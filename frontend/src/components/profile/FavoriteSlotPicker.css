@@ -1,0 +1,192 @@
+.favorite-slots {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+
+.favorite-slot {
+  position: relative;
+}
+
+.favorite-slot__empty {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1.5px dashed var(--fav-accent-dim);
+  border-radius: var(--radius-md);
+  color: var(--fav-accent);
+  background: color-mix(in srgb, var(--fav-accent) 5%, transparent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition:
+    border-color 250ms,
+    color 250ms,
+    background-color 250ms;
+}
+.favorite-slot__empty:hover {
+  border-color: var(--fav-accent);
+  background-color: color-mix(in srgb, var(--fav-accent) 10%, transparent);
+}
+
+.favorite-slot__filled {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 4px 14px var(--color-shadow);
+  transition: box-shadow 250ms;
+}
+.favorite-slot__filled:hover {
+  box-shadow:
+    0 12px 28px var(--color-shadow),
+    0 0 0 1px var(--fav-accent),
+    0 0 24px var(--fav-glow);
+}
+.favorite-slot__filled img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.favorite-slot__number {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 3;
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--fav-accent);
+  background: rgba(8, 10, 14, 0.75);
+  border: 1px solid var(--fav-accent);
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.favorite-slot__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 13, 18, 0.72);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+.favorite-slot__filled:hover .favorite-slot__overlay {
+  opacity: 1;
+}
+
+.favorite-slot__change-btn,
+.favorite-slot__remove-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background-color: rgba(255, 255, 255, 0.12);
+}
+.favorite-slot__change-btn:hover {
+  background-color: var(--fav-accent);
+  color: #05070a;
+}
+.favorite-slot__remove-btn:hover {
+  background-color: #d3554f;
+}
+
+.favorite-slot__title {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 8px 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.favorite-slot__editor {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  width: 260px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 16px 36px var(--color-shadow);
+  border: 1px solid var(--fav-accent-dim);
+}
+
+.favorite-slot__search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+.favorite-slot__search-row input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--color-text-primary);
+  font-size: 0.85rem;
+}
+.favorite-slot__search-row input:focus {
+  outline: none;
+}
+
+.favorite-slot__results {
+  max-height: 260px;
+  overflow-y: auto;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.favorite-slot__result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  text-align: left;
+  transition: background-color var(--transition-fast);
+}
+.favorite-slot__result:hover {
+  background-color: var(--fav-accent-dim);
+}
+.favorite-slot__result img {
+  width: 32px;
+  height: 46px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.favorite-slot__no-results {
+  padding: 8px 4px;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 600px) {
+  .favorite-slots {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

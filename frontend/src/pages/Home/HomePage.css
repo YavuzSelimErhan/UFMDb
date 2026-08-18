@@ -1,0 +1,14 @@
+.home-page {
+  padding-bottom: 32px;
+}
+
+.home-page__body {
+  padding-top: 32px;
+}
+
+.home-page__skeleton-title {
+  width: 220px;
+  height: 22px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}

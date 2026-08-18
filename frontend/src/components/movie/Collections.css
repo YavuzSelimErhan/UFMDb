@@ -1,0 +1,198 @@
+.collections-section {
+  margin-bottom: 32px;
+}
+
+.collections-section__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.collections-section__eyebrow {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.collections-section__title {
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.collections-section__see-all {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-bottom: 4px;
+  transition: color 200ms;
+}
+.collections-section__see-all:hover {
+  color: var(--color-text-primary);
+}
+
+.collections-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-auto-flow: row dense;
+  gap: 12px;
+}
+
+.collection-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  transition:
+    transform 250ms,
+    box-shadow 250ms,
+    border-color 250ms;
+}
+.collection-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 14px 30px var(--color-shadow),
+    0 0 0 1px var(--cc-color);
+  border-color: transparent;
+}
+
+.collection-card__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: color-mix(in srgb, var(--cc-color) 14%, var(--color-bg-card));
+  overflow: hidden;
+}
+
+.collection-card__cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 400ms;
+}
+.collection-card:hover .collection-card__cover {
+  transform: scale(1.06);
+}
+
+.collection-card__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cc-color);
+}
+
+.collection-card__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.72) 0%,
+    rgba(0, 0, 0, 0) 55%
+  );
+  pointer-events: none;
+}
+
+.collection-card__count {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.collection-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px 10px;
+}
+
+.collection-card__title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.collection-card__arrow {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cc-color);
+  border: 1px solid color-mix(in srgb, var(--cc-color) 40%, transparent);
+  transition:
+    background 200ms,
+    transform 200ms;
+}
+.collection-card:hover .collection-card__arrow {
+  background: color-mix(in srgb, var(--cc-color) 18%, transparent);
+  transform: translateX(2px);
+}
+
+/* 5 sütun x 2 satır = 10 kart hedeflenir. Ekran daraldıkça sütun sayısı azalır,
+   satır sayısı artar ama kart sayısı (10) sabit kalır. */
+@media (max-width: 1200px) {
+  .collections-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .collections-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .collections-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .collections-section__see-all span {
+    display: none;
+  }
+
+  @media (max-width: 420px) {
+    .collections-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .collections-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .collection-card__title {
+    font-size: 0.78rem;
+  }
+}

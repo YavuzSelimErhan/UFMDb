@@ -1,0 +1,28 @@
+.movie-row { margin-bottom: 48px; }
+
+.movie-row__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 18px;
+  padding-left: 2px;
+  border-left: 4px solid var(--color-accent);
+  padding-left: 12px;
+}
+
+.movie-row__scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scroll-snap-type: x proximity;
+}
+
+.movie-row__item {
+  flex: 0 0 auto;
+  width: 170px;
+  scroll-snap-align: start;
+}
+
+@media (max-width: 480px) {
+  .movie-row__item { width: 130px; }
+}

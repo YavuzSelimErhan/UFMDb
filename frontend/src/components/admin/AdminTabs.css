@@ -1,0 +1,242 @@
+.admin-tab {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.admin-tab > * {
+  min-width: 0;
+}
+
+.admin-tab__form {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: var(--radius-lg);
+}
+.admin-tab__form h3 {
+  margin-bottom: 8px;
+}
+
+.admin-tab__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.admin-tab__form input,
+.admin-tab__form textarea {
+  padding: 9px 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-size: 0.88rem;
+}
+.admin-tab__form textarea {
+  grid-column: 1 / -1;
+  resize: vertical;
+}
+
+.admin-tab__list {
+  padding: 24px;
+  max-height: 640px;
+  overflow-y: auto;
+  border-radius: var(--radius-lg);
+}
+.admin-tab__list table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 14px;
+}
+.admin-tab__list th {
+  text-align: left;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  padding: 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+.admin-tab__list td {
+  padding: 10px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+.admin-tab__delete-btn {
+  color: #e05c5c;
+  display: flex;
+  align-items: center;
+}
+.admin-tab__delete-btn:hover {
+  opacity: 0.7;
+}
+
+.admin-tab__row-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.admin-tab__edit-btn {
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+}
+.admin-tab__edit-btn:hover {
+  opacity: 0.7;
+}
+.admin-tab__edit-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.admin-tab__list tr.is-editing td {
+  background-color: var(--color-accent-muted);
+}
+
+/* ---------- Kullanıcılar sekmesi ---------- */
+.admin-users-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-users-tab__search {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  max-width: 340px;
+}
+.admin-users-tab__search:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.admin-users-tab__role-badge {
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+}
+.admin-users-tab__role-badge.is-admin {
+  background-color: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+.admin-users-tab__status-badge {
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+}
+.admin-users-tab__status-badge.is-active {
+  background-color: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+}
+.admin-users-tab__status-badge.is-inactive {
+  background-color: rgba(224, 92, 92, 0.15);
+  color: #e05c5c;
+}
+
+/* ---------- Film listesi: başlık + arama ---------- */
+.admin-tab__list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.admin-tab__list-header h3 {
+  margin: 0;
+}
+
+.admin-tab__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-text-secondary);
+  max-width: 260px;
+  width: 100%;
+}
+.admin-tab__search:focus-within {
+  border-color: var(--color-accent);
+}
+.admin-tab__search svg {
+  flex-shrink: 0;
+}
+.admin-tab__search input {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 0.88rem;
+  color: var(--color-text-primary);
+  width: 100%;
+}
+.admin-tab__search input:focus {
+  outline: none;
+}
+
+.admin-tab__empty {
+  text-align: center;
+  padding: 24px 0 !important;
+}
+
+/* ---------- Kişiler (Aktör/Yönetmen) üst sekmesi ---------- */
+.admin-people-tab__switcher {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-people-tab__tab-btn {
+  padding: 10px 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.admin-people-tab__tab-btn:hover {
+  color: var(--color-text-primary);
+}
+.admin-people-tab__tab-btn.is-active {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+@media (max-width: 900px) {
+  .admin-tab {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Liste tablosunda küçük kapak görseli ---------- */
+.admin-tab__thumb-cell {
+  width: 44px;
+}
+.admin-tab__thumb {
+  width: 36px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  display: block;
+}
+.admin-tab__thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg);
+  border: 1px dashed var(--color-border);
+  color: var(--color-text-muted);
+}

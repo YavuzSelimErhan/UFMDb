@@ -1,0 +1,186 @@
+.lists-page {
+  padding-top: 48px;
+  padding-bottom: 60px;
+}
+
+.lists-page__header {
+  margin-bottom: 40px;
+}
+.lists-page__header h1 {
+  font-size: 1.9rem;
+  margin-bottom: 8px;
+}
+
+.lists-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 26px;
+}
+
+/* ---------- Kart gövdesi ---------- */
+.list-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base),
+    border-color var(--transition-base);
+}
+.list-card:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 18px 34px var(--list-accent-soft),
+    0 14px 28px var(--color-shadow);
+  border-color: var(--list-accent);
+}
+.list-card:focus-visible {
+  outline: 2px solid var(--list-accent);
+  outline-offset: 3px;
+}
+
+/* ---------- Sahne: kapak görseli / poster yelpazesi ---------- */
+.list-card__stage {
+  position: relative;
+  height: 190px;
+  background:
+    radial-gradient(
+      circle at 25% 15%,
+      var(--list-accent-soft),
+      transparent 60%
+    ),
+    var(--color-bg-elevated);
+  overflow: hidden;
+}
+
+.list-card__stage-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--transition-base);
+}
+.list-card:hover .list-card__stage-img {
+  transform: scale(1.04);
+}
+
+.list-card__stage-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--list-accent);
+  opacity: 0.6;
+}
+
+/* ---------- Poster yelpazesi (kapak görseli girilmemişse) ---------- */
+.list-card__fan {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.list-card__fan-poster {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 104px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 10px 22px var(--color-shadow);
+  border: 2px solid var(--color-bg-card);
+  transition: transform var(--transition-base);
+}
+.list-card__fan-poster:nth-child(1) {
+  transform: translate(-50%, -46%) rotate(-9deg) translateX(-20px);
+  z-index: 4;
+}
+.list-card__fan-poster:nth-child(2) {
+  transform: translate(-50%, -50%) rotate(-3deg) translateX(-7px);
+  z-index: 3;
+}
+.list-card__fan-poster:nth-child(3) {
+  transform: translate(-50%, -50%) rotate(3deg) translateX(7px);
+  z-index: 2;
+}
+.list-card__fan-poster:nth-child(4) {
+  transform: translate(-50%, -46%) rotate(9deg) translateX(20px);
+  z-index: 1;
+}
+
+.list-card:hover .list-card__fan-poster:nth-child(1) {
+  transform: translate(-50%, -46%) rotate(-13deg) translateX(-28px);
+}
+.list-card:hover .list-card__fan-poster:nth-child(4) {
+  transform: translate(-50%, -46%) rotate(13deg) translateX(28px);
+}
+
+/* ---------- İmza öğe: film şeridi perforasyonu ---------- */
+.list-card__perf {
+  height: 11px;
+  background-color: var(--list-accent);
+  background-image: radial-gradient(
+    circle,
+    var(--color-bg-card) 0 3px,
+    transparent 3.2px
+  );
+  background-size: 18px 100%;
+  background-position: 9px center;
+  background-repeat: repeat-x;
+}
+
+/* ---------- Bilgi bloğu ---------- */
+.list-card__body {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.list-card__body h3 {
+  font-size: 1.05rem;
+}
+.list-card__desc {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 2px;
+}
+.list-card__ticket {
+  align-self: flex-start;
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--list-accent);
+  background-color: var(--list-accent-soft);
+  border: 1px solid var(--list-accent);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .list-card,
+  .list-card__stage-img,
+  .list-card__fan-poster {
+    transition: none !important;
+  }
+  .list-card:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .list-card__stage {
+    height: 160px;
+  }
+  .list-card__fan-poster {
+    width: 86px;
+    height: 124px;
+  }
+}

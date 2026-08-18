@@ -1,0 +1,88 @@
+.list-detail-page {
+  padding-top: 48px;
+  padding-bottom: 60px;
+}
+
+.list-detail-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.88rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 20px;
+  transition: color var(--transition-fast);
+}
+.list-detail-page__back:hover {
+  color: var(--list-accent, var(--color-accent));
+}
+
+/* ---------- Hero ---------- */
+.list-detail-page__hero {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  overflow: hidden;
+}
+.list-detail-page__hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.list-detail-page__hero-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, var(--color-bg) 0%, rgba(0, 0, 0, 0) 60%),
+    linear-gradient(120deg, var(--list-accent-soft), transparent 55%);
+}
+
+/* ---------- İmza öğe: hero ile başlık arasındaki film şeridi perforasyonu ---------- */
+.list-detail-page__perf {
+  height: 13px;
+  background-color: var(--list-accent);
+  background-image: radial-gradient(
+    circle,
+    var(--color-bg) 0 3.5px,
+    transparent 3.7px
+  );
+  background-size: 22px 100%;
+  background-position: 11px center;
+  background-repeat: repeat-x;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  margin-bottom: 24px;
+}
+
+/* ---------- Başlık bloğu ---------- */
+.list-detail-page__header {
+  margin-bottom: 28px;
+}
+.list-detail-page__header h1 {
+  font-size: 1.9rem;
+  margin: 10px 0 8px;
+}
+.list-detail-page__header p {
+  max-width: 640px;
+  line-height: 1.6;
+}
+
+.list-detail-page__ticket {
+  display: inline-block;
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--list-accent);
+  background-color: var(--list-accent-soft);
+  border: 1px solid var(--list-accent);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+}
+
+@media (max-width: 600px) {
+  .list-detail-page__hero {
+    height: 180px;
+  }
+}

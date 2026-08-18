@@ -1,0 +1,345 @@
+.profile-tabs {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.profile-tabs__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 190px;
+  flex-shrink: 0;
+}
+
+.profile-tabs__nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  transition:
+    background-color 200ms,
+    color 200ms;
+}
+.profile-tabs__nav-item:hover {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+}
+.profile-tabs__nav-item.is-active {
+  background: linear-gradient(
+    135deg,
+    var(--color-accent),
+    var(--color-accent-dim)
+  );
+  color: #fff;
+}
+
+.profile-tabs__nav-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-tabs__nav-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-muted);
+}
+.profile-tabs__nav-item.is-active .profile-tabs__nav-count {
+  background-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.profile-tabs__panel {
+  flex: 1;
+  min-width: 0;
+  animation: fade-in-up 0.2s ease;
+}
+
+.profile-tabs__people {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.profile-tabs__people-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.person-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 20px;
+}
+.person-grid--compact {
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 14px;
+}
+
+.person-grid__item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 12px;
+  text-align: center;
+}
+.person-grid--compact .person-grid__item {
+  padding: 10px 8px;
+}
+
+.person-grid__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+.person-grid__link img {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 12px var(--color-shadow);
+}
+.person-grid--compact .person-grid__link img {
+  width: 64px;
+  height: 64px;
+}
+.person-grid__link span {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.person-grid__unlike {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #e0245e;
+}
+
+.review-journal {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.review-entry {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  transition: border-color 200ms;
+}
+.review-entry:hover {
+  border-color: var(--color-accent-dim);
+}
+.review-entry:hover .review-entry__actions {
+  opacity: 1;
+}
+
+.review-entry__date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 44px;
+  flex-shrink: 0;
+}
+.review-entry__day {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+.review-entry__month {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-top: 3px;
+}
+.review-entry__year {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+}
+
+.review-entry__divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+.review-entry__poster-link {
+  flex-shrink: 0;
+}
+.review-entry__poster {
+  width: 48px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.review-entry__body {
+  flex: 1;
+  min-width: 0;
+}
+.review-entry__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.review-entry__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  transition: color 150ms;
+}
+.review-entry__title:hover {
+  color: var(--color-accent);
+}
+
+.review-entry__spoiler-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #e0a02f;
+  background: rgba(224, 160, 47, 0.12);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+}
+
+.review-entry__content {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.review-entry__actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 150ms;
+}
+.review-entry__action-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  transition:
+    background-color 150ms,
+    color 150ms;
+}
+.review-entry__action-btn:hover {
+  background-color: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+.review-entry__action-btn--danger:hover {
+  background-color: rgba(211, 85, 79, 0.14);
+  color: #d3554f;
+}
+
+.review-entry__confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-md);
+  border: 1px solid #d3554f;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 20px;
+}
+.review-entry__confirm p {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+.review-entry__confirm-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.review-entry__confirm-delete {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  background-color: #d3554f;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+@media (max-width: 560px) {
+  .review-entry {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px;
+  }
+  .review-entry__divider {
+    display: none;
+  }
+  .review-entry__confirm {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-tabs {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .profile-tabs__nav {
+    flex-direction: row;
+    min-width: 0;
+    overflow-x: auto;
+    gap: 6px;
+    padding-bottom: 4px;
+  }
+  .profile-tabs__nav-item {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}

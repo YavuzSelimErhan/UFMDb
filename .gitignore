@@ -1,0 +1,21 @@
+# .NET
+backend/**/bin/
+backend/**/obj/
+*.user
+
+# TMDB Import aracı - gerçek API anahtarı içerir, commit edilmemeli
+backend/src/UFMDb.Tools.TmdbImporter/appsettings.json
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
