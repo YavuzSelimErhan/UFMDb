@@ -5,6 +5,7 @@ backend/**/obj/
 
 # TMDB Import aracı - gerçek API anahtarı içerir, commit edilmemeli
 backend/src/UFMDb.Tools.TmdbImporter/appsettings.json
+backend/src/UFMDb.API/appsettings.Development.json
 
 # Node / Frontend
 frontend/node_modules/
