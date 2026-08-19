@@ -19,7 +19,7 @@ import ScreeningLogPage from "@/pages/ScreeningLog/ScreeningLogPage";
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/UFMDb">
       <ScrollToTop />
       <div className="app-shell">
         <Navbar />
