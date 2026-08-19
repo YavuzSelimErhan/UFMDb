@@ -6,8 +6,6 @@ import { listService } from "@/services";
 import AdminListForm from "./AdminListForm";
 import "./AdminTabs.css";
 
-const CELL_STYLE = { verticalAlign: "middle" as const };
-
 export default function AdminListsTab() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();

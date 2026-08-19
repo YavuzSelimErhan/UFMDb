@@ -10,11 +10,7 @@ interface Props {
   onSelect: (actorId: string, actorName: string) => void;
 }
 
-export default function ActorSearchSelect({
-  value,
-  displayName,
-  onSelect,
-}: Props) {
+export default function ActorSearchSelect({ displayName, onSelect }: Props) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);

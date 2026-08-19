@@ -10,11 +10,7 @@ interface Props {
   onSelect: (directorId: string, directorName: string) => void;
 }
 
-export default function DirectorSearchSelect({
-  value,
-  displayName,
-  onSelect,
-}: Props) {
+export default function DirectorSearchSelect({ displayName, onSelect }: Props) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);

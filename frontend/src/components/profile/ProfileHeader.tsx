@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Pencil, Star, X } from "lucide-react";
 import type { ProfileData } from "@/types";
