@@ -81,11 +81,7 @@ export default function ProfileHeader({ profile, onEditClick }: Props) {
           aria-label={t("profile.viewAvatar")}
         >
           {profile.avatarUrl ? (
-            <img
-              src={getImageUrl(profile.avatarUrl)}
-              alt={profile.userName}
-              onClick={(e) => e.stopPropagation()}
-            />
+            <img src={getImageUrl(profile.avatarUrl)} alt={profile.userName} />
           ) : (
             <span>{profile.userName[0]?.toUpperCase()}</span>
           )}
