@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Pencil, Star, X } from "lucide-react";
 import type { ProfileData } from "@/types";
+import { getImageUrl } from "@/utils/getImageUrl";
 import "./ProfileHeader.css";
 
 interface Props {
@@ -80,7 +81,11 @@ export default function ProfileHeader({ profile, onEditClick }: Props) {
           aria-label={t("profile.viewAvatar")}
         >
           {profile.avatarUrl ? (
-            <img src={profile.avatarUrl} alt={profile.userName} />
+            <img
+              src={getImageUrl(profile.avatarUrl)}
+              alt={profile.userName}
+              onClick={(e) => e.stopPropagation()}
+            />
           ) : (
             <span>{profile.userName[0]?.toUpperCase()}</span>
           )}
@@ -115,7 +120,7 @@ export default function ProfileHeader({ profile, onEditClick }: Props) {
             <X size={22} />
           </button>
           <img
-            src={profile.avatarUrl}
+            src={getImageUrl(profile.avatarUrl)}
             alt={profile.userName}
             onClick={(e) => e.stopPropagation()}
           />
