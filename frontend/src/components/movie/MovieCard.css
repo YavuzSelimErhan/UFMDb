@@ -125,6 +125,31 @@
   color: #fff;
 }
 
+.movie-card__like {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 12, 16, 0.78);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  transition:
+    background 150ms,
+    border-color 150ms,
+    transform 150ms;
+}
+.movie-card__like:hover {
+  transform: scale(1.08);
+}
+.movie-card__like.is-active {
+  background: #e0245e;
+  border-color: #e0245e;
+  color: #fff;
+}
+
 .movie-card__unlike {
   width: 28px;
   height: 28px;

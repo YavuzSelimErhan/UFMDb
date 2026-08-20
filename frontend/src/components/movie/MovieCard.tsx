@@ -21,6 +21,7 @@ export default function MovieCard({ movie, userRating, onUnlike }: Props) {
   const [inWatchlist, setInWatchlist] = useState(
     movie.isInWatchlistByCurrentUser,
   );
+  const [isLiked, setIsLiked] = useState(movie.isLikedByCurrentUser);
 
   const watchlistMutation = useMutation({
     mutationFn: () => movieService.toggleWatchlist(movie.id),
@@ -35,6 +36,22 @@ export default function MovieCard({ movie, userRating, onUnlike }: Props) {
     },
     onError: (_err, _vars, context) => {
       if (context) setInWatchlist(context.previous);
+    },
+  });
+
+  const likeMutation = useMutation({
+    mutationFn: () => movieService.toggleLike(movie.id),
+    onMutate: () => {
+      const previous = isLiked;
+      setIsLiked(!previous);
+      return { previous };
+    },
+    onSuccess: (newState) => {
+      setIsLiked(newState);
+      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+    },
+    onError: (_err, _vars, context) => {
+      if (context) setIsLiked(context.previous);
     },
   });
 
@@ -91,6 +108,22 @@ export default function MovieCard({ movie, userRating, onUnlike }: Props) {
                 size={13}
                 fill={inWatchlist ? "currentColor" : "none"}
               />
+            </button>
+          )}
+
+          {isAuthenticated && !onUnlike && (
+            <button
+              className={`movie-card__like ${isLiked ? "is-active" : ""}`}
+              disabled={likeMutation.isPending}
+              title={isLiked ? t("movie.unlike") : t("movie.like")}
+              aria-label={isLiked ? t("movie.unlike") : t("movie.like")}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                likeMutation.mutate();
+              }}
+            >
+              <Heart size={13} fill={isLiked ? "currentColor" : "none"} />
             </button>
           )}
 

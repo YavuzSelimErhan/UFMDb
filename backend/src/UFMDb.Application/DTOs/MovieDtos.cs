@@ -10,7 +10,8 @@ public record MovieListItemDto(
     List<string> Genres,
     string BackdropUrl,
     string Overview,
-    bool IsInWatchlistByCurrentUser = false
+    bool IsInWatchlistByCurrentUser = false,
+    bool IsLikedByCurrentUser = false
 );
 
 public record MovieDirectorDto(Guid Id, string FullName, string PhotoUrl);

@@ -9,6 +9,7 @@ export interface MovieListItem {
   backdropUrl: string;
   overview: string;
   isInWatchlistByCurrentUser: boolean;
+  isLikedByCurrentUser: boolean;
 }
 
 export interface MovieCast {

@@ -23,12 +23,18 @@ public class GetHomeFeedQueryHandler : IRequestHandler<GetHomeFeedQuery, HomeFee
 
     public async Task<HomeFeedDto> Handle(GetHomeFeedQuery request, CancellationToken ct)
     {
-        // Kullanıcı giriş yapmışsa watchlist'indeki film ID'lerini tek sorguda çekiyoruz.
-        // Her film için ayrı ayrı sorgu atmak yerine bir HashSet'te tutup mapping sırasında kontrol ediyoruz.
+        // Kullanıcı giriş yapmışsa watchlist ve like'ladığı film ID'lerini tek sorguda çekiyoruz.
         HashSet<Guid> watchlistMovieIds = request.UserId.HasValue
             ? (await _context.WatchlistItems.AsNoTracking()
                 .Where(w => w.UserId == request.UserId.Value)
                 .Select(w => w.MovieId)
+                .ToListAsync(ct)).ToHashSet()
+            : new HashSet<Guid>();
+
+        HashSet<Guid> likedMovieIds = request.UserId.HasValue
+            ? (await _context.Likes.AsNoTracking()
+                .Where(l => l.UserId == request.UserId.Value)
+                .Select(l => l.MovieId)
                 .ToListAsync(ct)).ToHashSet()
             : new HashSet<Guid>();
 
@@ -59,27 +65,30 @@ public class GetHomeFeedQueryHandler : IRequestHandler<GetHomeFeedQuery, HomeFee
                     i.Movie.AverageRating, i.Movie.RatingCount,
                     i.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
                     i.Movie.BackdropUrl, i.Movie.Overview,
-                    false // curated list mapping'inde watchlist bilgisi ayrıca doldurulacak (aşağıda)
+                    false, false // watchlist + like bayrakları sorgu sonrası doldurulacak (aşağıda)
                 )).ToList()
             )).ToListAsync(ct);
 
         // EF Core'un projeksiyon içinde HashSet.Contains ile SQL üretemediği durumlar için,
-        // watchlist bayrağını sorgu sonrası bellek üzerinde set ediyoruz (film sayısı zaten sınırlı: 6+12*3+curated).
-        ApplyWatchlistFlag(featured, watchlistMovieIds);
-        ApplyWatchlistFlag(popular, watchlistMovieIds);
-        ApplyWatchlistFlag(topRated, watchlistMovieIds);
-        ApplyWatchlistFlag(trending, watchlistMovieIds);
-        foreach (var cl in curatedLists) ApplyWatchlistFlag(cl.Movies, watchlistMovieIds);
+        // bayrakları sorgu sonrası bellek üzerinde set ediyoruz (film sayısı zaten sınırlı).
+        ApplyFlags(featured, watchlistMovieIds, likedMovieIds);
+        ApplyFlags(popular, watchlistMovieIds, likedMovieIds);
+        ApplyFlags(topRated, watchlistMovieIds, likedMovieIds);
+        ApplyFlags(trending, watchlistMovieIds, likedMovieIds);
+        foreach (var cl in curatedLists) ApplyFlags(cl.Movies, watchlistMovieIds, likedMovieIds);
 
         return new HomeFeedDto(featured, popular, topRated, trending, curatedLists);
     }
 
-    private static void ApplyWatchlistFlag(List<MovieListItemDto> items, HashSet<Guid> watchlistMovieIds)
+    private static void ApplyFlags(List<MovieListItemDto> items, HashSet<Guid> watchlistMovieIds, HashSet<Guid> likedMovieIds)
     {
         for (int i = 0; i < items.Count; i++)
         {
-            if (watchlistMovieIds.Contains(items[i].Id))
-                items[i] = items[i] with { IsInWatchlistByCurrentUser = true };
+            items[i] = items[i] with
+            {
+                IsInWatchlistByCurrentUser = watchlistMovieIds.Contains(items[i].Id),
+                IsLikedByCurrentUser = likedMovieIds.Contains(items[i].Id)
+            };
         }
     }
 
@@ -87,5 +96,5 @@ public class GetHomeFeedQueryHandler : IRequestHandler<GetHomeFeedQuery, HomeFee
         m => new MovieListItemDto(
             m.Id, m.Title, m.ReleaseYear, m.PosterUrl, m.AverageRating, m.RatingCount,
             m.MovieGenres.Select(mg => mg.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
-            false);
+            false, false);
 }

@@ -60,21 +60,32 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             .Select(m => new MovieListItemDto(
                 m.Id, m.Title, m.ReleaseYear, m.PosterUrl, m.AverageRating, m.RatingCount,
                 m.MovieGenres.Select(mg => mg.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
-                false
+                false, false
             ))
             .ToListAsync(ct);
 
         if (request.UserId.HasValue && items.Count > 0)
         {
             var movieIds = items.Select(i => i.Id).ToHashSet();
+
             var watchlistIds = (await _context.WatchlistItems.AsNoTracking()
                 .Where(w => w.UserId == request.UserId.Value && movieIds.Contains(w.MovieId))
                 .Select(w => w.MovieId)
                 .ToListAsync(ct)).ToHashSet();
 
+            var likedIds = (await _context.Likes.AsNoTracking()
+                .Where(l => l.UserId == request.UserId.Value && movieIds.Contains(l.MovieId))
+                .Select(l => l.MovieId)
+                .ToListAsync(ct)).ToHashSet();
+
             for (int i = 0; i < items.Count; i++)
-                if (watchlistIds.Contains(items[i].Id))
-                    items[i] = items[i] with { IsInWatchlistByCurrentUser = true };
+            {
+                items[i] = items[i] with
+                {
+                    IsInWatchlistByCurrentUser = watchlistIds.Contains(items[i].Id),
+                    IsLikedByCurrentUser = likedIds.Contains(items[i].Id)
+                };
+            }
         }
 
         return new PagedResult<MovieListItemDto>(items, totalCount, f.Page, f.PageSize);
