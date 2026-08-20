@@ -56,15 +56,6 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             .Where(f => f.UserId == request.UserId)
             .ToListAsync(ct);
 
-        // Her zaman 4 sabit slot döndürülür (1-4); dolu olmayan slotlar Movie=null olarak gelir.
-        var favorites = Enumerable.Range(1, 4)
-            .Select(slot =>
-            {
-                var match = favoriteEntities.FirstOrDefault(f => f.Slot == slot);
-                return new FavoriteSlotDto(slot, match is null ? null : ToListItem(match.Movie));
-            })
-            .ToList();
-
         var recent = await _context.WatchHistory.AsNoTracking()
             .Include(w => w.Movie).ThenInclude(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
             .Where(w => w.UserId == request.UserId)
@@ -86,6 +77,21 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             .OrderByDescending(w => w.CreatedAtUtc)
             .ToListAsync(ct);
 
+        // Like/watchlist bayraklarını bu handler içindeki TÜM MovieListItemDto dönüşümlerinde
+        // tutarlı kullanmak için, zaten çekmiş olduğumuz 'liked'/'watchlist' listelerinden
+        // (ekstra sorguya gerek kalmadan) iki HashSet çıkarıyoruz.
+        var likedMovieIds = liked.Select(l => l.MovieId).ToHashSet();
+        var watchlistMovieIds = watchlist.Select(w => w.MovieId).ToHashSet();
+
+        // Her zaman 4 sabit slot döndürülür (1-4); dolu olmayan slotlar Movie=null olarak gelir.
+        var favorites = Enumerable.Range(1, 4)
+            .Select(slot =>
+            {
+                var match = favoriteEntities.FirstOrDefault(f => f.Slot == slot);
+                return new FavoriteSlotDto(slot, match is null ? null : ToListItem(match.Movie, likedMovieIds, watchlistMovieIds));
+            })
+            .ToList();
+
         var ratedEntries = await _context.WatchHistory.AsNoTracking()
     .Where(w => w.UserId == request.UserId && w.Rating != null)
     .ToListAsync(ct);
@@ -98,7 +104,7 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
         var ratingsCount = userRatingsLookup.Count;
 
         var recentlyWatched = recent.Select(w => new RecentlyWatchedItemDto(
-            ToListItem(w.Movie), w.Rating
+            ToListItem(w.Movie, likedMovieIds, watchlistMovieIds), w.Rating
         )).ToList();
 
         var reviewEntities = await _context.Reviews.AsNoTracking()
@@ -150,24 +156,25 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
         return new ProfileDto(
             user.Id, user.UserName, user.AvatarUrl, user.PreferredLanguage, user.PreferredTheme,
             favorites,
-            recentlyWatched,                                 
-            liked.Select(l => ToListItem(l.Movie)).ToList(),
-            watchlist.Select(w => ToListItem(w.Movie)).ToList(),
+            recentlyWatched,
+            liked.Select(l => ToListItem(l.Movie, likedMovieIds, watchlistMovieIds)).ToList(),
+            watchlist.Select(w => ToListItem(w.Movie, likedMovieIds, watchlistMovieIds)).ToList(),
             reviews,
             favoriteActors,
             likedActors,
             favoriteDirectors,
             likedDirectors,
             totalWatchedCount,
-            averageGivenRating,                        
-            ratingsCount,                   
+            averageGivenRating,
+            ratingsCount,
             user.CreatedAtUtc
         );
     }
 
-    private static MovieListItemDto ToListItem(Movie m) => new(
+    private static MovieListItemDto ToListItem(Movie m, HashSet<Guid> likedIds, HashSet<Guid> watchlistIds) => new(
         m.Id, m.Title, m.ReleaseYear, m.PosterUrl, m.AverageRating, m.RatingCount,
-        m.MovieGenres.Select(g => g.Genre.Name).ToList(), m.BackdropUrl, m.Overview);
+        m.MovieGenres.Select(g => g.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
+        watchlistIds.Contains(m.Id), likedIds.Contains(m.Id));
 }
 
 // ---------- Favori film slotunu güncelle (1-4) ----------
@@ -403,13 +410,23 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
         var totalCount = allSorted.Count;
         var page = allSorted.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
+        // Like/watchlist bayraklarını bu sayfadaki filmler için tek seferde çekiyoruz.
+        var pageMovieIds = page.Select(w => w.MovieId).ToHashSet();
+        var likedIds = (await _context.Likes.AsNoTracking()
+            .Where(l => l.UserId == request.UserId && pageMovieIds.Contains(l.MovieId))
+            .Select(l => l.MovieId).ToListAsync(ct)).ToHashSet();
+        var watchlistIds = (await _context.WatchlistItems.AsNoTracking()
+            .Where(w => w.UserId == request.UserId && pageMovieIds.Contains(w.MovieId))
+            .Select(w => w.MovieId).ToListAsync(ct)).ToHashSet();
+
         var items = page.Select(w => new WatchedMovieDto(
             w.Id,
             new MovieListItemDto(
                 w.Movie.Id, w.Movie.Title, w.Movie.ReleaseYear, w.Movie.PosterUrl,
                 w.Movie.AverageRating, w.Movie.RatingCount,
                 w.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
-                w.Movie.BackdropUrl, w.Movie.Overview, false),
+                w.Movie.BackdropUrl, w.Movie.Overview,
+                watchlistIds.Contains(w.MovieId), likedIds.Contains(w.MovieId)),
             w.WatchedAtUtc,
             w.Rating
         )).ToList();

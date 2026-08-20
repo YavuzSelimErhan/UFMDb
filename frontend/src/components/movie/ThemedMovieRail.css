@@ -282,11 +282,17 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
-.rail-card__bookmark {
+.rail-card__actions {
   position: absolute;
   top: 8px;
   right: 8px;
   z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rail-card__bookmark {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -309,6 +315,31 @@
   background: var(--rail-accent);
   border-color: var(--rail-accent);
   color: #05070a;
+}
+
+.rail-card__like {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 10, 14, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  transition:
+    background 150ms,
+    border-color 150ms,
+    transform 150ms;
+}
+.rail-card__like:hover {
+  transform: scale(1.1);
+  background: rgba(8, 10, 14, 0.85);
+}
+.rail-card__like.is-active {
+  background: #e0245e;
+  border-color: #e0245e;
+  color: #fff;
 }
 
 .rail-card__foot {

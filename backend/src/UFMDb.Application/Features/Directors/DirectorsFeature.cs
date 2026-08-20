@@ -49,13 +49,30 @@ public class GetDirectorDetailQueryHandler : IRequestHandler<GetDirectorDetailQu
             .FirstOrDefaultAsync(d => d.Id == request.DirectorId && !d.IsDeleted, ct)
             ?? throw new NotFoundException(nameof(Director), request.DirectorId);
 
+        // Filmografideki her filmin, o an giriş yapmış kullanıcı için like/watchlist durumunu
+        // tek seferde (toplu) çekip bellekte eşleştiriyoruz.
+        var movieIds = director.MovieDirectors.Select(md => md.Movie.Id).ToHashSet();
+
+        var likedIds = request.CurrentUserId is Guid likeUid
+            ? (await _context.Likes.AsNoTracking()
+                .Where(l => l.UserId == likeUid && movieIds.Contains(l.MovieId))
+                .Select(l => l.MovieId).ToListAsync(ct)).ToHashSet()
+            : new HashSet<Guid>();
+
+        var watchlistIds = request.CurrentUserId is Guid watchUid
+            ? (await _context.WatchlistItems.AsNoTracking()
+                .Where(w => w.UserId == watchUid && movieIds.Contains(w.MovieId))
+                .Select(w => w.MovieId).ToListAsync(ct)).ToHashSet()
+            : new HashSet<Guid>();
+
         var filmography = director.MovieDirectors
             .OrderByDescending(md => md.Movie.ReleaseYear)
             .Select(md => new MovieListItemDto(
                 md.Movie.Id, md.Movie.Title, md.Movie.ReleaseYear, md.Movie.PosterUrl,
                 md.Movie.AverageRating, md.Movie.RatingCount,
                 md.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
-                md.Movie.BackdropUrl, md.Movie.Overview, false))
+                md.Movie.BackdropUrl, md.Movie.Overview,
+                watchlistIds.Contains(md.Movie.Id), likedIds.Contains(md.Movie.Id)))
             .ToList();
 
         var isLiked = request.CurrentUserId is Guid uid &&
