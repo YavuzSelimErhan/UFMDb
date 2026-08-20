@@ -30,6 +30,14 @@ public class TmdbClient
         return result ?? new TmdbGenreListResponse();
     }
 
+    public async Task<List<TmdbCountry>> GetCountriesConfigAsync(CancellationToken ct)
+    {
+        var response = await _http.GetAsync($"configuration/countries?api_key={_apiKey}", ct);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<List<TmdbCountry>>(_jsonOptions, ct);
+        return result ?? new List<TmdbCountry>();
+    }
+
     public async Task<TmdbDiscoverResponse> DiscoverMoviesAsync(
     int page,
     int minVoteCount,

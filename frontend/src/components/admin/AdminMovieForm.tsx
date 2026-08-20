@@ -10,7 +10,7 @@ import {
   Users2,
   Clapperboard,
 } from "lucide-react";
-import { movieService, genreService } from "@/services";
+import { movieService, genreService, countryService } from "@/services";
 import ActorSearchSelect from "./ActorSearchSelect";
 import DirectorSearchSelect from "./DirectorSearchSelect";
 import type { MovieFormPayload } from "@/types";
@@ -61,6 +61,11 @@ export default function AdminMovieForm({ movieId, onDone, onCancel }: Props) {
   const { data: genres } = useQuery({
     queryKey: ["genres"],
     queryFn: genreService.getAll,
+  });
+
+  const { data: countries } = useQuery({
+    queryKey: ["countries"],
+    queryFn: countryService.getAll,
   });
 
   const { data: existingMovie } = useQuery({
@@ -238,10 +243,17 @@ export default function AdminMovieForm({ movieId, onDone, onCancel }: Props) {
 
       <div className="admin-movie-form__field">
         <label>{t("admin.movies.fieldCountry")}</label>
-        <input
+        <select
           value={form.country}
           onChange={(e) => setForm({ ...form, country: e.target.value })}
-        />
+        >
+          <option value="">{t("admin.movies.selectCountry")}</option>
+          {countries?.map((c) => (
+            <option key={c.id} value={c.name}>
+              {i18n.language === "tr" ? c.nameTr : c.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="admin-movie-form__field">

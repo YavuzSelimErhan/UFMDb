@@ -12,6 +12,7 @@ public interface IApplicationDbContext
 {
     DbSet<Movie> Movies { get; }
     DbSet<Genre> Genres { get; }
+    DbSet<Country> Countries { get; }
     DbSet<Actor> Actors { get; }
     DbSet<MovieActor> MovieActors { get; }
     DbSet<Director> Directors { get; }

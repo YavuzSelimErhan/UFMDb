@@ -16,6 +16,14 @@ public class TmdbGenre
     public string Name { get; set; } = default!;
 }
 
+public class TmdbCountry
+{
+    [JsonPropertyName("iso_3166_1")]
+    public string Iso3166_1 { get; set; } = default!;
+    public string EnglishName { get; set; } = default!;
+    public string NativeName { get; set; } = default!;
+}
+
 public class TmdbDiscoverResponse
 {
     public int Page { get; set; }

@@ -20,6 +20,13 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             query = query.Where(m => m.Title.Contains(f.Title) || m.OriginalTitle.Contains(f.Title));
         if (!string.IsNullOrWhiteSpace(f.Genre))
             query = query.Where(m => m.MovieGenres.Any(mg => mg.Genre.Name == f.Genre || mg.Genre.NameTr == f.Genre));
+        if (!string.IsNullOrWhiteSpace(f.Country))
+        {
+            var countryMatch = await _context.Countries.AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Name == f.Country || c.NameTr == f.Country, ct);
+            var resolvedCountry = countryMatch?.Name ?? f.Country;
+            query = query.Where(m => m.Country == resolvedCountry);
+        }
 
         if (f.YearFrom.HasValue || f.YearTo.HasValue)
         {

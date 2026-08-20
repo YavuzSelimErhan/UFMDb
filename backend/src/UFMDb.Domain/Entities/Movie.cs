@@ -47,6 +47,13 @@ public class Genre : BaseEntity
     public ICollection<MovieGenre> MovieGenres { get; set; } = new List<MovieGenre>();
 }
 
+public class Country : BaseEntity
+{
+    public string IsoCode { get; set; } = default!;
+    public string Name { get; set; } = default!;
+    public string NameTr { get; set; } = default!;
+}
+
 /// <summary>Movie-Genre many-to-many join entity</summary>
 public class MovieGenre
 {

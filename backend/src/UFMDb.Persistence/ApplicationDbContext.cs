@@ -1,3 +1,4 @@
+using System.Diagnostics.Metrics;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using UFMDb.Application.Common.Interfaces;
@@ -12,6 +13,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public DbSet<Movie> Movies => Set<Movie>();
     public DbSet<Genre> Genres => Set<Genre>();
+    public DbSet<Country> Countries => Set<Country>();
     public DbSet<Actor> Actors => Set<Actor>();
     public DbSet<MovieActor> MovieActors => Set<MovieActor>();
     public DbSet<Director> Directors => Set<Director>();

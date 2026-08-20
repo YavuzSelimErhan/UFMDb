@@ -37,6 +37,70 @@ var genreTranslations = new Dictionary<string, string>
 // Bizim önceden seed edilen genre isimleriyle TMDB isimleri arasındaki farklar (ör. "Sci-Fi" <-> "Science Fiction")
 var nameAliases = new Dictionary<string, string> { ["Science Fiction"] = "Sci-Fi" };
 
+var countryTranslations = new Dictionary<string, string>
+{
+    ["United States of America"] = "Amerika Birleşik Devletleri",
+    ["United Kingdom"] = "Birleşik Krallık",
+    ["France"] = "Fransa",
+    ["Germany"] = "Almanya",
+    ["Italy"] = "İtalya",
+    ["Spain"] = "İspanya",
+    ["Japan"] = "Japonya",
+    ["South Korea"] = "Güney Kore",
+    ["China"] = "Çin",
+    ["Hong Kong"] = "Hong Kong",
+    ["Taiwan"] = "Tayvan",
+    ["India"] = "Hindistan",
+    ["Canada"] = "Kanada",
+    ["Australia"] = "Avustralya",
+    ["Mexico"] = "Meksika",
+    ["Brazil"] = "Brezilya",
+    ["Argentina"] = "Arjantin",
+    ["Russia"] = "Rusya",
+    ["Sweden"] = "İsveç",
+    ["Denmark"] = "Danimarka",
+    ["Norway"] = "Norveç",
+    ["Finland"] = "Finlandiya",
+    ["Netherlands"] = "Hollanda",
+    ["Belgium"] = "Belçika",
+    ["Ireland"] = "İrlanda",
+    ["Poland"] = "Polonya",
+    ["Turkey"] = "Türkiye",
+    ["Iran"] = "İran",
+    ["Israel"] = "İsrail",
+    ["Thailand"] = "Tayland",
+    ["Indonesia"] = "Endonezya",
+    ["Philippines"] = "Filipinler",
+    ["Egypt"] = "Mısır",
+    ["Nigeria"] = "Nijerya",
+    ["South Africa"] = "Güney Afrika",
+    ["New Zealand"] = "Yeni Zelanda",
+    ["Austria"] = "Avusturya",
+    ["Switzerland"] = "İsviçre",
+    ["Czech Republic"] = "Çekya",
+    ["Hungary"] = "Macaristan",
+    ["Greece"] = "Yunanistan",
+    ["Portugal"] = "Portekiz",
+    ["Saudi Arabia"] = "Suudi Arabistan",
+    ["United Arab Emirates"] = "Birleşik Arap Emirlikleri",
+    ["Ukraine"] = "Ukrayna",
+    ["Colombia"] = "Kolombiya",
+    ["Chile"] = "Şili",
+    ["Peru"] = "Peru",
+    ["Iceland"] = "İzlanda",
+    ["Romania"] = "Romanya",
+    ["Bulgaria"] = "Bulgaristan",
+    ["Serbia"] = "Sırbistan",
+    ["Croatia"] = "Hırvatistan",
+    ["Vietnam"] = "Vietnam",
+    ["Malaysia"] = "Malezya",
+    ["Singapore"] = "Singapur",
+    ["Pakistan"] = "Pakistan",
+    ["Lebanon"] = "Lübnan",
+    ["Morocco"] = "Fas",
+    ["Kenya"] = "Kenya",
+};
+
 var tmdb = new TmdbClient(apiKey);
 var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
     .UseSqlServer(connectionString)
@@ -396,6 +460,44 @@ await using (var db = new ApplicationDbContext(dbOptions))
 
     await db.SaveChangesAsync(cts.Token);
     Console.WriteLine($"{genreMap.Count} tür senkronize edildi.\n");
+}
+
+// ---------------- 1.5. Ülkeleri senkronize et ----------------
+Console.WriteLine("Ülkeler senkronize ediliyor...");
+
+await using (var db = new ApplicationDbContext(dbOptions))
+{
+    var tmdbCountries = await tmdb.GetCountriesConfigAsync(cts.Token);
+    var localCountries = await db.Countries.ToListAsync(cts.Token);
+    var syncedCount = 0;
+
+    foreach (var tc in tmdbCountries)
+    {
+        var match = localCountries.FirstOrDefault(c => c.IsoCode == tc.Iso3166_1);
+
+        if (match is null)
+        {
+            match = new Country
+            {
+                IsoCode = tc.Iso3166_1,
+                Name = tc.EnglishName,
+                NameTr = countryTranslations.GetValueOrDefault(tc.EnglishName, tc.EnglishName)
+            };
+            db.Countries.Add(match);
+            localCountries.Add(match);
+        }
+        else
+        {
+            // İsim TMDB'de değişmiş olabilir, güncel tut
+            match.Name = tc.EnglishName;
+            if (countryTranslations.TryGetValue(tc.EnglishName, out var tr))
+                match.NameTr = tr;
+        }
+        syncedCount++;
+    }
+
+    await db.SaveChangesAsync(cts.Token);
+    Console.WriteLine($"{syncedCount} ülke senkronize edildi.\n");
 }
 
 // ---------------- 2. Discover ile film ID listesini topla (decade bazlı) ----------------

@@ -97,6 +97,7 @@ export interface PagedResult<T> {
 export interface MovieSearchFilter {
   title?: string;
   genre?: string;
+  country?: string;
   year?: number;
   yearFrom?: number;
   yearTo?: number;
@@ -292,6 +293,13 @@ export interface ScreeningLogDay {
 export interface RecentlyWatchedItem {
   movie: MovieListItem;
   userRating: number | null;
+}
+
+export interface Country {
+  id: string;
+  name: string;
+  nameTr: string;
+  movieCount: number;
 }
 
 export type ThemeMode = "dark" | "light";

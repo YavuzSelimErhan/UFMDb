@@ -14,6 +14,7 @@ import {
   genreService,
   actorService,
   directorService,
+  countryService,
 } from "@/services";
 import MovieCard from "@/components/movie/MovieCard";
 import YearPicker from "@/components/search/YearPicker";
@@ -121,6 +122,11 @@ export default function SearchPage() {
     queryFn: genreService.getAll,
   });
 
+  const { data: countries } = useQuery({
+    queryKey: ["countries"],
+    queryFn: countryService.getAll,
+  });
+
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["movie-search", filter],
     queryFn: () => movieService.search(filter),
@@ -160,6 +166,12 @@ export default function SearchPage() {
     return match ? (i18n.language === "tr" ? match.nameTr : match.name) : name;
   };
 
+  const countryLabel = (name?: string) => {
+    if (!name) return "";
+    const match = countries?.find((c) => c.name === name || c.nameTr === name);
+    return match ? (i18n.language === "tr" ? match.nameTr : match.name) : name;
+  };
+
   const yearLabel = filter.year
     ? String(filter.year)
     : filter.yearFrom
@@ -176,6 +188,11 @@ export default function SearchPage() {
       key: "genre",
       label: genreLabel(filter.genre),
       onRemove: () => update({ genre: undefined }),
+    },
+    filter.country && {
+      key: "country",
+      label: countryLabel(filter.country),
+      onRemove: () => update({ country: undefined }),
     },
     yearLabel && {
       key: "year",
@@ -281,6 +298,17 @@ export default function SearchPage() {
                   ...(genres?.map((g) => ({
                     label: i18n.language === "tr" ? g.nameTr : g.name,
                     value: i18n.language === "tr" ? g.nameTr : g.name,
+                  })) ?? []),
+                ]}
+              />
+              <Dropdown
+                value={filter.country ?? ""}
+                onChange={(v) => update({ country: v || undefined })}
+                options={[
+                  { label: t("search.allCountries"), value: "" },
+                  ...(countries?.map((c) => ({
+                    label: i18n.language === "tr" ? c.nameTr : c.name,
+                    value: i18n.language === "tr" ? c.nameTr : c.name,
                   })) ?? []),
                 ]}
               />

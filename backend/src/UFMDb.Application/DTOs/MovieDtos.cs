@@ -38,6 +38,7 @@ public record PagedResult<T>(List<T> Items, int TotalCount, int Page, int PageSi
 public record MovieSearchQueryDto(
     string? Title,
     string? Genre,
+    string? Country,
     int? Year,
     string? ActorName,
     double? MinRating,

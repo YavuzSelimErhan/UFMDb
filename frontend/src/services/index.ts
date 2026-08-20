@@ -21,6 +21,7 @@ import type {
   DirectorFormPayload,
   WatchedMovie,
   ScreeningLogDay,
+  Country,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -222,6 +223,14 @@ export const profileService = {
 export const genreService = {
   getAll: async (): Promise<Genre[]> => {
     const { data } = await api.get("/genres");
+    return data;
+  },
+};
+
+// ---------------- Countries ----------------
+export const countryService = {
+  getAll: async (): Promise<Country[]> => {
+    const { data } = await api.get("/countries");
     return data;
   },
 };
