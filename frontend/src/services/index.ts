@@ -145,8 +145,13 @@ export const authService = {
     });
     return data;
   },
-  // NOT: Backend'de bu endpoint henüz yok. Gerçek şifre sıfırlama için e-posta
-  // gönderimi yapan bir endpoint eklenmesi gerekiyor — istersen birlikte kuralım.
+  refresh: async (): Promise<AuthResult> => {
+    const { data } = await api.post("/auth/refresh");
+    return data;
+  },
+  logout: async (): Promise<void> => {
+    await api.post("/auth/logout");
+  },
   requestPasswordReset: async (email: string): Promise<void> => {
     await api.post("/auth/forgot-password", { email });
   },

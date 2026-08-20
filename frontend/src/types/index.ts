@@ -190,7 +190,6 @@ export interface AuthResult {
   email: string;
   role: "Admin" | "User";
   accessToken: string;
-  refreshToken: string;
 }
 
 export interface FavoriteSlot {

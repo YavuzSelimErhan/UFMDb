@@ -16,10 +16,12 @@ import RegisterPage from "@/pages/Register/RegisterPage";
 import ProfilePage from "@/pages/Profile/ProfilePage";
 import AdminPage from "@/pages/Admin/AdminPage";
 import ScreeningLogPage from "@/pages/ScreeningLog/ScreeningLogPage";
+import SessionManager from "@/components/common/SessionManager";
 
 export default function App() {
   return (
     <BrowserRouter basename="/UFMDb">
+      <SessionManager />
       <ScrollToTop />
       <div className="app-shell">
         <Navbar />

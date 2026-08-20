@@ -72,7 +72,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResul
         {
             UserId = user.Id,
             Token = refresh,
-            ExpiresAtUtc = DateTime.UtcNow.AddDays(7)
+            ExpiresAtUtc = DateTime.UtcNow.AddMonths(1)
         });
         await _context.SaveChangesAsync(ct);
 
@@ -120,10 +120,73 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResultDto>
         {
             UserId = user.Id,
             Token = refresh,
-            ExpiresAtUtc = DateTime.UtcNow.AddDays(7)
+            ExpiresAtUtc = DateTime.UtcNow.AddMonths(1)
         });
         await _context.SaveChangesAsync(ct);
 
         return new AuthResultDto(user.Id, user.UserName, user.Email, user.Role.ToString(), access, refresh);
+    }
+}
+
+// ---------- Refresh ----------
+public record RefreshTokenCommand(string RefreshToken) : IRequest<AuthResultDto>;
+
+public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, AuthResultDto>
+{
+    private readonly IApplicationDbContext _context;
+    private readonly IJwtTokenService _jwtTokenService;
+
+    public RefreshTokenCommandHandler(IApplicationDbContext context, IJwtTokenService jwtTokenService)
+    {
+        _context = context;
+        _jwtTokenService = jwtTokenService;
+    }
+
+    public async Task<AuthResultDto> Handle(RefreshTokenCommand request, CancellationToken ct)
+    {
+        var existing = await _context.RefreshTokens
+            .Include(rt => rt.User)
+            .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken, ct)
+            ?? throw new UnauthorizedException("Geçersiz oturum, lütfen tekrar giriş yapın.");
+
+        if (existing.IsRevoked || existing.ExpiresAtUtc < DateTime.UtcNow)
+            throw new UnauthorizedException("Oturum süresi doldu, lütfen tekrar giriş yapın.");
+
+        // Rotasyon: eski refresh token'ı iptal edip yenisini üret (güvenlik için)
+        existing.IsRevoked = true;
+
+        var user = existing.User;
+        var access = _jwtTokenService.GenerateAccessToken(user);
+        var refresh = _jwtTokenService.GenerateRefreshToken();
+
+        _context.RefreshTokens.Add(new RefreshToken
+        {
+            UserId = user.Id,
+            Token = refresh,
+            ExpiresAtUtc = DateTime.UtcNow.AddMonths(1)
+        });
+        await _context.SaveChangesAsync(ct);
+
+        return new AuthResultDto(user.Id, user.UserName, user.Email, user.Role.ToString(), access, refresh);
+    }
+}
+
+// ---------- Logout ----------
+public record LogoutCommand(string RefreshToken) : IRequest;
+
+public class LogoutCommandHandler : IRequestHandler<LogoutCommand>
+{
+    private readonly IApplicationDbContext _context;
+
+    public LogoutCommandHandler(IApplicationDbContext context) => _context = context;
+
+    public async Task Handle(LogoutCommand request, CancellationToken ct)
+    {
+        var token = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken, ct);
+        if (token is not null)
+        {
+            token.IsRevoked = true;
+            await _context.SaveChangesAsync(ct);
+        }
     }
 }

@@ -14,6 +14,7 @@ import {
 import { useAppDispatch, useAppSelector } from "@/store";
 import { toggleTheme } from "@/store/uiSlice";
 import { logout } from "@/store/authSlice";
+import { authService } from "@/services";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -29,9 +30,10 @@ export default function Navbar() {
     localStorage.setItem("ufmdb_language", next);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await authService.logout();
     dispatch(logout());
-    navigate("/");
+    navigate("/login");
   };
 
   return (
