@@ -223,6 +223,12 @@ export default function ProfilePage() {
                 >
                   EN
                 </button>
+                <button
+                  className={i18n.language === "az" ? "active" : ""}
+                  onClick={() => handleLangChange("az")}
+                >
+                  AZ
+                </button>
               </div>
             </div>
           </section>

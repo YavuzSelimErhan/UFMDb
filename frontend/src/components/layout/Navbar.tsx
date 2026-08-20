@@ -23,9 +23,13 @@ export default function Navbar() {
   const navigate = useNavigate();
   const theme = useAppSelector((s) => s.ui.theme);
   const { isAuthenticated, userName, role } = useAppSelector((s) => s.auth);
+  const LANGUAGES = ["tr", "en", "az"] as const;
 
   const handleLangToggle = () => {
-    const next = i18n.language === "tr" ? "en" : "tr";
+    const currentIndex = LANGUAGES.indexOf(
+      i18n.language as (typeof LANGUAGES)[number],
+    );
+    const next = LANGUAGES[(currentIndex + 1) % LANGUAGES.length];
     i18n.changeLanguage(next);
     localStorage.setItem("ufmdb_language", next);
   };
@@ -68,7 +72,7 @@ export default function Navbar() {
           <button
             className="navbar__icon-btn"
             onClick={handleLangToggle}
-            title="TR / EN"
+            title="Language"
           >
             {i18n.language.toUpperCase()}
           </button>
