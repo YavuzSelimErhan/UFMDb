@@ -3,6 +3,7 @@ import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import tr from "./locales/tr/translation.json";
 import en from "./locales/en/translation.json";
+import az from "./locales/az/translation.json";
 
 i18n
   .use(LanguageDetector)
@@ -11,9 +12,10 @@ i18n
     resources: {
       tr: { translation: tr },
       en: { translation: en },
+      az: { translation: az },
     },
     fallbackLng: "tr",
-    supportedLngs: ["tr", "en"],
+    supportedLngs: ["tr", "en", "az"],
     interpolation: { escapeValue: false },
     detection: {
       order: ["localStorage", "navigator"],
