@@ -1,8 +1,20 @@
-.admin-movie-form { padding: 24px; display: flex; flex-direction: column; gap: 16px; border-radius: var(--radius-lg); }
-.admin-movie-form h3 { font-family: var(--font-display); }
+.admin-movie-form {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-radius: var(--radius-lg);
+}
+.admin-movie-form h3 {
+  font-family: var(--font-display);
+}
 
 /* ---------- Üst blok: poster önizleme + temel bilgiler ---------- */
-.admin-movie-form__top { display: grid; grid-template-columns: 110px 1fr; gap: 18px; }
+.admin-movie-form__top {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 18px;
+}
 
 .admin-movie-form__poster-preview {
   width: 110px;
@@ -16,7 +28,11 @@
   overflow: hidden;
   flex-shrink: 0;
 }
-.admin-movie-form__poster-preview img { width: 100%; height: 100%; object-fit: cover; }
+.admin-movie-form__poster-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 .admin-movie-form__basic-fields {
   display: grid;
@@ -25,11 +41,19 @@
   align-content: start;
 }
 .admin-movie-form__basic-fields .admin-movie-form__field:nth-child(1),
-.admin-movie-form__basic-fields .admin-movie-form__field:nth-child(2) { grid-column: span 1; }
+.admin-movie-form__basic-fields .admin-movie-form__field:nth-child(2) {
+  grid-column: span 1;
+}
 
 /* ---------- Genel form alanı ---------- */
-.admin-movie-form__field { display: flex; flex-direction: column; gap: 5px; }
-.admin-movie-form__field--sm { min-width: 0; }
+.admin-movie-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.admin-movie-form__field--sm {
+  min-width: 0;
+}
 
 .admin-movie-form__field label {
   font-size: 0.78rem;
@@ -37,7 +61,11 @@
   color: var(--color-text-secondary);
 }
 
-.admin-movie-form__section-label { display: flex; align-items: center; gap: 6px; }
+.admin-movie-form__section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
 .admin-movie-form input,
 .admin-movie-form textarea {
@@ -49,13 +77,26 @@
   font-size: 0.88rem;
   width: 100%;
 }
-.admin-movie-form input:focus, .admin-movie-form textarea:focus { outline: none; border-color: var(--color-accent); }
-.admin-movie-form textarea { resize: vertical; }
+.admin-movie-form input:focus,
+.admin-movie-form textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+.admin-movie-form textarea {
+  resize: vertical;
+}
 
-.admin-movie-form__grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.admin-movie-form__grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
 
 /* ---------- Bölümler (Görseller / Türler / Kadro) ---------- */
-.admin-movie-form__section { padding-top: 16px; border-top: 1px solid var(--color-border); }
+.admin-movie-form__section {
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
 .admin-movie-form__section h4 {
   display: flex;
   align-items: center;
@@ -65,9 +106,15 @@
   color: var(--color-text-primary);
   margin-bottom: 12px;
 }
-.admin-movie-form__section h4 svg { color: var(--color-accent); }
+.admin-movie-form__section h4 svg {
+  color: var(--color-accent);
+}
 
-.admin-movie-form__genre-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.admin-movie-form__genre-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 
 .admin-movie-form__genre-chip {
   display: flex;
@@ -78,17 +125,45 @@
   border: 1px solid var(--color-border);
   font-size: 0.82rem;
   cursor: pointer;
-  transition: border-color var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
-.admin-movie-form__genre-chip:hover { border-color: var(--color-accent); }
-.admin-movie-form__genre-chip.is-selected { background-color: var(--color-accent); border-color: var(--color-accent); color: #fff; }
-.admin-movie-form__genre-chip input { display: none; }
+.admin-movie-form__genre-chip:hover {
+  border-color: var(--color-accent);
+}
+.admin-movie-form__genre-chip.is-selected {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+.admin-movie-form__genre-chip input {
+  display: none;
+}
 
-.admin-movie-form__cast-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.admin-movie-form__cast-header h4 { margin-bottom: 0; }
-.admin-movie-form__add-cast { display: flex; align-items: center; gap: 6px; padding: 6px 12px; font-size: 0.8rem; }
+.admin-movie-form__cast-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.admin-movie-form__cast-header h4 {
+  margin-bottom: 0;
+}
+.admin-movie-form__add-cast {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
 
-.admin-movie-form__cast-list { display: flex; flex-direction: column; gap: 8px; }
+.admin-movie-form__cast-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
 .admin-movie-form__cast-row {
   display: flex;
@@ -118,18 +193,48 @@
   flex-shrink: 0;
 }
 
-.admin-movie-form__remove-cast { color: #e05c5c; flex-shrink: 0; padding: 4px; }
-.admin-movie-form__remove-cast:hover { opacity: 0.7; }
-.admin-movie-form__no-cast { font-size: 0.85rem; padding: 8px 0; }
+.admin-movie-form__remove-cast {
+  color: #e05c5c;
+  flex-shrink: 0;
+  padding: 4px;
+}
+.admin-movie-form__remove-cast:hover {
+  opacity: 0.7;
+}
+.admin-movie-form__no-cast {
+  font-size: 0.85rem;
+  padding: 8px 0;
+}
 
-.admin-movie-form__actions { display: flex; gap: 10px; padding-top: 16px; border-top: 1px solid var(--color-border); }
-.admin-movie-form__actions button { flex: 1; }
+.admin-movie-form__actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+.admin-movie-form__actions button {
+  flex: 1;
+}
 
 @media (max-width: 600px) {
-  .admin-movie-form__top { grid-template-columns: 1fr; }
-  .admin-movie-form__poster-preview { width: 90px; height: 122px; }
-  .admin-movie-form__basic-fields { grid-template-columns: 1fr; }
-  .admin-movie-form__grid-2 { grid-template-columns: 1fr; }
-  .admin-movie-form__cast-row { flex-wrap: wrap; }
-  .admin-movie-form__cast-row input:not(.actor-select input) { width: 100%; }
+  .admin-movie-form__top {
+    grid-template-columns: 1fr;
+  }
+  .admin-movie-form__poster-preview {
+    width: 90px;
+    height: 122px;
+    margin: 0 auto;
+  }
+  .admin-movie-form__basic-fields {
+    grid-template-columns: 1fr;
+  }
+  .admin-movie-form__grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .admin-movie-form__cast-row {
+    flex-wrap: wrap;
+  }
+  .admin-movie-form__cast-row input:not(.actor-select input) {
+    width: 100%;
+  }
 }

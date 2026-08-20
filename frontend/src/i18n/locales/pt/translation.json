@@ -8,7 +8,9 @@
     "login": "Entrar",
     "register": "Cadastrar",
     "logout": "Sair",
-    "log": "Diário"
+    "log": "Diário",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu"
   },
   "home": {
     "popular": "Filmes populares",
@@ -201,7 +203,8 @@
     "filmography": "Filmografia",
     "born": "Data de nascimento",
     "like": "Curtir",
-    "liked": "Curtiu"
+    "liked": "Curtiu",
+    "noBiography": "Nenhuma biografia disponível."
   },
   "director": {
     "filmography": "Filmografia"

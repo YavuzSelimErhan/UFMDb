@@ -8,7 +8,9 @@
     "login": "Connexion",
     "register": "S'inscrire",
     "logout": "Déconnexion",
-    "log": "Journal"
+    "log": "Journal",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu"
   },
   "home": {
     "popular": "Films populaires",
@@ -201,7 +203,8 @@
     "filmography": "Filmographie",
     "born": "Date de naissance",
     "like": "J'aime",
-    "liked": "Aimé"
+    "liked": "Aimé",
+    "noBiography": "Aucune biographie disponible."
   },
   "director": {
     "filmography": "Filmographie"

@@ -85,4 +85,7 @@
   .list-detail-page__hero {
     height: 180px;
   }
+  .list-detail-page__header h1 {
+    font-size: 1.5rem;
+  }
 }

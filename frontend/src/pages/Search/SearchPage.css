@@ -11,7 +11,6 @@
   padding: 1px;
   margin-bottom: 24px;
   background: linear-gradient(135deg, var(--tab-glow), transparent 55%);
-  /* overflow: hidden;  <-- BU SATIRI SİL */
   transition: background var(--transition-base);
 }
 
@@ -82,7 +81,7 @@
     color var(--transition-fast);
 }
 .spotlight-card__tabs button.active {
-  color: #10131a; /* koyu tema için — accent renkler açık tonda olduğundan koyu metin okunaklı kalır */
+  color: #10131a;
 }
 
 .spotlight-card__search {
@@ -164,21 +163,6 @@
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 18px;
 }
-@media (max-width: 1100px) {
-  .movie-masonry {
-    column-count: 3;
-  }
-}
-@media (max-width: 700px) {
-  .movie-masonry {
-    column-count: 2;
-  }
-}
-@media (max-width: 480px) {
-  .movie-masonry {
-    column-count: 1;
-  }
-}
 
 /* ---------- Kişi (oyuncu/yönetmen) ızgarası ---------- */
 .person-grid {
@@ -226,6 +210,15 @@
   }
   .spotlight-card__inner {
     padding: 1.2rem 1.2rem;
+  }
+  .spotlight-card__tabs {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .spotlight-card__tabs::-webkit-scrollbar {
+    display: none;
   }
 }
 

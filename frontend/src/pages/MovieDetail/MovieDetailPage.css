@@ -333,6 +333,9 @@
 }
 
 @media (max-width: 768px) {
+  .movie-detail__backdrop {
+    height: 220px;
+  }
   .movie-detail__content {
     flex-direction: column;
     margin-top: -80px;
@@ -351,6 +354,24 @@
   .movie-detail__ticket-strip {
     flex-wrap: wrap;
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .movie-detail__print-tag {
+    left: 14px;
+    bottom: 12px;
+    font-size: 0.66rem;
+    padding: 4px 10px;
+  }
+  .movie-detail__ticket-cell {
+    padding: 7px 12px;
+  }
+  .movie-detail__ticket-value {
+    font-size: 0.78rem;
+  }
+  .movie-detail__log-form-row {
+    gap: 14px;
   }
 }
 

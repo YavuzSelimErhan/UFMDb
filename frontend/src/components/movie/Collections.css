@@ -136,6 +136,7 @@
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
@@ -181,12 +182,6 @@
 @media (max-width: 640px) {
   .collections-section__see-all span {
     display: none;
-  }
-
-  @media (max-width: 420px) {
-    .collections-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
   }
   .collections-grid {
     grid-template-columns: repeat(2, 1fr);

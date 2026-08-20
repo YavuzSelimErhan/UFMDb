@@ -1,9 +1,16 @@
-.admin-page { padding-top: 48px; padding-bottom: 60px; }
-.admin-page h1 { margin-bottom: 20px; }
+.admin-page {
+  padding-top: 48px;
+  padding-bottom: 60px;
+}
+.admin-page h1 {
+  margin-bottom: 20px;
+}
 
 .admin-page__tabs {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
+  row-gap: 6px;
   border-bottom: 1px solid var(--color-border);
   margin-bottom: 24px;
 }
@@ -13,4 +20,7 @@
   color: var(--color-text-secondary);
   border-bottom: 2px solid transparent;
 }
-.admin-page__tabs button.active { color: var(--color-accent); border-bottom-color: var(--color-accent); }
+.admin-page__tabs button.active {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}

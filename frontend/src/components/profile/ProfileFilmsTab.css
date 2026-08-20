@@ -147,3 +147,20 @@
   color: #e0245e;
   flex-shrink: 0;
 }
+
+@media (max-width: 480px) {
+  .films-tab__row {
+    gap: 10px;
+    padding: 8px;
+  }
+  .films-tab__poster {
+    width: 44px;
+    height: 66px;
+  }
+  .films-tab__title {
+    font-size: 0.86rem;
+  }
+  .films-tab__actions {
+    opacity: 1; /* touch cihazda hover olmadığı için her zaman görünür */
+  }
+}

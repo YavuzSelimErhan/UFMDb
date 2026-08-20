@@ -308,6 +308,7 @@
   color: var(--color-text-primary);
   margin-bottom: 4px;
   width: 100%;
+  font-size: 16px;
 }
 .auth-card input:focus {
   outline: none;
@@ -327,6 +328,8 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  flex-wrap: wrap;
+  row-gap: 4px;
   margin-top: 10px;
 }
 .auth-card__label-row label {
@@ -351,15 +354,21 @@
 }
 .auth-card__password-toggle {
   position: absolute;
-  right: 10px;
+  right: 4px;
   color: var(--color-text-muted);
   display: flex;
   align-items: center;
-  padding: 4px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
   margin-bottom: 4px;
 }
-.auth-card__password-toggle:hover {
+.auth-card__password-toggle:hover,
+.auth-card__password-toggle:active {
   color: var(--color-text-secondary);
+  background-color: var(--color-accent-muted);
 }
 
 .auth-card .btn-primary {
@@ -413,5 +422,35 @@
   }
   .auth-page__mobile-brand .auth-page__brand {
     font-size: 1.1rem;
+  }
+  .auth-card {
+    gap: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 20px 12px;
+  }
+  .auth-page__form-side {
+    padding: 28px 18px;
+  }
+  .auth-card h1 {
+    font-size: 1.3rem;
+    margin: 4px 0 12px;
+  }
+  .auth-card label {
+    margin-top: 8px;
+  }
+  .auth-card input {
+    padding: 11px 12px;
+  }
+  .auth-card .btn-primary {
+    margin-top: 16px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  .auth-card__forgot-link {
+    font-size: 0.75rem;
   }
 }

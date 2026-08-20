@@ -60,7 +60,7 @@ export default function DirectorDetailPage() {
             </p>
           )}
           <p className="text-secondary actor-page__bio">
-            {director.biography || "Biyografi bilgisi mevcut değil."}
+            {director.biography || t("actor.noBiography")}
           </p>
 
           {isAuthenticated && (

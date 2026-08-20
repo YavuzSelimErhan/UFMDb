@@ -113,6 +113,7 @@
   margin-bottom: 26px;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   max-width: 560px;
@@ -205,5 +206,19 @@
   }
   .hero-carousel__nav {
     display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero-carousel {
+    height: 420px;
+  }
+  .hero-carousel__title {
+    font-size: 1.5rem;
+  }
+  .hero-carousel__meta {
+    gap: 10px;
+    font-size: 0.82rem;
+    flex-wrap: wrap;
   }
 }

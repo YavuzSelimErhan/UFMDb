@@ -538,6 +538,17 @@
     background-size: 10px 100%;
     background-repeat: repeat-x;
   }
+  .screening-log__timeline::before {
+    left: 23px;
+  }
+
+  .screening-log__entry-actions {
+    opacity: 1;
+  }
+
+  .screening-log__header h1 {
+    font-size: 1.4rem;
+  }
 }
 
 .screening-log__month-group {

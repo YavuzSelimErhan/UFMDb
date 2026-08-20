@@ -5,6 +5,8 @@
 
 .rail__header {
   display: flex;
+  flex-wrap: wrap;
+  row-gap: 8px;
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
@@ -15,6 +17,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 
 .rail__eyebrow {
@@ -41,6 +44,7 @@
   font-weight: 800;
   color: var(--color-text-primary);
   letter-spacing: -0.02em;
+  overflow-wrap: break-word;
 }
 
 .rail__see-all {

@@ -44,10 +44,13 @@
   padding: 24px;
   max-height: 640px;
   overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: var(--radius-lg);
 }
 .admin-tab__list table {
   width: 100%;
+  min-width: 480px;
   border-collapse: collapse;
   margin-top: 14px;
 }
@@ -218,6 +221,26 @@
 @media (max-width: 900px) {
   .admin-tab {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-tab__grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-tab__form {
+    padding: 18px;
+  }
+  .admin-tab__list {
+    padding: 16px 12px;
+  }
+  .admin-tab__list th,
+  .admin-tab__list td {
+    padding: 8px 6px;
+    font-size: 0.82rem;
+  }
+  .admin-users-tab__search {
+    max-width: 100%;
   }
 }
 

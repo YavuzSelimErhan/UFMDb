@@ -8,7 +8,9 @@
     "login": "Log In",
     "register": "Sign Up",
     "logout": "Log Out",
-    "log": "Log"
+    "log": "Log",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "home": {
     "popular": "Popular Movies",
@@ -201,7 +203,8 @@
     "filmography": "Filmography",
     "born": "Born",
     "like": "Like",
-    "liked": "Liked"
+    "liked": "Liked",
+    "noBiography": "No biography available."
   },
   "director": { "filmography": "Filmography" },
   "footer": {

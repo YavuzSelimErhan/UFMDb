@@ -8,7 +8,9 @@
     "login": "Anmelden",
     "register": "Registrieren",
     "logout": "Abmelden",
-    "log": "Tagebuch"
+    "log": "Tagebuch",
+    "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen"
   },
   "home": {
     "popular": "Beliebte Filme",
@@ -201,7 +203,8 @@
     "filmography": "Filmografie",
     "born": "Geburtsdatum",
     "like": "Gefällt mir",
-    "liked": "Gefällt mir"
+    "liked": "Gefällt mir",
+    "noBiography": "Keine Biografie verfügbar."
   },
   "director": {
     "filmography": "Filmografie"

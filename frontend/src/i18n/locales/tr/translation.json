@@ -8,7 +8,9 @@
     "login": "Giriş Yap",
     "register": "Kayıt Ol",
     "logout": "Çıkış Yap",
-    "log": "Günlük"
+    "log": "Günlük",
+    "openMenu": "Menüyü aç",
+    "closeMenu": "Menüyü kapat"
   },
   "home": {
     "popular": "Popüler Filmler",
@@ -201,7 +203,8 @@
     "filmography": "Filmografi",
     "born": "Doğum Tarihi",
     "like": "Beğen",
-    "liked": "Beğenildi"
+    "liked": "Beğenildi",
+    "noBiography": "Biyografi bilgisi mevcut değil."
   },
   "director": {
     "filmography": "Filmografi"
