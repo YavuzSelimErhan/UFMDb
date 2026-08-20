@@ -1,5 +1,5 @@
 // Vite'ın statik analiz edebilmesi için glob pattern literal string olmalı (değişken kullanılamaz)
-const modules = import.meta.glob("../locales/*/translation.json", {
+const modules = import.meta.glob("./locales/*/translation.json", {
   eager: true,
 }) as Record<string, { default: Record<string, unknown> }>;
 
@@ -9,7 +9,7 @@ export const languageResources: Record<
 > = {};
 
 for (const path in modules) {
-  const match = path.match(/\.\.\/locales\/([a-zA-Z-]+)\/translation\.json$/);
+  const match = path.match(/\.\/locales\/([a-zA-Z-]+)\/translation\.json$/);
   if (!match) continue;
   const code = match[1];
   languageResources[code] = { translation: modules[path].default };
