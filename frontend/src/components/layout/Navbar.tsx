@@ -10,11 +10,14 @@ import {
   Moon,
   LogOut,
   Ticket,
+  Languages,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { toggleTheme } from "@/store/uiSlice";
 import { logout } from "@/store/authSlice";
 import { authService } from "@/services";
+import { SUPPORTED_LANGUAGES, languageLabel } from "@/i18n/languages";
+import Dropdown from "@/components/search/Dropdown";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -23,15 +26,15 @@ export default function Navbar() {
   const navigate = useNavigate();
   const theme = useAppSelector((s) => s.ui.theme);
   const { isAuthenticated, userName, role } = useAppSelector((s) => s.auth);
-  const LANGUAGES = ["tr", "en", "az"] as const;
 
-  const handleLangToggle = () => {
-    const currentIndex = LANGUAGES.indexOf(
-      i18n.language as (typeof LANGUAGES)[number],
-    );
-    const next = LANGUAGES[(currentIndex + 1) % LANGUAGES.length];
-    i18n.changeLanguage(next);
-    localStorage.setItem("ufmdb_language", next);
+  const languageOptions = SUPPORTED_LANGUAGES.map((lng) => ({
+    label: languageLabel(lng),
+    value: lng,
+  }));
+
+  const handleLangChange = (value: string) => {
+    i18n.changeLanguage(value);
+    localStorage.setItem("ufmdb_language", value);
   };
 
   const handleLogout = async () => {
@@ -69,13 +72,12 @@ export default function Navbar() {
         </nav>
 
         <div className="navbar__actions">
-          <button
-            className="navbar__icon-btn"
-            onClick={handleLangToggle}
-            title="Language"
-          >
-            {i18n.language.toUpperCase()}
-          </button>
+          <Dropdown
+            icon={<Languages size={14} />}
+            value={i18n.language}
+            options={languageOptions}
+            onChange={handleLangChange}
+          />
           <button
             className="navbar__icon-btn"
             onClick={() => dispatch(toggleTheme())}

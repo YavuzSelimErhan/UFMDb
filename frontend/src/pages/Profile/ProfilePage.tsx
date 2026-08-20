@@ -13,10 +13,13 @@ import {
   MessageSquare,
   Film,
   ArrowRight,
+  Languages,
 } from "lucide-react";
 import { profileService } from "@/services";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { setTheme } from "@/store/uiSlice";
+import { SUPPORTED_LANGUAGES, languageLabel } from "@/i18n/languages";
+import Dropdown from "@/components/search/Dropdown";
 import MovieCard from "@/components/movie/MovieCard";
 import FavoritesShowcase from "@/components/profile/FavoritesShowcase";
 import ProfileFilmsTab from "@/components/profile/ProfileFilmsTab";
@@ -72,6 +75,11 @@ export default function ProfilePage() {
     localStorage.setItem("ufmdb_language", value);
     settingsMutation.mutate({ language: value, theme });
   };
+
+  const languageOptions = SUPPORTED_LANGUAGES.map((lng) => ({
+    label: languageLabel(lng),
+    value: lng,
+  }));
 
   if (isLoading) return <PageSpinner label={t("common.loading")} />;
 
@@ -210,26 +218,12 @@ export default function ProfilePage() {
             </div>
             <div className="profile-page__setting-row">
               <span>{t("profile.language")}</span>
-              <div className="profile-page__toggle-group">
-                <button
-                  className={i18n.language === "tr" ? "active" : ""}
-                  onClick={() => handleLangChange("tr")}
-                >
-                  TR
-                </button>
-                <button
-                  className={i18n.language === "en" ? "active" : ""}
-                  onClick={() => handleLangChange("en")}
-                >
-                  EN
-                </button>
-                <button
-                  className={i18n.language === "az" ? "active" : ""}
-                  onClick={() => handleLangChange("az")}
-                >
-                  AZ
-                </button>
-              </div>
+              <Dropdown
+                icon={<Languages size={14} />}
+                value={i18n.language}
+                options={languageOptions}
+                onChange={handleLangChange}
+              />
             </div>
           </section>
         )}

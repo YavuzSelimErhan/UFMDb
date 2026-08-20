@@ -165,6 +165,7 @@
 
 .profile-page__toggle-group {
   display: flex;
+  flex-wrap: wrap;
   border: 1px solid var(--color-border);
   border-radius: 20px;
   overflow: hidden;

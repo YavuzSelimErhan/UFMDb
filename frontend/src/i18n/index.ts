@@ -1,21 +1,15 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
-import tr from "./locales/tr/translation.json";
-import en from "./locales/en/translation.json";
-import az from "./locales/az/translation.json";
+import { languageResources, SUPPORTED_LANGUAGES } from "./languages";
 
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    resources: {
-      tr: { translation: tr },
-      en: { translation: en },
-      az: { translation: az },
-    },
+    resources: languageResources,
     fallbackLng: "tr",
-    supportedLngs: ["tr", "en", "az"],
+    supportedLngs: SUPPORTED_LANGUAGES,
     interpolation: { escapeValue: false },
     detection: {
       order: ["localStorage", "navigator"],
@@ -24,10 +18,6 @@ i18n
     },
   });
 
-// <html lang="..."> özniteliğini i18n diliyle senkronize tutuyoruz.
-// Tarayıcılar text-transform: uppercase gibi CSS kurallarını locale'e duyarlı uyguluyor
-// (örn. html lang="tr" iken İngilizce "Films" kelimesi "FİLMS" olarak büyütülebiliyor) —
-// bu senkronizasyon olmadan dil değiştirmek görsel tutarsızlıklara yol açar.
 const syncHtmlLang = (lng: string) => {
   document.documentElement.lang = lng;
 };
