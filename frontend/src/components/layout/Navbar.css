@@ -149,7 +149,6 @@
   white-space: nowrap;
 }
 
-/* Mobil açılır panel */
 .navbar__mobile-panel {
   position: absolute;
   top: 68px;
@@ -169,6 +168,7 @@
 .navbar__mobile-panel--open {
   max-height: 480px;
   opacity: 1;
+  overflow: visible;
 }
 
 .navbar__mobile-links {
@@ -203,6 +203,10 @@
   align-items: center;
   gap: 10px;
   padding: 14px 20px 18px;
+}
+.navbar__mobile-utils > *:first-child {
+  flex: 1;
+  min-width: 0;
 }
 
 .navbar__mobile-backdrop {

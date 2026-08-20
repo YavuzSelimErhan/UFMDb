@@ -11,7 +11,7 @@ interface Props {
 }
 
 const CURRENT_YEAR = new Date().getFullYear();
-const EARLIEST_DECADE = 1920;
+const EARLIEST_DECADE = 1900;
 
 function getDecades(): number[] {
   const startDecade = Math.floor(CURRENT_YEAR / 10) * 10;
