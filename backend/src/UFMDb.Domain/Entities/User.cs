@@ -14,6 +14,11 @@ public class User : BaseEntity
     public string PreferredLanguage { get; set; } = "tr"; // "tr" | "en"
     public string PreferredTheme { get; set; } = "dark";  // "dark" | "light"
     public bool IsActive { get; set; } = true;
+    public string? FullName { get; set; }
+    public string? Country { get; set; }
+    public DateTime? BirthDate { get; set; }
+    public Gender Gender { get; set; } = Gender.NotSpecified;
+    public string? Biography { get; set; }
 
     // Navigation
     public ICollection<Review> Reviews { get; set; } = new List<Review>();

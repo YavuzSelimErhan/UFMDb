@@ -233,6 +233,11 @@ export default function ProfilePage() {
         <EditProfileForm
           userName={profile.userName}
           avatarUrl={profile.avatarUrl}
+          fullName={profile.fullName}
+          country={profile.country}
+          birthDate={profile.birthDate}
+          gender={profile.gender}
+          biography={profile.biography}
           onClose={() => setIsEditingProfile(false)}
         />
       )}

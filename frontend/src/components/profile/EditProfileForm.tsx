@@ -2,29 +2,56 @@ import { useState, useRef, type FormEvent, type DragEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { X, User, Upload, Loader2, ImageOff } from "lucide-react";
-import { profileService } from "@/services";
+import { profileService, countryService } from "@/services";
+import { useQuery } from "@tanstack/react-query";
+import Dropdown from "@/components/search/Dropdown";
+import type { ProfileData } from "@/types";
 import "./EditProfileForm.css";
 
 interface Props {
   userName: string;
   avatarUrl: string | null;
+  fullName: string | null;
+  country: string | null;
+  birthDate: string | null;
+  gender: ProfileData["gender"];
+  biography: string | null;
   onClose: () => void;
 }
+
+const BIOGRAPHY_MAX_LENGTH = 500;
 
 export default function EditProfileForm({
   userName,
   avatarUrl,
+  fullName,
+  country,
+  birthDate,
+  gender,
+  biography,
   onClose,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState(userName);
   const [avatar, setAvatar] = useState(avatarUrl ?? "");
   const [previewUrl, setPreviewUrl] = useState(avatarUrl ?? "");
+  const [fullNameValue, setFullNameValue] = useState(fullName ?? "");
+  const [countryValue, setCountryValue] = useState(country ?? "");
+  const [birthDateValue, setBirthDateValue] = useState(
+    birthDate ? birthDate.slice(0, 10) : "", // ISO string -> yyyy-MM-dd
+  );
+  const [genderValue, setGenderValue] = useState<ProfileData["gender"]>(gender);
+  const [biographyValue, setBiographyValue] = useState(biography ?? "");
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+
+  const { data: countries } = useQuery({
+    queryKey: ["countries"],
+    queryFn: countryService.getAll,
+  });
 
   const uploadMutation = useMutation({
     mutationFn: (file: File) => profileService.uploadAvatar(file),
@@ -35,7 +62,16 @@ export default function EditProfileForm({
   });
 
   const saveMutation = useMutation({
-    mutationFn: () => profileService.updateProfile(name, avatar.trim() || null),
+    mutationFn: () =>
+      profileService.updateProfile({
+        userName: name,
+        avatarUrl: avatar.trim() || null,
+        fullName: fullNameValue.trim() || null,
+        country: countryValue || null,
+        birthDate: birthDateValue || null,
+        gender: genderValue,
+        biography: biographyValue.trim() || null,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
       onClose();
@@ -156,6 +192,70 @@ export default function EditProfileForm({
             minLength={3}
             maxLength={50}
             required
+          />
+        </div>
+
+        <div className="edit-profile-form__field">
+          <label>{t("profile.fullName")}</label>
+          <input
+            value={fullNameValue}
+            onChange={(e) => setFullNameValue(e.target.value)}
+            maxLength={100}
+            placeholder={t("profile.fullNamePlaceholder")}
+          />
+        </div>
+
+        <div className="edit-profile-form__field">
+          <label>{t("profile.country")}</label>
+          <Dropdown
+            value={countryValue}
+            onChange={setCountryValue}
+            options={[
+              { label: t("profile.countryNotSpecified"), value: "" },
+              ...(countries?.map((c) => ({
+                label: i18n.language === "tr" ? c.nameTr : c.name,
+                value: i18n.language === "tr" ? c.nameTr : c.name,
+              })) ?? []),
+            ]}
+          />
+        </div>
+
+        <div className="edit-profile-form__field">
+          <label>{t("profile.birthDate")}</label>
+          <input
+            type="date"
+            value={birthDateValue}
+            onChange={(e) => setBirthDateValue(e.target.value)}
+            max={new Date().toISOString().slice(0, 10)}
+          />
+        </div>
+
+        <div className="edit-profile-form__field">
+          <label>{t("profile.gender")}</label>
+          <Dropdown
+            value={genderValue}
+            onChange={(v) => setGenderValue(v as ProfileData["gender"])}
+            options={[
+              { label: t("profile.genderNotSpecified"), value: "NotSpecified" },
+              { label: t("profile.genderMale"), value: "Male" },
+              { label: t("profile.genderFemale"), value: "Female" },
+            ]}
+          />
+        </div>
+
+        <div className="edit-profile-form__field">
+          <label>
+            {t("profile.biography")}{" "}
+            <span className="edit-profile-form__char-count">
+              {biographyValue.length}/{BIOGRAPHY_MAX_LENGTH}
+            </span>
+          </label>
+          <textarea
+            value={biographyValue}
+            onChange={(e) => setBiographyValue(e.target.value)}
+            maxLength={BIOGRAPHY_MAX_LENGTH}
+            rows={4}
+            placeholder={t("profile.biographyPlaceholder")}
           />
         </div>
 

@@ -21,8 +21,9 @@ public record RecentlyWatchedItemDto(MovieListItemDto Movie, decimal? UserRating
 
 public record ProfileDto(
     Guid UserId, string UserName, string? AvatarUrl, string PreferredLanguage, string PreferredTheme,
+    string? FullName, string? Country, DateTime? BirthDate, string Gender, string? Biography,
     List<FavoriteSlotDto> FavoriteMovies,
-    List<RecentlyWatchedItemDto> RecentlyWatched,   // <-- tip değişti
+    List<RecentlyWatchedItemDto> RecentlyWatched,
     List<MovieListItemDto> LikedMovies,
     List<MovieListItemDto> Watchlist,
     List<ReviewSummaryDto> Reviews,
@@ -31,8 +32,8 @@ public record ProfileDto(
     List<FavoriteDirectorSlotDto> FavoriteDirectors,
     List<DirectorListItemDto> LikedDirectors,
     int TotalWatchedCount,
-    decimal? AverageGivenRating,   // <-- yeni
-    int RatingsCount,              // <-- yeni
+    decimal? AverageGivenRating,
+    int RatingsCount,
     DateTime MemberSinceUtc
 );
 
@@ -155,6 +156,7 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
 
         return new ProfileDto(
             user.Id, user.UserName, user.AvatarUrl, user.PreferredLanguage, user.PreferredTheme,
+            user.FullName, user.Country, user.BirthDate, user.Gender.ToString(), user.Biography,
             favorites,
             recentlyWatched,
             liked.Select(l => ToListItem(l.Movie, likedMovieIds, watchlistMovieIds)).ToList(),
@@ -204,7 +206,10 @@ public class SetFavoriteMovieCommandHandler : IRequestHandler<SetFavoriteMovieCo
 }
 
 // ---------- Kullanıcı adı ve profil resmini güncelle ----------
-public record UpdateProfileCommand(Guid UserId, string UserName, string? AvatarUrl) : IRequest;
+public record UpdateProfileCommand(
+    Guid UserId, string UserName, string? AvatarUrl,
+    string? FullName, string? Country, DateTime? BirthDate, string? Gender, string? Biography
+) : IRequest;
 
 public class UpdateProfileCommandValidator : AbstractValidator<UpdateProfileCommand>
 {
@@ -212,6 +217,12 @@ public class UpdateProfileCommandValidator : AbstractValidator<UpdateProfileComm
     {
         RuleFor(x => x.UserName).NotEmpty().MinimumLength(3).MaximumLength(50);
         RuleFor(x => x.AvatarUrl).MaximumLength(500);
+        RuleFor(x => x.FullName).MaximumLength(100);
+        RuleFor(x => x.Country).MaximumLength(100);
+        RuleFor(x => x.Biography).MaximumLength(500);
+        RuleFor(x => x.Gender)
+            .Must(g => string.IsNullOrEmpty(g) || Enum.TryParse<UFMDb.Domain.Enums.Gender>(g, out _))
+            .WithMessage("Geçersiz cinsiyet değeri.");
     }
 }
 
@@ -233,6 +244,14 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand>
         }
 
         user.AvatarUrl = string.IsNullOrWhiteSpace(request.AvatarUrl) ? null : request.AvatarUrl;
+        user.FullName = string.IsNullOrWhiteSpace(request.FullName) ? null : request.FullName;
+        user.Country = string.IsNullOrWhiteSpace(request.Country) ? null : request.Country;
+        user.BirthDate = request.BirthDate;
+        user.Biography = string.IsNullOrWhiteSpace(request.Biography) ? null : request.Biography;
+
+        if (!string.IsNullOrWhiteSpace(request.Gender) && Enum.TryParse<UFMDb.Domain.Enums.Gender>(request.Gender, out var parsedGender))
+            user.Gender = parsedGender;
+
         user.UpdatedAtUtc = DateTime.UtcNow;
         await _context.SaveChangesAsync(ct);
     }

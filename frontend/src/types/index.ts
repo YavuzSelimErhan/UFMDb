@@ -225,6 +225,11 @@ export interface ProfileData {
   avatarUrl: string | null;
   preferredLanguage: string;
   preferredTheme: string;
+  fullName: string | null;
+  country: string | null;
+  birthDate: string | null;
+  gender: "NotSpecified" | "Male" | "Female";
+  biography: string | null;
   favoriteMovies: FavoriteSlot[];
   recentlyWatched: RecentlyWatchedItem[];
   likedMovies: MovieListItem[];

@@ -138,6 +138,33 @@
   outline: none;
   border-color: var(--color-accent);
 }
+.edit-profile-form__field textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color var(--transition-fast);
+}
+.edit-profile-form__field textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.edit-profile-form__char-count {
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  margin-left: auto;
+}
+.edit-profile-form__field label {
+  justify-content: space-between;
+}
 
 .edit-profile-form__actions {
   display: flex;

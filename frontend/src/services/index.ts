@@ -164,8 +164,15 @@ export const profileService = {
     const { data } = await api.get("/profile");
     return data;
   },
-  updateProfile: async (userName: string, avatarUrl: string | null) =>
-    (await api.put("/profile", { userName, avatarUrl })).data,
+  updateProfile: async (payload: {
+    userName: string;
+    avatarUrl: string | null;
+    fullName: string | null;
+    country: string | null;
+    birthDate: string | null;
+    gender: string | null;
+    biography: string | null;
+  }) => (await api.put("/profile", payload)).data,
   setFavoriteSlot: async (slot: number, movieId: string) =>
     (
       await api.put(`/profile/favorites/${slot}`, JSON.stringify(movieId), {

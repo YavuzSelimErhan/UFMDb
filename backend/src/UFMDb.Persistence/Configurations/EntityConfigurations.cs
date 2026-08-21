@@ -77,6 +77,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         b.Property(u => u.Email).IsRequired().HasMaxLength(256);
         b.HasIndex(u => u.Email).IsUnique();
         b.HasIndex(u => u.UserName).IsUnique();
+        b.Property(u => u.FullName).HasMaxLength(100);
+        b.Property(u => u.Country).HasMaxLength(100);
+        b.Property(u => u.Biography).HasMaxLength(500);
     }
 }
 

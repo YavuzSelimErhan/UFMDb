@@ -89,7 +89,9 @@ public class ProfileController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> UpdateProfile(UpdateProfileRequest request)
     {
-        await _mediator.Send(new UpdateProfileCommand(RequireUserId(), request.UserName, request.AvatarUrl));
+        await _mediator.Send(new UpdateProfileCommand(
+            RequireUserId(), request.UserName, request.AvatarUrl,
+            request.FullName, request.Country, request.BirthDate, request.Gender, request.Biography));
         return NoContent();
     }
 
@@ -178,4 +180,7 @@ public class ProfileController : ControllerBase
 }
 
 public record UpdateUserSettingsRequest(string Language, string Theme);
-public record UpdateProfileRequest(string UserName, string? AvatarUrl);
+public record UpdateProfileRequest(
+    string UserName, string? AvatarUrl,
+    string? FullName, string? Country, DateTime? BirthDate, string? Gender, string? Biography
+);
