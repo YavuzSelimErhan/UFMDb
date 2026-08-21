@@ -17,6 +17,7 @@ import ProfilePage from "@/pages/Profile/ProfilePage";
 import AdminPage from "@/pages/Admin/AdminPage";
 import ScreeningLogPage from "@/pages/ScreeningLog/ScreeningLogPage";
 import SessionManager from "@/components/common/SessionManager";
+import EditProfilePage from "@/pages/Profile/EditProfilePage";
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
 
             <Route element={<ProtectedRoute />}>
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/profile/edit" element={<EditProfilePage />} />
               <Route path="/log" element={<ScreeningLogPage />} />
             </Route>
 

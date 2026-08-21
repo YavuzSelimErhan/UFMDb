@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Clock,
   Settings2,
@@ -23,7 +23,6 @@ import Dropdown from "@/components/search/Dropdown";
 import MovieCard from "@/components/movie/MovieCard";
 import FavoritesShowcase from "@/components/profile/FavoritesShowcase";
 import ProfileFilmsTab from "@/components/profile/ProfileFilmsTab";
-import EditProfileForm from "@/components/profile/EditProfileForm";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileContentTabs from "@/components/profile/ProfileContentTabs";
 import {
@@ -45,7 +44,7 @@ export default function ProfilePage() {
   const { t, i18n } = useTranslation();
   const dispatch = useAppDispatch();
   const theme = useAppSelector((s) => s.ui.theme);
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const navigate = useNavigate();
   const [tab, setTab] = useState<ProfileTab>("profile");
 
   const {
@@ -127,7 +126,7 @@ export default function ProfilePage() {
     <div className="container profile-page">
       <ProfileHeader
         profile={profile}
-        onEditClick={() => setIsEditingProfile(true)}
+        onEditClick={() => navigate("/profile/edit")}
       />
 
       <nav className="profile-page__toptabs">
@@ -228,19 +227,6 @@ export default function ProfilePage() {
           </section>
         )}
       </div>
-
-      {isEditingProfile && (
-        <EditProfileForm
-          userName={profile.userName}
-          avatarUrl={profile.avatarUrl}
-          fullName={profile.fullName}
-          country={profile.country}
-          birthDate={profile.birthDate}
-          gender={profile.gender}
-          biography={profile.biography}
-          onClose={() => setIsEditingProfile(false)}
-        />
-      )}
     </div>
   );
 }
