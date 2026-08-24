@@ -500,55 +500,79 @@ await using (var db = new ApplicationDbContext(dbOptions))
     Console.WriteLine($"{syncedCount} ülke senkronize edildi.\n");
 }
 
-// ---------------- 2. Discover ile film ID listesini topla (decade bazlı) ----------------
-var decades = new List<(string Label, int StartYear, int EndYear, int TargetCount, int MinVotes)>
+// ---------------- 2. Mevcut filmleri kontrol et, sadece eksikleri tara ----------------
+Console.WriteLine("Mevcut filmler kontrol ediliyor...");
+List<(int TmdbId, int ReleaseYear)> existingMovies;
+await using (var db = new ApplicationDbContext(dbOptions))
 {
-    ("1900-1910", 1900, 1909, 3,    10),
-    ("1910-1920", 1910, 1919, 5,    15),
-    ("1920-1930", 1920, 1929, 20,   20),
-    ("1930-1940", 1930, 1939, 50,   30),
-    ("1940-1950", 1940, 1949, 80,   50),
-    ("1950-1960", 1950, 1959, 120,  75),
-    ("1960-1970", 1960, 1969, 180,  100),
-    ("1970-1980", 1970, 1979, 250,  150),
-    ("1980-1990", 1980, 1989, 350,  200),
-    ("1990-2000", 1990, 1999, 500,  300),
-    ("2000-2010", 2000, 2009, 700,  500),
-    ("2010-2020", 2010, 2019, 1250, 800),
-    ("2020-2026", 2020, 2026, 642,  300),
+    existingMovies = await db.Movies.Where(m => m.TmdbId != null)
+        .Select(m => new ValueTuple<int, int>(m.TmdbId!.Value, m.ReleaseYear))
+        .ToListAsync(cts.Token);
+}
+var existingTmdbIds = existingMovies.Select(m => m.TmdbId).ToHashSet();
+Console.WriteLine($"Veritabanında {existingMovies.Count} film zaten mevcut.\n");
+
+var decades = new List<(string Label, int StartYear, int EndYear, int TargetCount)>
+{
+    ("1900-1920", 1900, 1919, 15),
+    ("1920-1930", 1920, 1929, 35),
+    ("1930-1940", 1930, 1939, 60),
+    ("1940-1950", 1940, 1949, 100),
+    ("1950-1960", 1950, 1959, 180),
+    ("1960-1970", 1960, 1969, 300),
+    ("1970-1980", 1970, 1979, 450),
+    ("1980-1990", 1980, 1989, 700),
+    ("1990-2000", 1990, 1999, 1200),
+    ("2000-2010", 2000, 2009, 900),
+    ("2010-2020", 2010, 2019, 1000),
+    ("2020-2026", 2020, 2026, 500),
 };
 
-Console.WriteLine($"Hedef: {decades.Sum(d => d.TargetCount)} film, {decades.Count} decade'e dağıtılmış.\n");
 var movieIds = new List<int>();
 
 foreach (var decade in decades)
 {
     if (cts.IsCancellationRequested) break;
 
-    var decadeIds = new List<int>();
+    var existingInDecade = existingMovies.Count(m => m.ReleaseYear >= decade.StartYear && m.ReleaseYear <= decade.EndYear);
+    var remaining = decade.TargetCount - existingInDecade;
+
+    if (remaining <= 0)
+    {
+        Console.WriteLine($"{decade.Label}: zaten {existingInDecade}/{decade.TargetCount} film var, atlanıyor.");
+        continue;
+    }
+
+    var newIds = new List<int>();
     var page = 1;
     var gte = $"{decade.StartYear}-01-01";
     var lte = $"{decade.EndYear}-12-31";
 
-    while (decadeIds.Count < decade.TargetCount && !cts.IsCancellationRequested)
+    while (newIds.Count < remaining && !cts.IsCancellationRequested)
     {
-        var discoverResult = await tmdb.DiscoverMoviesAsync(page, decade.MinVotes, cts.Token, gte, lte);
+        // Oy sayısına göre sıralıyoruz (en çok bilinen/oylanan filmler önce gelsin diye).
+        var discoverResult = await tmdb.DiscoverMoviesAsync(page, 1, cts.Token, gte, lte, "vote_count.desc");
         if (discoverResult.Results.Count == 0) break;
 
-        decadeIds.AddRange(discoverResult.Results.Select(r => r.Id));
-        page++;
+        foreach (var r in discoverResult.Results)
+        {
+            if (existingTmdbIds.Contains(r.Id) || newIds.Contains(r.Id)) continue;
+            newIds.Add(r.Id);
+            if (newIds.Count >= remaining) break;
+        }
 
+        page++;
         if (page > discoverResult.TotalPages) break;
         await Task.Delay(150, cts.Token);
     }
 
-    decadeIds = decadeIds.Distinct().Take(decade.TargetCount).ToList();
-    movieIds.AddRange(decadeIds);
-    Console.WriteLine($"{decade.Label}: {decadeIds.Count}/{decade.TargetCount} film bulundu (min. {decade.MinVotes} oy).");
+    movieIds.AddRange(newIds);
+    foreach (var nid in newIds) existingTmdbIds.Add(nid);
+    Console.WriteLine($"{decade.Label}: {existingInDecade} zaten vardı, {newIds.Count} yeni bulundu (hedef {decade.TargetCount}).");
 }
 
 movieIds = movieIds.Distinct().ToList();
-Console.WriteLine($"\nToplam {movieIds.Count} film ID'si toplandı.\n");
+Console.WriteLine($"\nToplam {movieIds.Count} yeni film ID'si toplandı.\n");
 
 // ---------------- 3. Her film için detay + cast çek, upsert et ----------------
 int processed = 0, created = 0, updated = 0, failed = 0;

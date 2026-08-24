@@ -19,7 +19,7 @@ public class MovieConfiguration : IEntityTypeConfiguration<Movie>
         b.HasIndex(m => m.ReleaseYear);
         // TMDB senkronizasyonu için: aynı filmi tekrar tekrar upsert edebilmek amacıyla unique.
         // Filtrelenmiş index: TmdbId NULL olan (elle eklenmiş) filmler bu kısıtlamadan etkilenmez.
-        b.HasIndex(m => m.TmdbId).IsUnique().HasFilter("[TmdbId] IS NOT NULL");
+        b.HasIndex(m => m.TmdbId).IsUnique().HasFilter("\"TmdbId\" IS NOT NULL");
     }
 }
 
@@ -30,7 +30,7 @@ public class GenreConfiguration : IEntityTypeConfiguration<Genre>
         b.ToTable("Genres");
         b.Property(g => g.Name).IsRequired().HasMaxLength(100);
         b.HasIndex(g => g.Name).IsUnique();
-        b.HasIndex(g => g.TmdbId).IsUnique().HasFilter("[TmdbId] IS NOT NULL");
+        b.HasIndex(g => g.TmdbId).IsUnique().HasFilter("\"TmdbId\" IS NOT NULL");
     }
 }
 
@@ -52,7 +52,7 @@ public class ActorConfiguration : IEntityTypeConfiguration<Actor>
         b.ToTable("Actors");
         b.Property(a => a.FullName).IsRequired().HasMaxLength(200);
         b.HasIndex(a => a.FullName);
-        b.HasIndex(a => a.TmdbId).IsUnique().HasFilter("[TmdbId] IS NOT NULL");
+        b.HasIndex(a => a.TmdbId).IsUnique().HasFilter("\"TmdbId\" IS NOT NULL");
     }
 }
 
@@ -198,7 +198,7 @@ public class DirectorConfiguration : IEntityTypeConfiguration<Director>
         b.ToTable("Directors");
         b.Property(d => d.FullName).IsRequired().HasMaxLength(200);
         b.HasIndex(d => d.FullName);
-        b.HasIndex(d => d.TmdbId).IsUnique().HasFilter("[TmdbId] IS NOT NULL");
+        b.HasIndex(d => d.TmdbId).IsUnique().HasFilter("\"TmdbId\" IS NOT NULL");
     }
 }
 

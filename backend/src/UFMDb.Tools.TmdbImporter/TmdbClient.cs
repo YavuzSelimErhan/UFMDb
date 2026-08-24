@@ -43,12 +43,12 @@ public class TmdbClient
     int minVoteCount,
     CancellationToken ct,
     string? releaseDateGte = null,
-    string? releaseDateLte = null)
+    string? releaseDateLte = null,
+    string sortBy = "vote_average.desc")
     {
-        var url = $"discover/movie?api_key={_apiKey}&language=en-US&sort_by=vote_average.desc" +
+        var url = $"discover/movie?api_key={_apiKey}&language=en-US&sort_by={sortBy}" +
                   $"&include_adult=false&include_video=false&page={page}&vote_count.gte={minVoteCount}";
 
-        // Decade bazlı taramada belirli bir yıl aralığına sıkıştırmak için kullanılır.
         if (!string.IsNullOrEmpty(releaseDateGte))
             url += $"&primary_release_date.gte={releaseDateGte}";
         if (!string.IsNullOrEmpty(releaseDateLte))
