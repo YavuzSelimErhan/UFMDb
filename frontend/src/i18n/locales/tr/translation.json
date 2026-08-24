@@ -185,12 +185,17 @@
     "filmsFilterRated": "Puanlı",
     "filmsFilterUnrated": "Puansız",
     "filmsSort": {
-      "watchedDesc": "Son İzlenen",
-      "watchedAsc": "İlk İzlenen",
-      "ratingDesc": "En Yüksek Puan",
-      "ratingAsc": "En Düşük Puan",
-      "titleAsc": "İsme Göre"
+      "watchedDesc": "Yakın zamanda izlenen",
+      "watchedAsc": "İzleme tarihi (eski)",
+      "releaseDesc": "Çıkış tarihi (yeni)",
+      "releaseAsc": "Çıkış tarihi (eski)",
+      "myRatingDesc": "Puanım (yüksekten düşüğe)",
+      "myRatingAsc": "Puanım (düşükten yükseğe)",
+      "filmRatingDesc": "Film puanı (yüksekten düşüğe)",
+      "filmRatingAsc": "Film puanı (düşükten yükseğe)",
+      "titleAsc": "Başlık (A-Z)"
     },
+    "editRating": "Puanı düzenle",
     "statFilms": "Film",
     "statReviews": "Yorum",
     "statAverage": "Ortalama",

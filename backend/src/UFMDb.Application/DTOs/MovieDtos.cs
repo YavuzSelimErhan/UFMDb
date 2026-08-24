@@ -1,17 +1,11 @@
 namespace UFMDb.Application.DTOs;
 
 public record MovieListItemDto(
-    Guid Id,
-    string Title,
-    int ReleaseYear,
-    string PosterUrl,
-    double AverageRating,
-    int RatingCount,
-    List<string> Genres,
-    string BackdropUrl,
-    string Overview,
-    bool IsInWatchlistByCurrentUser = false,
-    bool IsLikedByCurrentUser = false
+    Guid Id, string Title, int ReleaseYear, string PosterUrl,
+    decimal AverageRating, int RatingCount, List<string> Genres,
+    string BackdropUrl, string Overview,
+    bool IsInWatchlistByCurrentUser, bool IsLikedByCurrentUser,
+    DateTime ReleaseDate
 );
 
 public record MovieDirectorDto(Guid Id, string FullName, string PhotoUrl);

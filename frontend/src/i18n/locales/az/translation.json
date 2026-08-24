@@ -185,12 +185,17 @@
     "filmsFilterRated": "Ballı",
     "filmsFilterUnrated": "Balsız",
     "filmsSort": {
-      "watchedDesc": "Son İzlənən",
-      "watchedAsc": "İlk İzlənən",
-      "ratingDesc": "Ən Yüksək Bal",
-      "ratingAsc": "Ən Aşağı Bal",
-      "titleAsc": "Ada Görə"
+      "watchedDesc": "Yaxınlarda izlənən",
+      "watchedAsc": "İzlənmə tarixi (köhnə)",
+      "releaseDesc": "Çıxış tarixi (yeni)",
+      "releaseAsc": "Çıxış tarixi (köhnə)",
+      "myRatingDesc": "Reytinqim (yüksəkdən aşağıya)",
+      "myRatingAsc": "Reytinqim (aşağıdan yüksəyə)",
+      "filmRatingDesc": "Film reytinqi (yüksəkdən aşağıya)",
+      "filmRatingAsc": "Film reytinqi (aşağıdan yüksəyə)",
+      "titleAsc": "Başlıq (A-Z)"
     },
+    "editRating": "Reytinqi düzəlt",
     "statFilms": "Film",
     "statReviews": "Rəy",
     "statAverage": "Orta",

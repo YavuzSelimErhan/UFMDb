@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.Common.Services;
@@ -171,9 +172,9 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
     }
 
     private static MovieListItemDto ToListItem(Movie m, HashSet<Guid> likedIds, HashSet<Guid> watchlistIds) => new(
-        m.Id, m.Title, m.ReleaseYear, m.PosterUrl, m.AverageRating, m.RatingCount,
-        m.MovieGenres.Select(g => g.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
-        watchlistIds.Contains(m.Id), likedIds.Contains(m.Id));
+    m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
+    m.MovieGenres.Select(g => g.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
+    watchlistIds.Contains(m.Id), likedIds.Contains(m.Id), m.ReleaseDate);
 }
 
 // ---------- Favori film slotunu güncelle (1-4) ----------
@@ -422,8 +423,12 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
         perMovie = request.SortBy switch
         {
             "watched-asc" => perMovie.OrderBy(w => w.WatchedAtUtc),
+            "release-desc" => perMovie.OrderByDescending(w => w.Movie.ReleaseDate),
+            "release-asc" => perMovie.OrderBy(w => w.Movie.ReleaseDate),
             "rating-desc" => perMovie.OrderByDescending(w => hasRatingLookup.GetValueOrDefault(w.MovieId, -1)),
             "rating-asc" => perMovie.OrderBy(w => hasRatingLookup.GetValueOrDefault(w.MovieId, -1)),
+            "movie-rating-desc" => perMovie.OrderByDescending(w => w.Movie.AverageRating),
+            "movie-rating-asc" => perMovie.OrderBy(w => w.Movie.AverageRating),
             "title-asc" => perMovie.OrderBy(w => w.Movie.Title),
             _ => perMovie.OrderByDescending(w => w.WatchedAtUtc)
         };
@@ -433,15 +438,16 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
         var page = allSorted.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
         var items = page.Select(w => new WatchedMovieDto(
-            w.Id,
-            new MovieListItemDto(
-                w.Movie.Id, w.Movie.Title, w.Movie.ReleaseYear, w.Movie.PosterUrl,
-                w.Movie.AverageRating, w.Movie.RatingCount,
-                w.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
-                w.Movie.BackdropUrl, w.Movie.Overview, false),
-                w.WatchedAtUtc,
-                myRatingsLookup.TryGetValue(w.MovieId, out var r) ? r : (decimal?)null
-                    )).ToList();
+    w.Id,
+    new MovieListItemDto(
+        w.Movie.Id, w.Movie.Title, w.Movie.ReleaseYear, w.Movie.PosterUrl,
+        (decimal)w.Movie.AverageRating, w.Movie.RatingCount,
+        w.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
+        w.Movie.BackdropUrl, w.Movie.Overview,
+        false, false, w.Movie.ReleaseDate),
+    w.WatchedAtUtc,
+    myRatingsLookup.TryGetValue(w.MovieId, out var r) ? r : (decimal?)null
+)).ToList();
 
         return new PagedResult<WatchedMovieDto>(items, totalCount, request.Page, request.PageSize);
     }

@@ -186,11 +186,16 @@
     "filmsFilterUnrated": "Неоценённые",
     "filmsSort": {
       "watchedDesc": "Недавно просмотренные",
-      "watchedAsc": "Сначала просмотренные",
-      "ratingDesc": "Высокий рейтинг",
-      "ratingAsc": "Низкий рейтинг",
-      "titleAsc": "По названию"
+      "watchedAsc": "Просмотрено (старые)",
+      "releaseDesc": "Дата выхода (новые)",
+      "releaseAsc": "Дата выхода (старые)",
+      "myRatingDesc": "Моя оценка (по убыванию)",
+      "myRatingAsc": "Моя оценка (по возрастанию)",
+      "filmRatingDesc": "Оценка фильма (по убыванию)",
+      "filmRatingAsc": "Оценка фильма (по возрастанию)",
+      "titleAsc": "Название (А-Я)"
     },
+    "editRating": "Изменить оценку",
     "statFilms": "Фильмов",
     "statReviews": "Рецензий",
     "statAverage": "Средняя оценка",

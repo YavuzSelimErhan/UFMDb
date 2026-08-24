@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Star, Pencil, Trash2, Calendar, Check, X } from "lucide-react";
+import { Star, Pencil, Trash2, Check, X } from "lucide-react";
 import { profileService, screeningLogService } from "@/services";
 import Dropdown from "@/components/search/Dropdown";
 import Pagination from "@/components/common/Pagination";
@@ -13,13 +13,16 @@ import "./ProfileFilmsTab.css";
 const SORT_OPTIONS = [
   { label: "watchedDesc", value: "watched-desc" },
   { label: "watchedAsc", value: "watched-asc" },
-  { label: "ratingDesc", value: "rating-desc" },
-  { label: "ratingAsc", value: "rating-asc" },
+  { label: "releaseDesc", value: "release-desc" },
+  { label: "releaseAsc", value: "release-asc" },
+  { label: "myRatingDesc", value: "rating-desc" },
+  { label: "myRatingAsc", value: "rating-asc" },
+  { label: "filmRatingDesc", value: "movie-rating-desc" },
+  { label: "filmRatingAsc", value: "movie-rating-asc" },
   { label: "titleAsc", value: "title-asc" },
 ];
 
 const RATING_STEPS = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
-
 const RATING_OPTIONS = [
   { label: "profile.notRated", value: "" },
   ...RATING_STEPS.map((v) => ({ label: v.toFixed(1), value: String(v) })),
@@ -32,10 +35,23 @@ function monthLabel(dateStr: string, locale: string) {
   });
 }
 
-function groupByMonth(items: WatchedMovie[], locale: string) {
+function yearLabel(dateStr: string | undefined) {
+  if (!dateStr) return "—";
+  return new Date(dateStr).getFullYear().toString();
+}
+
+// Watched-date sırasında aya göre, çıkış tarihi sırasında yıla göre grupla.
+// Puan/başlık sıralamalarında gruplama yapılmaz, tek akış olarak gösterilir.
+function groupEntries(items: WatchedMovie[], sortBy: string, locale: string) {
+  const isWatchedSort = sortBy === "watched-desc" || sortBy === "watched-asc";
+  const isReleaseSort = sortBy === "release-desc" || sortBy === "release-asc";
+  if (!isWatchedSort && !isReleaseSort) return null;
+
   const groups: { label: string; items: WatchedMovie[] }[] = [];
   for (const item of items) {
-    const label = monthLabel(item.watchedAtUtc, locale);
+    const label = isWatchedSort
+      ? monthLabel(item.watchedAtUtc, locale)
+      : yearLabel(item.movie.releaseDate);
     const last = groups[groups.length - 1];
     if (last && last.label === label) last.items.push(item);
     else groups.push({ label, items: [item] });
@@ -43,16 +59,16 @@ function groupByMonth(items: WatchedMovie[], locale: string) {
   return groups;
 }
 
+type PanelMode = "none" | "edit" | "delete";
+
 export default function ProfileFilmsTab() {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState("watched-desc");
   const [hasRating, setHasRating] = useState<string>("");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(
-    null,
-  );
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [panelMode, setPanelMode] = useState<PanelMode>("none");
 
   const { data, isLoading } = useQuery({
     queryKey: ["watched-films", page, sortBy, hasRating],
@@ -78,7 +94,7 @@ export default function ProfileFilmsTab() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["watched-films"] });
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
-      setEditingId(null);
+      closePanel();
     },
   });
 
@@ -87,41 +103,86 @@ export default function ProfileFilmsTab() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["watched-films"] });
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
-      setConfirmingDeleteId(null);
+      closePanel();
     },
   });
 
-  const canGroupByMonth = sortBy === "watched-desc" || sortBy === "watched-asc";
-  const groups =
-    data && canGroupByMonth ? groupByMonth(data.items, i18n.language) : null;
+  function closePanel() {
+    setActiveId(null);
+    setPanelMode("none");
+  }
 
-  const renderRow = (entry: WatchedMovie) => {
-    const isEditing = editingId === entry.id;
-    const isConfirmingDelete = confirmingDeleteId === entry.id;
+  function openPanel(id: string, mode: PanelMode) {
+    setActiveId(id);
+    setPanelMode(mode);
+  }
+
+  const groups = data ? groupEntries(data.items, sortBy, i18n.language) : null;
+
+  const renderCard = (entry: WatchedMovie) => {
+    const isActive = activeId === entry.id;
+    const isEditing = isActive && panelMode === "edit";
+    const isDeleting = isActive && panelMode === "delete";
 
     return (
-      <div key={entry.id} className="films-tab__row card">
+      <div
+        key={entry.id}
+        className={`films-grid__card${isActive ? " films-grid__card--active" : ""}`}
+      >
         <Link
           to={`/movies/${entry.movie.id}`}
-          className="films-tab__poster-link"
+          className="films-grid__poster-wrap"
+          tabIndex={isActive ? -1 : 0}
         >
           <img
             src={entry.movie.posterUrl}
             alt={entry.movie.title}
-            className="films-tab__poster"
+            className="films-grid__poster"
           />
         </Link>
 
-        <Link to={`/movies/${entry.movie.id}`} className="films-tab__info">
-          <p className="films-tab__title">{entry.movie.title}</p>
-          <p className="films-tab__date text-muted">
-            <Calendar size={12} />
-            {new Date(entry.watchedAtUtc).toLocaleDateString()}
-          </p>
-        </Link>
+        <div className="films-grid__scrim" />
 
-        {isEditing ? (
-          <div className="films-tab__edit">
+        {entry.userRating !== null && !isActive && (
+          <span className="films-grid__rating">
+            <Star size={11} fill="currentColor" />
+            {entry.userRating.toFixed(1)}
+          </span>
+        )}
+
+        <div className="films-grid__meta">
+          <p className="films-grid__title">{entry.movie.title}</p>
+          <p className="films-grid__date">
+            {new Date(entry.watchedAtUtc).toLocaleDateString(i18n.language, {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
+          </p>
+        </div>
+
+        {!isActive && (
+          <div className="films-grid__hover-actions">
+            <button
+              className="films-grid__icon-btn"
+              onClick={() => openPanel(entry.id, "edit")}
+              aria-label={t("common.edit")}
+            >
+              <Pencil size={13} />
+            </button>
+            <button
+              className="films-grid__icon-btn films-grid__icon-btn--danger"
+              onClick={() => openPanel(entry.id, "delete")}
+              aria-label={t("common.delete")}
+            >
+              <Trash2 size={13} />
+            </button>
+          </div>
+        )}
+
+        {isEditing && (
+          <div className="films-grid__panel">
+            <p className="films-grid__panel-title">{t("profile.editRating")}</p>
             <Dropdown
               value={entry.userRating != null ? String(entry.userRating) : ""}
               onChange={(v) => {
@@ -138,62 +199,38 @@ export default function ProfileFilmsTab() {
               }))}
             />
             <button
-              className="films-tab__icon-btn"
-              onClick={() => setEditingId(null)}
+              className="films-grid__panel-close"
+              onClick={closePanel}
               aria-label={t("common.cancel")}
             >
               <X size={14} />
             </button>
           </div>
-        ) : isConfirmingDelete ? (
-          <div className="films-tab__confirm-delete">
-            <span>{t("profile.confirmDeleteScreening")}</span>
-            <button
-              className="films-tab__icon-btn films-tab__icon-btn--danger"
-              disabled={deleteMutation.isPending}
-              onClick={() => deleteMutation.mutate(entry.id)}
-              aria-label={t("common.confirm")}
-            >
-              <Check size={14} />
-            </button>
-            <button
-              className="films-tab__icon-btn"
-              onClick={() => setConfirmingDeleteId(null)}
-              aria-label={t("common.cancel")}
-            >
-              <X size={14} />
-            </button>
-          </div>
-        ) : (
-          <>
-            {entry.userRating !== null ? (
-              <span className="films-tab__rating">
-                <Star size={13} fill="currentColor" />{" "}
-                {entry.userRating.toFixed(1)}
-              </span>
-            ) : (
-              <span className="films-tab__unrated text-muted">
-                {t("profile.notRated")}
-              </span>
-            )}
+        )}
 
-            <div className="films-tab__actions">
+        {isDeleting && (
+          <div className="films-grid__panel films-grid__panel--danger">
+            <p className="films-grid__panel-title">
+              {t("profile.confirmDeleteScreening")}
+            </p>
+            <div className="films-grid__panel-row">
               <button
-                className="films-tab__icon-btn"
-                onClick={() => setEditingId(entry.id)}
-                aria-label={t("common.edit")}
+                className="films-grid__icon-btn films-grid__icon-btn--danger"
+                disabled={deleteMutation.isPending}
+                onClick={() => deleteMutation.mutate(entry.id)}
+                aria-label={t("common.confirm")}
               >
-                <Pencil size={14} />
+                <Check size={14} />
               </button>
               <button
-                className="films-tab__icon-btn films-tab__icon-btn--danger"
-                onClick={() => setConfirmingDeleteId(entry.id)}
-                aria-label={t("common.delete")}
+                className="films-grid__icon-btn"
+                onClick={closePanel}
+                aria-label={t("common.cancel")}
               >
-                <Trash2 size={14} />
+                <X size={14} />
               </button>
             </div>
-          </>
+          </div>
         )}
       </div>
     );
@@ -235,16 +272,16 @@ export default function ProfileFilmsTab() {
         />
       )}
 
-      <div className="films-tab__list">
-        {groups
-          ? groups.map((group) => (
-              <div key={group.label} className="films-tab__group">
-                <p className="films-tab__group-label">{group.label}</p>
-                {group.items.map(renderRow)}
-              </div>
-            ))
-          : data?.items.map(renderRow)}
-      </div>
+      {groups
+        ? groups.map((group) => (
+            <div key={group.label} className="films-grid__group">
+              <p className="films-grid__group-label">{group.label}</p>
+              <div className="films-grid">{group.items.map(renderCard)}</div>
+            </div>
+          ))
+        : data && (
+            <div className="films-grid">{data.items.map(renderCard)}</div>
+          )}
 
       {data && data.totalPages > 1 && (
         <Pagination

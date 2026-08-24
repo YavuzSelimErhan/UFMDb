@@ -185,12 +185,17 @@
     "filmsFilterRated": "Avaliados",
     "filmsFilterUnrated": "Não avaliados",
     "filmsSort": {
-      "watchedDesc": "Assistidos recentemente",
-      "watchedAsc": "Assistidos primeiro",
-      "ratingDesc": "Maior avaliação",
-      "ratingAsc": "Menor avaliação",
-      "titleAsc": "Por título"
+      "watchedDesc": "Vistos recentemente",
+      "watchedAsc": "Vistos (mais antigos)",
+      "releaseDesc": "Data de lançamento (mais recente)",
+      "releaseAsc": "Data de lançamento (mais antiga)",
+      "myRatingDesc": "Minha nota (maior-menor)",
+      "myRatingAsc": "Minha nota (menor-maior)",
+      "filmRatingDesc": "Nota do filme (maior-menor)",
+      "filmRatingAsc": "Nota do filme (menor-maior)",
+      "titleAsc": "Título (A-Z)"
     },
+    "editRating": "Editar nota",
     "statFilms": "Filmes",
     "statReviews": "Críticas",
     "statAverage": "Média",

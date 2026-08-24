@@ -186,11 +186,16 @@
     "filmsFilterUnrated": "Non votati",
     "filmsSort": {
       "watchedDesc": "Visti di recente",
-      "watchedAsc": "Visti per primi",
-      "ratingDesc": "Voto più alto",
-      "ratingAsc": "Voto più basso",
-      "titleAsc": "Per titolo"
+      "watchedAsc": "Visti (più vecchi)",
+      "releaseDesc": "Data di uscita (più recente)",
+      "releaseAsc": "Data di uscita (più vecchia)",
+      "myRatingDesc": "Il mio voto (alto-basso)",
+      "myRatingAsc": "Il mio voto (basso-alto)",
+      "filmRatingDesc": "Voto del film (alto-basso)",
+      "filmRatingAsc": "Voto del film (basso-alto)",
+      "titleAsc": "Titolo (A-Z)"
     },
+    "editRating": "Modifica voto",
     "statFilms": "Film",
     "statReviews": "Recensioni",
     "statAverage": "Media",

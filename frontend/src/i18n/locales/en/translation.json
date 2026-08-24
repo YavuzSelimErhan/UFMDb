@@ -185,12 +185,17 @@
     "filmsFilterRated": "Rated",
     "filmsFilterUnrated": "Unrated",
     "filmsSort": {
-      "watchedDesc": "Recently Watched",
-      "watchedAsc": "First Watched",
-      "ratingDesc": "Highest Rated",
-      "ratingAsc": "Lowest Rated",
-      "titleAsc": "By Title"
+      "watchedDesc": "Recently watched",
+      "watchedAsc": "Watched (oldest)",
+      "releaseDesc": "Release date (newest)",
+      "releaseAsc": "Release date (oldest)",
+      "myRatingDesc": "My rating (high to low)",
+      "myRatingAsc": "My rating (low to high)",
+      "filmRatingDesc": "Film rating (high to low)",
+      "filmRatingAsc": "Film rating (low to high)",
+      "titleAsc": "Title (A–Z)"
     },
+    "editRating": "Edit rating",
     "statFilms": "Films",
     "statReviews": "Reviews",
     "statAverage": "Average",
