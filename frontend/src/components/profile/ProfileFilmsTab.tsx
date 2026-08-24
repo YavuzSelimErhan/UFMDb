@@ -1,10 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
+import {
+  Star,
+  Trash2,
+  X,
+  Check,
+  LayoutGrid,
+  LayoutList,
+  ArrowUpDown,
+} from "lucide-react";
 import { profileService, movieService } from "@/services";
+import Dropdown from "@/components/search/Dropdown";
 import type { WatchedMovie } from "@/types";
 import "./ProfileFilmsTab.css";
 
 // VARSAYIM 1: PagedResult<T> = { items: T[]; totalCount: number; page: number; pageSize: number; totalPages: number }
-//   (backend'deki PagedResult<T> record'unun camelCase JSON karşılığı)
 // VARSAYIM 2: movieService.upsertRating(movieId: string, value: number) mevcut ve MovieRating'i senkronize ediyor
 // VARSAYIM 3: profileService.getWatchedFilms artık { page, pageSize, sortBy, hasRating } parametreleri alıyor
 
@@ -58,11 +67,10 @@ function StarRow({
     <div className="star-row" onMouseLeave={() => setHoverValue(null)}>
       {[1, 2, 3, 4, 5].map((i) => {
         const filled = displayValue >= i;
-        const half = !filled && displayValue >= i - 0.5;
         return (
           <span
             key={i}
-            className={`star${filled ? " star-filled" : ""}${half ? " star-half" : ""}${
+            className={`star${filled ? " star-filled" : ""}${
               interactive ? " star-interactive" : ""
             }`}
             onClick={interactive ? () => onRate?.(i) : undefined}
@@ -70,7 +78,7 @@ function StarRow({
             role={interactive ? "button" : undefined}
             aria-label={interactive ? `${i} yıldız ver` : undefined}
           >
-            {filled ? "★" : half ? "⯨" : "☆"}
+            <Star size={16} fill={filled ? "currentColor" : "none"} />
           </span>
         );
       })}
@@ -100,7 +108,7 @@ function MovieCard({
   const { movie, userRating, watchedAtUtc } = entry;
 
   return (
-    <div className="movie-card">
+    <div className="movie-card card">
       {movie.posterUrl ? (
         <img
           className="movie-card-poster"
@@ -120,7 +128,9 @@ function MovieCard({
         <div className="movie-card-subrow">
           <p className="movie-card-date">{formatDate(watchedAtUtc)}</p>
           {userRating !== null && (
-            <span className="movie-card-rating">★ {userRating.toFixed(1)}</span>
+            <span className="movie-card-rating">
+              <Star size={11} fill="currentColor" /> {userRating.toFixed(1)}
+            </span>
           )}
         </div>
       </div>
@@ -133,15 +143,15 @@ function MovieCard({
             onClick={() => onOpenPanel("rate")}
             aria-label="Puanla"
           >
-            <i className="ti ti-star" aria-hidden="true" />
+            <Star size={13} />
           </button>
           <button
             type="button"
-            className="action-btn"
+            className="action-btn action-btn--danger"
             onClick={() => onOpenPanel("delete")}
             aria-label="Filmlerimden çıkar"
           >
-            <i className="ti ti-trash" aria-hidden="true" />
+            <Trash2 size={13} />
           </button>
         </div>
       )}
@@ -160,7 +170,7 @@ function MovieCard({
             onClick={onClosePanel}
             aria-label="Kapat"
           >
-            <i className="ti ti-x" aria-hidden="true" />
+            <X size={12} />
           </button>
         </div>
       )}
@@ -178,7 +188,7 @@ function MovieCard({
               disabled={isSaving}
               aria-label="Çıkarmayı onayla"
             >
-              <i className="ti ti-check" aria-hidden="true" />
+              <Check size={14} />
             </button>
             <button
               type="button"
@@ -186,7 +196,7 @@ function MovieCard({
               onClick={onClosePanel}
               aria-label="Vazgeç"
             >
-              <i className="ti ti-x" aria-hidden="true" />
+              <X size={14} />
             </button>
           </div>
         </div>
@@ -200,7 +210,6 @@ export default function ProfileFilmsTab() {
   const [counts, setCounts] = useState({ all: 0, rated: 0, unrated: 0 });
   const [filter, setFilter] = useState<FilterType>("all");
   const [sortBy, setSortBy] = useState("watched-desc");
-  const [sortOpen, setSortOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -331,7 +340,7 @@ export default function ProfileFilmsTab() {
             className={`pill${filter === "all" ? " pill-active" : ""}`}
             onClick={() => setFilter("all")}
           >
-            Tümü <span className="pill-count">· {counts.all}</span>
+            Tümü <span className="pill-count">{counts.all}</span>
           </button>
           <button
             type="button"
@@ -340,7 +349,7 @@ export default function ProfileFilmsTab() {
             className={`pill${filter === "rated" ? " pill-active" : ""}`}
             onClick={() => setFilter("rated")}
           >
-            Puanlı <span className="pill-count">· {counts.rated}</span>
+            Puanlı <span className="pill-count">{counts.rated}</span>
           </button>
           <button
             type="button"
@@ -349,41 +358,17 @@ export default function ProfileFilmsTab() {
             className={`pill${filter === "unrated" ? " pill-active" : ""}`}
             onClick={() => setFilter("unrated")}
           >
-            Puansız <span className="pill-count">· {counts.unrated}</span>
+            Puansız <span className="pill-count">{counts.unrated}</span>
           </button>
         </div>
 
         <div className="toolbar-right">
-          <div className="sort-wrap">
-            <button
-              type="button"
-              className="sort-btn"
-              onClick={() => setSortOpen((v) => !v)}
-              aria-expanded={sortOpen}
-            >
-              <i className="ti ti-arrows-sort" aria-hidden="true" />
-              {SORT_OPTIONS.find((o) => o.value === sortBy)?.label}
-              <i className="ti ti-chevron-down" aria-hidden="true" />
-            </button>
-            {sortOpen && (
-              <div className="sort-menu" role="menu">
-                {SORT_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    role="menuitem"
-                    className={`sort-option${opt.value === sortBy ? " sort-option-active" : ""}`}
-                    onClick={() => {
-                      setSortBy(opt.value);
-                      setSortOpen(false);
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <Dropdown
+            icon={<ArrowUpDown size={14} />}
+            value={sortBy}
+            options={SORT_OPTIONS}
+            onChange={setSortBy}
+          />
 
           <div className="view-toggle" role="group" aria-label="Görünüm seçimi">
             <button
@@ -393,7 +378,7 @@ export default function ProfileFilmsTab() {
               aria-label="Izgara görünümü"
               aria-pressed={viewMode === "grid"}
             >
-              <i className="ti ti-layout-grid" aria-hidden="true" />
+              <LayoutGrid size={14} />
             </button>
             <button
               type="button"
@@ -402,7 +387,7 @@ export default function ProfileFilmsTab() {
               aria-label="Serbest görünüm"
               aria-pressed={viewMode === "masonry"}
             >
-              <i className="ti ti-grid-dots" aria-hidden="true" />
+              <LayoutList size={14} />
             </button>
           </div>
         </div>
@@ -444,7 +429,7 @@ export default function ProfileFilmsTab() {
             <div className="load-more-wrap">
               <button
                 type="button"
-                className="load-more-btn"
+                className="load-more-btn btn-secondary"
                 onClick={() => loadPage(page + 1, false)}
                 disabled={isLoadingMore}
               >
