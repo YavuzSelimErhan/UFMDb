@@ -62,10 +62,10 @@ public class GetHomeFeedQueryHandler : IRequestHandler<GetHomeFeedQuery, HomeFee
                 cl.TitleTr,
                 cl.Items.OrderBy(i => i.Order).Select(i => new MovieListItemDto(
                     i.Movie.Id, i.Movie.Title, i.Movie.ReleaseYear, i.Movie.PosterUrl,
-                    i.Movie.AverageRating, i.Movie.RatingCount,
+                    (decimal)i.Movie.AverageRating, i.Movie.RatingCount,
                     i.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
                     i.Movie.BackdropUrl, i.Movie.Overview,
-                    false, false // watchlist + like bayrakları sorgu sonrası doldurulacak (aşağıda)
+                    false, false, i.Movie.ReleaseDate
                 )).ToList()
             )).ToListAsync(ct);
 
@@ -93,8 +93,8 @@ public class GetHomeFeedQueryHandler : IRequestHandler<GetHomeFeedQuery, HomeFee
     }
 
     private static System.Linq.Expressions.Expression<Func<Domain.Entities.Movie, MovieListItemDto>> MapToListItemProjection() =>
-        m => new MovieListItemDto(
-            m.Id, m.Title, m.ReleaseYear, m.PosterUrl, m.AverageRating, m.RatingCount,
-            m.MovieGenres.Select(mg => mg.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
-            false, false);
+    m => new MovieListItemDto(
+        m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
+        m.MovieGenres.Select(mg => mg.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
+        false, false, m.ReleaseDate);
 }

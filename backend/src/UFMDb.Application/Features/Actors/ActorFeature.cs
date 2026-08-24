@@ -70,10 +70,11 @@ public class GetActorDetailQueryHandler : IRequestHandler<GetActorDetailQuery, A
             .OrderByDescending(ma => ma.Movie.ReleaseYear)
             .Select(ma => new MovieListItemDto(
                 ma.Movie.Id, ma.Movie.Title, ma.Movie.ReleaseYear, ma.Movie.PosterUrl,
-                ma.Movie.AverageRating, ma.Movie.RatingCount,
+                (decimal)ma.Movie.AverageRating, ma.Movie.RatingCount,
                 ma.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
                 ma.Movie.BackdropUrl, ma.Movie.Overview,
-                watchlistIds.Contains(ma.Movie.Id), likedIds.Contains(ma.Movie.Id)))
+                watchlistIds.Contains(ma.Movie.Id), likedIds.Contains(ma.Movie.Id),
+                ma.Movie.ReleaseDate))
             .ToList();
 
         var isLiked = request.CurrentUserId is Guid uid &&

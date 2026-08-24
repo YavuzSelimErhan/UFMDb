@@ -65,9 +65,9 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             .Skip((f.Page - 1) * f.PageSize)
             .Take(f.PageSize)
             .Select(m => new MovieListItemDto(
-                m.Id, m.Title, m.ReleaseYear, m.PosterUrl, m.AverageRating, m.RatingCount,
+                m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
                 m.MovieGenres.Select(mg => mg.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
-                false, false
+                false, false, m.ReleaseDate
             ))
             .ToListAsync(ct);
 

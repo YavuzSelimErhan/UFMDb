@@ -69,10 +69,11 @@ public class GetDirectorDetailQueryHandler : IRequestHandler<GetDirectorDetailQu
             .OrderByDescending(md => md.Movie.ReleaseYear)
             .Select(md => new MovieListItemDto(
                 md.Movie.Id, md.Movie.Title, md.Movie.ReleaseYear, md.Movie.PosterUrl,
-                md.Movie.AverageRating, md.Movie.RatingCount,
+                (decimal)md.Movie.AverageRating, md.Movie.RatingCount,
                 md.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
                 md.Movie.BackdropUrl, md.Movie.Overview,
-                watchlistIds.Contains(md.Movie.Id), likedIds.Contains(md.Movie.Id)))
+                watchlistIds.Contains(md.Movie.Id), likedIds.Contains(md.Movie.Id),
+                md.Movie.ReleaseDate))
             .ToList();
 
         var isLiked = request.CurrentUserId is Guid uid &&

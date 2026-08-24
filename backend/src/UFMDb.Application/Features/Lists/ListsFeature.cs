@@ -55,9 +55,10 @@ public class GetListDetailQueryHandler : IRequestHandler<GetListDetailQuery, Lis
             ?? throw new NotFoundException(nameof(CuratedList), request.ListId);
         var movies = list.Items.OrderBy(i => i.Order).Select(i => new MovieListItemDto(
             i.Movie.Id, i.Movie.Title, i.Movie.ReleaseYear, i.Movie.PosterUrl,
-            i.Movie.AverageRating, i.Movie.RatingCount,
+            (decimal)i.Movie.AverageRating, i.Movie.RatingCount,
             i.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
-            i.Movie.BackdropUrl, i.Movie.Overview
+            i.Movie.BackdropUrl, i.Movie.Overview,
+            false, false, i.Movie.ReleaseDate
         )).ToList();
         return new ListDetailDto(list.Id, list.Title, list.TitleTr, list.Description, list.CoverImageUrl, movies);
     }
