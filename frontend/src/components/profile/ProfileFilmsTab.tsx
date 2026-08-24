@@ -115,13 +115,14 @@ function MovieCard({
       )}
       <div className="movie-card-scrim" aria-hidden="true" />
 
-      {userRating !== null && (
-        <div className="movie-card-badge">★ {userRating.toFixed(1)}</div>
-      )}
-
       <div className="movie-card-meta">
         <p className="movie-card-title">{movie.title}</p>
-        <p className="movie-card-date">{formatDate(watchedAtUtc)}</p>
+        <div className="movie-card-subrow">
+          <p className="movie-card-date">{formatDate(watchedAtUtc)}</p>
+          {userRating !== null && (
+            <span className="movie-card-rating">★ {userRating.toFixed(1)}</span>
+          )}
+        </div>
       </div>
 
       {!isPanelOpen && (
