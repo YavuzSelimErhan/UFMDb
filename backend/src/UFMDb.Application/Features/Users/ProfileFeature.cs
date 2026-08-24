@@ -390,7 +390,7 @@ public class UpdateUserSettingsCommandHandler : IRequestHandler<UpdateUserSettin
     }
 }
 
-public record WatchedMovieDto(Guid Id, MovieListItemDto Movie, DateTime WatchedAtUtc, decimal? UserRating);
+public record WatchedMovieDto(Guid MovieId, MovieListItemDto Movie, DateTime WatchedAtUtc, decimal? UserRating);
 public record GetUserWatchedMoviesQuery(Guid UserId, int Page, int PageSize, string? SortBy, bool? HasRating) : IRequest<PagedResult<WatchedMovieDto>>;
 
 public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMoviesQuery, PagedResult<WatchedMovieDto>>
@@ -400,56 +400,96 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
 
     public async Task<PagedResult<WatchedMovieDto>> Handle(GetUserWatchedMoviesQuery request, CancellationToken ct)
     {
-        var allEntries = await _context.WatchHistory.AsNoTracking()
-            .Include(w => w.Movie).ThenInclude(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
+        // Her film için en son izleme tarihi (varsa)
+        var lastWatchedByMovie = await _context.WatchHistory.AsNoTracking()
             .Where(w => w.UserId == request.UserId)
+            .GroupBy(w => w.MovieId)
+            .Select(g => new { MovieId = g.Key, LastWatchedAtUtc = g.Max(w => w.WatchedAtUtc) })
+            .ToDictionaryAsync(x => x.MovieId, x => x.LastWatchedAtUtc, ct);
+
+        // Kullanıcının GÜNCEL puanları — artık asıl kaynak burası
+        var ratingEntities = await _context.MovieRatings.AsNoTracking()
+            .Where(r => r.UserId == request.UserId)
+            .ToListAsync(ct);
+        var ratingValueByMovie = ratingEntities.ToDictionary(r => r.MovieId, r => r.Value);
+        var ratingDateByMovie = ratingEntities.ToDictionary(r => r.MovieId, r => r.CreatedAtUtc);
+
+        // İki kümenin birleşimi: izlenmiş VEYA puanlanmış her film
+        var movieIds = lastWatchedByMovie.Keys.Union(ratingValueByMovie.Keys).ToList();
+
+        var movies = await _context.Movies.AsNoTracking()
+            .Include(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
+            .Where(m => movieIds.Contains(m.Id))
             .ToListAsync(ct);
 
-        var myRatingsLookup = await _context.MovieRatings.AsNoTracking()
-            .Where(r => r.UserId == request.UserId)
-            .ToDictionaryAsync(r => r.MovieId, r => r.Value, ct);
+        var likedMovieIds = await _context.Likes.AsNoTracking()
+            .Where(l => l.UserId == request.UserId).Select(l => l.MovieId).ToListAsync(ct);
+        var watchlistMovieIds = await _context.WatchlistItems.AsNoTracking()
+            .Where(w => w.UserId == request.UserId).Select(w => w.MovieId).ToListAsync(ct);
+        var likedSet = likedMovieIds.ToHashSet();
+        var watchlistSet = watchlistMovieIds.ToHashSet();
 
-        // Her film için en son izleme tarihini alıyoruz (izleme geçmişi/tarih hâlâ WatchHistory'den);
-        // puan ise artık MovieRatings'teki güncel görüşten geliyor.
-        var perMovie = allEntries
-            .GroupBy(w => w.MovieId)
-            .Select(g => g.OrderByDescending(w => w.WatchedAtUtc).First())
-            .AsEnumerable();
-
-        var hasRatingLookup = myRatingsLookup;
-        if (request.HasRating is true) perMovie = perMovie.Where(w => hasRatingLookup.ContainsKey(w.MovieId));
-        if (request.HasRating is false) perMovie = perMovie.Where(w => !hasRatingLookup.ContainsKey(w.MovieId));
-
-        perMovie = request.SortBy switch
+        IEnumerable<WatchedMovieDto> all = movies.Select(m =>
         {
-            "watched-asc" => perMovie.OrderBy(w => w.WatchedAtUtc),
-            "release-desc" => perMovie.OrderByDescending(w => w.Movie.ReleaseDate),
-            "release-asc" => perMovie.OrderBy(w => w.Movie.ReleaseDate),
-            "rating-desc" => perMovie.OrderByDescending(w => hasRatingLookup.GetValueOrDefault(w.MovieId, -1)),
-            "rating-asc" => perMovie.OrderBy(w => hasRatingLookup.GetValueOrDefault(w.MovieId, -1)),
-            "movie-rating-desc" => perMovie.OrderByDescending(w => w.Movie.AverageRating),
-            "movie-rating-asc" => perMovie.OrderBy(w => w.Movie.AverageRating),
-            "title-asc" => perMovie.OrderBy(w => w.Movie.Title),
-            _ => perMovie.OrderByDescending(w => w.WatchedAtUtc)
+            var hasWatch = lastWatchedByMovie.TryGetValue(m.Id, out var lastWatched);
+            // Tarih önceliği: gerçekten izlenmişse izleme tarihi, sadece puanlanmışsa puanın verildiği tarih
+            var date = hasWatch ? lastWatched : ratingDateByMovie[m.Id];
+            var rating = ratingValueByMovie.TryGetValue(m.Id, out var r) ? r : (decimal?)null;
+            return new WatchedMovieDto(m.Id, ToListItem(m, likedSet, watchlistSet), date, rating);
+        });
+
+        if (request.HasRating is true) all = all.Where(w => w.UserRating.HasValue);
+        if (request.HasRating is false) all = all.Where(w => !w.UserRating.HasValue);
+
+        all = request.SortBy switch
+        {
+            "watched-asc" => all.OrderBy(w => w.WatchedAtUtc),
+            "release-desc" => all.OrderByDescending(w => w.Movie.ReleaseDate),
+            "release-asc" => all.OrderBy(w => w.Movie.ReleaseDate),
+            "rating-desc" => all.OrderByDescending(w => w.UserRating ?? -1),
+            "rating-asc" => all.OrderBy(w => w.UserRating ?? -1),
+            "movie-rating-desc" => all.OrderByDescending(w => w.Movie.AverageRating),
+            "movie-rating-asc" => all.OrderBy(w => w.Movie.AverageRating),
+            "title-asc" => all.OrderBy(w => w.Movie.Title),
+            _ => all.OrderByDescending(w => w.WatchedAtUtc)
         };
 
-        var allSorted = perMovie.ToList();
+        var allSorted = all.ToList();
         var totalCount = allSorted.Count;
         var page = allSorted.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
-        var items = page.Select(w => new WatchedMovieDto(
-    w.Id,
-    new MovieListItemDto(
-        w.Movie.Id, w.Movie.Title, w.Movie.ReleaseYear, w.Movie.PosterUrl,
-        (decimal)w.Movie.AverageRating, w.Movie.RatingCount,
-        w.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
-        w.Movie.BackdropUrl, w.Movie.Overview,
-        false, false, w.Movie.ReleaseDate),
-    w.WatchedAtUtc,
-    myRatingsLookup.TryGetValue(w.MovieId, out var r) ? r : (decimal?)null
-)).ToList();
+        return new PagedResult<WatchedMovieDto>(page, totalCount, request.Page, request.PageSize);
+    }
 
-        return new PagedResult<WatchedMovieDto>(items, totalCount, request.Page, request.PageSize);
+    private static MovieListItemDto ToListItem(Movie m, HashSet<Guid> likedIds, HashSet<Guid> watchlistIds) => new(
+        m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
+        m.MovieGenres.Select(g => g.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
+        watchlistIds.Contains(m.Id), likedIds.Contains(m.Id), m.ReleaseDate);
+}
+
+public record RemoveWatchedMovieCommand(Guid UserId, Guid MovieId) : IRequest;
+
+public class RemoveWatchedMovieCommandHandler : IRequestHandler<RemoveWatchedMovieCommand>
+{
+    private readonly IApplicationDbContext _context;
+    public RemoveWatchedMovieCommandHandler(IApplicationDbContext context) => _context = context;
+
+    public async Task Handle(RemoveWatchedMovieCommand request, CancellationToken ct)
+    {
+        var movie = await _context.Movies.FirstOrDefaultAsync(m => m.Id == request.MovieId, ct)
+            ?? throw new NotFoundException(nameof(Movie), request.MovieId);
+
+        var watchEntries = await _context.WatchHistory
+            .Where(w => w.UserId == request.UserId && w.MovieId == request.MovieId)
+            .ToListAsync(ct);
+        _context.WatchHistory.RemoveRange(watchEntries);
+
+        var rating = await _context.MovieRatings
+            .FirstOrDefaultAsync(r => r.UserId == request.UserId && r.MovieId == request.MovieId, ct);
+        if (rating is not null) _context.MovieRatings.Remove(rating);
+
+        await _context.SaveChangesAsync(ct);
+        await MovieRatingRecalculator.RecalculateAsync(_context, movie, ct);
     }
 }
 // ---------- Seans Defteri: gün gün gruplanmış, "double feature" ve rewatch numaralı ----------

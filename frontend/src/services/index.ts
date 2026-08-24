@@ -224,6 +224,8 @@ export const profileService = {
     const { data } = await api.get("/profile/watched-films", { params });
     return data;
   },
+  removeWatchedFilm: async (movieId: string) =>
+    (await api.delete(`/profile/watched-films/${movieId}`)).data,
 };
 
 // ---------------- Genres ----------------

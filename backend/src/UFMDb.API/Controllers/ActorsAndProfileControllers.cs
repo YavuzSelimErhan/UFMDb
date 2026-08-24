@@ -148,6 +148,13 @@ public class ProfileController : ControllerBase
     public async Task<IActionResult> GetWatchedFilms([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? sortBy = null, [FromQuery] bool? hasRating = null)
     => Ok(await _mediator.Send(new GetUserWatchedMoviesQuery(RequireUserId(), page, pageSize, sortBy, hasRating)));
 
+    [HttpDelete("watched-films/{movieId:guid}")]
+    public async Task<IActionResult> RemoveWatchedFilm(Guid movieId)
+    {
+        await _mediator.Send(new RemoveWatchedMovieCommand(RequireUserId(), movieId));
+        return NoContent();
+    }
+
     [HttpPost("avatar")]
     public async Task<IActionResult> UploadAvatar(IFormFile file)
     {

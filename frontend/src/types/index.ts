@@ -274,7 +274,7 @@ export interface ListFormPayload {
 }
 
 export interface WatchedMovie {
-  id: string;
+  movieId: string;
   movie: MovieListItem;
   watchedAtUtc: string;
   userRating: number | null;
