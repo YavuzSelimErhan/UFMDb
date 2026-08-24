@@ -31,7 +31,10 @@ public class GetMovieDetailQueryHandler : IRequestHandler<GetMovieDetailQuery, M
                 .Where(w => w.MovieId == movie.Id && w.UserId == uid && w.Rating != null)
                 .OrderByDescending(w => w.WatchedAtUtc)
                 .FirstOrDefaultAsync(ct);
-            myRating = latestRatedEntry?.Rating;
+            myRating = await _context.MovieRatings.AsNoTracking()
+                .Where(r => r.MovieId == movie.Id && r.UserId == uid)
+                .Select(r => (decimal?)r.Value)
+                .FirstOrDefaultAsync(ct);
 
             var reviewEntity = await _context.Reviews.AsNoTracking()
                 .FirstOrDefaultAsync(r => r.MovieId == movie.Id && r.UserId == uid && !r.IsDeleted, ct);

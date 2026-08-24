@@ -13,6 +13,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public DbSet<Movie> Movies => Set<Movie>();
     public DbSet<Genre> Genres => Set<Genre>();
+    public DbSet<MovieRating> MovieRatings => Set<MovieRating>();
     public DbSet<Country> Countries => Set<Country>();
     public DbSet<Actor> Actors => Set<Actor>();
     public DbSet<MovieActor> MovieActors => Set<MovieActor>();

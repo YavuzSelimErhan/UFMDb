@@ -93,16 +93,13 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             })
             .ToList();
 
-        var ratedEntries = await _context.WatchHistory.AsNoTracking()
-    .Where(w => w.UserId == request.UserId && w.Rating != null)
-    .ToListAsync(ct);
+        var userRatings = await _context.MovieRatings.AsNoTracking()
+            .Where(r => r.UserId == request.UserId)
+            .ToListAsync(ct);
 
-        var userRatingsLookup = ratedEntries
-            .GroupBy(w => w.MovieId)
-            .ToDictionary(g => g.Key, g => g.OrderByDescending(w => w.WatchedAtUtc).First().Rating!.Value);
-
-        var averageGivenRating = userRatingsLookup.Count > 0 ? Math.Round(userRatingsLookup.Values.Average(), 2) : (decimal?)null;
-        var ratingsCount = userRatingsLookup.Count;
+        var userRatingsLookup = userRatings.ToDictionary(r => r.MovieId, r => r.Value);
+        var averageGivenRating = userRatings.Count > 0 ? Math.Round(userRatings.Average(r => r.Value), 2) : (decimal?)null;
+        var ratingsCount = userRatings.Count;
 
         var recentlyWatched = recent.Select(w => new RecentlyWatchedItemDto(
             ToListItem(w.Movie, likedMovieIds, watchlistMovieIds), w.Rating
@@ -407,36 +404,33 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
             .Where(w => w.UserId == request.UserId)
             .ToListAsync(ct);
 
-        // Her film için en son seansı (en güncel izleme tarihi + o seansın puanı) alıyoruz.
+        var myRatingsLookup = await _context.MovieRatings.AsNoTracking()
+            .Where(r => r.UserId == request.UserId)
+            .ToDictionaryAsync(r => r.MovieId, r => r.Value, ct);
+
+        // Her film için en son izleme tarihini alıyoruz (izleme geçmişi/tarih hâlâ WatchHistory'den);
+        // puan ise artık MovieRatings'teki güncel görüşten geliyor.
         var perMovie = allEntries
             .GroupBy(w => w.MovieId)
             .Select(g => g.OrderByDescending(w => w.WatchedAtUtc).First())
             .AsEnumerable();
 
-        if (request.HasRating is true) perMovie = perMovie.Where(w => w.Rating != null);
-        if (request.HasRating is false) perMovie = perMovie.Where(w => w.Rating == null);
+        var hasRatingLookup = myRatingsLookup;
+        if (request.HasRating is true) perMovie = perMovie.Where(w => hasRatingLookup.ContainsKey(w.MovieId));
+        if (request.HasRating is false) perMovie = perMovie.Where(w => !hasRatingLookup.ContainsKey(w.MovieId));
 
         perMovie = request.SortBy switch
         {
             "watched-asc" => perMovie.OrderBy(w => w.WatchedAtUtc),
-            "rating-desc" => perMovie.OrderByDescending(w => w.Rating ?? -1),
-            "rating-asc" => perMovie.OrderBy(w => w.Rating ?? -1),
+            "rating-desc" => perMovie.OrderByDescending(w => hasRatingLookup.GetValueOrDefault(w.MovieId, -1)),
+            "rating-asc" => perMovie.OrderBy(w => hasRatingLookup.GetValueOrDefault(w.MovieId, -1)),
             "title-asc" => perMovie.OrderBy(w => w.Movie.Title),
-            _ => perMovie.OrderByDescending(w => w.WatchedAtUtc) // "watched-desc" varsayılan
+            _ => perMovie.OrderByDescending(w => w.WatchedAtUtc)
         };
 
         var allSorted = perMovie.ToList();
         var totalCount = allSorted.Count;
         var page = allSorted.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
-
-        // Like/watchlist bayraklarını bu sayfadaki filmler için tek seferde çekiyoruz.
-        var pageMovieIds = page.Select(w => w.MovieId).ToHashSet();
-        var likedIds = (await _context.Likes.AsNoTracking()
-            .Where(l => l.UserId == request.UserId && pageMovieIds.Contains(l.MovieId))
-            .Select(l => l.MovieId).ToListAsync(ct)).ToHashSet();
-        var watchlistIds = (await _context.WatchlistItems.AsNoTracking()
-            .Where(w => w.UserId == request.UserId && pageMovieIds.Contains(w.MovieId))
-            .Select(w => w.MovieId).ToListAsync(ct)).ToHashSet();
 
         var items = page.Select(w => new WatchedMovieDto(
             w.Id,
@@ -444,11 +438,10 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
                 w.Movie.Id, w.Movie.Title, w.Movie.ReleaseYear, w.Movie.PosterUrl,
                 w.Movie.AverageRating, w.Movie.RatingCount,
                 w.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
-                w.Movie.BackdropUrl, w.Movie.Overview,
-                watchlistIds.Contains(w.MovieId), likedIds.Contains(w.MovieId)),
-            w.WatchedAtUtc,
-            w.Rating
-        )).ToList();
+                w.Movie.BackdropUrl, w.Movie.Overview, false),
+                w.WatchedAtUtc,
+                myRatingsLookup.TryGetValue(w.MovieId, out var r) ? r : (decimal?)null
+                    )).ToList();
 
         return new PagedResult<WatchedMovieDto>(items, totalCount, request.Page, request.PageSize);
     }
@@ -521,7 +514,9 @@ public class LogScreeningCommandHandler : IRequestHandler<LogScreeningCommand, G
         if (watchlistEntry is not null) _context.WatchlistItems.Remove(watchlistEntry);
 
         await _context.SaveChangesAsync(ct);
-        if (request.Rating.HasValue) await MovieRatingRecalculator.RecalculateAsync(_context, movie, ct);
+
+        if (request.Rating.HasValue)
+            await MovieRatingRecalculator.UpsertCurrentRatingAsync(_context, movie, request.UserId, request.Rating.Value, ct);
 
         return entry.Id;
     }
@@ -546,7 +541,8 @@ public class UpdateScreeningLogEntryCommandHandler : IRequestHandler<UpdateScree
         entry.UpdatedAtUtc = DateTime.UtcNow;
         await _context.SaveChangesAsync(ct);
 
-        await MovieRatingRecalculator.RecalculateAsync(_context, entry.Movie, ct);
+        if (request.Rating.HasValue)
+            await MovieRatingRecalculator.UpsertCurrentRatingAsync(_context, entry.Movie, request.UserId, request.Rating.Value, ct);
     }
 }
 

@@ -103,7 +103,7 @@ var countryTranslations = new Dictionary<string, string>
 
 var tmdb = new TmdbClient(apiKey);
 var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
-    .UseSqlServer(connectionString)
+    .UseNpgsql(connectionString)
     .Options;
 
 // ---------------- Opsiyonel: demo/seed verisini temizleme modu ----------------

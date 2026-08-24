@@ -37,6 +37,7 @@ public class Movie : BaseEntity
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
     public ICollection<Like> Likes { get; set; } = new List<Like>();
     public ICollection<WatchlistItem> WatchlistItems { get; set; } = new List<WatchlistItem>();
+    public ICollection<MovieRating> MovieRatings { get; set; } = new List<MovieRating>();
 }
 
 public class Genre : BaseEntity

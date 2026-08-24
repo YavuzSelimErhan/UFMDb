@@ -64,25 +64,7 @@ public class UpsertRatingCommandHandler : IRequestHandler<UpsertRatingCommand>
         var movie = await _context.Movies.FirstOrDefaultAsync(m => m.Id == request.MovieId, ct)
             ?? throw new NotFoundException(nameof(Movie), request.MovieId);
 
-        var latestEntry = await _context.WatchHistory
-            .Where(w => w.MovieId == request.MovieId && w.UserId == request.UserId)
-            .OrderByDescending(w => w.WatchedAtUtc)
-            .FirstOrDefaultAsync(ct);
-
-        if (latestEntry is null)
-        {
-            latestEntry = new WatchHistory { MovieId = request.MovieId, UserId = request.UserId, WatchedAtUtc = DateTime.UtcNow };
-            _context.WatchHistory.Add(latestEntry);
-        }
-        latestEntry.Rating = request.Value;
-        latestEntry.UpdatedAtUtc = DateTime.UtcNow;
-
-        var watchlistEntry = await _context.WatchlistItems
-            .FirstOrDefaultAsync(w => w.MovieId == request.MovieId && w.UserId == request.UserId, ct);
-        if (watchlistEntry is not null) _context.WatchlistItems.Remove(watchlistEntry);
-
-        await _context.SaveChangesAsync(ct);
-        await MovieRatingRecalculator.RecalculateAsync(_context, movie, ct);
+        await MovieRatingRecalculator.UpsertCurrentRatingAsync(_context, movie, request.UserId, request.Value, ct);
     }
 }
 

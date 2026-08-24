@@ -128,6 +128,18 @@ public class FavoriteMovieConfiguration : IEntityTypeConfiguration<FavoriteMovie
     }
 }
 
+public class MovieRatingConfiguration : IEntityTypeConfiguration<MovieRating>
+{
+    public void Configure(EntityTypeBuilder<MovieRating> b)
+    {
+        b.ToTable("MovieRatings");
+        b.Property(r => r.Value).HasColumnType("decimal(2,1)");
+        b.HasIndex(r => new { r.MovieId, r.UserId }).IsUnique();
+        b.HasOne(r => r.Movie).WithMany(m => m.MovieRatings).HasForeignKey(r => r.MovieId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne(r => r.User).WithMany(u => u.MovieRatings).HasForeignKey(r => r.UserId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
 public class WatchHistoryConfiguration : IEntityTypeConfiguration<WatchHistory>
 {
     public void Configure(EntityTypeBuilder<WatchHistory> b)

@@ -31,6 +31,7 @@ public class User : BaseEntity
     public ICollection<DirectorLike> DirectorLikes { get; set; } = new List<DirectorLike>();
     public ICollection<FavoriteActor> FavoriteActors { get; set; } = new List<FavoriteActor>();
     public ICollection<FavoriteDirector> FavoriteDirectors { get; set; } = new List<FavoriteDirector>();
+    public ICollection<MovieRating> MovieRatings { get; set; } = new List<MovieRating>();
 }
 
 public class RefreshToken : BaseEntity
