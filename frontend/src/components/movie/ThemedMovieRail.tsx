@@ -1,10 +1,8 @@
 import { useRef, useState, useEffect, type MouseEvent } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Star, Heart, Bookmark } from "lucide-react";
-import { movieService } from "@/services";
-import { useAppSelector } from "@/store";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import MovieCard from "@/components/movie/MovieCard";
 import type { MovieListItem } from "@/types";
 import "./ThemedMovieRail.css";
 
@@ -81,7 +79,7 @@ export default function ThemedMovieRail({
   const scrollByCards = (dir: 1 | -1) => {
     const el = trackRef.current;
     if (!el) return;
-    const card = el.querySelector<HTMLElement>(".rail-card");
+    const card = el.querySelector<HTMLElement>(".movie-card--compact");
     const gap = parseInt(getComputedStyle(el).gap || "16", 10);
     const step = card ? (card.getBoundingClientRect().width + gap) * 3 : 400;
     el.scrollBy({ left: dir * step, behavior: "smooth" });
@@ -153,10 +151,11 @@ export default function ThemedMovieRail({
           onMouseLeave={endDrag}
         >
           {movies.map((m, i) => (
-            <RailCard
+            <MovieCard
               key={m.id}
               movie={m}
               rank={showRank ? i + 1 : undefined}
+              compact
             />
           ))}
         </div>
@@ -177,117 +176,5 @@ export default function ThemedMovieRail({
         />
       </div>
     </section>
-  );
-}
-
-function RailCard({ movie, rank }: { movie: MovieListItem; rank?: number }) {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const { isAuthenticated } = useAppSelector((s) => s.auth);
-
-  const [inWatchlist, setInWatchlist] = useState(
-    movie.isInWatchlistByCurrentUser,
-  );
-  const [isLiked, setIsLiked] = useState(movie.isLikedByCurrentUser);
-
-  const watchlistMutation = useMutation({
-    mutationFn: () => movieService.toggleWatchlist(movie.id),
-    onMutate: () => {
-      const previous = inWatchlist;
-      setInWatchlist(!previous);
-      return { previous };
-    },
-    onSuccess: (newState) => {
-      setInWatchlist(newState);
-      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
-    },
-    onError: (_err, _vars, context) => {
-      if (context) setInWatchlist(context.previous);
-    },
-  });
-
-  const likeMutation = useMutation({
-    mutationFn: () => movieService.toggleLike(movie.id),
-    onMutate: () => {
-      const previous = isLiked;
-      setIsLiked(!previous);
-      return { previous };
-    },
-    onSuccess: (newState) => {
-      setIsLiked(newState);
-      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
-    },
-    onError: (_err, _vars, context) => {
-      if (context) setIsLiked(context.previous);
-    },
-  });
-
-  return (
-    <div className="rail-card">
-      <Link to={`/movies/${movie.id}`} className="rail-card__poster">
-        <img src={movie.posterUrl} alt={movie.title} loading="lazy" />
-        {rank && (
-          <div className="rail-card__rank">
-            <span>{rank}</span>
-          </div>
-        )}
-        {movie.genres[0] && (
-          <div className="rail-card__badge">{movie.genres[0]}</div>
-        )}
-
-        {isAuthenticated && (
-          <div className="rail-card__actions">
-            <button
-              className={`rail-card__bookmark ${inWatchlist ? "is-active" : ""}`}
-              disabled={watchlistMutation.isPending}
-              title={inWatchlist ? t("movie.inList") : t("movie.listShort")}
-              aria-label={
-                inWatchlist ? t("movie.inList") : t("movie.listShort")
-              }
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                watchlistMutation.mutate();
-              }}
-            >
-              <Bookmark
-                size={13}
-                fill={inWatchlist ? "currentColor" : "none"}
-              />
-            </button>
-
-            <button
-              className={`rail-card__like ${isLiked ? "is-active" : ""}`}
-              disabled={likeMutation.isPending}
-              title={isLiked ? t("movie.unlike") : t("movie.like")}
-              aria-label={isLiked ? t("movie.unlike") : t("movie.like")}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                likeMutation.mutate();
-              }}
-            >
-              <Heart size={13} fill={isLiked ? "currentColor" : "none"} />
-            </button>
-          </div>
-        )}
-
-        <div className="rail-card__overlay">
-          <p className="rail-card__overlay-title">{movie.title}</p>
-          <p className="rail-card__overlay-rating">
-            <Star size={12} fill="currentColor" />{" "}
-            {movie.averageRating.toFixed(1)}
-          </p>
-        </div>
-      </Link>
-      <div className="rail-card__foot">
-        <p className="rail-card__name">{movie.title}</p>
-        <p className="rail-card__meta">
-          <span className="rail-card__star">★</span>{" "}
-          {movie.averageRating.toFixed(1)}{" "}
-          <span className="text-muted">{movie.releaseYear}</span>
-        </p>
-      </div>
-    </div>
   );
 }

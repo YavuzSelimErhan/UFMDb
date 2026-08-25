@@ -1,17 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import {
-  Star,
-  Trash2,
-  X,
-  Check,
-  LayoutGrid,
-  LayoutList,
-  ArrowUpDown,
-} from "lucide-react";
+import { ArrowUpDown, LayoutGrid, LayoutList } from "lucide-react";
 import { profileService, movieService } from "@/services";
 import Dropdown from "@/components/search/Dropdown";
+import MovieCard from "@/components/movie/MovieCard";
 import type { WatchedMovie } from "@/types";
 import "./ProfileFilmsTab.css";
 
@@ -19,7 +11,6 @@ const PAGE_SIZE = 24;
 
 type FilterType = "all" | "rated" | "unrated";
 type ViewMode = "grid" | "masonry";
-type PanelType = "rate" | "delete" | null;
 
 const SORT_OPTIONS = [
   { value: "watched-desc", labelKey: "watchedDesc" },
@@ -33,214 +24,12 @@ const SORT_OPTIONS = [
   { value: "title-asc", labelKey: "titleAsc" },
 ];
 
-function getInitials(title: string): string {
-  return title
-    .split(" ")
-    .map((w) => w[0])
-    .join("");
-}
-
 function formatDate(iso: string, locale: string): string {
   return new Date(iso).toLocaleDateString(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
-}
-
-// Yarım yıldız destekli puanlama satırı. Her yıldız görünmez iki hit-area'ya
-// bölünmüş: sola tıklamak x.5, sağa tıklamak x.0 değeri veriyor. Dolgu oranı
-// (fillRatio) 0-1 arası hesaplanıp SVG'nin üstüne bindirilen kırpılmış bir
-// kopyayla gösteriliyor, böylece 3.5 gibi değerler de görsel olarak doğru.
-function StarRow({
-  rating,
-  onRate,
-  interactive = false,
-}: {
-  rating: number | null;
-  onRate?: (value: number) => void;
-  interactive?: boolean;
-}) {
-  const { t } = useTranslation();
-  const [hoverValue, setHoverValue] = useState<number | null>(null);
-  const displayValue =
-    interactive && hoverValue !== null ? hoverValue : (rating ?? 0);
-
-  return (
-    <div className="star-row" onMouseLeave={() => setHoverValue(null)}>
-      {[1, 2, 3, 4, 5].map((i) => {
-        const fillRatio = Math.max(0, Math.min(1, displayValue - (i - 1)));
-        return (
-          <span
-            key={i}
-            className={`star${interactive ? " star-interactive" : ""}`}
-          >
-            <Star size={16} className="star-base" />
-            <span
-              className="star-fill"
-              style={{ width: `${fillRatio * 100}%` }}
-            >
-              <Star size={16} fill="currentColor" />
-            </span>
-            {interactive && (
-              <>
-                <button
-                  type="button"
-                  className="star-hit star-hit--left"
-                  onMouseEnter={() => setHoverValue(i - 0.5)}
-                  onFocus={() => setHoverValue(i - 0.5)}
-                  onClick={() => onRate?.(i - 0.5)}
-                  aria-label={t("profile.giveStarRating", {
-                    value: (i - 0.5).toFixed(1),
-                  })}
-                />
-                <button
-                  type="button"
-                  className="star-hit star-hit--right"
-                  onMouseEnter={() => setHoverValue(i)}
-                  onFocus={() => setHoverValue(i)}
-                  onClick={() => onRate?.(i)}
-                  aria-label={t("profile.giveStarRating", {
-                    value: i.toFixed(1),
-                  })}
-                />
-              </>
-            )}
-          </span>
-        );
-      })}
-    </div>
-  );
-}
-
-function MovieCard({
-  entry,
-  locale,
-  isPanelOpen,
-  panelType,
-  isSaving,
-  onOpenPanel,
-  onClosePanel,
-  onRate,
-  onDelete,
-}: {
-  entry: WatchedMovie;
-  locale: string;
-  isPanelOpen: boolean;
-  panelType: PanelType;
-  isSaving: boolean;
-  onOpenPanel: (type: Exclude<PanelType, null>) => void;
-  onClosePanel: () => void;
-  onRate: (value: number) => void;
-  onDelete: () => void;
-}) {
-  const { t } = useTranslation();
-  const { movie, userRating, watchedAtUtc } = entry;
-
-  return (
-    <div className="movie-card card">
-      <Link
-        to={`/movies/${movie.id}`}
-        className="movie-card-link"
-        tabIndex={isPanelOpen ? -1 : 0}
-      >
-        {movie.posterUrl ? (
-          <img
-            className="movie-card-poster"
-            src={movie.posterUrl}
-            alt={movie.title}
-            loading="lazy"
-          />
-        ) : (
-          <div className="movie-card-initials" aria-hidden="true">
-            {getInitials(movie.title)}
-          </div>
-        )}
-        <div className="movie-card-scrim" aria-hidden="true" />
-
-        <div className="movie-card-meta">
-          <p className="movie-card-title">{movie.title}</p>
-          <div className="movie-card-subrow">
-            <p className="movie-card-date">
-              {formatDate(watchedAtUtc, locale)}
-            </p>
-            {userRating !== null && (
-              <span className="movie-card-rating">
-                <Star size={11} fill="currentColor" /> {userRating.toFixed(1)}
-              </span>
-            )}
-          </div>
-        </div>
-      </Link>
-
-      {!isPanelOpen && (
-        <div className="movie-card-actions">
-          <button
-            type="button"
-            className="action-btn"
-            onClick={() => onOpenPanel("rate")}
-            aria-label={t("profile.rateFilm")}
-          >
-            <Star size={13} />
-          </button>
-          <button
-            type="button"
-            className="action-btn action-btn--danger"
-            onClick={() => onOpenPanel("delete")}
-            aria-label={t("profile.removeFromWatched")}
-          >
-            <Trash2 size={13} />
-          </button>
-        </div>
-      )}
-
-      {isPanelOpen && panelType === "rate" && (
-        <div className="movie-card-panel">
-          <p className="panel-label">{t("profile.enterRating")}</p>
-          <StarRow
-            rating={userRating}
-            onRate={onRate}
-            interactive={!isSaving}
-          />
-          <button
-            type="button"
-            className="panel-close"
-            onClick={onClosePanel}
-            aria-label={t("common.close")}
-          >
-            <X size={12} />
-          </button>
-        </div>
-      )}
-
-      {isPanelOpen && panelType === "delete" && (
-        <div className="movie-card-panel panel-delete">
-          <p className="panel-label panel-label-danger">
-            {t("profile.confirmRemoveWatched")}
-          </p>
-          <div className="panel-delete-actions">
-            <button
-              type="button"
-              className="confirm-btn"
-              onClick={onDelete}
-              disabled={isSaving}
-              aria-label={t("common.confirm")}
-            >
-              <Check size={14} />
-            </button>
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={onClosePanel}
-              aria-label={t("common.cancel")}
-            >
-              <X size={14} />
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
 }
 
 export default function ProfileFilmsTab() {
@@ -255,8 +44,6 @@ export default function ProfileFilmsTab() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [savingMovieId, setSavingMovieId] = useState<string | null>(null);
-  const [activePanelId, setActivePanelId] = useState<string | null>(null);
-  const [activePanelType, setActivePanelType] = useState<PanelType>(null);
   const [error, setError] = useState<string | null>(null);
 
   const hasRatingParam = filter === "all" ? undefined : filter === "rated";
@@ -326,16 +113,6 @@ export default function ProfileFilmsTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, sortBy]);
 
-  const openPanel = (id: string, type: Exclude<PanelType, null>) => {
-    setActivePanelId(id);
-    setActivePanelType(type);
-  };
-
-  const closePanel = () => {
-    setActivePanelId(null);
-    setActivePanelType(null);
-  };
-
   const handleRate = async (movieId: string, value: number) => {
     setSavingMovieId(movieId);
     try {
@@ -349,7 +126,6 @@ export default function ProfileFilmsTab() {
       setError(t("profile.ratingSaveError"));
     } finally {
       setSavingMovieId(null);
-      closePanel();
     }
   };
 
@@ -360,9 +136,7 @@ export default function ProfileFilmsTab() {
       setEntries((prev) => prev.filter((e) => e.movieId !== movieId));
     } catch {
       setError(t("profile.removeError"));
-    } finally {
       setSavingMovieId(null);
-      closePanel();
     }
   };
 
@@ -449,30 +223,25 @@ export default function ProfileFilmsTab() {
       {isLoading ? (
         <div className="movie-grid movie-grid--6">
           {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="movie-card movie-card-skeleton" />
+            <div key={i} className="film-skeleton" />
           ))}
         </div>
       ) : entries.length > 0 ? (
         <>
           <div
-            className={`movie-grid movie-grid--6${
-              viewMode === "masonry" ? " movie-grid-masonry" : ""
-            }`}
+            className={`movie-grid movie-grid--6${viewMode === "masonry" ? " movie-grid-masonry" : ""}`}
           >
             {entries.map((entry) => (
               <MovieCard
                 key={entry.movieId}
-                entry={entry}
-                locale={i18n.language}
-                isPanelOpen={activePanelId === entry.movieId}
-                panelType={
-                  activePanelId === entry.movieId ? activePanelType : null
-                }
-                isSaving={savingMovieId === entry.movieId}
-                onOpenPanel={(type) => openPanel(entry.movieId, type)}
-                onClosePanel={closePanel}
+                movie={entry.movie}
+                userRating={entry.userRating}
                 onRate={(value) => handleRate(entry.movieId, value)}
+                isRatingSaving={savingMovieId === entry.movieId}
+                showDelete
                 onDelete={() => handleDelete(entry.movieId)}
+                isDeleting={savingMovieId === entry.movieId}
+                subtitle={formatDate(entry.watchedAtUtc, i18n.language)}
               />
             ))}
           </div>
