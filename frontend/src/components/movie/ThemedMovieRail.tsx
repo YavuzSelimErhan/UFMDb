@@ -117,6 +117,7 @@ export default function ThemedMovieRail({
           "--rail-accent": colors.accent,
           "--rail-accent-dim": colors.dim,
           "--rail-glow": colors.glow,
+          "--card-accent": colors.accent,
         } as React.CSSProperties
       }
     >

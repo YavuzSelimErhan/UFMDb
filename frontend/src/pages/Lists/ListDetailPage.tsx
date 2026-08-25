@@ -39,6 +39,7 @@ export default function ListDetailPage() {
     "--list-accent": theme.accent,
     "--list-accent-soft": theme.accentSoft,
     "--list-accent-strong": theme.accentStrong,
+    "--card-accent": theme.accent,
   } as React.CSSProperties;
 
   // Admin kapak görseli girmemişse listedeki ilk filmin backdrop/poster'ına düşüyoruz,

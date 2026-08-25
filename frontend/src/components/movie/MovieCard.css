@@ -120,8 +120,8 @@
   transform: scale(1.08);
 }
 .movie-card__bookmark.is-active {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
+  background: var(--card-accent, var(--color-accent));
+  border-color: var(--card-accent, var(--color-accent));
   color: #fff;
 }
 
@@ -388,4 +388,16 @@
 .movie-card__delete-confirm-no {
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
+}
+.movie-card.card {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.movie-card.card:hover {
+  border-color: transparent;
+  box-shadow: none;
+}
+.movie-card__info {
+  background: transparent;
 }

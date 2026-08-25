@@ -1,4 +1,6 @@
-.movie-row { margin-bottom: 48px; }
+.movie-row {
+  margin-bottom: 48px;
+}
 
 .movie-row__title {
   font-size: 1.25rem;
@@ -24,5 +26,7 @@
 }
 
 @media (max-width: 480px) {
-  .movie-row__item { width: 130px; }
+  .movie-row__item {
+    width: 130px;
+  }
 }
