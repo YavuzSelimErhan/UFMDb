@@ -207,7 +207,8 @@
     "uploadError": "Caricamento dell'immagine non riuscito, riprova",
     "editReview": "Modifica recensione",
     "confirmDeleteReview": "Sei sicuro di voler eliminare questa recensione?",
-    "confirmDeleteScreening": "Vuoi eliminare questa proiezione?"
+    "confirmDeleteScreening": "Vuoi eliminare questa proiezione?",
+    "confirmRemoveWatched": "Rimuovere questo film dai film visti?"
   },
   "lists": {
     "title": "Liste",

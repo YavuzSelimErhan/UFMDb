@@ -1,84 +1,108 @@
-import { useCallback, useEffect, useState } from "react";
-import {
-  Star,
-  Trash2,
-  X,
-  Check,
-  LayoutGrid,
-  LayoutList,
-  ArrowUpDown,
-} from "lucide-react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import { Star, Trash2, X } from "lucide-react";
 import { profileService, movieService } from "@/services";
 import Dropdown from "@/components/search/Dropdown";
+import Pagination from "@/components/common/Pagination";
+import { EmptyState } from "@/components/common/PageState";
 import type { WatchedMovie } from "@/types";
 import "./ProfileFilmsTab.css";
 
-// VARSAYIM 1: PagedResult<T> = { items: T[]; totalCount: number; page: number; pageSize: number; totalPages: number }
-// VARSAYIM 2: movieService.upsertRating(movieId: string, value: number) mevcut ve MovieRating'i senkronize ediyor
-// VARSAYIM 3: profileService.getWatchedFilms artık { page, pageSize, sortBy, hasRating } parametreleri alıyor
-
-const PAGE_SIZE = 24;
-
-type FilterType = "all" | "rated" | "unrated";
-type ViewMode = "grid" | "masonry";
-type PanelType = "rate" | "delete" | null;
-
-const SORT_OPTIONS: { value: string; label: string }[] = [
-  { value: "watched-desc", label: "İzleme tarihi (yeni-eski)" },
-  { value: "watched-asc", label: "İzleme tarihi (eski-yeni)" },
-  { value: "release-desc", label: "Vizyon tarihi (yeni-eski)" },
-  { value: "release-asc", label: "Vizyon tarihi (eski-yeni)" },
-  { value: "rating-desc", label: "Puanım (yüksek-düşük)" },
-  { value: "rating-asc", label: "Puanım (düşük-yüksek)" },
-  { value: "movie-rating-desc", label: "Film puanı (yüksek-düşük)" },
-  { value: "movie-rating-asc", label: "Film puanı (düşük-yüksek)" },
-  { value: "title-asc", label: "Başlık (A-Z)" },
+const SORT_OPTIONS = [
+  { label: "watchedDesc", value: "watched-desc" },
+  { label: "watchedAsc", value: "watched-asc" },
+  { label: "releaseDesc", value: "release-desc" },
+  { label: "releaseAsc", value: "release-asc" },
+  { label: "myRatingDesc", value: "rating-desc" },
+  { label: "myRatingAsc", value: "rating-asc" },
+  { label: "filmRatingDesc", value: "movie-rating-desc" },
+  { label: "filmRatingAsc", value: "movie-rating-asc" },
+  { label: "titleAsc", value: "title-asc" },
 ];
 
-function getInitials(title: string): string {
-  return title
-    .split(" ")
-    .map((w) => w[0])
-    .join("");
-}
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("tr-TR", {
-    day: "numeric",
-    month: "short",
+function monthLabel(dateStr: string, locale: string) {
+  return new Date(dateStr).toLocaleDateString(locale, {
+    month: "long",
     year: "numeric",
   });
 }
 
-function StarRow({
-  rating,
-  onRate,
-  interactive = false,
+function yearLabel(dateStr: string | undefined) {
+  if (!dateStr) return "—";
+  return new Date(dateStr).getFullYear().toString();
+}
+
+function groupEntries(items: WatchedMovie[], sortBy: string, locale: string) {
+  const isWatchedSort = sortBy === "watched-desc" || sortBy === "watched-asc";
+  const isReleaseSort = sortBy === "release-desc" || sortBy === "release-asc";
+  if (!isWatchedSort && !isReleaseSort) return null;
+
+  const groups: { label: string; items: WatchedMovie[] }[] = [];
+  for (const item of items) {
+    const label = isWatchedSort
+      ? monthLabel(item.watchedAtUtc, locale)
+      : yearLabel(item.movie.releaseDate);
+    const last = groups[groups.length - 1];
+    if (last && last.label === label) last.items.push(item);
+    else groups.push({ label, items: [item] });
+  }
+  return groups;
+}
+
+type PanelMode = "none" | "rate" | "delete";
+
+// Letterboxd tarzı yarım-yıldız destekli, tıklanabilir puanlama input'u.
+// Her yıldız görsel olarak ikiye bölünmüş görünmez hit-area'lara sahip:
+// sol yarıya tıklamak x.5, sağ yarıya tıklamak x.0 değerini verir.
+function StarRatingInput({
+  value,
+  onChange,
+  disabled,
 }: {
-  rating: number | null;
-  onRate?: (value: number) => void;
-  interactive?: boolean;
+  value: number | null;
+  onChange: (v: number | null) => void;
+  disabled?: boolean;
 }) {
-  const [hoverValue, setHoverValue] = useState<number | null>(null);
-  const displayValue =
-    interactive && hoverValue !== null ? hoverValue : (rating ?? 0);
+  const [hover, setHover] = useState<number | null>(null);
+  const shown = hover ?? value ?? 0;
 
   return (
-    <div className="star-row" onMouseLeave={() => setHoverValue(null)}>
+    <div
+      className="star-input"
+      onMouseLeave={() => setHover(null)}
+      aria-label="Puan ver"
+    >
       {[1, 2, 3, 4, 5].map((i) => {
-        const filled = displayValue >= i;
+        const fillRatio = Math.max(0, Math.min(1, shown - (i - 1)));
         return (
-          <span
-            key={i}
-            className={`star${filled ? " star-filled" : ""}${
-              interactive ? " star-interactive" : ""
-            }`}
-            onClick={interactive ? () => onRate?.(i) : undefined}
-            onMouseEnter={interactive ? () => setHoverValue(i) : undefined}
-            role={interactive ? "button" : undefined}
-            aria-label={interactive ? `${i} yıldız ver` : undefined}
-          >
-            <Star size={16} fill={filled ? "currentColor" : "none"} />
+          <span key={i} className="star-input__star">
+            <Star size={20} className="star-input__base" />
+            <span
+              className="star-input__fill"
+              style={{ width: `${fillRatio * 100}%` }}
+            >
+              <Star size={20} fill="currentColor" />
+            </span>
+            <button
+              type="button"
+              disabled={disabled}
+              className="star-input__hit star-input__hit--left"
+              onMouseEnter={() => setHover(i - 0.5)}
+              onFocus={() => setHover(i - 0.5)}
+              onClick={() => onChange(value === i - 0.5 ? null : i - 0.5)}
+              aria-label={`${(i - 0.5).toFixed(1)}`}
+            />
+            <button
+              type="button"
+              disabled={disabled}
+              className="star-input__hit star-input__hit--right"
+              onMouseEnter={() => setHover(i)}
+              onFocus={() => setHover(i)}
+              onClick={() => onChange(value === i ? null : i)}
+              aria-label={`${i.toFixed(1)}`}
+            />
           </span>
         );
       })}
@@ -86,362 +110,229 @@ function StarRow({
   );
 }
 
-function MovieCard({
-  entry,
-  isPanelOpen,
-  panelType,
-  isSaving,
-  onOpenPanel,
-  onClosePanel,
-  onRate,
-  onDelete,
-}: {
-  entry: WatchedMovie;
-  isPanelOpen: boolean;
-  panelType: PanelType;
-  isSaving: boolean;
-  onOpenPanel: (type: Exclude<PanelType, null>) => void;
-  onClosePanel: () => void;
-  onRate: (value: number) => void;
-  onDelete: () => void;
-}) {
-  const { movie, userRating, watchedAtUtc } = entry;
+export default function ProfileFilmsTab() {
+  const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState("watched-desc");
+  const [hasRating, setHasRating] = useState<string>("");
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [panelMode, setPanelMode] = useState<PanelMode>("none");
 
-  return (
-    <div className="movie-card card">
-      {movie.posterUrl ? (
-        <img
-          className="movie-card-poster"
-          src={movie.posterUrl}
-          alt=""
-          loading="lazy"
-        />
-      ) : (
-        <div className="movie-card-initials" aria-hidden="true">
-          {getInitials(movie.title)}
-        </div>
-      )}
-      <div className="movie-card-scrim" aria-hidden="true" />
+  const { data, isLoading } = useQuery({
+    queryKey: ["watched-films", page, sortBy, hasRating],
+    queryFn: () =>
+      profileService.getWatchedFilms({
+        page,
+        pageSize: 24,
+        sortBy,
+        hasRating: hasRating === "" ? undefined : hasRating === "true",
+      }),
+  });
 
-      <div className="movie-card-meta">
-        <p className="movie-card-title">{movie.title}</p>
-        <div className="movie-card-subrow">
-          <p className="movie-card-date">{formatDate(watchedAtUtc)}</p>
-          {userRating !== null && (
-            <span className="movie-card-rating">
-              <Star size={11} fill="currentColor" /> {userRating.toFixed(1)}
-            </span>
-          )}
-        </div>
-      </div>
+  // Puan değiştirme artık doğrudan MovieRatings'i güncelleyen quick-rate
+  // endpoint'ini kullanıyor — film izlenmiş olsun olmasın çalışır.
+  const rateMutation = useMutation({
+    mutationFn: ({
+      movieId,
+      value,
+    }: {
+      movieId: string;
+      value: number | null;
+    }) => movieService.upsertRating(movieId, value ?? 0),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["watched-films"] });
+      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      closePanel();
+    },
+  });
 
-      {!isPanelOpen && (
-        <div className="movie-card-actions">
-          <button
-            type="button"
-            className="action-btn"
-            onClick={() => onOpenPanel("rate")}
-            aria-label="Puanla"
-          >
-            <Star size={13} />
-          </button>
-          <button
-            type="button"
-            className="action-btn action-btn--danger"
-            onClick={() => onOpenPanel("delete")}
-            aria-label="Filmlerimden çıkar"
-          >
-            <Trash2 size={13} />
-          </button>
-        </div>
-      )}
+  const removeMutation = useMutation({
+    mutationFn: (movieId: string) => profileService.removeWatchedFilm(movieId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["watched-films"] });
+      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      closePanel();
+    },
+  });
 
-      {isPanelOpen && panelType === "rate" && (
-        <div className="movie-card-panel">
-          <p className="panel-label">Puanını gir</p>
-          <StarRow
-            rating={userRating}
-            onRate={onRate}
-            interactive={!isSaving}
+  function closePanel() {
+    setActiveId(null);
+    setPanelMode("none");
+  }
+
+  function openPanel(id: string, mode: PanelMode) {
+    setActiveId(id);
+    setPanelMode(mode);
+  }
+
+  const groups = data ? groupEntries(data.items, sortBy, i18n.language) : null;
+
+  const renderCard = (entry: WatchedMovie) => {
+    const isActive = activeId === entry.movieId;
+    const isRating = isActive && panelMode === "rate";
+    const isDeleting = isActive && panelMode === "delete";
+
+    return (
+      <div
+        key={entry.movieId}
+        className={`films-grid__card${isActive ? " films-grid__card--active" : ""}`}
+      >
+        <Link
+          to={`/movies/${entry.movie.id}`}
+          className="films-grid__poster-wrap"
+          tabIndex={isActive ? -1 : 0}
+        >
+          <img
+            src={entry.movie.posterUrl}
+            alt={entry.movie.title}
+            className="films-grid__poster"
           />
-          <button
-            type="button"
-            className="panel-close"
-            onClick={onClosePanel}
-            aria-label="Kapat"
-          >
-            <X size={12} />
-          </button>
-        </div>
-      )}
+        </Link>
 
-      {isPanelOpen && panelType === "delete" && (
-        <div className="movie-card-panel panel-delete">
-          <p className="panel-label panel-label-danger">
-            Filmlerimden çıkarılsın mı?
+        <div className="films-grid__scrim" />
+
+        {entry.userRating !== null && !isActive && (
+          <span className="films-grid__rating">
+            <Star size={11} fill="currentColor" />
+            {entry.userRating.toFixed(1)}
+          </span>
+        )}
+
+        <div className="films-grid__meta">
+          <p className="films-grid__title">{entry.movie.title}</p>
+          <p className="films-grid__date">
+            {new Date(entry.watchedAtUtc).toLocaleDateString(i18n.language, {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
           </p>
-          <div className="panel-delete-actions">
+        </div>
+
+        {!isActive && (
+          <div className="films-grid__hover-actions">
             <button
-              type="button"
-              className="confirm-btn"
-              onClick={onDelete}
-              disabled={isSaving}
-              aria-label="Çıkarmayı onayla"
+              className="films-grid__icon-btn"
+              onClick={() => openPanel(entry.movieId, "rate")}
+              aria-label={t("profile.editRating")}
             >
-              <Check size={14} />
+              <Star size={13} />
             </button>
             <button
-              type="button"
-              className="cancel-btn"
-              onClick={onClosePanel}
-              aria-label="Vazgeç"
+              className="films-grid__icon-btn films-grid__icon-btn--danger"
+              onClick={() => openPanel(entry.movieId, "delete")}
+              aria-label={t("common.delete")}
+            >
+              <Trash2 size={13} />
+            </button>
+          </div>
+        )}
+
+        {isRating && (
+          <div className="films-grid__panel">
+            <p className="films-grid__panel-title">{t("profile.editRating")}</p>
+            <StarRatingInput
+              value={entry.userRating}
+              disabled={rateMutation.isPending}
+              onChange={(value) =>
+                rateMutation.mutate({ movieId: entry.movieId, value })
+              }
+            />
+            <button
+              className="films-grid__panel-close"
+              onClick={closePanel}
+              aria-label={t("common.cancel")}
             >
               <X size={14} />
             </button>
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
+        )}
 
-export default function ProfileFilmsTab() {
-  const [entries, setEntries] = useState<WatchedMovie[]>([]);
-  const [counts, setCounts] = useState({ all: 0, rated: 0, unrated: 0 });
-  const [filter, setFilter] = useState<FilterType>("all");
-  const [sortBy, setSortBy] = useState("watched-desc");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [savingMovieId, setSavingMovieId] = useState<string | null>(null);
-  const [activePanelId, setActivePanelId] = useState<string | null>(null);
-  const [activePanelType, setActivePanelType] = useState<PanelType>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const hasRatingParam = filter === "all" ? undefined : filter === "rated";
-
-  // Sekme sayaçları — her filtre için pageSize:1 ile sadece totalCount alıyoruz
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const [all, rated, unrated] = await Promise.all([
-          profileService.getWatchedFilms({ page: 1, pageSize: 1 }),
-          profileService.getWatchedFilms({
-            page: 1,
-            pageSize: 1,
-            hasRating: true,
-          }),
-          profileService.getWatchedFilms({
-            page: 1,
-            pageSize: 1,
-            hasRating: false,
-          }),
-        ]);
-        if (!cancelled) {
-          setCounts({
-            all: all.totalCount,
-            rated: rated.totalCount,
-            unrated: unrated.totalCount,
-          });
-        }
-      } catch {
-        // sayaçlar ikincil bilgi — sessizce yut
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [entries.length]);
-
-  const loadPage = useCallback(
-    async (targetPage: number, replace: boolean) => {
-      if (replace) setIsLoading(true);
-      else setIsLoadingMore(true);
-      setError(null);
-      try {
-        const result = await profileService.getWatchedFilms({
-          page: targetPage,
-          pageSize: PAGE_SIZE,
-          sortBy,
-          hasRating: hasRatingParam,
-        });
-        setEntries((prev) =>
-          replace ? result.items : [...prev, ...result.items],
-        );
-        setPage(result.page);
-        setTotalPages(result.totalPages);
-      } catch {
-        setError("Filmler yüklenirken bir sorun oluştu.");
-      } finally {
-        setIsLoading(false);
-        setIsLoadingMore(false);
-      }
-    },
-    [sortBy, hasRatingParam],
-  );
-
-  useEffect(() => {
-    loadPage(1, true);
-    // filtre veya sıralama değiştiğinde baştan yükle
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, sortBy]);
-
-  const openPanel = (id: string, type: Exclude<PanelType, null>) => {
-    setActivePanelId(id);
-    setActivePanelType(type);
-  };
-
-  const closePanel = () => {
-    setActivePanelId(null);
-    setActivePanelType(null);
-  };
-
-  const handleRate = async (movieId: string, value: number) => {
-    setSavingMovieId(movieId);
-    try {
-      await movieService.upsertRating(movieId, value);
-      setEntries((prev) =>
-        prev.map((e) =>
-          e.movieId === movieId ? { ...e, userRating: value } : e,
-        ),
-      );
-    } catch {
-      setError("Puan kaydedilemedi, tekrar deneyin.");
-    } finally {
-      setSavingMovieId(null);
-      closePanel();
-    }
-  };
-
-  const handleDelete = async (movieId: string) => {
-    setSavingMovieId(movieId);
-    try {
-      await profileService.removeWatchedFilm(movieId);
-      setEntries((prev) => prev.filter((e) => e.movieId !== movieId));
-    } catch {
-      setError("Kayıt silinemedi, tekrar deneyin.");
-    } finally {
-      setSavingMovieId(null);
-      closePanel();
-    }
+        {isDeleting && (
+          <div className="films-grid__panel films-grid__panel--danger">
+            <p className="films-grid__panel-title">
+              {t("profile.confirmRemoveWatched")}
+            </p>
+            <div className="films-grid__panel-row">
+              <button
+                className="films-grid__icon-btn films-grid__icon-btn--danger"
+                disabled={removeMutation.isPending}
+                onClick={() => removeMutation.mutate(entry.movieId)}
+                aria-label={t("common.confirm")}
+              >
+                <Trash2 size={14} />
+              </button>
+              <button
+                className="films-grid__icon-btn"
+                onClick={closePanel}
+                aria-label={t("common.cancel")}
+              >
+                <X size={14} />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
     <div className="films-tab">
-      <div className="films-toolbar">
-        <div className="filter-pills" role="tablist" aria-label="Film filtresi">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={filter === "all"}
-            className={`pill${filter === "all" ? " pill-active" : ""}`}
-            onClick={() => setFilter("all")}
-          >
-            Tümü <span className="pill-count">{counts.all}</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={filter === "rated"}
-            className={`pill${filter === "rated" ? " pill-active" : ""}`}
-            onClick={() => setFilter("rated")}
-          >
-            Puanlı <span className="pill-count">{counts.rated}</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={filter === "unrated"}
-            className={`pill${filter === "unrated" ? " pill-active" : ""}`}
-            onClick={() => setFilter("unrated")}
-          >
-            Puansız <span className="pill-count">{counts.unrated}</span>
-          </button>
-        </div>
-
-        <div className="toolbar-right">
-          <Dropdown
-            icon={<ArrowUpDown size={14} />}
-            value={sortBy}
-            options={SORT_OPTIONS}
-            onChange={setSortBy}
-          />
-
-          <div className="view-toggle" role="group" aria-label="Görünüm seçimi">
-            <button
-              type="button"
-              className={`view-btn${viewMode === "grid" ? " view-btn-active" : ""}`}
-              onClick={() => setViewMode("grid")}
-              aria-label="Izgara görünümü"
-              aria-pressed={viewMode === "grid"}
-            >
-              <LayoutGrid size={14} />
-            </button>
-            <button
-              type="button"
-              className={`view-btn${viewMode === "masonry" ? " view-btn-active" : ""}`}
-              onClick={() => setViewMode("masonry")}
-              aria-label="Serbest görünüm"
-              aria-pressed={viewMode === "masonry"}
-            >
-              <LayoutList size={14} />
-            </button>
-          </div>
-        </div>
+      <div className="films-tab__filters">
+        <Dropdown
+          value={sortBy}
+          onChange={setSortBy}
+          options={SORT_OPTIONS.map((o) => ({
+            label: t(`profile.filmsSort.${o.label}`),
+            value: o.value,
+          }))}
+        />
+        <Dropdown
+          value={hasRating}
+          onChange={setHasRating}
+          options={[
+            { label: t("profile.filmsFilterAll"), value: "" },
+            { label: t("profile.filmsFilterRated"), value: "true" },
+            { label: t("profile.filmsFilterUnrated"), value: "false" },
+          ]}
+        />
       </div>
 
-      {error && <p className="films-error">{error}</p>}
+      {!isLoading && data && data.totalCount > 0 && (
+        <p className="films-tab__count">
+          {t("search.resultsCount", { count: data.totalCount })}
+        </p>
+      )}
 
-      {isLoading ? (
-        <div className="movie-grid movie-grid--6">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="movie-card movie-card-skeleton" />
-          ))}
-        </div>
-      ) : entries.length > 0 ? (
-        <>
-          <div
-            className={`movie-grid movie-grid--6${
-              viewMode === "masonry" ? " movie-grid-masonry" : ""
-            }`}
-          >
-            {entries.map((entry) => (
-              <MovieCard
-                key={entry.movieId}
-                entry={entry}
-                isPanelOpen={activePanelId === entry.movieId}
-                panelType={
-                  activePanelId === entry.movieId ? activePanelType : null
-                }
-                isSaving={savingMovieId === entry.movieId}
-                onOpenPanel={(type) => openPanel(entry.movieId, type)}
-                onClosePanel={closePanel}
-                onRate={(value) => handleRate(entry.movieId, value)}
-                onDelete={() => handleDelete(entry.movieId)}
-              />
-            ))}
-          </div>
+      {!isLoading && data && data.items.length === 0 && (
+        <EmptyState
+          icon={<Star size={26} />}
+          title={t("profile.emptyContent")}
+          hint={t("profile.recentlyWatchedHint")}
+        />
+      )}
 
-          {page < totalPages && (
-            <div className="load-more-wrap">
-              <button
-                type="button"
-                className="load-more-btn btn-secondary"
-                onClick={() => loadPage(page + 1, false)}
-                disabled={isLoadingMore}
-              >
-                {isLoadingMore ? "Yükleniyor…" : "Daha fazla göster"}
-              </button>
+      {groups
+        ? groups.map((group) => (
+            <div key={group.label} className="films-grid__group">
+              <p className="films-grid__group-label">{group.label}</p>
+              <div className="films-grid">{group.items.map(renderCard)}</div>
             </div>
+          ))
+        : data && (
+            <div className="films-grid">{data.items.map(renderCard)}</div>
           )}
-        </>
-      ) : (
-        <div className="empty-state">
-          <p>Bu filtreye uyan film yok.</p>
-        </div>
+
+      {data && data.totalPages > 1 && (
+        <Pagination
+          page={data.page}
+          totalPages={data.totalPages}
+          onChange={(p) => {
+            setPage(p);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        />
       )}
     </div>
   );

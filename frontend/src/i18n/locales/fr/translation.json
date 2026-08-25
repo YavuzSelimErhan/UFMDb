@@ -207,7 +207,8 @@
     "uploadError": "Échec du téléchargement de la photo, veuillez réessayer",
     "editReview": "Modifier la critique",
     "confirmDeleteReview": "Es-tu sûr de vouloir supprimer cette critique ?",
-    "confirmDeleteScreening": "Souhaites-tu supprimer cette séance ?"
+    "confirmDeleteScreening": "Souhaites-tu supprimer cette séance ?",
+    "confirmRemoveWatched": "Retirer ce film de vos films vus ?"
   },
   "lists": {
     "title": "Listes",

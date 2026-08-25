@@ -207,7 +207,8 @@
     "uploadError": "Bild konnte nicht hochgeladen werden, bitte erneut versuchen",
     "editReview": "Rezension bearbeiten",
     "confirmDeleteReview": "Möchtest du diese Rezension wirklich löschen?",
-    "confirmDeleteScreening": "Möchtest du diese Vorführung löschen?"
+    "confirmDeleteScreening": "Möchtest du diese Vorführung löschen?",
+    "confirmRemoveWatched": "Diesen Film aus deinen gesehenen Filmen entfernen?"
   },
   "lists": {
     "title": "Listen",

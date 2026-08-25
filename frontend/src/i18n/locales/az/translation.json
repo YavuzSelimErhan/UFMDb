@@ -207,7 +207,8 @@
     "uploadError": "Şəkil yüklənmədi, yenidən cəhd edin",
     "editReview": "Rəyi Redaktə Et",
     "confirmDeleteReview": "Bu rəyi silmək istədiyinə əminsən?",
-    "confirmDeleteScreening": "Bu seansı silmək istəyirsən?"
+    "confirmDeleteScreening": "Bu seansı silmək istəyirsən?",
+    "confirmRemoveWatched": "Bu filmi izlədiklərimdən silmək istəyirsiniz?"
   },
   "lists": {
     "title": "Siyahılar",

@@ -207,7 +207,8 @@
     "uploadError": "No se pudo subir la foto, inténtalo de nuevo",
     "editReview": "Editar reseña",
     "confirmDeleteReview": "¿Seguro que quieres eliminar esta reseña?",
-    "confirmDeleteScreening": "¿Quieres eliminar esta sesión?"
+    "confirmDeleteScreening": "¿Quieres eliminar esta sesión?",
+    "confirmRemoveWatched": "¿Quitar esta película de tus películas vistas?"
   },
   "lists": {
     "title": "Listas",

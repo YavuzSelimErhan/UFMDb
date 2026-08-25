@@ -207,7 +207,8 @@
     "uploadError": "Fotoğraf yüklenemedi, tekrar deneyin",
     "editReview": "Yorumu Düzenle",
     "confirmDeleteReview": "Bu yorumu silmek istediğine emin misin?",
-    "confirmDeleteScreening": "Bu seansı silmek istiyor musun?"
+    "confirmDeleteScreening": "Bu seansı silmek istiyor musun?",
+    "confirmRemoveWatched": "Bu filmi izlediklerimden kaldırmak istiyor musun?"
   },
   "lists": {
     "title": "Listeler",

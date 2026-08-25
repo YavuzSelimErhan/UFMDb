@@ -207,7 +207,8 @@
     "uploadError": "Falha ao enviar a foto, tente novamente",
     "editReview": "Editar crítica",
     "confirmDeleteReview": "Tem certeza de que deseja excluir esta crítica?",
-    "confirmDeleteScreening": "Deseja excluir esta sessão?"
+    "confirmDeleteScreening": "Deseja excluir esta sessão?",
+    "confirmRemoveWatched": "Remover este filme dos filmes assistidos?"
   },
   "lists": {
     "title": "Listas",

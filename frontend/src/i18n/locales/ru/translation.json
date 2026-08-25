@@ -207,7 +207,8 @@
     "uploadError": "Не удалось загрузить фото, попробуйте снова",
     "editReview": "Редактировать рецензию",
     "confirmDeleteReview": "Вы уверены, что хотите удалить эту рецензию?",
-    "confirmDeleteScreening": "Удалить этот сеанс?"
+    "confirmDeleteScreening": "Удалить этот сеанс?",
+    "confirmRemoveWatched": "Убрать этот фильм из просмотренных?"
   },
   "lists": {
     "title": "Списки",
