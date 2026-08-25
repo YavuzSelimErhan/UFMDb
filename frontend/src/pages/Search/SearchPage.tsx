@@ -110,6 +110,10 @@ function filterFromParams(params: URLSearchParams): MovieSearchFilter {
     minRating: params.get("minRating")
       ? Number(params.get("minRating"))
       : undefined,
+
+    // BURAYI EKLE
+    releaseDateFrom: params.get("releaseDateFrom") ?? undefined,
+    releaseDateTo: params.get("releaseDateTo") ?? undefined,
   };
 }
 
@@ -132,6 +136,8 @@ function writeFilterParams(n: URLSearchParams, filter: MovieSearchFilter) {
   set("yearFrom", filter.yearFrom);
   set("yearTo", filter.yearTo);
   set("minRating", filter.minRating);
+  set("releaseDateFrom", filter.releaseDateFrom);
+  set("releaseDateTo", filter.releaseDateTo);
 }
 
 export default function SearchPage() {
