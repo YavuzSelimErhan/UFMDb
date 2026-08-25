@@ -4,13 +4,11 @@ using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.DTOs;
 namespace UFMDb.Application.Features.Movies.HomeFeed;
 
-public record CuratedListDto(Guid Id, string Title, string TitleTr, List<MovieListItemDto> Movies);
 public record HomeFeedDto(
     List<MovieListItemDto> Featured,
     List<MovieListItemDto> Popular,
     List<MovieListItemDto> TopRated,
-    List<MovieListItemDto> Trending,
-    List<CuratedListDto> CuratedLists
+    List<MovieListItemDto> Trending
 );
 
 // Misafir kullanıcılar da ana sayfayı görebildiği için UserId opsiyonel
@@ -54,30 +52,14 @@ public class GetHomeFeedQueryHandler : IRequestHandler<GetHomeFeedQuery, HomeFee
             .OrderByDescending(m => m.ViewCount * 0.6 + m.LikeCount * 0.4)
             .Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
 
-        var curatedLists = await _context.CuratedLists.AsNoTracking()
-            .OrderBy(cl => cl.DisplayOrder)
-            .Select(cl => new CuratedListDto(
-                cl.Id,
-                cl.Title,
-                cl.TitleTr,
-                cl.Items.OrderBy(i => i.Order).Select(i => new MovieListItemDto(
-                    i.Movie.Id, i.Movie.Title, i.Movie.ReleaseYear, i.Movie.PosterUrl,
-                    (decimal)i.Movie.AverageRating, i.Movie.RatingCount,
-                    i.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
-                    i.Movie.BackdropUrl, i.Movie.Overview,
-                    false, false, i.Movie.ReleaseDate
-                )).ToList()
-            )).ToListAsync(ct);
-
         // EF Core'un projeksiyon içinde HashSet.Contains ile SQL üretemediği durumlar için,
         // bayrakları sorgu sonrası bellek üzerinde set ediyoruz (film sayısı zaten sınırlı).
         ApplyFlags(featured, watchlistMovieIds, likedMovieIds);
         ApplyFlags(popular, watchlistMovieIds, likedMovieIds);
         ApplyFlags(topRated, watchlistMovieIds, likedMovieIds);
         ApplyFlags(trending, watchlistMovieIds, likedMovieIds);
-        foreach (var cl in curatedLists) ApplyFlags(cl.Movies, watchlistMovieIds, likedMovieIds);
 
-        return new HomeFeedDto(featured, popular, topRated, trending, curatedLists);
+        return new HomeFeedDto(featured, popular, topRated, trending);
     }
 
     private static void ApplyFlags(List<MovieListItemDto> items, HashSet<Guid> watchlistMovieIds, HashSet<Guid> likedMovieIds)

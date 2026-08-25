@@ -38,9 +38,11 @@ public record MovieSearchQueryDto(
     double? MinRating,
     int Page = 1,
     int PageSize = 20,
-    string? SortBy = "title", // title | rating | year
+    string? SortBy = "title", // title | rating | year | popularity | newest | releaseDate
     string? SortDirection = "asc", // asc | desc
     int? YearFrom = null,
     int? YearTo = null,
-    string? DirectorName = null
+    string? DirectorName = null,
+    DateTime? ReleaseDateFrom = null,
+    DateTime? ReleaseDateTo = null
 );

@@ -18,6 +18,10 @@ import "./HomePage.css";
 
 const RAIL_SIZE = 15;
 const CURRENT_YEAR = new Date().getFullYear();
+// Trend rail'i için geriye dönük kaç yıl taransın.
+const TRENDING_YEARS_BACK = 2;
+// "Yakında vizyonda" filtresi için bugünün tarihi (YYYY-MM-DD).
+const TODAY_ISO = new Date().toISOString().split("T")[0];
 
 export default function HomePage() {
   const { t, i18n } = useTranslation();
@@ -69,6 +73,31 @@ export default function HomePage() {
     return match ? (i18n.language === "tr" ? match.nameTr : match.name) : name;
   };
 
+  // Popüler: tüm zamanlar, oy sayısına göre (backend'de RatingCount bazlı sıralıyor).
+  const { data: popularMovies, isLoading: isPopularLoading } = useQuery({
+    queryKey: ["home-popular"],
+    queryFn: () =>
+      movieService.search({
+        page: 1,
+        pageSize: RAIL_SIZE,
+        sortBy: "popularity",
+        sortDirection: "desc",
+      }),
+  });
+
+  // Trend: son N yılın en yüksek oy sayılı filmleri.
+  const { data: trendingMovies, isLoading: isTrendingLoading } = useQuery({
+    queryKey: ["home-trending", TRENDING_YEARS_BACK],
+    queryFn: () =>
+      movieService.search({
+        page: 1,
+        pageSize: RAIL_SIZE,
+        sortBy: "popularity",
+        sortDirection: "desc",
+        yearFrom: CURRENT_YEAR - TRENDING_YEARS_BACK,
+      }),
+  });
+
   const { data: newestMovies, isLoading: isNewestLoading } = useQuery({
     queryKey: ["home-newest"],
     queryFn: () =>
@@ -80,15 +109,17 @@ export default function HomePage() {
       }),
   });
 
+  // Yakında vizyonda: gerçek vizyon tarihi bugünden sonra olan filmler.
+  // Backend'de MovieSearchQueryDto.ReleaseDateFrom + "releaseDate" sortBy case'i eklendikten sonra çalışır.
   const { data: upcomingMovies, isLoading: isUpcomingLoading } = useQuery({
     queryKey: ["home-upcoming"],
     queryFn: () =>
       movieService.search({
         page: 1,
         pageSize: RAIL_SIZE,
-        sortBy: "year",
+        sortBy: "releaseDate",
         sortDirection: "asc",
-        yearFrom: CURRENT_YEAR,
+        releaseDateFrom: TODAY_ISO,
       }),
   });
 
@@ -140,14 +171,17 @@ export default function HomePage() {
               />
             )}
 
-            <ThemedMovieRail
-              eyebrow={t("home.trendingEyebrow")}
-              title={t("home.trending")}
-              movies={data.trending}
-              theme="neon"
-              showRank
-              seeAllHref="/search?sortBy=popularity&sortDirection=desc"
-            />
+            {isTrendingLoading && <RailSkeleton />}
+            {trendingMovies && trendingMovies.items.length > 0 && (
+              <ThemedMovieRail
+                eyebrow={t("home.trendingEyebrow")}
+                title={t("home.trending")}
+                movies={trendingMovies.items}
+                theme="neon"
+                showRank
+                seeAllHref={`/search?sortBy=popularity&sortDirection=desc&yearFrom=${CURRENT_YEAR - TRENDING_YEARS_BACK}`}
+              />
+            )}
 
             <ThemedMovieRail
               eyebrow={t("home.topRatedEyebrow")}
@@ -158,13 +192,17 @@ export default function HomePage() {
               seeAllHref="/search?sortBy=rating&sortDirection=desc"
             />
 
-            <ThemedMovieRail
-              eyebrow={t("home.popularEyebrow")}
-              title={t("home.popular")}
-              movies={data.popular}
-              theme="frost"
-              seeAllHref="/search?sortBy=popularity&sortDirection=desc"
-            />
+            {isPopularLoading && <RailSkeleton />}
+            {popularMovies && popularMovies.items.length > 0 && (
+              <ThemedMovieRail
+                eyebrow={t("home.popularEyebrow")}
+                title={t("home.popular")}
+                movies={popularMovies.items}
+                theme="frost"
+                showRank
+                seeAllHref="/search?sortBy=popularity&sortDirection=desc"
+              />
+            )}
 
             {isGenreLoading && <RailSkeleton />}
             {genreMovies && genreMovies.items.length > 0 && topGenre && (
@@ -195,7 +233,7 @@ export default function HomePage() {
                 title={t("home.upcoming")}
                 movies={upcomingMovies.items}
                 theme="neon"
-                seeAllHref={`/search?sortBy=year&sortDirection=asc&yearFrom=${CURRENT_YEAR}`}
+                seeAllHref={`/search?sortBy=releaseDate&sortDirection=asc&releaseDateFrom=${TODAY_ISO}`}
               />
             )}
 

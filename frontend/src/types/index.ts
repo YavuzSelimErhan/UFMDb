@@ -107,8 +107,16 @@ export interface MovieSearchFilter {
   minRating?: number;
   page?: number;
   pageSize?: number;
-  sortBy?: "title" | "rating" | "year" | "popularity" | "newest";
+  sortBy?:
+    | "title"
+    | "rating"
+    | "year"
+    | "popularity"
+    | "newest"
+    | "releaseDate";
   sortDirection?: "asc" | "desc";
+  releaseDateFrom?: string;
+  releaseDateTo?: string;
 }
 
 export interface Genre {
@@ -130,7 +138,6 @@ export interface HomeFeed {
   popular: MovieListItem[];
   topRated: MovieListItem[];
   trending: MovieListItem[];
-  curatedLists: CuratedListDto[];
 }
 
 export interface ActorListItem {

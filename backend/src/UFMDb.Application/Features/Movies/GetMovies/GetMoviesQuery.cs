@@ -32,6 +32,10 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
         {
             if (f.YearFrom.HasValue) query = query.Where(m => m.ReleaseYear >= f.YearFrom.Value);
             if (f.YearTo.HasValue) query = query.Where(m => m.ReleaseYear <= f.YearTo.Value);
+            if (f.ReleaseDateFrom.HasValue)
+                query = query.Where(m => m.ReleaseDate >= f.ReleaseDateFrom.Value);
+            if (f.ReleaseDateTo.HasValue)
+                query = query.Where(m => m.ReleaseDate <= f.ReleaseDateTo.Value);
         }
         else if (f.Year.HasValue)
         {
@@ -56,6 +60,8 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             ("popularity", false) => query.OrderBy(m => m.RatingCount).ThenBy(m => m.AverageRating),
             ("newest", true) => query.OrderByDescending(m => m.CreatedAtUtc),
             ("newest", false) => query.OrderBy(m => m.CreatedAtUtc),
+            ("releaseDate", true) => query.OrderByDescending(m => m.ReleaseDate),
+            ("releaseDate", false) => query.OrderBy(m => m.ReleaseDate),
             (_, true) => query.OrderByDescending(m => m.Title),
             _ => query.OrderBy(m => m.Title)
         };

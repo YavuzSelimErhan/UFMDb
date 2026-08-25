@@ -16,9 +16,7 @@
     "popular": "Popüler Filmler",
     "topRated": "En Yüksek Puanlılar",
     "trending": "Trend Olanlar",
-    "curated": "Küratör Seçkileri",
     "featured": "Öne Çıkan",
-    "curatedBadge": "Küratör Seçkisi",
     "seeAll": "Tümünü Gör",
     "trendingEyebrow": "Canlı Sıralama",
     "popularEyebrow": "Bu Ay Öne Çıkan",
@@ -33,7 +31,6 @@
     "genresCountSuffix": "TÜR",
     "collectionsEyebrow": "Koleksiyon",
     "collections": "Koleksiyonlar",
-    "exploreCollection": "Keşfet",
     "viewAllLists": "Tüm Listeleri Gör",
     "watchlistEyebrow": "İZLEME LİSTEN",
     "watchlist": "İzleme Listen",
@@ -51,6 +48,7 @@
     "releaseDate": "Vizyon Tarihi",
     "rating": "Puan",
     "like": "Beğen",
+    "unlike": "Beğenmekten Vazgeç",
     "liked": "Beğenildi",
     "addWatchlist": "İzleme Listesine Ekle",
     "inWatchlist": "İzleme Listemde",
@@ -281,7 +279,9 @@
     "retry": "Tekrar Dene",
     "back": "Geri",
     "forward": "İleri",
-    "confirm": "Onayla"
+    "confirm": "Onayla",
+    "close": "Kapat",
+    "clear": "Temizle"
   },
   "admin": {
     "tabs": {
