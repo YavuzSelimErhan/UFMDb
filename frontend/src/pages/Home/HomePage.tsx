@@ -233,7 +233,7 @@ export default function HomePage() {
                 title={t("home.upcoming")}
                 movies={upcomingMovies.items}
                 theme="neon"
-                seeAllHref={`/search?sortBy=releaseDate&sortDirection=asc&releaseDateFromUtc=${TODAY_ISO}`}
+                seeAllHref={`/search?sortBy=releaseDate&sortDirection=asc&releaseDateFrom=${TODAY_ISO}`}
               />
             )}
 
