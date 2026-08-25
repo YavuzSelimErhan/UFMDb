@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { Star, Bookmark, Heart, Trash2, Check, X } from "lucide-react";
+import { Star, Bookmark, Heart, Trash2, Check, X, Pencil } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { movieService } from "@/services";
@@ -134,6 +134,9 @@ export default function MovieCard({
           >
             <Star size={12} fill="#d4af37" stroke="#d4af37" />
             <span>{userRating.toFixed(1)}</span>
+            {onRate && (
+              <Pencil size={10} className="movie-card__user-rating-edit" />
+            )}
           </button>
         )}
 

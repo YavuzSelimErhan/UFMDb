@@ -69,7 +69,7 @@
 }
 
 .movie-card__title {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 600;
   line-height: 1.3;
   white-space: nowrap;
@@ -82,7 +82,7 @@
 }
 
 .movie-card__meta {
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   margin-top: 5px;
   white-space: nowrap;
   overflow: hidden;
@@ -224,10 +224,10 @@
   font-family: "SF Mono", monospace;
   font-size: 0.72rem;
   font-weight: 800;
-  color: var(--color-accent);
+  color: var(--card-accent, var(--color-accent));
   background: rgba(10, 12, 16, 0.78);
   backdrop-filter: blur(6px);
-  border: 1px solid var(--color-accent);
+  border: 1px solid var(--card-accent, var(--color-accent));
   padding: 2px 7px;
   border-radius: 6px;
 }
@@ -239,9 +239,23 @@
 }
 .movie-card__user-rating.is-clickable {
   cursor: pointer;
+  transition:
+    transform 150ms,
+    background 150ms,
+    box-shadow 150ms;
+}
+.movie-card__user-rating-edit {
+  display: none;
+  color: rgba(255, 255, 255, 0.7);
+  margin-left: 2px;
 }
 .movie-card__user-rating.is-clickable:hover {
-  background-color: rgba(10, 12, 16, 0.92);
+  background-color: rgba(10, 12, 16, 0.95);
+  transform: scale(1.06);
+  box-shadow: 0 0 0 1px #d4af37;
+}
+.movie-card__user-rating.is-clickable:hover .movie-card__user-rating-edit {
+  display: inline-flex;
 }
 
 .movie-card__rate-cta {

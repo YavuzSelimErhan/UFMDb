@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { ArrowUpDown, LayoutGrid, LayoutList } from "lucide-react";
 import { profileService, movieService } from "@/services";
 import Dropdown from "@/components/search/Dropdown";
@@ -34,11 +35,15 @@ function formatDate(iso: string, locale: string): string {
 
 export default function ProfileFilmsTab() {
   const { t, i18n } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const filter = (searchParams.get("ff") as FilterType) || "all";
+  const sortBy = searchParams.get("fs") || "watched-desc";
+  const viewMode = (searchParams.get("fv") as ViewMode) || "grid";
+  const lastPageParam = Number(searchParams.get("fp")) || 1;
+
   const [entries, setEntries] = useState<WatchedMovie[]>([]);
   const [counts, setCounts] = useState({ all: 0, rated: 0, unrated: 0 });
-  const [filter, setFilter] = useState<FilterType>("all");
-  const [sortBy, setSortBy] = useState("watched-desc");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,6 +52,26 @@ export default function ProfileFilmsTab() {
   const [error, setError] = useState<string | null>(null);
 
   const hasRatingParam = filter === "all" ? undefined : filter === "rated";
+
+  const setFilter = (v: FilterType) => {
+    const n = new URLSearchParams(searchParams);
+    v === "all" ? n.delete("ff") : n.set("ff", v);
+    n.delete("fp");
+    setSearchParams(n, { replace: true });
+  };
+
+  const setSortBy = (v: string) => {
+    const n = new URLSearchParams(searchParams);
+    v === "watched-desc" ? n.delete("fs") : n.set("fs", v);
+    n.delete("fp");
+    setSearchParams(n, { replace: true });
+  };
+
+  const setViewMode = (v: ViewMode) => {
+    const n = new URLSearchParams(searchParams);
+    v === "grid" ? n.delete("fv") : n.set("fv", v);
+    setSearchParams(n, { replace: true });
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -81,37 +106,72 @@ export default function ProfileFilmsTab() {
     };
   }, [entries.length]);
 
-  const loadPage = useCallback(
-    async (targetPage: number, replace: boolean) => {
-      if (replace) setIsLoading(true);
-      else setIsLoadingMore(true);
+  // Filtre/sıralama değiştiğinde ilk sayfadan başla; geri navigasyonda ise
+  // URL'deki fp'ye kadar olan tüm sayfaları sırayla yükleyip kaldığı yeri geri getir.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setIsLoading(true);
       setError(null);
       try {
-        const result = await profileService.getWatchedFilms({
-          page: targetPage,
+        const first = await profileService.getWatchedFilms({
+          page: 1,
           pageSize: PAGE_SIZE,
           sortBy,
           hasRating: hasRatingParam,
         });
-        setEntries((prev) =>
-          replace ? result.items : [...prev, ...result.items],
-        );
-        setPage(result.page);
-        setTotalPages(result.totalPages);
+        if (cancelled) return;
+        let items = first.items;
+        let last = first;
+        for (let p = 2; p <= Math.min(lastPageParam, first.totalPages); p++) {
+          // eslint-disable-next-line no-await-in-loop
+          last = await profileService.getWatchedFilms({
+            page: p,
+            pageSize: PAGE_SIZE,
+            sortBy,
+            hasRating: hasRatingParam,
+          });
+          if (cancelled) return;
+          items = [...items, ...last.items];
+        }
+        setEntries(items);
+        setPage(last.page);
+        setTotalPages(last.totalPages);
       } catch {
-        setError(t("profile.filmsLoadError"));
+        if (!cancelled) setError(t("profile.filmsLoadError"));
       } finally {
-        setIsLoading(false);
-        setIsLoadingMore(false);
+        if (!cancelled) setIsLoading(false);
       }
-    },
-    [sortBy, hasRatingParam, t],
-  );
-
-  useEffect(() => {
-    loadPage(1, true);
+    })();
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, sortBy]);
+
+  const loadMore = async () => {
+    setIsLoadingMore(true);
+    setError(null);
+    try {
+      const targetPage = page + 1;
+      const result = await profileService.getWatchedFilms({
+        page: targetPage,
+        pageSize: PAGE_SIZE,
+        sortBy,
+        hasRating: hasRatingParam,
+      });
+      setEntries((prev) => [...prev, ...result.items]);
+      setPage(result.page);
+      setTotalPages(result.totalPages);
+      const n = new URLSearchParams(searchParams);
+      result.page > 1 ? n.set("fp", String(result.page)) : n.delete("fp");
+      setSearchParams(n, { replace: true });
+    } catch {
+      setError(t("profile.filmsLoadError"));
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   const handleRate = async (movieId: string, value: number) => {
     setSavingMovieId(movieId);
@@ -251,7 +311,7 @@ export default function ProfileFilmsTab() {
               <button
                 type="button"
                 className="load-more-btn btn-secondary"
-                onClick={() => loadPage(page + 1, false)}
+                onClick={loadMore}
                 disabled={isLoadingMore}
               >
                 {isLoadingMore

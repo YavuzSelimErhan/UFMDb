@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import ScrollToTop from "@/components/common/ScrollToTop";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import HomePage from "@/pages/Home/HomePage";
 import MovieDetailPage from "@/pages/MovieDetail/MovieDetailPage";
@@ -18,40 +17,48 @@ import AdminPage from "@/pages/Admin/AdminPage";
 import ScreeningLogPage from "@/pages/ScreeningLog/ScreeningLogPage";
 import SessionManager from "@/components/common/SessionManager";
 import EditProfilePage from "@/pages/Profile/EditProfilePage";
+import { useScrollRestoration } from "@/hooks/useScrollRestoration";
+
+function AppShell() {
+  useScrollRestoration();
+
+  return (
+    <div className="app-shell">
+      <Navbar />
+      <main className="app-shell__main">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/movies/:id" element={<MovieDetailPage />} />
+          <Route path="/actors/:id" element={<ActorDetailPage />} />
+          <Route path="/directors/:id" element={<DirectorDetailPage />} />
+          <Route path="/lists" element={<ListsPage />} />
+          <Route path="/lists/:id" element={<ListDetailPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/edit" element={<EditProfilePage />} />
+            <Route path="/log" element={<ScreeningLogPage />} />
+          </Route>
+
+          <Route element={<ProtectedRoute requireAdmin />}>
+            <Route path="/admin" element={<AdminPage />} />
+          </Route>
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  );
+}
 
 export default function App() {
   return (
     <BrowserRouter basename="/UFMDb">
       <SessionManager />
-      <ScrollToTop />
-      <div className="app-shell">
-        <Navbar />
-        <main className="app-shell__main">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/movies/:id" element={<MovieDetailPage />} />
-            <Route path="/actors/:id" element={<ActorDetailPage />} />
-            <Route path="/directors/:id" element={<DirectorDetailPage />} />
-            <Route path="/lists" element={<ListsPage />} />
-            <Route path="/lists/:id" element={<ListDetailPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-
-            <Route element={<ProtectedRoute />}>
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/profile/edit" element={<EditProfilePage />} />
-              <Route path="/log" element={<ScreeningLogPage />} />
-            </Route>
-
-            <Route element={<ProtectedRoute requireAdmin />}>
-              <Route path="/admin" element={<AdminPage />} />
-            </Route>
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+      <AppShell />
     </BrowserRouter>
   );
 }

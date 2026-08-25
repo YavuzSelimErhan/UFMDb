@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
@@ -93,29 +92,68 @@ const TABS: { key: Tab; labelKey: string }[] = [
   { key: "directors", labelKey: "search.directorsTab" },
 ];
 
+function filterFromParams(params: URLSearchParams): MovieSearchFilter {
+  return {
+    page: Number(params.get("page")) || 1,
+    pageSize: 25,
+    sortBy:
+      (params.get("sortBy") as MovieSearchFilter["sortBy"]) ?? "popularity",
+    sortDirection: (params.get("sortDirection") as "asc" | "desc") ?? "desc",
+    genre: params.get("genre") ?? undefined,
+    title: params.get("title") ?? undefined,
+    country: params.get("country") ?? undefined,
+    year: params.get("year") ? Number(params.get("year")) : undefined,
+    yearFrom: params.get("yearFrom")
+      ? Number(params.get("yearFrom"))
+      : undefined,
+    yearTo: params.get("yearTo") ? Number(params.get("yearTo")) : undefined,
+    minRating: params.get("minRating")
+      ? Number(params.get("minRating"))
+      : undefined,
+  };
+}
+
+function writeFilterParams(n: URLSearchParams, filter: MovieSearchFilter) {
+  const set = (
+    key: string,
+    value: string | number | undefined,
+    skip?: string | number,
+  ) => {
+    if (value == null || value === skip) n.delete(key);
+    else n.set(key, String(value));
+  };
+  set("page", filter.page, 1);
+  set("sortBy", filter.sortBy, "popularity");
+  set("sortDirection", filter.sortDirection, "desc");
+  set("genre", filter.genre);
+  set("title", filter.title);
+  set("country", filter.country);
+  set("year", filter.year);
+  set("yearFrom", filter.yearFrom);
+  set("yearTo", filter.yearTo);
+  set("minRating", filter.minRating);
+}
+
 export default function SearchPage() {
   const { t, i18n } = useTranslation();
-  const [searchParams] = useSearchParams();
-  const [tab, setTab] = useState<Tab>("movies");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const tab = (searchParams.get("tab") as Tab) || "movies";
   const theme = THEME[tab];
 
-  // ---- Film state ----
-  const [filter, setFilter] = useState<MovieSearchFilter>({
-    page: 1,
-    pageSize: 25,
-    sortBy: "popularity",
-    sortDirection: "desc",
-    genre: searchParams.get("genre") ?? undefined,
-    title: searchParams.get("title") ?? undefined,
-  });
+  // ---- Film state (URL'den) ----
+  const filter = filterFromParams(searchParams);
 
-  // ---- Oyuncu state ----
-  const [actorQuery, setActorQuery] = useState("");
-  const [actorPage, setActorPage] = useState(1);
+  // ---- Oyuncu state (URL'den) ----
+  const actorQuery = tab === "actors" ? (searchParams.get("q") ?? "") : "";
+  const actorPage =
+    tab === "actors" ? Number(searchParams.get("page")) || 1 : 1;
 
-  // ---- Yönetmen state ----
-  const [directorQuery, setDirectorQuery] = useState("");
-  const [directorPage, setDirectorPage] = useState(1);
+  // ---- Yönetmen state (URL'den) ----
+  const directorQuery =
+    tab === "directors" ? (searchParams.get("q") ?? "") : "";
+  const directorPage =
+    tab === "directors" ? Number(searchParams.get("page")) || 1 : 1;
 
   const { data: genres } = useQuery({
     queryKey: ["genres"],
@@ -146,10 +184,24 @@ export default function SearchPage() {
     enabled: tab === "directors",
   });
 
-  const update = (patch: Partial<MovieSearchFilter>) =>
-    setFilter((f) => ({ ...f, ...patch, page: 1 }));
+  const setTab = (next: Tab) => {
+    // Tab değişince o tab'a ait temiz bir arama başlat (diğerinin filtrelerini taşımıyoruz)
+    const n = new URLSearchParams();
+    if (next !== "movies") n.set("tab", next);
+    setSearchParams(n);
+  };
+
+  const update = (patch: Partial<MovieSearchFilter>) => {
+    const next = { ...filter, ...patch, page: 1 };
+    const n = new URLSearchParams(searchParams);
+    writeFilterParams(n, next);
+    setSearchParams(n);
+  };
+
   const goToPage = (page: number) => {
-    setFilter((f) => ({ ...f, page }));
+    const n = new URLSearchParams(searchParams);
+    writeFilterParams(n, { ...filter, page });
+    setSearchParams(n);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -225,13 +277,20 @@ export default function SearchPage() {
   const handleQueryChange = (value: string) => {
     if (tab === "movies") {
       update({ title: value || undefined });
-    } else if (tab === "actors") {
-      setActorQuery(value);
-      setActorPage(1);
-    } else {
-      setDirectorQuery(value);
-      setDirectorPage(1);
+      return;
     }
+    const n = new URLSearchParams(searchParams);
+    if (value) n.set("q", value);
+    else n.delete("q");
+    n.delete("page");
+    setSearchParams(n);
+  };
+
+  const setPersonPage = (page: number) => {
+    const n = new URLSearchParams(searchParams);
+    if (page > 1) n.set("page", String(page));
+    else n.delete("page");
+    setSearchParams(n);
   };
 
   const cssVars = {
@@ -407,7 +466,7 @@ export default function SearchPage() {
           query={actorQuery}
           results={actorResults}
           entityRoute="/actors"
-          onPageChange={setActorPage}
+          onPageChange={setPersonPage}
         />
       )}
 
@@ -417,7 +476,7 @@ export default function SearchPage() {
           query={directorQuery}
           results={directorResults}
           entityRoute="/directors"
-          onPageChange={setDirectorPage}
+          onPageChange={setPersonPage}
         />
       )}
     </div>

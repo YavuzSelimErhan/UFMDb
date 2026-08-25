@@ -1,7 +1,6 @@
-import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Clock,
   Settings2,
@@ -45,7 +44,20 @@ export default function ProfilePage() {
   const dispatch = useAppDispatch();
   const theme = useAppSelector((s) => s.ui.theme);
   const navigate = useNavigate();
-  const [tab, setTab] = useState<ProfileTab>("profile");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = (searchParams.get("tab") as ProfileTab) || "profile";
+
+  const setTab = (next: ProfileTab) => {
+    const n = new URLSearchParams(searchParams);
+    if (next === "profile") n.delete("tab");
+    else n.set("tab", next);
+    // Tab değişince Films sekmesine ait filtre/sıralama/sayfa param'larını taşımıyoruz
+    n.delete("ff");
+    n.delete("fs");
+    n.delete("fv");
+    n.delete("fp");
+    setSearchParams(n);
+  };
 
   const {
     data: profile,
