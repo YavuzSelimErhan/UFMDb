@@ -24,9 +24,16 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             : (DateTime?)null;
 
         if (!string.IsNullOrWhiteSpace(f.Title))
-            query = query.Where(m => m.Title.Contains(f.Title) || m.OriginalTitle.Contains(f.Title));
+        {
+            var titlePattern = $"%{f.Title}%";
+            query = query.Where(m =>
+                EF.Functions.ILike(m.Title, titlePattern) ||
+                EF.Functions.ILike(m.OriginalTitle, titlePattern));
+        }
+
         if (!string.IsNullOrWhiteSpace(f.Genre))
             query = query.Where(m => m.MovieGenres.Any(mg => mg.Genre.Name == f.Genre || mg.Genre.NameTr == f.Genre));
+
         if (!string.IsNullOrWhiteSpace(f.Country))
         {
             var countryMatch = await _context.Countries.AsNoTracking()
@@ -48,9 +55,17 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             query = query.Where(m => m.ReleaseDate <= releaseDateToUtc.Value);
 
         if (!string.IsNullOrWhiteSpace(f.ActorName))
-            query = query.Where(m => m.MovieActors.Any(ma => ma.Actor.FullName.Contains(f.ActorName)));
+        {
+            var actorPattern = $"%{f.ActorName}%";
+            query = query.Where(m => m.MovieActors.Any(ma => EF.Functions.ILike(ma.Actor.FullName, actorPattern)));
+        }
+
         if (!string.IsNullOrWhiteSpace(f.DirectorName))
-            query = query.Where(m => m.MovieDirectors.Any(md => md.Director.FullName.Contains(f.DirectorName)));
+        {
+            var directorPattern = $"%{f.DirectorName}%";
+            query = query.Where(m => m.MovieDirectors.Any(md => EF.Functions.ILike(md.Director.FullName, directorPattern)));
+        }
+
         if (f.MinRating.HasValue)
             query = query.Where(m => m.AverageRating >= f.MinRating.Value);
 

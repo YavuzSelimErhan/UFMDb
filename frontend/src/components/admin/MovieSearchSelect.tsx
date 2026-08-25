@@ -5,16 +5,15 @@ import { movieService } from "@/services";
 import "./ActorSearchSelect.css";
 
 interface Props {
-  onSelect: (
-    movieId: string,
-    title: string,
-    posterUrl: string,
-    releaseDate: string,
-  ) => void;
+  onSelect: (movieId: string, title: string, posterUrl: string) => void;
+  excludeUnreleased?: boolean;
 }
 
 /** Listeye film eklemek için arama kutusu: seçilince listeye ekler, kutuyu temizler. */
-export default function MovieSearchSelect({ onSelect }: Props) {
+export default function MovieSearchSelect({
+  onSelect,
+  excludeUnreleased,
+}: Props) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -25,6 +24,10 @@ export default function MovieSearchSelect({ onSelect }: Props) {
     queryFn: () => movieService.search({ title: query, page: 1, pageSize: 6 }),
     enabled: query.trim().length > 0,
   });
+
+  const results = excludeUnreleased
+    ? data?.items.filter((m) => new Date(m.releaseDate).getTime() <= Date.now())
+    : data?.items;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -51,14 +54,14 @@ export default function MovieSearchSelect({ onSelect }: Props) {
       />
       {isOpen && query.trim().length > 0 && (
         <div className="actor-select__results">
-          {data?.items.length ? (
-            data.items.map((m) => (
+          {results?.length ? (
+            results.map((m) => (
               <button
                 key={m.id}
                 type="button"
                 className="actor-select__result"
                 onClick={() => {
-                  onSelect(m.id, m.title, m.posterUrl, m.releaseDate);
+                  onSelect(m.id, m.title, m.posterUrl);
                   setIsOpen(false);
                   setQuery("");
                 }}
