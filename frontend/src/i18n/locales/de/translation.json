@@ -208,7 +208,21 @@
     "editReview": "Rezension bearbeiten",
     "confirmDeleteReview": "Möchtest du diese Rezension wirklich löschen?",
     "confirmDeleteScreening": "Möchtest du diese Vorführung löschen?",
-    "confirmRemoveWatched": "Diesen Film aus deinen gesehenen Filmen entfernen?"
+    "confirmRemoveWatched": "Diesen Film aus deinen gesehenen Filmen entfernen?",
+    "rateFilm": "Film bewerten",
+    "removeFromWatched": "Aus gesehenen Filmen entfernen",
+    "enterRating": "Bewertung eingeben",
+    "giveStarRating": "{{value}} Sterne geben",
+    "filmsFilterAriaLabel": "Filmfilter",
+    "viewModeAriaLabel": "Ansichtsmodus",
+    "gridView": "Rasteransicht",
+    "freeView": "Freie Ansicht",
+    "filmsLoadError": "Beim Laden der Filme ist ein Fehler aufgetreten.",
+    "ratingSaveError": "Bewertung konnte nicht gespeichert werden, bitte erneut versuchen.",
+    "removeError": "Eintrag konnte nicht gelöscht werden, bitte erneut versuchen.",
+    "loadingMore": "Wird geladen…",
+    "loadMore": "Mehr anzeigen",
+    "noFilmsForFilter": "Keine Filme entsprechen diesem Filter."
   },
   "lists": {
     "title": "Listen",

@@ -208,7 +208,21 @@
     "editReview": "Modifica recensione",
     "confirmDeleteReview": "Sei sicuro di voler eliminare questa recensione?",
     "confirmDeleteScreening": "Vuoi eliminare questa proiezione?",
-    "confirmRemoveWatched": "Rimuovere questo film dai film visti?"
+    "confirmRemoveWatched": "Rimuovere questo film dai film visti?",
+    "rateFilm": "Valuta questo film",
+    "removeFromWatched": "Rimuovi dai visti",
+    "enterRating": "Inserisci la tua valutazione",
+    "giveStarRating": "Dai {{value}} stelle",
+    "filmsFilterAriaLabel": "Filtro film",
+    "viewModeAriaLabel": "Modalità di visualizzazione",
+    "gridView": "Vista a griglia",
+    "freeView": "Vista libera",
+    "filmsLoadError": "Si è verificato un problema durante il caricamento dei film.",
+    "ratingSaveError": "Impossibile salvare la valutazione, riprova.",
+    "removeError": "Impossibile eliminare la voce, riprova.",
+    "loadingMore": "Caricamento…",
+    "loadMore": "Mostra altri",
+    "noFilmsForFilter": "Nessun film corrisponde a questo filtro."
   },
   "lists": {
     "title": "Liste",

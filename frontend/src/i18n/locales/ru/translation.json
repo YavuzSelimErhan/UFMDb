@@ -208,7 +208,21 @@
     "editReview": "Редактировать рецензию",
     "confirmDeleteReview": "Вы уверены, что хотите удалить эту рецензию?",
     "confirmDeleteScreening": "Удалить этот сеанс?",
-    "confirmRemoveWatched": "Убрать этот фильм из просмотренных?"
+    "confirmRemoveWatched": "Убрать этот фильм из просмотренных?",
+    "rateFilm": "Оценить фильм",
+    "removeFromWatched": "Убрать из просмотренных",
+    "enterRating": "Введите вашу оценку",
+    "giveStarRating": "Поставить {{value}} звёзд",
+    "filmsFilterAriaLabel": "Фильтр фильмов",
+    "viewModeAriaLabel": "Режим отображения",
+    "gridView": "Вид сеткой",
+    "freeView": "Свободный вид",
+    "filmsLoadError": "Не удалось загрузить фильмы.",
+    "ratingSaveError": "Не удалось сохранить оценку, попробуйте снова.",
+    "removeError": "Не удалось удалить запись, попробуйте снова.",
+    "loadingMore": "Загрузка…",
+    "loadMore": "Показать ещё",
+    "noFilmsForFilter": "Нет фильмов, соответствующих этому фильтру."
   },
   "lists": {
     "title": "Списки",

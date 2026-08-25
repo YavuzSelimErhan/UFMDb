@@ -208,7 +208,21 @@
     "editReview": "Yorumu Düzenle",
     "confirmDeleteReview": "Bu yorumu silmek istediğine emin misin?",
     "confirmDeleteScreening": "Bu seansı silmek istiyor musun?",
-    "confirmRemoveWatched": "Bu filmi izlediklerimden kaldırmak istiyor musun?"
+    "confirmRemoveWatched": "Bu filmi izlediklerimden kaldırmak istiyor musun?",
+    "rateFilm": "Puanla",
+    "removeFromWatched": "Filmlerimden çıkar",
+    "enterRating": "Puanını gir",
+    "giveStarRating": "{{value}} yıldız ver",
+    "filmsFilterAriaLabel": "Film filtresi",
+    "viewModeAriaLabel": "Görünüm seçimi",
+    "gridView": "Izgara görünümü",
+    "freeView": "Serbest görünüm",
+    "filmsLoadError": "Filmler yüklenirken bir sorun oluştu.",
+    "ratingSaveError": "Puan kaydedilemedi, tekrar deneyin.",
+    "removeError": "Kayıt silinemedi, tekrar deneyin.",
+    "loadingMore": "Yükleniyor…",
+    "loadMore": "Daha fazla göster",
+    "noFilmsForFilter": "Bu filtreye uyan film yok."
   },
   "lists": {
     "title": "Listeler",

@@ -208,7 +208,21 @@
     "editReview": "Rəyi Redaktə Et",
     "confirmDeleteReview": "Bu rəyi silmək istədiyinə əminsən?",
     "confirmDeleteScreening": "Bu seansı silmək istəyirsən?",
-    "confirmRemoveWatched": "Bu filmi izlədiklərimdən silmək istəyirsiniz?"
+    "confirmRemoveWatched": "Bu filmi izlədiklərimdən silmək istəyirsiniz?",
+    "rateFilm": "Filmi qiymətləndir",
+    "removeFromWatched": "İzlədiklərimdən sil",
+    "enterRating": "Qiymətini daxil et",
+    "giveStarRating": "{{value}} ulduz ver",
+    "filmsFilterAriaLabel": "Film filtri",
+    "viewModeAriaLabel": "Görünüş rejimi",
+    "gridView": "Şəbəkə görünüşü",
+    "freeView": "Sərbəst görünüş",
+    "filmsLoadError": "Filmlər yüklənərkən problem yarandı.",
+    "ratingSaveError": "Qiymət saxlanılmadı, yenidən cəhd edin.",
+    "removeError": "Qeyd silinmədi, yenidən cəhd edin.",
+    "loadingMore": "Yüklənir…",
+    "loadMore": "Daha çox göstər",
+    "noFilmsForFilter": "Bu filtrə uyğun film yoxdur."
   },
   "lists": {
     "title": "Siyahılar",

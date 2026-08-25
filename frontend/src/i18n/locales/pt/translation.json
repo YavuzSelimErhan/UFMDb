@@ -208,7 +208,21 @@
     "editReview": "Editar crítica",
     "confirmDeleteReview": "Tem certeza de que deseja excluir esta crítica?",
     "confirmDeleteScreening": "Deseja excluir esta sessão?",
-    "confirmRemoveWatched": "Remover este filme dos filmes assistidos?"
+    "confirmRemoveWatched": "Remover este filme dos filmes assistidos?",
+    "rateFilm": "Avaliar este filme",
+    "removeFromWatched": "Remover dos assistidos",
+    "enterRating": "Insira sua avaliação",
+    "giveStarRating": "Dar {{value}} estrelas",
+    "filmsFilterAriaLabel": "Filtro de filmes",
+    "viewModeAriaLabel": "Modo de exibição",
+    "gridView": "Visualização em grade",
+    "freeView": "Visualização livre",
+    "filmsLoadError": "Ocorreu um problema ao carregar os filmes.",
+    "ratingSaveError": "Não foi possível salvar a avaliação, tente novamente.",
+    "removeError": "Não foi possível excluir o registro, tente novamente.",
+    "loadingMore": "Carregando…",
+    "loadMore": "Mostrar mais",
+    "noFilmsForFilter": "Nenhum filme corresponde a este filtro."
   },
   "lists": {
     "title": "Listas",
