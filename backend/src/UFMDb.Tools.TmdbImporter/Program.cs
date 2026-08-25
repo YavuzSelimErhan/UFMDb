@@ -29,6 +29,7 @@ var targetMovieCount = int.Parse(configuration["Tmdb:TargetMovieCount"] ?? "200"
 var minVoteCount = int.Parse(configuration["Tmdb:MinVoteCount"] ?? "1000");
 var upcomingMovieCount = int.Parse(configuration["Tmdb:UpcomingMovieCount"] ?? "50");
 var upcomingWindowDays = int.Parse(configuration["Tmdb:UpcomingWindowDays"] ?? "180");
+var turkishMovieCount = int.Parse(configuration["Tmdb:TurkishMovieCount"] ?? "200");
 var castLimit = 12; // her filmden alınacak maksimum oyuncu sayısı
 
 if (string.IsNullOrWhiteSpace(apiKey) || apiKey == "REPLACE_WITH_YOUR_TMDB_API_KEY")
@@ -529,14 +530,22 @@ async Task<List<int>> DiscoverUniqueMovieIdsAsync(
     string sortBy,
     int minVoteCountFilter,
     string? releaseDateGte = null,
-    string? releaseDateLte = null)
+    string? releaseDateLte = null,
+    string? originCountry = null)
 {
     var newIds = new List<int>();
     var page = 1;
 
     while (newIds.Count < targetCount && !cts.IsCancellationRequested)
     {
-        var discoverResult = await tmdb.DiscoverMoviesAsync(page, minVoteCountFilter, cts.Token, releaseDateGte, releaseDateLte, sortBy);
+        var discoverResult = await tmdb.DiscoverMoviesAsync(
+            page,
+            minVoteCountFilter,
+            cts.Token,
+            releaseDateGte,
+            releaseDateLte,
+            sortBy,
+            originCountry);
         if (discoverResult.Results.Count == 0) break;
 
         foreach (var r in discoverResult.Results)
@@ -724,6 +733,43 @@ async Task FetchUpcomingMoviesAsync()
     if (newIds.Count == 0)
     {
         Console.WriteLine("İşlenecek yeni film yok, çıkılıyor.");
+        return;
+    }
+
+    await ImportMoviesAsync(newIds, genreMap);
+}
+
+// ---------------- Opsiyonel: en yüksek oy sayısına sahip Türk filmlerini çekme modu ----------------
+// Kullanım: dotnet run --project src/UFMDb.Tools.TmdbImporter -- fetch-turkish
+if (args.Contains("fetch-turkish"))
+{
+    await FetchTurkishMoviesAsync();
+    return;
+}
+
+async Task FetchTurkishMoviesAsync()
+{
+    Console.WriteLine(
+        $"TMDB'den oy sayısına göre en yüksek {turkishMovieCount} yeni Türk filmi bulunuyor...\n");
+
+    var existingTmdbIds = await GetExistingTmdbIdsAsync(dbOptions);
+
+    Console.WriteLine(
+        $"Veritabanında {existingTmdbIds.Count} film zaten mevcut.\n");
+
+    var newIds = await DiscoverUniqueMovieIdsAsync(
+        targetCount: turkishMovieCount,
+        existingTmdbIds: existingTmdbIds,
+        sortBy: "vote_count.desc",
+        minVoteCountFilter: minVoteCount,
+        originCountry: "TR");
+
+    Console.WriteLine(
+        $"\nToplam {newIds.Count} yeni Türk filmi bulundu.\n");
+
+    if (newIds.Count == 0)
+    {
+        Console.WriteLine("İşlenecek yeni Türk filmi yok, çıkılıyor.");
         return;
     }
 

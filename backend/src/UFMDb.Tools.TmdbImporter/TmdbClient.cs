@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using UFMDb.Tools.TmdbImporter.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace UFMDb.Tools.TmdbImporter;
 
@@ -44,19 +45,28 @@ public class TmdbClient
     CancellationToken ct,
     string? releaseDateGte = null,
     string? releaseDateLte = null,
-    string sortBy = "vote_average.desc")
+    string sortBy = "vote_count.desc",
+    string? originCountry = null)
     {
         var url = $"discover/movie?api_key={_apiKey}&language=en-US&sort_by={sortBy}" +
                   $"&include_adult=false&include_video=false&page={page}&vote_count.gte={minVoteCount}";
 
         if (!string.IsNullOrEmpty(releaseDateGte))
             url += $"&primary_release_date.gte={releaseDateGte}";
+
         if (!string.IsNullOrEmpty(releaseDateLte))
             url += $"&primary_release_date.lte={releaseDateLte}";
 
+        if (!string.IsNullOrWhiteSpace(originCountry))
+            url += $"&with_origin_country={originCountry}";
+
         var response = await _http.GetAsync(url, ct);
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<TmdbDiscoverResponse>(_jsonOptions, ct);
+
+        var result = await response.Content.ReadFromJsonAsync<TmdbDiscoverResponse>(
+            _jsonOptions,
+            ct);
+
         return result ?? new TmdbDiscoverResponse();
     }
 
