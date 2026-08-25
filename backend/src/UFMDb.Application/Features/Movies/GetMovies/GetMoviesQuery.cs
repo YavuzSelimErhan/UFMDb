@@ -16,6 +16,13 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
         var f = request.Filter;
         var query = _context.Movies.AsNoTracking().Where(m => !m.IsDeleted);
 
+        var releaseDateFromUtc = f.ReleaseDateFrom.HasValue
+            ? DateTime.SpecifyKind(f.ReleaseDateFrom.Value, DateTimeKind.Utc)
+            : (DateTime?)null;
+        var releaseDateToUtc = f.ReleaseDateTo.HasValue
+            ? DateTime.SpecifyKind(f.ReleaseDateTo.Value, DateTimeKind.Utc)
+            : (DateTime?)null;
+
         if (!string.IsNullOrWhiteSpace(f.Title))
             query = query.Where(m => m.Title.Contains(f.Title) || m.OriginalTitle.Contains(f.Title));
         if (!string.IsNullOrWhiteSpace(f.Genre))
@@ -28,19 +35,17 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             query = query.Where(m => m.Country == resolvedCountry);
         }
 
-        if (f.YearFrom.HasValue || f.YearTo.HasValue)
-        {
-            if (f.YearFrom.HasValue) query = query.Where(m => m.ReleaseYear >= f.YearFrom.Value);
-            if (f.YearTo.HasValue) query = query.Where(m => m.ReleaseYear <= f.YearTo.Value);
-            if (f.ReleaseDateFrom.HasValue)
-                query = query.Where(m => m.ReleaseDate >= f.ReleaseDateFrom.Value);
-            if (f.ReleaseDateTo.HasValue)
-                query = query.Where(m => m.ReleaseDate <= f.ReleaseDateTo.Value);
-        }
-        else if (f.Year.HasValue)
-        {
+        if (f.YearFrom.HasValue)
+            query = query.Where(m => m.ReleaseYear >= f.YearFrom.Value);
+        if (f.YearTo.HasValue)
+            query = query.Where(m => m.ReleaseYear <= f.YearTo.Value);
+        if (f.YearFrom is null && f.YearTo is null && f.Year.HasValue)
             query = query.Where(m => m.ReleaseYear == f.Year.Value);
-        }
+
+        if (releaseDateFromUtc.HasValue)
+            query = query.Where(m => m.ReleaseDate >= releaseDateFromUtc.Value);
+        if (releaseDateToUtc.HasValue)
+            query = query.Where(m => m.ReleaseDate <= releaseDateToUtc.Value);
 
         if (!string.IsNullOrWhiteSpace(f.ActorName))
             query = query.Where(m => m.MovieActors.Any(ma => ma.Actor.FullName.Contains(f.ActorName)));

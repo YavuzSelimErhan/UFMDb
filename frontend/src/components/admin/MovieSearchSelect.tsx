@@ -5,7 +5,12 @@ import { movieService } from "@/services";
 import "./ActorSearchSelect.css";
 
 interface Props {
-  onSelect: (movieId: string, title: string, posterUrl: string) => void;
+  onSelect: (
+    movieId: string,
+    title: string,
+    posterUrl: string,
+    releaseDate: string,
+  ) => void;
 }
 
 /** Listeye film eklemek için arama kutusu: seçilince listeye ekler, kutuyu temizler. */
@@ -53,7 +58,7 @@ export default function MovieSearchSelect({ onSelect }: Props) {
                 type="button"
                 className="actor-select__result"
                 onClick={() => {
-                  onSelect(m.id, m.title, m.posterUrl);
+                  onSelect(m.id, m.title, m.posterUrl, m.releaseDate);
                   setIsOpen(false);
                   setQuery("");
                 }}

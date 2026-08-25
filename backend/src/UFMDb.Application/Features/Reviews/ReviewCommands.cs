@@ -64,6 +64,9 @@ public class UpsertRatingCommandHandler : IRequestHandler<UpsertRatingCommand>
         var movie = await _context.Movies.FirstOrDefaultAsync(m => m.Id == request.MovieId, ct)
             ?? throw new NotFoundException(nameof(Movie), request.MovieId);
 
+        if (movie.ReleaseDate > DateTime.UtcNow)
+            throw new ConflictException("Henüz vizyona girmemiş bir filme puan verilemez.");
+
         await MovieRatingRecalculator.UpsertCurrentRatingAsync(_context, movie, request.UserId, request.Value, ct);
     }
 }
@@ -86,8 +89,11 @@ public class UpsertReviewCommandHandler : IRequestHandler<UpsertReviewCommand, G
 
     public async Task<Guid> Handle(UpsertReviewCommand request, CancellationToken ct)
     {
-        var movieExists = await _context.Movies.AnyAsync(m => m.Id == request.MovieId, ct);
-        if (!movieExists) throw new NotFoundException(nameof(Movie), request.MovieId);
+        var movie = await _context.Movies.FirstOrDefaultAsync(m => m.Id == request.MovieId, ct)
+            ?? throw new NotFoundException(nameof(Movie), request.MovieId);
+
+        if (movie.ReleaseDate > DateTime.UtcNow)
+            throw new ConflictException("Henüz vizyona girmemiş bir film için yorum yazılamaz.");
 
         var review = await _context.Reviews
             .FirstOrDefaultAsync(r => r.MovieId == request.MovieId && r.UserId == request.UserId, ct);

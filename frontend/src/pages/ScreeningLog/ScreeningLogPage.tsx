@@ -200,6 +200,7 @@ export default function ScreeningLogPage() {
     id: string;
     title: string;
     posterUrl: string;
+    releaseDate: string;
   } | null>(null);
   const [watchedDate, setWatchedDate] = useState(todayLocalDateString());
   const [addRating, setAddRating] = useState(0);
@@ -268,6 +269,9 @@ export default function ScreeningLogPage() {
           ratedEntries.length
         ).toFixed(1)
       : "—";
+  const isSelectedUnreleased =
+    selectedMovie != null &&
+    new Date(selectedMovie.releaseDate).getTime() > Date.now();
 
   return (
     <div className="container screening-log">
@@ -353,9 +357,15 @@ export default function ScreeningLogPage() {
                 </div>
               ) : (
                 <MovieSearchSelect
-                  onSelect={(movieId, title, posterUrl) =>
-                    setSelectedMovie({ id: movieId, title, posterUrl })
-                  }
+                  onSelect={(movieId, title, posterUrl, releaseDate) => {
+                    setSelectedMovie({
+                      id: movieId,
+                      title,
+                      posterUrl,
+                      releaseDate,
+                    });
+                    setAddRating(0);
+                  }}
                 />
               )}
             </div>
@@ -379,10 +389,17 @@ export default function ScreeningLogPage() {
             </button>
           </div>
 
-          <div className="screening-log__add-rating-row">
-            <label>{t("log.addEntryRating")}</label>
-            <StarRating value={addRating} onChange={setAddRating} />
-          </div>
+          {selectedMovie && !isSelectedUnreleased && (
+            <div className="screening-log__add-rating-row">
+              <label>{t("log.addEntryRating")}</label>
+              <StarRating value={addRating} onChange={setAddRating} />
+            </div>
+          )}
+          {isSelectedUnreleased && (
+            <p className="text-muted screening-log__add-rating-row">
+              {t("movie.notYetReleased")}
+            </p>
+          )}
         </div>
       )}
 

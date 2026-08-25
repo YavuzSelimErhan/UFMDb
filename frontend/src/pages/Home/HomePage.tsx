@@ -19,7 +19,7 @@ import "./HomePage.css";
 const RAIL_SIZE = 15;
 const CURRENT_YEAR = new Date().getFullYear();
 // Trend rail'i için geriye dönük kaç yıl taransın.
-const TRENDING_YEARS_BACK = 2;
+const TRENDING_YEARS_BACK = 1;
 // "Yakında vizyonda" filtresi için bugünün tarihi (YYYY-MM-DD).
 const TODAY_ISO = new Date().toISOString().split("T")[0];
 

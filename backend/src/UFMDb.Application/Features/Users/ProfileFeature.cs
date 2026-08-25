@@ -552,6 +552,9 @@ public class LogScreeningCommandHandler : IRequestHandler<LogScreeningCommand, G
         var movie = await _context.Movies.FirstOrDefaultAsync(m => m.Id == request.MovieId, ct)
             ?? throw new NotFoundException(nameof(Movie), request.MovieId);
 
+        if (request.Rating.HasValue && movie.ReleaseDate > DateTime.UtcNow)
+            throw new ConflictException("Henüz vizyona girmemiş bir filme puan verilemez.");
+
         var entry = new WatchHistory { UserId = request.UserId, MovieId = request.MovieId, WatchedAtUtc = request.WatchedAtUtc, Rating = request.Rating };
         _context.WatchHistory.Add(entry);
 
@@ -581,6 +584,9 @@ public class UpdateScreeningLogEntryCommandHandler : IRequestHandler<UpdateScree
         var entry = await _context.WatchHistory.Include(w => w.Movie)
             .FirstOrDefaultAsync(w => w.Id == request.EntryId && w.UserId == request.UserId, ct)
             ?? throw new NotFoundException(nameof(WatchHistory), request.EntryId);
+
+        if (request.Rating.HasValue && entry.Movie.ReleaseDate > DateTime.UtcNow)
+            throw new ConflictException("Henüz vizyona girmemiş bir filme puan verilemez.");
 
         entry.WatchedAtUtc = request.WatchedAtUtc;
         entry.Rating = request.Rating;

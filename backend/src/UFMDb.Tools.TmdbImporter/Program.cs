@@ -4,6 +4,16 @@ using UFMDb.Domain.Entities;
 using UFMDb.Persistence;
 using UFMDb.Tools.TmdbImporter;
 
+static DateTime? ParseUtcDate(string? value)
+{
+    if (string.IsNullOrWhiteSpace(value)) return null;
+    return DateTime.TryParse(
+        value,
+        System.Globalization.CultureInfo.InvariantCulture,
+        System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal,
+        out var d) ? d : null;
+}
+
 Console.WriteLine("=== UFMDb TMDB Import Aracı ===\n");
 
 // ---------------- Yapılandırma ----------------
@@ -15,8 +25,10 @@ var configuration = new ConfigurationBuilder()
 
 var apiKey = configuration["Tmdb:ApiKey"];
 var connectionString = configuration.GetConnectionString("DefaultConnection");
-var targetMovieCount = int.Parse(configuration["Tmdb:TargetMovieCount"] ?? "1000");
+var targetMovieCount = int.Parse(configuration["Tmdb:TargetMovieCount"] ?? "200");
 var minVoteCount = int.Parse(configuration["Tmdb:MinVoteCount"] ?? "1000");
+var upcomingMovieCount = int.Parse(configuration["Tmdb:UpcomingMovieCount"] ?? "50");
+var upcomingWindowDays = int.Parse(configuration["Tmdb:UpcomingWindowDays"] ?? "180");
 var castLimit = 12; // her filmden alınacak maksimum oyuncu sayısı
 
 if (string.IsNullOrWhiteSpace(apiKey) || apiKey == "REPLACE_WITH_YOUR_TMDB_API_KEY")
@@ -381,7 +393,7 @@ async Task EnrichBatchAsync(DbContextOptions<ApplicationDbContext> options, List
             if (detail is null) { failed++; continue; }
 
             var biography = Truncate(detail.Biography ?? string.Empty, 4000);
-            var birthDate = DateTime.TryParse(detail.Birthday, out var bd) ? (DateTime?)bd : null;
+            var birthDate = ParseUtcDate(detail.Birthday);
 
             // Yaklaşık uyruk: place_of_birth genelde "Şehir, Eyalet, Ülke" formatında —
             // virgülle bölüp son parçayı alıyoruz. Format tutarsızsa yanlış olabilir.
@@ -500,65 +512,38 @@ await using (var db = new ApplicationDbContext(dbOptions))
     Console.WriteLine($"{syncedCount} ülke senkronize edildi.\n");
 }
 
-// ---------------- 2. Mevcut filmleri kontrol et, sadece eksikleri tara ----------------
-Console.WriteLine("Mevcut filmler kontrol ediliyor...");
-List<(int TmdbId, int ReleaseYear)> existingMovies;
-await using (var db = new ApplicationDbContext(dbOptions))
+// ---------------- Ortak: veritabanındaki mevcut TmdbId'leri getir ----------------
+async Task<HashSet<int>> GetExistingTmdbIdsAsync(DbContextOptions<ApplicationDbContext> options)
 {
-    existingMovies = await db.Movies.Where(m => m.TmdbId != null)
-        .Select(m => new ValueTuple<int, int>(m.TmdbId!.Value, m.ReleaseYear))
+    await using var db = new ApplicationDbContext(options);
+    var ids = await db.Movies.Where(m => m.TmdbId != null)
+        .Select(m => m.TmdbId!.Value)
         .ToListAsync(cts.Token);
+    return ids.ToHashSet();
 }
-var existingTmdbIds = existingMovies.Select(m => m.TmdbId).ToHashSet();
-Console.WriteLine($"Veritabanında {existingMovies.Count} film zaten mevcut.\n");
 
-var decades = new List<(string Label, int StartYear, int EndYear, int TargetCount)>
+// ---------------- Ortak: TMDB discover ile benzersiz film ID'si topla ----------------
+async Task<List<int>> DiscoverUniqueMovieIdsAsync(
+    int targetCount,
+    HashSet<int> existingTmdbIds,
+    string sortBy,
+    int minVoteCountFilter,
+    string? releaseDateGte = null,
+    string? releaseDateLte = null)
 {
-    ("1900-1920", 1900, 1919, 15),
-    ("1920-1930", 1920, 1929, 35),
-    ("1930-1940", 1930, 1939, 60),
-    ("1940-1950", 1940, 1949, 100),
-    ("1950-1960", 1950, 1959, 180),
-    ("1960-1970", 1960, 1969, 300),
-    ("1970-1980", 1970, 1979, 450),
-    ("1980-1990", 1980, 1989, 700),
-    ("1990-2000", 1990, 1999, 1200),
-    ("2000-2010", 2000, 2009, 900),
-    ("2010-2020", 2010, 2019, 1000),
-    ("2020-2026", 2020, 2026, 500),
-};
-
-var movieIds = new List<int>();
-
-foreach (var decade in decades)
-{
-    if (cts.IsCancellationRequested) break;
-
-    var existingInDecade = existingMovies.Count(m => m.ReleaseYear >= decade.StartYear && m.ReleaseYear <= decade.EndYear);
-    var remaining = decade.TargetCount - existingInDecade;
-
-    if (remaining <= 0)
-    {
-        Console.WriteLine($"{decade.Label}: zaten {existingInDecade}/{decade.TargetCount} film var, atlanıyor.");
-        continue;
-    }
-
     var newIds = new List<int>();
     var page = 1;
-    var gte = $"{decade.StartYear}-01-01";
-    var lte = $"{decade.EndYear}-12-31";
 
-    while (newIds.Count < remaining && !cts.IsCancellationRequested)
+    while (newIds.Count < targetCount && !cts.IsCancellationRequested)
     {
-        // Oy sayısına göre sıralıyoruz (en çok bilinen/oylanan filmler önce gelsin diye).
-        var discoverResult = await tmdb.DiscoverMoviesAsync(page, 1, cts.Token, gte, lte, "vote_count.desc");
+        var discoverResult = await tmdb.DiscoverMoviesAsync(page, minVoteCountFilter, cts.Token, releaseDateGte, releaseDateLte, sortBy);
         if (discoverResult.Results.Count == 0) break;
 
         foreach (var r in discoverResult.Results)
         {
             if (existingTmdbIds.Contains(r.Id) || newIds.Contains(r.Id)) continue;
             newIds.Add(r.Id);
-            if (newIds.Count >= remaining) break;
+            if (newIds.Count >= targetCount) break;
         }
 
         page++;
@@ -566,140 +551,206 @@ foreach (var decade in decades)
         await Task.Delay(150, cts.Token);
     }
 
-    movieIds.AddRange(newIds);
-    foreach (var nid in newIds) existingTmdbIds.Add(nid);
-    Console.WriteLine($"{decade.Label}: {existingInDecade} zaten vardı, {newIds.Count} yeni bulundu (hedef {decade.TargetCount}).");
+    return newIds;
 }
 
-movieIds = movieIds.Distinct().ToList();
-Console.WriteLine($"\nToplam {movieIds.Count} yeni film ID'si toplandı.\n");
-
-// ---------------- 3. Her film için detay + cast çek, upsert et ----------------
-int processed = 0, created = 0, updated = 0, failed = 0;
-
-foreach (var tmdbId in movieIds)
+// ---------------- Ortak: verilen TMDB ID listesini işleyip veritabanına upsert et ----------------
+async Task ImportMoviesAsync(List<int> movieIds, Dictionary<int, Guid> genreMapping)
 {
-    if (cts.IsCancellationRequested) break;
-    processed++;
+    int processed = 0, created = 0, updated = 0, failed = 0;
 
-    try
+    foreach (var tmdbId in movieIds)
     {
-        var detail = await tmdb.GetMovieDetailAsync(tmdbId, cts.Token);
-        if (detail is null) { failed++; continue; }
+        if (cts.IsCancellationRequested) break;
+        processed++;
 
-        await using var db = new ApplicationDbContext(dbOptions);
-
-        var movie = await db.Movies
-            .Include(m => m.MovieGenres)
-            .Include(m => m.MovieActors)
-            .Include(m => m.MovieDirectors)
-            .FirstOrDefaultAsync(m => m.TmdbId == tmdbId, cts.Token);
-
-        var isNew = movie is null;
-        movie ??= new Movie { TmdbId = tmdbId };
-
-        movie.Title = detail.Title;
-        movie.OriginalTitle = string.IsNullOrWhiteSpace(detail.OriginalTitle) ? detail.Title : detail.OriginalTitle;
-        movie.Overview = Truncate(detail.Overview, 4000);
-        movie.ReleaseDate = DateTime.TryParse(detail.ReleaseDate, out var rd) ? rd : DateTime.UtcNow;
-        movie.ReleaseYear = movie.ReleaseDate.Year;
-        movie.RuntimeMinutes = detail.Runtime ?? 0;
-        movie.PosterUrl = TmdbClient.BuildImageUrl(detail.PosterPath, "w500") ?? string.Empty;
-        movie.BackdropUrl = TmdbClient.BuildImageUrl(detail.BackdropPath, "w1280") ?? string.Empty;
-        movie.Country = detail.ProductionCountries.FirstOrDefault()?.Name ?? string.Empty;
-
-        // NOT: AverageRating/RatingCount başlangıçta TMDB'nin izleyici puanından baseline olarak dolduruluyor.
-        // TMDB'nin puan skalası 0-10 iken bizim skalamız (Letterboxd tarzı, yarım yıldız dahil) 0-5 olduğu
-        // için burada TMDB puanı 2'ye bölünerek bizim skalamıza çevriliyor. Gerçek kullanıcılar UFMDb
-        // üzerinden review yazdıkça bu değerler normal review-recalculation mantığıyla güncellenmeye devam eder.
-        movie.AverageRating = Math.Round(detail.VoteAverage / 2.0, 2);
-        movie.SeedVoteCount = detail.VoteCount;
-        movie.RatingCount = detail.VoteCount;
-        movie.ViewCount = detail.VoteCount;
-
-        if (isNew) db.Movies.Add(movie);
-
-        // ---- Türler (temizle + yeniden kur) ----
-        movie.MovieGenres.Clear();
-        foreach (var g in detail.Genres)
+        try
         {
-            if (genreMap.TryGetValue(g.Id, out var localGenreId))
-                movie.MovieGenres.Add(new MovieGenre { GenreId = localGenreId });
-        }
+            var detail = await tmdb.GetMovieDetailAsync(tmdbId, cts.Token);
+            if (detail is null) { failed++; continue; }
 
-        // ---- Oyuncu kadrosu (temizle + yeniden kur) ----
-        movie.MovieActors.Clear();
-        var castMembers = (detail.Credits?.Cast ?? new()).OrderBy(c => c.Order).Take(castLimit).ToList();
-        foreach (var cast in castMembers)
-        {
-            var actor = await db.Actors.FirstOrDefaultAsync(a => a.TmdbId == cast.Id, cts.Token);
-            if (actor is null)
+            await using var db = new ApplicationDbContext(dbOptions);
+
+            var movie = await db.Movies
+                .Include(m => m.MovieGenres)
+                .Include(m => m.MovieActors)
+                .Include(m => m.MovieDirectors)
+                .FirstOrDefaultAsync(m => m.TmdbId == tmdbId, cts.Token);
+
+            var isNew = movie is null;
+            movie ??= new Movie { TmdbId = tmdbId };
+
+            movie.Title = detail.Title;
+            movie.OriginalTitle = string.IsNullOrWhiteSpace(detail.OriginalTitle) ? detail.Title : detail.OriginalTitle;
+            movie.Overview = Truncate(detail.Overview, 4000);
+            movie.ReleaseDate = ParseUtcDate(detail.ReleaseDate) ?? DateTime.UtcNow;
+            movie.ReleaseYear = movie.ReleaseDate.Year;
+            movie.RuntimeMinutes = detail.Runtime ?? 0;
+            movie.PosterUrl = TmdbClient.BuildImageUrl(detail.PosterPath, "w500") ?? string.Empty;
+            movie.BackdropUrl = TmdbClient.BuildImageUrl(detail.BackdropPath, "w1280") ?? string.Empty;
+            movie.Country = detail.ProductionCountries.FirstOrDefault()?.Name ?? string.Empty;
+
+            // NOT: AverageRating/RatingCount başlangıçta TMDB'nin izleyici puanından baseline olarak dolduruluyor.
+            // TMDB'nin puan skalası 0-10 iken bizim skalamız (Letterboxd tarzı, yarım yıldız dahil) 0-5 olduğu
+            // için burada TMDB puanı 2'ye bölünerek bizim skalamıza çevriliyor. Gerçek kullanıcılar UFMDb
+            // üzerinden review yazdıkça bu değerler normal review-recalculation mantığıyla güncellenmeye devam eder.
+            movie.AverageRating = Math.Round(detail.VoteAverage / 2.0, 2);
+            movie.SeedVoteCount = detail.VoteCount;
+            movie.RatingCount = detail.VoteCount;
+            movie.ViewCount = detail.VoteCount;
+
+            if (isNew) db.Movies.Add(movie);
+
+            // ---- Türler (temizle + yeniden kur) ----
+            movie.MovieGenres.Clear();
+            foreach (var g in detail.Genres)
             {
-                actor = new Actor
-                {
-                    TmdbId = cast.Id,
-                    FullName = cast.Name,
-                    PhotoUrl = TmdbClient.BuildImageUrl(cast.ProfilePath, "w300") ?? string.Empty
-                };
-                db.Actors.Add(actor);
-                await db.SaveChangesAsync(cts.Token); // Id'yi hemen almak için
+                if (genreMapping.TryGetValue(g.Id, out var localGenreId))
+                    movie.MovieGenres.Add(new MovieGenre { GenreId = localGenreId });
             }
 
-            movie.MovieActors.Add(new MovieActor
+            // ---- Oyuncu kadrosu (temizle + yeniden kur) ----
+            movie.MovieActors.Clear();
+            var castMembers = (detail.Credits?.Cast ?? new()).OrderBy(c => c.Order).Take(castLimit).ToList();
+            foreach (var cast in castMembers)
             {
-                ActorId = actor.Id,
-                CharacterName = cast.Character ?? string.Empty,
-                Order = cast.Order
-            });
-        }
-
-        // ---- Yönetmenler (temizle + yeniden kur) ----
-        movie.MovieDirectors.Clear();
-        var directingCrew = (detail.Credits?.Crew ?? new())
-            .Where(c => c.Job == "Director")
-            .ToList();
-
-        var directorOrder = 0;
-        foreach (var crewMember in directingCrew)
-        {
-            var director = await db.Directors.FirstOrDefaultAsync(d => d.TmdbId == crewMember.Id, cts.Token);
-            if (director is null)
-            {
-                director = new Director
+                var actor = await db.Actors.FirstOrDefaultAsync(a => a.TmdbId == cast.Id, cts.Token);
+                if (actor is null)
                 {
-                    TmdbId = crewMember.Id,
-                    FullName = crewMember.Name,
-                    PhotoUrl = TmdbClient.BuildImageUrl(crewMember.ProfilePath, "w300") ?? string.Empty
-                };
-                db.Directors.Add(director);
-                await db.SaveChangesAsync(cts.Token); // Id'yi hemen almak için
+                    actor = new Actor
+                    {
+                        TmdbId = cast.Id,
+                        FullName = cast.Name,
+                        PhotoUrl = TmdbClient.BuildImageUrl(cast.ProfilePath, "w300") ?? string.Empty
+                    };
+                    db.Actors.Add(actor);
+                    await db.SaveChangesAsync(cts.Token); // Id'yi hemen almak için
+                }
+
+                movie.MovieActors.Add(new MovieActor
+                {
+                    ActorId = actor.Id,
+                    CharacterName = cast.Character ?? string.Empty,
+                    Order = cast.Order
+                });
             }
 
-            movie.MovieDirectors.Add(new MovieDirector
+            // ---- Yönetmenler (temizle + yeniden kur) ----
+            movie.MovieDirectors.Clear();
+            var directingCrew = (detail.Credits?.Crew ?? new())
+                .Where(c => c.Job == "Director")
+                .ToList();
+
+            var directorOrder = 0;
+            foreach (var crewMember in directingCrew)
             {
-                DirectorId = director.Id,
-                Order = directorOrder++
-            });
+                var director = await db.Directors.FirstOrDefaultAsync(d => d.TmdbId == crewMember.Id, cts.Token);
+                if (director is null)
+                {
+                    director = new Director
+                    {
+                        TmdbId = crewMember.Id,
+                        FullName = crewMember.Name,
+                        PhotoUrl = TmdbClient.BuildImageUrl(crewMember.ProfilePath, "w300") ?? string.Empty
+                    };
+                    db.Directors.Add(director);
+                    await db.SaveChangesAsync(cts.Token); // Id'yi hemen almak için
+                }
+
+                movie.MovieDirectors.Add(new MovieDirector
+                {
+                    DirectorId = director.Id,
+                    Order = directorOrder++
+                });
+            }
+
+            await db.SaveChangesAsync(cts.Token);
+
+            if (isNew) created++; else updated++;
+
+            if (processed % 20 == 0 || processed == movieIds.Count)
+                Console.WriteLine($"[{processed}/{movieIds.Count}] işlendi — {created} yeni, {updated} güncellendi, {failed} başarısız. Son: {movie.Title} ({movie.ReleaseYear})");
+
+            await Task.Delay(120, cts.Token); // TMDB rate limit'ine karşı temkinli bekleme
         }
-
-        await db.SaveChangesAsync(cts.Token);
-
-        if (isNew) created++; else updated++;
-
-        if (processed % 20 == 0 || processed == movieIds.Count)
-            Console.WriteLine($"[{processed}/{movieIds.Count}] işlendi — {created} yeni, {updated} güncellendi, {failed} başarısız. Son: {movie.Title} ({movie.ReleaseYear})");
-
-        await Task.Delay(120, cts.Token); // TMDB rate limit'ine karşı temkinli bekleme
+        catch (Exception ex)
+        {
+            failed++;
+            Console.WriteLine($"[HATA] TMDB ID {tmdbId}: {ex.Message}");
+            var inner = ex.InnerException;
+            while (inner is not null)
+            {
+                Console.WriteLine($"   -> INNER: {inner.GetType().Name}: {inner.Message}");
+                inner = inner.InnerException;
+            }
+        }
     }
-    catch (Exception ex)
-    {
-        failed++;
-        Console.WriteLine($"[HATA] TMDB ID {tmdbId}: {ex.Message}");
-    }
+
+    Console.WriteLine("\n=== Tamamlandı ===");
+    Console.WriteLine($"Toplam işlenen: {processed} | Yeni: {created} | Güncellenen: {updated} | Başarısız: {failed}");
 }
 
-Console.WriteLine("\n=== Tamamlandı ===");
-Console.WriteLine($"Toplam işlenen: {processed} | Yeni: {created} | Güncellenen: {updated} | Başarısız: {failed}");
+// ---------------- Opsiyonel: henüz vizyona girmemiş filmleri çekme modu ----------------
+// Kullanım: dotnet run --project src/UFMDb.Tools.TmdbImporter -- fetch-upcoming
+if (args.Contains("fetch-upcoming"))
+{
+    await FetchUpcomingMoviesAsync();
+    return;
+}
+
+async Task FetchUpcomingMoviesAsync()
+{
+    Console.WriteLine($"Henüz vizyona girmemiş {upcomingMovieCount} film TMDB'den çekiliyor (yakında çıkacak filmler için)...\n");
+
+    var existingTmdbIds = await GetExistingTmdbIdsAsync(dbOptions);
+    Console.WriteLine($"Veritabanında {existingTmdbIds.Count} film zaten mevcut.\n");
+
+    var today = DateTime.UtcNow.Date;
+    var gte = today.AddDays(1).ToString("yyyy-MM-dd");           // yarından itibaren
+    var lte = today.AddDays(upcomingWindowDays).ToString("yyyy-MM-dd"); // aşırı uzak/placeholder tarihleri ayıklamak için bir üst sınır
+
+    // Henüz vizyona girmemiş filmlerin oy sayısı olmadığı/çok az olduğu için sıralamayı
+    // popülerliğe göre yapıyoruz, oy sayısı filtresi uygulamıyoruz (minVoteCountFilter: 0).
+    var newIds = await DiscoverUniqueMovieIdsAsync(
+        targetCount: upcomingMovieCount,
+        existingTmdbIds: existingTmdbIds,
+        sortBy: "popularity.desc",
+        minVoteCountFilter: 0,
+        releaseDateGte: gte,
+        releaseDateLte: lte);
+
+    Console.WriteLine($"{newIds.Count} yeni yaklaşan film ID'si bulundu.\n");
+
+    if (newIds.Count == 0)
+    {
+        Console.WriteLine("İşlenecek yeni film yok, çıkılıyor.");
+        return;
+    }
+
+    await ImportMoviesAsync(newIds, genreMap);
+}
+
+// ---------------- 2. Ana akış: oy sayısına göre yüksekten aza, yıl filtresiz, benzersiz film çekimi ----------------
+Console.WriteLine("Mevcut filmler kontrol ediliyor...");
+var existingIds = await GetExistingTmdbIdsAsync(dbOptions);
+Console.WriteLine($"Veritabanında {existingIds.Count} film zaten mevcut.\n");
+
+Console.WriteLine($"TMDB'den oy sayısına göre (yüksekten aza) yıl filtresi olmadan {targetMovieCount} benzersiz film ID'si toplanıyor (min. oy sayısı: {minVoteCount})...");
+var movieIds = await DiscoverUniqueMovieIdsAsync(
+    targetCount: targetMovieCount,
+    existingTmdbIds: existingIds,
+    sortBy: "vote_count.desc",
+    minVoteCountFilter: minVoteCount);
+
+Console.WriteLine($"Toplam {movieIds.Count} yeni film ID'si toplandı.\n");
+
+if (movieIds.Count == 0)
+{
+    Console.WriteLine("İşlenecek yeni film yok, çıkılıyor.");
+    return;
+}
+
+await ImportMoviesAsync(movieIds, genreMap);
 
 static string Truncate(string value, int maxLength) =>
     string.IsNullOrEmpty(value) ? value : (value.Length <= maxLength ? value : value[..maxLength]);

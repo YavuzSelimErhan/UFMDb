@@ -107,6 +107,7 @@ export default function MovieDetailPage() {
     );
 
   const theme = getEntityTheme(movie.id);
+  const isUnreleased = new Date(movie.releaseDate).getTime() > Date.now();
   const themeStyle = {
     "--print-accent": theme.accent,
     "--print-accent-soft": theme.accentSoft,
@@ -189,7 +190,7 @@ export default function MovieDetailPage() {
             </div>
           </div>
 
-          {isAuthenticated && (
+          {isAuthenticated && !isUnreleased && (
             <div className="movie-detail__quick-rate">
               <span className="movie-detail__quick-rate-label">
                 {t("movie.quickRateLabel")}
@@ -206,6 +207,11 @@ export default function MovieDetailPage() {
                 </span>
               )}
             </div>
+          )}
+          {isAuthenticated && isUnreleased && (
+            <p className="movie-detail__quick-rate-status text-muted">
+              {t("movie.notYetReleased")}
+            </p>
           )}
 
           {isAuthenticated && (
@@ -250,6 +256,8 @@ export default function MovieDetailPage() {
               <button
                 className={`btn-secondary movie-detail__action-btn ${isLogging ? "active" : ""}`}
                 onClick={() => setIsLogging((s) => !s)}
+                disabled={isUnreleased}
+                title={isUnreleased ? t("movie.notYetReleased") : undefined}
               >
                 <Ticket size={16} />
                 {t("movie.logScreening")}
@@ -345,7 +353,7 @@ export default function MovieDetailPage() {
             </div>
           </div>
 
-          {isAuthenticated && (
+          {isAuthenticated && !isUnreleased && (
             <div className="movie-detail__review-box card">
               <h3>{t("movie.writeReview")}</h3>
               <p className="movie-detail__review-rating-hint">
