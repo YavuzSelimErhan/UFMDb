@@ -393,7 +393,8 @@
       "coverHint": "Puoi trascinare l'immagine, selezionarla dal tuo dispositivo o incollare direttamente un URL.",
       "saveError": "Si è verificato un errore durante il salvataggio della lista.",
       "moveUp": "Sposta su",
-      "moveDown": "Sposta giù"
+      "moveDown": "Sposta giù",
+      "fieldIsOfficial": "Lista ufficiale"
     }
   },
   "log": {

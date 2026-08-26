@@ -393,7 +393,8 @@
       "coverHint": "Şəkli sürükləyib buraxa, cihazınızdan seçə və ya birbaşa URL yapışdıra bilərsiniz.",
       "saveError": "Siyahı yadda saxlanarkən xəta baş verdi.",
       "moveUp": "Yuxarı köçür",
-      "moveDown": "Aşağı köçür"
+      "moveDown": "Aşağı köçür",
+      "fieldIsOfficial": "Rəsmi siyahı"
     }
   },
   "log": {

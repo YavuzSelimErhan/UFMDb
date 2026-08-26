@@ -393,7 +393,8 @@
       "coverHint": "Você pode arrastar e soltar, escolher um arquivo do dispositivo ou colar uma URL diretamente.",
       "saveError": "Ocorreu um erro ao salvar a lista.",
       "moveUp": "Mover para cima",
-      "moveDown": "Mover para baixo"
+      "moveDown": "Mover para baixo",
+      "fieldIsOfficial": "Lista oficial"
     }
   },
   "log": {

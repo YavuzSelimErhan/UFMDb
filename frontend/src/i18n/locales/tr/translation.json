@@ -393,7 +393,8 @@
       "coverHint": "Görseli sürükleyip bırakabilir, cihazından seçebilir veya doğrudan URL yapıştırabilirsin.",
       "saveError": "Liste kaydedilirken bir hata oluştu.",
       "moveUp": "Yukarı taşı",
-      "moveDown": "Aşağı taşı"
+      "moveDown": "Aşağı taşı",
+      "fieldIsOfficial": "Resmi Liste"
     }
   },
   "log": {

@@ -393,7 +393,8 @@
       "coverHint": "Du kannst das Bild per Drag & Drop hinzufügen, eine Datei auswählen oder direkt eine URL einfügen.",
       "saveError": "Beim Speichern der Liste ist ein Fehler aufgetreten.",
       "moveUp": "Nach oben verschieben",
-      "moveDown": "Nach unten verschieben"
+      "moveDown": "Nach unten verschieben",
+      "fieldIsOfficial": "Offizielle Liste"
     }
   },
   "log": {

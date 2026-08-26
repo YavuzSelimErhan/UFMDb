@@ -322,3 +322,18 @@
     font-size: 0.78rem;
   }
 }
+
+.profile-page__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.profile-page__section-header h2 {
+  margin: 0;
+}
+.profile-page__create-list {
+  flex-shrink: 0;
+}

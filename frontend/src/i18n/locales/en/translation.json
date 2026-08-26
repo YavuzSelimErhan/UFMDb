@@ -391,7 +391,8 @@
       "coverHint": "You can drag & drop, pick a file from your device, or paste a URL directly.",
       "saveError": "An error occurred while saving the list.",
       "moveUp": "Move up",
-      "moveDown": "Move down"
+      "moveDown": "Move down",
+      "fieldIsOfficial": "Official List"
     }
   },
   "log": {
