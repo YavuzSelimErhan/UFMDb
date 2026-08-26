@@ -56,6 +56,10 @@ export default function MovieCard({
     onSuccess: (newState) => {
       setInWatchlist(newState);
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["list"] });
+      queryClient.invalidateQueries({ queryKey: ["movies"] });
+      queryClient.invalidateQueries({ queryKey: ["home-feed"] });
+      queryClient.invalidateQueries({ queryKey: ["movie", movie.id] });
     },
     onError: (_err, _vars, context) => {
       if (context) setInWatchlist(context.previous);
@@ -72,6 +76,10 @@ export default function MovieCard({
     onSuccess: (newState) => {
       setIsLiked(newState);
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["list"] });
+      queryClient.invalidateQueries({ queryKey: ["movies"] });
+      queryClient.invalidateQueries({ queryKey: ["home-feed"] });
+      queryClient.invalidateQueries({ queryKey: ["movie", movie.id] });
     },
     onError: (_err, _vars, context) => {
       if (context) setIsLiked(context.previous);
@@ -82,6 +90,10 @@ export default function MovieCard({
     mutationFn: () => movieService.toggleLike(movie.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["list"] });
+      queryClient.invalidateQueries({ queryKey: ["movies"] });
+      queryClient.invalidateQueries({ queryKey: ["home-feed"] });
+      queryClient.invalidateQueries({ queryKey: ["movie", movie.id] });
       onUnlike?.();
     },
   });

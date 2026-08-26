@@ -82,7 +82,7 @@ export default function ListsPage() {
                 <div className="list-card__perf" aria-hidden="true" />
 
                 <div className="list-card__body">
-                  <h3>{displayTitle}</h3>
+                  <h3 title={displayTitle}>{displayTitle}</h3>
                   <p className="text-secondary list-card__desc">
                     {list.description}
                   </p>
