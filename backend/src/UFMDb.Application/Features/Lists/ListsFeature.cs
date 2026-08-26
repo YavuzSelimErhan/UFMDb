@@ -41,7 +41,9 @@ public class GetListsQueryHandler : IRequestHandler<GetListsQuery, List<ListSumm
 }
 
 // ---------- Tekil liste detayı (tüm filmleriyle) ----------
-public record GetListDetailQuery(Guid ListId) : IRequest<ListDetailDto>;
+// UserId eklendi: GetMoviesQuery'deki desenle aynı — controller giriş yapmış
+// kullanıcının id'sini buraya geçiyor (giriş yapılmamışsa null).
+public record GetListDetailQuery(Guid ListId, Guid? UserId) : IRequest<ListDetailDto>;
 public class GetListDetailQueryHandler : IRequestHandler<GetListDetailQuery, ListDetailDto>
 {
     private readonly IApplicationDbContext _context;
@@ -53,6 +55,7 @@ public class GetListDetailQueryHandler : IRequestHandler<GetListDetailQuery, Lis
             .Include(cl => cl.Items.OrderBy(i => i.Order)).ThenInclude(i => i.Movie).ThenInclude(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
             .FirstOrDefaultAsync(cl => cl.Id == request.ListId, ct)
             ?? throw new NotFoundException(nameof(CuratedList), request.ListId);
+
         var movies = list.Items.OrderBy(i => i.Order).Select(i => new MovieListItemDto(
             i.Movie.Id, i.Movie.Title, i.Movie.ReleaseYear, i.Movie.PosterUrl,
             (decimal)i.Movie.AverageRating, i.Movie.RatingCount,
@@ -60,6 +63,34 @@ public class GetListDetailQueryHandler : IRequestHandler<GetListDetailQuery, Lis
             i.Movie.BackdropUrl, i.Movie.Overview,
             false, false, i.Movie.ReleaseDate
         )).ToList();
+
+        // GetMoviesQueryHandler'daki desenin birebir aynısı: kullanıcı giriş
+        // yapmışsa, listedeki filmlerin watchlist/like durumunu tek seferde
+        // (N+1'e düşmeden) toplu çekip DTO'lara işliyoruz.
+        if (request.UserId.HasValue && movies.Count > 0)
+        {
+            var movieIds = movies.Select(m => m.Id).ToHashSet();
+
+            var watchlistIds = (await _context.WatchlistItems.AsNoTracking()
+                .Where(w => w.UserId == request.UserId.Value && movieIds.Contains(w.MovieId))
+                .Select(w => w.MovieId)
+                .ToListAsync(ct)).ToHashSet();
+
+            var likedIds = (await _context.Likes.AsNoTracking()
+                .Where(l => l.UserId == request.UserId.Value && movieIds.Contains(l.MovieId))
+                .Select(l => l.MovieId)
+                .ToListAsync(ct)).ToHashSet();
+
+            for (int i = 0; i < movies.Count; i++)
+            {
+                movies[i] = movies[i] with
+                {
+                    IsInWatchlistByCurrentUser = watchlistIds.Contains(movies[i].Id),
+                    IsLikedByCurrentUser = likedIds.Contains(movies[i].Id)
+                };
+            }
+        }
+
         return new ListDetailDto(list.Id, list.Title, list.TitleTr, list.Description, list.CoverImageUrl, movies);
     }
 }

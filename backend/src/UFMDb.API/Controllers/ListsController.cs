@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
+using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.Features.Lists;
 
 namespace UFMDb.API.Controllers;
@@ -11,7 +12,13 @@ namespace UFMDb.API.Controllers;
 public class ListsController : ControllerBase
 {
     private readonly ISender _mediator;
-    public ListsController(ISender mediator) => _mediator = mediator;
+    private readonly ICurrentUserService _currentUser;
+
+    public ListsController(ISender mediator, ICurrentUserService currentUser)
+    {
+        _mediator = mediator;
+        _currentUser = currentUser;
+    }
 
     [HttpGet]
     [OutputCache(PolicyName = "Lists")]
@@ -19,7 +26,7 @@ public class ListsController : ControllerBase
 
     [HttpGet("{id:guid}")]
     [OutputCache(PolicyName = "Lists")]
-    public async Task<IActionResult> GetById(Guid id) => Ok(await _mediator.Send(new GetListDetailQuery(id)));
+    public async Task<IActionResult> GetById(Guid id) => Ok(await _mediator.Send(new GetListDetailQuery(id, _currentUser.UserId)));
 
     [Authorize(Roles = "Admin")]
     [HttpPost]
