@@ -20,6 +20,16 @@ public class MovieConfiguration : IEntityTypeConfiguration<Movie>
         // TMDB senkronizasyonu için: aynı filmi tekrar tekrar upsert edebilmek amacıyla unique.
         // Filtrelenmiş index: TmdbId NULL olan (elle eklenmiş) filmler bu kısıtlamadan etkilenmez.
         b.HasIndex(m => m.TmdbId).IsUnique().HasFilter("\"TmdbId\" IS NOT NULL");
+
+        // "upcoming" rail'i: ReleaseDate >= bugün filtresi + releaseDate asc sıralaması
+        b.HasIndex(m => m.ReleaseDate);
+
+        // "popularity" sıralaması (popular + trending rail'leri, GetMoviesQueryHandler'da
+        // OrderByDescending(RatingCount).ThenByDescending(AverageRating))
+        b.HasIndex(m => new { m.RatingCount, m.AverageRating });
+
+        // "newest" sıralaması
+        b.HasIndex(m => m.CreatedAtUtc);
     }
 }
 

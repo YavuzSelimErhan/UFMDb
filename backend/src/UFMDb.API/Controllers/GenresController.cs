@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using UFMDb.Application.Features.Genres;
 
 namespace UFMDb.API.Controllers;
@@ -12,5 +13,6 @@ public class GenresController : ControllerBase
     public GenresController(ISender mediator) => _mediator = mediator;
 
     [HttpGet]
+    [OutputCache(PolicyName = "Genres")]
     public async Task<IActionResult> GetGenres() => Ok(await _mediator.Send(new GetGenresQuery()));
 }

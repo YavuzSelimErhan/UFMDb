@@ -43,6 +43,17 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+});
+builder.Services.AddOutputCache(options =>
+{
+    options.AddPolicy("Genres", p => p.Expire(TimeSpan.FromMinutes(10)));
+    options.AddPolicy("Lists", p => p.Expire(TimeSpan.FromMinutes(5)));
+});
 
 // ---------------- JWT Authentication ----------------
 var jwtSection = builder.Configuration.GetSection("JwtSettings");
@@ -122,10 +133,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseResponseCompression();
 app.UseCors(CorsPolicy);
 app.UseAuthentication();
-app.UseStaticFiles();
 app.UseAuthorization();
 app.MapControllers();
+app.UseOutputCache();
 
 app.Run();

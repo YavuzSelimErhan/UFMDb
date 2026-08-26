@@ -1,7 +1,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using UFMDb.Application.Features.Lists;
+
 namespace UFMDb.API.Controllers;
 
 [ApiController]
@@ -12,9 +14,11 @@ public class ListsController : ControllerBase
     public ListsController(ISender mediator) => _mediator = mediator;
 
     [HttpGet]
+    [OutputCache(PolicyName = "Lists")]
     public async Task<IActionResult> GetLists() => Ok(await _mediator.Send(new GetListsQuery()));
 
     [HttpGet("{id:guid}")]
+    [OutputCache(PolicyName = "Lists")]
     public async Task<IActionResult> GetById(Guid id) => Ok(await _mediator.Send(new GetListDetailQuery(id)));
 
     [Authorize(Roles = "Admin")]

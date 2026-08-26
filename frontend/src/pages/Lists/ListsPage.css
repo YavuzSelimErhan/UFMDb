@@ -13,8 +13,35 @@
 
 .lists-page__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-  gap: 26px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 22px;
+}
+
+@media (max-width: 1400px) {
+  .lists-page__grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+@media (max-width: 1150px) {
+  .lists-page__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 900px) {
+  .lists-page__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 680px) {
+  .lists-page__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+@media (max-width: 420px) {
+  .lists-page__grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ---------- Kart gövdesi ---------- */
@@ -76,6 +103,8 @@
 }
 
 /* ---------- Poster yelpazesi (kapak görseli girilmemişse) ---------- */
+/* Sabit px yerine kartın genişliğine göre oranlı boyut: 6 sütunlu dar
+   kartlarda taşmayı önler, az sütunlu geniş kartlarda da orantılı büyür. */
 .list-card__fan {
   position: relative;
   width: 100%;
@@ -85,8 +114,10 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 104px;
-  height: 150px;
+  width: 46%;
+  max-width: 104px;
+  aspect-ratio: 2 / 3;
+  height: auto;
   object-fit: cover;
   border-radius: 6px;
   box-shadow: 0 10px 22px var(--color-shadow);
@@ -176,13 +207,15 @@
   }
 }
 
+@media (max-width: 900px) {
+  .list-card__stage {
+    height: 170px;
+  }
+}
+
 @media (max-width: 600px) {
   .list-card__stage {
-    height: 160px;
-  }
-  .list-card__fan-poster {
-    width: 86px;
-    height: 124px;
+    height: 150px;
   }
 }
 

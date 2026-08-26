@@ -21,7 +21,7 @@ public class GetActorsQueryHandler : IRequestHandler<GetActorsQuery, PagedResult
     {
         var query = _context.Actors.AsNoTracking().Where(a => !a.IsDeleted);
         if (!string.IsNullOrWhiteSpace(request.Search))
-            query = query.Where(a => a.FullName.Contains(request.Search));
+            query = query.Where(a => EF.Functions.ILike(a.FullName, $"%{request.Search.Trim()}%"));
 
         var total = await query.CountAsync(ct);
         var items = await query
