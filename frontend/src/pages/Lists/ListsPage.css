@@ -46,15 +46,68 @@
 
 /* ---------- Kart gövdesi ---------- */
 .list-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   padding: 0;
   overflow: hidden;
+  opacity: 0;
+  animation: list-card-in 480ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   transition:
     transform var(--transition-base),
     box-shadow var(--transition-base),
     border-color var(--transition-base);
 }
+
+/* İlk 12 kart sırayla belirir, sonrasındakiler gecikmesiz */
+.lists-page__grid > .list-card:nth-child(1) {
+  animation-delay: 0ms;
+}
+.lists-page__grid > .list-card:nth-child(2) {
+  animation-delay: 40ms;
+}
+.lists-page__grid > .list-card:nth-child(3) {
+  animation-delay: 80ms;
+}
+.lists-page__grid > .list-card:nth-child(4) {
+  animation-delay: 120ms;
+}
+.lists-page__grid > .list-card:nth-child(5) {
+  animation-delay: 160ms;
+}
+.lists-page__grid > .list-card:nth-child(6) {
+  animation-delay: 200ms;
+}
+.lists-page__grid > .list-card:nth-child(7) {
+  animation-delay: 240ms;
+}
+.lists-page__grid > .list-card:nth-child(8) {
+  animation-delay: 280ms;
+}
+.lists-page__grid > .list-card:nth-child(9) {
+  animation-delay: 320ms;
+}
+.lists-page__grid > .list-card:nth-child(10) {
+  animation-delay: 360ms;
+}
+.lists-page__grid > .list-card:nth-child(11) {
+  animation-delay: 400ms;
+}
+.lists-page__grid > .list-card:nth-child(12) {
+  animation-delay: 440ms;
+}
+
+@keyframes list-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .list-card:hover {
   transform: translateY(-6px);
   box-shadow:
@@ -99,7 +152,11 @@
   align-items: center;
   justify-content: center;
   color: var(--list-accent);
-  opacity: 0.6;
+  opacity: 0.55;
+  transition: opacity var(--transition-base);
+}
+.list-card:hover .list-card__stage-empty {
+  opacity: 0.8;
 }
 
 /* ---------- Poster yelpazesi (kapak görseli girilmemişse) ---------- */
@@ -141,16 +198,24 @@
   z-index: 1;
 }
 
+/* Hover'da yelpaze tamamen açılır, sadece uçlar değil */
 .list-card:hover .list-card__fan-poster:nth-child(1) {
   transform: translate(-50%, -46%) rotate(-13deg) translateX(-28px);
+}
+.list-card:hover .list-card__fan-poster:nth-child(2) {
+  transform: translate(-50%, -50%) rotate(-5deg) translateX(-11px);
+}
+.list-card:hover .list-card__fan-poster:nth-child(3) {
+  transform: translate(-50%, -50%) rotate(5deg) translateX(11px);
 }
 .list-card:hover .list-card__fan-poster:nth-child(4) {
   transform: translate(-50%, -46%) rotate(13deg) translateX(28px);
 }
 
-/* ---------- İmza öğe: film şeridi perforasyonu ---------- */
+/* ---------- İmza öğe: bilet kökü çentikleri + film şeridi perforasyonu ---------- */
 .list-card__perf {
-  height: 11px;
+  position: relative;
+  height: 12px;
   background-color: var(--list-accent);
   background-image: radial-gradient(
     circle,
@@ -160,6 +225,29 @@
   background-size: 18px 100%;
   background-position: 9px center;
   background-repeat: repeat-x;
+}
+
+/* Gerçek bilet köklerindeki gibi kenarlardan "delinmiş" yarım daire çentikler.
+   .list-card'daki overflow:hidden dış yarıyı keser, geriye tam bir bilet
+   çentiği izlenimi kalır. */
+.list-card__perf::before,
+.list-card__perf::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-bg);
+  box-shadow: inset 0 0 0 1px var(--color-shadow);
+  transform: translateY(-50%);
+  z-index: 2;
+}
+.list-card__perf::before {
+  left: -9px;
+}
+.list-card__perf::after {
+  right: -9px;
 }
 
 /* ---------- Bilgi bloğu ---------- */
@@ -184,6 +272,8 @@
 }
 .list-card__ticket {
   align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
   font-family:
     "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
   font-size: 0.72rem;
@@ -192,15 +282,19 @@
   color: var(--list-accent);
   background-color: var(--list-accent-soft);
   border: 1px solid var(--list-accent);
-  padding: 4px 10px;
+  border-left: 2px dashed var(--list-accent);
+  padding: 4px 10px 4px 8px;
   border-radius: var(--radius-pill);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .list-card,
   .list-card__stage-img,
+  .list-card__stage-empty,
   .list-card__fan-poster {
     transition: none !important;
+    animation: none !important;
+    opacity: 1 !important;
   }
   .list-card:hover {
     transform: none;
@@ -216,11 +310,5 @@
 @media (max-width: 600px) {
   .list-card__stage {
     height: 150px;
-  }
-}
-
-@media (max-width: 480px) {
-  .lists-page__header h1 {
-    font-size: 1.5rem;
   }
 }
