@@ -69,6 +69,7 @@ export default function ProfilePage() {
     queryKey: ["my-profile"],
     queryFn: profileService.getMyProfile,
     retry: 1,
+    staleTime: 60_000,
   });
 
   const settingsMutation = useMutation({

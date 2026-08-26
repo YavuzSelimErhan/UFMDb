@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Star, Bookmark, Heart, Trash2, Check, X, Pencil } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -10,16 +10,16 @@ import "./MovieCard.css";
 
 interface Props {
   movie: MovieListItem;
-  userRating?: number | null; // verilmişse "senin puanın" rozetini gösterir
-  onUnlike?: () => void; // verilmişse kalp butonu gösterir, beğenmekten çıkarınca çağrılır
-  onRate?: (value: number) => void; // verilmişse rating rozetine tıklanınca puanlama paneli açılır
+  userRating?: number | null;
+  onUnlike?: () => void;
+  onRate?: (value: number) => void;
   isRatingSaving?: boolean;
-  showDelete?: boolean; // sağ-alt köşede silme butonu gösterir
+  showDelete?: boolean;
   onDelete?: () => void;
   isDeleting?: boolean;
-  rank?: number; // rail'lerde sıralama rozeti
-  compact?: boolean; // yatay kaydırmalı rail içinde sabit genişlik
-  subtitle?: string; // alt bilgi satırını override eder (örn. izlenme tarihi)
+  rank?: number;
+  compact?: boolean;
+  subtitle?: string;
 }
 
 export default function MovieCard({
@@ -45,6 +45,19 @@ export default function MovieCard({
   const [isRatingOpen, setIsRatingOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [hoverValue, setHoverValue] = useState<number | null>(null);
+
+  // movie prop'u cache invalidation sonrası güncellenip aynı MovieCard
+  // instance'ı yeniden kullanıldığında (key değişmediği için remount
+  // olmuyor), local state'i taze değerle senkronize eder. useState'in
+  // başlangıç değeri sadece mount anında okunur, bu yüzden bu senkron
+  // olmadan güncel veri gelse bile ekranda eski durum kalırdı.
+  useEffect(() => {
+    setInWatchlist(movie.isInWatchlistByCurrentUser);
+  }, [movie.isInWatchlistByCurrentUser]);
+
+  useEffect(() => {
+    setIsLiked(movie.isLikedByCurrentUser);
+  }, [movie.isLikedByCurrentUser]);
 
   const watchlistMutation = useMutation({
     mutationFn: () => movieService.toggleWatchlist(movie.id),
@@ -129,7 +142,6 @@ export default function MovieCard({
           </div>
         )}
 
-        {/* Sol alt: kullanıcının kendi puanı / puanlama girişi */}
         {!isRatingOpen && userRating != null && (
           <button
             type="button"
@@ -232,7 +244,6 @@ export default function MovieCard({
           </div>
         )}
 
-        {/* Sol üst: watchlist + like */}
         <div className="movie-card__actions">
           {isAuthenticated && (
             <button
@@ -285,7 +296,6 @@ export default function MovieCard({
           )}
         </div>
 
-        {/* Sağ alt: silme (Films sekmesi) */}
         {showDelete && !isDeleteOpen && (
           <button
             type="button"
