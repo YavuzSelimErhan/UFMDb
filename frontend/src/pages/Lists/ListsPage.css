@@ -13,32 +13,27 @@
 
 .lists-page__grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 22px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 24px;
 }
 
-@media (max-width: 1400px) {
-  .lists-page__grid {
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
-@media (max-width: 1150px) {
+@media (max-width: 1300px) {
   .lists-page__grid {
     grid-template-columns: repeat(4, 1fr);
   }
 }
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
   .lists-page__grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
-@media (max-width: 680px) {
+@media (max-width: 700px) {
   .lists-page__grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
 }
-@media (max-width: 420px) {
+@media (max-width: 440px) {
   .lists-page__grid {
     grid-template-columns: 1fr;
   }
@@ -259,6 +254,13 @@
 }
 .list-card__body h3 {
   font-size: 1.05rem;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.6em;
 }
 .list-card__desc {
   font-size: 0.85rem;
@@ -268,12 +270,14 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: 2.4em;
   margin-bottom: 2px;
 }
 .list-card__ticket {
+  position: relative;
   align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
+  margin-top: auto;
+  padding-top: 4px;
   font-family:
     "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
   font-size: 0.72rem;
@@ -282,9 +286,16 @@
   color: var(--list-accent);
   background-color: var(--list-accent-soft);
   border: 1px solid var(--list-accent);
-  border-left: 2px dashed var(--list-accent);
-  padding: 4px 10px 4px 8px;
+  padding: 4px 10px;
   border-radius: var(--radius-pill);
+}
+.list-card__ticket::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  right: -20px;
+  top: -10px;
+  border-top: 1px dashed var(--color-border, var(--list-accent-soft));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -301,14 +312,20 @@
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
   .list-card__stage {
     height: 170px;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
   .list-card__stage {
     height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lists-page__header h1 {
+    font-size: 1.5rem;
   }
 }

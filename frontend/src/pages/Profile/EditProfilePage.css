@@ -282,7 +282,8 @@
   font-size: 0.6rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: var(--color-accent);
+  opacity: 0.85;
   margin-bottom: 12px;
   display: flex;
   align-items: center;
@@ -325,12 +326,14 @@
 .edit-profile-page__field label {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 6px;
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--color-text-secondary);
   margin-bottom: 7px;
+}
+.edit-profile-page__field label:has(.edit-profile-page__char-count) {
+  justify-content: space-between;
 }
 .edit-profile-page__field input,
 .edit-profile-page__field textarea {
