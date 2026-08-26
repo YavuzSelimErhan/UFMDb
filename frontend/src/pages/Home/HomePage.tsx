@@ -38,7 +38,7 @@ export default function HomePage() {
   });
   const { data: lists } = useQuery({
     queryKey: ["lists"],
-    queryFn: listService.getAll,
+    queryFn: () => listService.getAll(),
   });
 
   // 'my-profile' key'i zaten RailCard/HeroCarousel'daki watchlist toggle'ların
