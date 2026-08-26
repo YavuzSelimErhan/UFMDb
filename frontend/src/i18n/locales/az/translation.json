@@ -379,7 +379,15 @@
       "fieldDisplayOrder": "Görüntülənmə Sırası",
       "sectionMovies": "Filmlər",
       "movieSearchPlaceholder": "Əlavə etmək üçün film axtar...",
-      "noMovies": "Hələ film əlavə edilməyib."
+      "noMovies": "Hələ film əlavə edilməyib.",
+      "dragOrClick": "Sürükləyib buraxın və ya seçmək üçün klikləyin",
+      "dropHere": "Buraya buraxın",
+      "invalidImageType": "Yalnız şəkil faylları yüklənə bilər",
+      "uploadError": "Şəkil yüklənmədi, yenidən cəhd edin",
+      "coverHint": "Şəkli sürükləyib buraxa, cihazınızdan seçə və ya birbaşa URL yapışdıra bilərsiniz.",
+      "saveError": "Siyahı yadda saxlanarkən xəta baş verdi.",
+      "moveUp": "Yuxarı köçür",
+      "moveDown": "Aşağı köçür"
     }
   },
   "log": {

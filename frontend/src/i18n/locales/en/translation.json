@@ -377,7 +377,15 @@
       "fieldDisplayOrder": "Display Order",
       "sectionMovies": "Movies",
       "movieSearchPlaceholder": "Search movie to add...",
-      "noMovies": "No movies added yet."
+      "noMovies": "No movies added yet.",
+      "dragOrClick": "Drag and drop or click to select",
+      "dropHere": "Drop here",
+      "invalidImageType": "Only image files can be uploaded",
+      "uploadError": "Image upload failed, please try again",
+      "coverHint": "You can drag & drop, pick a file from your device, or paste a URL directly.",
+      "saveError": "An error occurred while saving the list.",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
     }
   },
   "log": {

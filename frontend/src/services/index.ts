@@ -298,3 +298,14 @@ export const screeningLogService = {
   remove: async (entryId: string) =>
     (await api.delete(`/screening-log/${entryId}`)).data,
 };
+
+export const uploadService = {
+  uploadImage: async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const { data } = await api.post("/uploads/image", formData, {
+      headers: { "Content-Type": undefined },
+    });
+    return data.url;
+  },
+};

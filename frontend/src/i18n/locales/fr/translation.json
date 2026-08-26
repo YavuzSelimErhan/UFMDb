@@ -379,7 +379,15 @@
       "fieldDisplayOrder": "Ordre d'affichage",
       "sectionMovies": "Films",
       "movieSearchPlaceholder": "Rechercher un film à ajouter...",
-      "noMovies": "Aucun film ajouté pour le moment."
+      "noMovies": "Aucun film ajouté pour le moment.",
+      "dragOrClick": "Glissez-déposez ou cliquez pour sélectionner",
+      "dropHere": "Déposez ici",
+      "invalidImageType": "Seuls les fichiers image peuvent être téléchargés",
+      "uploadError": "Échec du téléchargement de l'image, veuillez réessayer",
+      "coverHint": "Vous pouvez glisser-déposer, choisir un fichier depuis votre appareil ou coller une URL directement.",
+      "saveError": "Une erreur s'est produite lors de l'enregistrement de la liste.",
+      "moveUp": "Déplacer vers le haut",
+      "moveDown": "Déplacer vers le bas"
     }
   },
   "log": {

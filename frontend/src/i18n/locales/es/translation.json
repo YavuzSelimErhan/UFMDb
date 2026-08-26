@@ -379,7 +379,15 @@
       "fieldDisplayOrder": "Orden de visualización",
       "sectionMovies": "Películas",
       "movieSearchPlaceholder": "Buscar película para añadir...",
-      "noMovies": "Todavía no se ha añadido ninguna película."
+      "noMovies": "Todavía no se ha añadido ninguna película.",
+      "dragOrClick": "Arrastra y suelta o haz clic para seleccionar",
+      "dropHere": "Suelta aquí",
+      "invalidImageType": "Solo se pueden subir archivos de imagen",
+      "uploadError": "No se pudo subir la imagen, inténtalo de nuevo",
+      "coverHint": "Puedes arrastrar y soltar, elegir un archivo de tu dispositivo o pegar una URL directamente.",
+      "saveError": "Ocurrió un error al guardar la lista.",
+      "moveUp": "Mover arriba",
+      "moveDown": "Mover abajo"
     }
   },
   "log": {
