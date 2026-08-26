@@ -225,14 +225,20 @@
     "removeError": "No se pudo eliminar el registro, inténtalo de nuevo.",
     "loadingMore": "Cargando…",
     "loadMore": "Mostrar más",
-    "noFilmsForFilter": "Ninguna película coincide con este filtro."
+    "noFilmsForFilter": "Ninguna película coincide con este filtro.",
+    "myLists": "Mis listas"
   },
   "lists": {
     "title": "Listas",
     "subtitle": "Selecciones de películas preparadas para ti por UFMDb",
     "moviesCount": "películas",
     "backToLists": "Volver a las listas",
-    "empty": "Todavía no hay listas"
+    "empty": "Todavía no hay listas",
+    "createList": "Crear lista",
+    "official": "Oficial",
+    "community": "Comunidad",
+    "byUser": "Creada por {{name}}",
+    "myListsHint": "Aún no has creado ninguna lista."
   },
   "actor": {
     "filmography": "Filmografía",

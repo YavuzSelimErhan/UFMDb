@@ -276,7 +276,6 @@
 .list-card__ticket {
   position: relative;
   align-self: flex-start;
-  margin-top: auto;
   padding-top: 4px;
   font-family:
     "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
@@ -328,4 +327,59 @@
   .lists-page__header h1 {
     font-size: 1.5rem;
   }
+}
+
+/* ---------- Beğeni butonu (sahne üzerinde, sağ üst) ---------- */
+.list-card__like {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+.list-card__like:hover {
+  transform: scale(1.08);
+}
+.list-card__like.is-active {
+  color: #e84393;
+  background-color: rgba(232, 67, 147, 0.2);
+}
+
+/* ---------- Ticket + beğeni sayısı satırı ---------- */
+.list-card__meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.list-card__like-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+.list-card__like-count svg {
+  color: #e84393;
+}
+
+.list-card__creator {
+  font-size: 0.74rem;
+  margin-top: 2px;
 }

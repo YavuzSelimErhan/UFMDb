@@ -26,6 +26,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<FavoriteMovie> FavoriteMovies => Set<FavoriteMovie>();
     public DbSet<WatchHistory> WatchHistory => Set<WatchHistory>();
     public DbSet<CuratedList> CuratedLists => Set<CuratedList>();
+    public DbSet<CuratedListLike> CuratedListLikes => Set<CuratedListLike>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<ActorLike> ActorLikes => Set<ActorLike>();
     public DbSet<FavoriteActor> FavoriteActors => Set<FavoriteActor>();

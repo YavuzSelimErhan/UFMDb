@@ -1,98 +1,83 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { ListVideo, Layers } from "lucide-react";
+import { ListVideo, Plus } from "lucide-react";
 import { listService } from "@/services";
-import { getListTheme } from "@/utils/listTheme";
+import { useAppSelector } from "@/store";
+import ListCard from "./ListCard";
 import {
   PageSpinner,
   PageError,
   EmptyState,
 } from "@/components/common/PageState";
+import type { ListScope } from "@/types";
 import "./ListsPage.css";
+
+const TABS: { key: ListScope; labelKey: string }[] = [
+  { key: "Official", labelKey: "lists.official" },
+  { key: "Community", labelKey: "lists.community" },
+];
 
 export default function ListsPage() {
   const { t, i18n } = useTranslation();
+  const { isAuthenticated } = useAppSelector((s) => s.auth);
+  const [scope, setScope] = useState<ListScope>("Official");
 
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["lists"],
-    queryFn: listService.getAll,
+    queryKey: ["lists", scope],
+    queryFn: () => listService.getAll(scope),
     retry: 1,
   });
-
-  if (isLoading) return <PageSpinner label={t("common.loading")} />;
-  if (isError || !data)
-    return (
-      <PageError message={t("errors.listsFailed")} onRetry={() => refetch()} />
-    );
 
   return (
     <div className="container lists-page">
       <div className="lists-page__header">
-        <h1>{t("lists.title")}</h1>
-        <p className="text-muted">{t("lists.subtitle")}</p>
+        <div>
+          <h1>{t("lists.title")}</h1>
+          <p className="text-muted">{t("lists.subtitle")}</p>
+        </div>
+        {isAuthenticated && (
+          <Link to="/lists/new" className="btn-primary lists-page__create">
+            <Plus size={15} /> {t("lists.createList")}
+          </Link>
+        )}
       </div>
 
-      {data.length === 0 ? (
+      <div className="lists-page__tabs">
+        {TABS.map(({ key, labelKey }) => (
+          <button
+            key={key}
+            className={`lists-page__tab ${scope === key ? "is-active" : ""}`}
+            onClick={() => setScope(key)}
+          >
+            {t(labelKey)}
+          </button>
+        ))}
+      </div>
+
+      {isLoading && <PageSpinner label={t("common.loading")} />}
+
+      {isError && !isLoading && (
+        <PageError
+          message={t("errors.listsFailed")}
+          onRetry={() => refetch()}
+        />
+      )}
+
+      {data && data.length === 0 && (
         <EmptyState icon={<ListVideo size={28} />} title={t("lists.empty")} />
-      ) : (
+      )}
+
+      {data && data.length > 0 && (
         <div className="lists-page__grid">
-          {data.map((list) => {
-            const displayTitle =
-              i18n.language === "tr" ? list.titleTr : list.title;
-            const theme = getListTheme(list.id);
-            const themeStyle = {
-              "--list-accent": theme.accent,
-              "--list-accent-soft": theme.accentSoft,
-              "--list-accent-strong": theme.accentStrong,
-            } as React.CSSProperties;
-
-            return (
-              <Link
-                key={list.id}
-                to={`/lists/${list.id}`}
-                className="list-card card"
-                style={themeStyle}
-              >
-                <div className="list-card__stage">
-                  {list.coverImageUrl ? (
-                    <img
-                      src={list.coverImageUrl}
-                      alt=""
-                      className="list-card__stage-img"
-                    />
-                  ) : list.coverPosters.length > 0 ? (
-                    <div className="list-card__fan">
-                      {list.coverPosters.slice(0, 4).map((poster, i) => (
-                        <img
-                          key={i}
-                          src={poster}
-                          alt=""
-                          className="list-card__fan-poster"
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="list-card__stage-empty">
-                      <Layers size={26} />
-                    </div>
-                  )}
-                </div>
-
-                <div className="list-card__perf" aria-hidden="true" />
-
-                <div className="list-card__body">
-                  <h3 title={displayTitle}>{displayTitle}</h3>
-                  <p className="text-secondary list-card__desc">
-                    {list.description}
-                  </p>
-                  <span className="list-card__ticket">
-                    {list.movieCount} {t("lists.moviesCount")}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
+          {data.map((list) => (
+            <ListCard
+              key={list.id}
+              list={list}
+              displayTitle={i18n.language === "tr" ? list.titleTr : list.title}
+            />
+          ))}
         </div>
       )}
     </div>

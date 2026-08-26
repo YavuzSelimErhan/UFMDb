@@ -33,6 +33,7 @@ public class WatchlistItem : BaseEntity
 }
 
 /// <summary>Ana sayfa küratör seçkileri (ör. "Yönetmenin Seçtikleri")</summary>
+/// <summary>Film listesi — hem resmi (admin/site) koleksiyonları hem kullanıcı listelerini kapsar</summary>
 public class CuratedList : BaseEntity
 {
     public string Title { get; set; } = default!;
@@ -40,7 +41,24 @@ public class CuratedList : BaseEntity
     public string Description { get; set; } = string.Empty;
     public string CoverImageUrl { get; set; } = string.Empty;
     public int DisplayOrder { get; set; }
+
+    // ---- Yeni alanlar ----
+    /// <summary>true: sitenin resmi koleksiyonu (sadece Admin oluşturabilir). false: bir kullanıcının kendi listesi.</summary>
+    public bool IsOfficial { get; set; } = true;
+    public Guid CreatedByUserId { get; set; }
+    public User CreatedByUser { get; set; } = default!;
+    public int LikeCount { get; set; } = 0;
+
     public ICollection<CuratedListItem> Items { get; set; } = new List<CuratedListItem>();
+    public ICollection<CuratedListLike> Likes { get; set; } = new List<CuratedListLike>();
+}
+
+public class CuratedListLike : BaseEntity
+{
+    public Guid CuratedListId { get; set; }
+    public CuratedList CuratedList { get; set; } = default!;
+    public Guid UserId { get; set; }
+    public User User { get; set; } = default!;
 }
 
 public class CuratedListItem

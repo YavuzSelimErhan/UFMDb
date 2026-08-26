@@ -167,6 +167,16 @@ public class CuratedListConfiguration : IEntityTypeConfiguration<CuratedList>
     {
         b.ToTable("CuratedLists");
         b.Property(c => c.Title).IsRequired().HasMaxLength(200);
+
+        b.HasOne(c => c.CreatedByUser)
+            .WithMany(u => u.CreatedLists)
+            .HasForeignKey(c => c.CreatedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // "Resmi koleksiyonlar" / "Topluluk listeleri" filtresi ve profil sayfasındaki
+        // "kullanıcının listeleri" sorgusu için.
+        b.HasIndex(c => c.IsOfficial);
+        b.HasIndex(c => c.CreatedByUserId);
     }
 }
 
@@ -178,6 +188,17 @@ public class CuratedListItemConfiguration : IEntityTypeConfiguration<CuratedList
         b.HasKey(i => new { i.CuratedListId, i.MovieId });
         b.HasOne(i => i.CuratedList).WithMany(c => c.Items).HasForeignKey(i => i.CuratedListId).OnDelete(DeleteBehavior.Cascade);
         b.HasOne(i => i.Movie).WithMany().HasForeignKey(i => i.MovieId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class CuratedListLikeConfiguration : IEntityTypeConfiguration<CuratedListLike>
+{
+    public void Configure(EntityTypeBuilder<CuratedListLike> b)
+    {
+        b.ToTable("CuratedListLikes");
+        b.HasIndex(l => new { l.CuratedListId, l.UserId }).IsUnique();
+        b.HasOne(l => l.CuratedList).WithMany(c => c.Likes).HasForeignKey(l => l.CuratedListId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne(l => l.User).WithMany(u => u.CuratedListLikes).HasForeignKey(l => l.UserId).OnDelete(DeleteBehavior.Restrict);
     }
 }
 

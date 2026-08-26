@@ -225,14 +225,20 @@
     "removeError": "Couldn't delete the entry, please try again.",
     "loadingMore": "Loading…",
     "loadMore": "Load more",
-    "noFilmsForFilter": "No films match this filter."
+    "noFilmsForFilter": "No films match this filter.",
+    "myLists": "My Lists"
   },
   "lists": {
     "title": "Lists",
     "subtitle": "Curated movie collections handpicked by UFMDb",
     "moviesCount": "movies",
     "backToLists": "Back to Lists",
-    "empty": "No lists yet"
+    "empty": "No lists yet",
+    "createList": "Create List",
+    "official": "Official",
+    "community": "Community",
+    "byUser": "Created by {{name}}",
+    "myListsHint": "You haven't created any lists yet."
   },
   "actor": {
     "filmography": "Filmography",

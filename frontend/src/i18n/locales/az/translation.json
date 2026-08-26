@@ -225,14 +225,20 @@
     "removeError": "Qeyd silinmədi, yenidən cəhd edin.",
     "loadingMore": "Yüklənir…",
     "loadMore": "Daha çox göstər",
-    "noFilmsForFilter": "Bu filtrə uyğun film yoxdur."
+    "noFilmsForFilter": "Bu filtrə uyğun film yoxdur.",
+    "myLists": "Siyahılarım"
   },
   "lists": {
     "title": "Siyahılar",
     "subtitle": "UFMDb-nin sənin üçün hazırladığı film seçimləri",
     "moviesCount": "film",
     "backToLists": "Siyahılara Qayıt",
-    "empty": "Hələ siyahı yoxdur"
+    "empty": "Hələ siyahı yoxdur",
+    "createList": "Siyahı yarat",
+    "official": "Rəsmi",
+    "community": "İcma",
+    "byUser": "{{name}} tərəfindən yaradılıb",
+    "myListsHint": "Hələ heç bir siyahı yaratmamısan."
   },
   "actor": {
     "filmography": "Filmoqrafiya",

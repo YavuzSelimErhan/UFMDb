@@ -260,6 +260,11 @@ export interface ListSummary {
   coverImageUrl: string;
   movieCount: number;
   coverPosters: string[];
+  isOfficial: boolean;
+  createdByUserId: string;
+  createdByUserName: string;
+  likeCount: number;
+  isLikedByCurrentUser: boolean;
 }
 
 export interface ListDetail {
@@ -269,7 +274,14 @@ export interface ListDetail {
   description: string;
   coverImageUrl: string;
   movies: MovieListItem[];
+  isOfficial: boolean;
+  createdByUserId: string;
+  createdByUserName: string;
+  likeCount: number;
+  isLikedByCurrentUser: boolean;
 }
+
+export type ListScope = "All" | "Official" | "Community" | "Mine";
 
 export interface ListFormPayload {
   title: string;
@@ -278,6 +290,7 @@ export interface ListFormPayload {
   coverImageUrl: string;
   displayOrder: number;
   movieIds: string[];
+  isOfficial: boolean;
 }
 
 export interface WatchedMovie {

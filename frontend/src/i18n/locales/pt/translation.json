@@ -225,14 +225,20 @@
     "removeError": "Não foi possível excluir o registro, tente novamente.",
     "loadingMore": "Carregando…",
     "loadMore": "Mostrar mais",
-    "noFilmsForFilter": "Nenhum filme corresponde a este filtro."
+    "noFilmsForFilter": "Nenhum filme corresponde a este filtro.",
+    "myLists": "Minhas listas"
   },
   "lists": {
     "title": "Listas",
     "subtitle": "Seleções de filmes preparadas para você pelo UFMDb",
     "moviesCount": "filmes",
     "backToLists": "Voltar às listas",
-    "empty": "Ainda não há listas"
+    "empty": "Ainda não há listas",
+    "createList": "Criar lista",
+    "official": "Oficial",
+    "community": "Comunidade",
+    "byUser": "Criada por {{name}}",
+    "myListsHint": "Você ainda não criou nenhuma lista."
   },
   "actor": {
     "filmography": "Filmografia",

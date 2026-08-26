@@ -8,22 +8,38 @@ using UFMDb.Domain.Entities;
 namespace UFMDb.Application.Features.Lists;
 
 public record ListSummaryDto(
-    Guid Id, string Title, string TitleTr, string Description, string CoverImageUrl, int MovieCount, List<string> CoverPosters
+    Guid Id, string Title, string TitleTr, string Description, string CoverImageUrl, int MovieCount, List<string> CoverPosters,
+    bool IsOfficial, Guid CreatedByUserId, string CreatedByUserName, int LikeCount, bool IsLikedByCurrentUser
 );
 public record ListDetailDto(
-    Guid Id, string Title, string TitleTr, string Description, string CoverImageUrl, List<MovieListItemDto> Movies
+    Guid Id, string Title, string TitleTr, string Description, string CoverImageUrl, List<MovieListItemDto> Movies,
+    bool IsOfficial, Guid CreatedByUserId, string CreatedByUserName, int LikeCount, bool IsLikedByCurrentUser
 );
 
-// ---------- Tüm sistem listelerini getir (kapak posterleriyle özet halinde) ----------
-public record GetListsQuery : IRequest<List<ListSummaryDto>>;
+// ---------- Liste listeleme: scope filtresiyle (resmi / topluluk / benim listelerim) ----------
+public enum ListScope { All, Official, Community, Mine }
+
+public record GetListsQuery(ListScope Scope, Guid? UserId) : IRequest<List<ListSummaryDto>>;
 public class GetListsQueryHandler : IRequestHandler<GetListsQuery, List<ListSummaryDto>>
 {
     private readonly IApplicationDbContext _context;
     public GetListsQueryHandler(IApplicationDbContext context) => _context = context;
+
     public async Task<List<ListSummaryDto>> Handle(GetListsQuery request, CancellationToken ct)
     {
-        var lists = await _context.CuratedLists.AsNoTracking()
-            .Where(cl => !cl.IsDeleted)
+        var query = _context.CuratedLists.AsNoTracking().Where(cl => !cl.IsDeleted);
+
+        query = request.Scope switch
+        {
+            ListScope.Official => query.Where(cl => cl.IsOfficial),
+            ListScope.Community => query.Where(cl => !cl.IsOfficial),
+            ListScope.Mine => request.UserId.HasValue
+                ? query.Where(cl => cl.CreatedByUserId == request.UserId.Value)
+                : query.Where(cl => false), // giriş yapmamışsa boş dön
+            _ => query
+        };
+
+        var lists = await query
             .OrderBy(cl => cl.DisplayOrder)
             .Select(cl => new
             {
@@ -32,17 +48,31 @@ public class GetListsQueryHandler : IRequestHandler<GetListsQuery, List<ListSumm
                 cl.TitleTr,
                 cl.Description,
                 cl.CoverImageUrl,
+                cl.IsOfficial,
+                cl.CreatedByUserId,
+                CreatedByUserName = cl.CreatedByUser.UserName,
+                cl.LikeCount,
                 Count = cl.Items.Count,
                 Covers = cl.Items.OrderBy(i => i.Order).Take(4).Select(i => i.Movie.PosterUrl).ToList()
             })
             .ToListAsync(ct);
-        return lists.Select(l => new ListSummaryDto(l.Id, l.Title, l.TitleTr, l.Description, l.CoverImageUrl, l.Count, l.Covers)).ToList();
+
+        HashSet<Guid> likedListIds = request.UserId.HasValue
+            ? (await _context.CuratedListLikes.AsNoTracking()
+                .Where(l => l.UserId == request.UserId.Value)
+                .Select(l => l.CuratedListId)
+                .ToListAsync(ct)).ToHashSet()
+            : new HashSet<Guid>();
+
+        return lists.Select(l => new ListSummaryDto(
+            l.Id, l.Title, l.TitleTr, l.Description, l.CoverImageUrl, l.Count, l.Covers,
+            l.IsOfficial, l.CreatedByUserId, l.CreatedByUserName, l.LikeCount,
+            likedListIds.Contains(l.Id)
+        )).ToList();
     }
 }
 
-// ---------- Tekil liste detayı (tüm filmleriyle) ----------
-// UserId eklendi: GetMoviesQuery'deki desenle aynı — controller giriş yapmış
-// kullanıcının id'sini buraya geçiyor (giriş yapılmamışsa null).
+// ---------- Tekil liste detayı ----------
 public record GetListDetailQuery(Guid ListId, Guid? UserId) : IRequest<ListDetailDto>;
 public class GetListDetailQueryHandler : IRequestHandler<GetListDetailQuery, ListDetailDto>
 {
@@ -53,6 +83,7 @@ public class GetListDetailQueryHandler : IRequestHandler<GetListDetailQuery, Lis
         var list = await _context.CuratedLists.AsNoTracking()
             .Where(cl => !cl.IsDeleted)
             .Include(cl => cl.Items.OrderBy(i => i.Order)).ThenInclude(i => i.Movie).ThenInclude(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
+            .Include(cl => cl.CreatedByUser)
             .FirstOrDefaultAsync(cl => cl.Id == request.ListId, ct)
             ?? throw new NotFoundException(nameof(CuratedList), request.ListId);
 
@@ -64,40 +95,51 @@ public class GetListDetailQueryHandler : IRequestHandler<GetListDetailQuery, Lis
             false, false, i.Movie.ReleaseDate
         )).ToList();
 
-        // GetMoviesQueryHandler'daki desenin birebir aynısı: kullanıcı giriş
-        // yapmışsa, listedeki filmlerin watchlist/like durumunu tek seferde
-        // (N+1'e düşmeden) toplu çekip DTO'lara işliyoruz.
-        if (request.UserId.HasValue && movies.Count > 0)
+        bool isLikedByCurrentUser = false;
+
+        if (request.UserId.HasValue)
         {
-            var movieIds = movies.Select(m => m.Id).ToHashSet();
-
-            var watchlistIds = (await _context.WatchlistItems.AsNoTracking()
-                .Where(w => w.UserId == request.UserId.Value && movieIds.Contains(w.MovieId))
-                .Select(w => w.MovieId)
-                .ToListAsync(ct)).ToHashSet();
-
-            var likedIds = (await _context.Likes.AsNoTracking()
-                .Where(l => l.UserId == request.UserId.Value && movieIds.Contains(l.MovieId))
-                .Select(l => l.MovieId)
-                .ToListAsync(ct)).ToHashSet();
-
-            for (int i = 0; i < movies.Count; i++)
+            if (movies.Count > 0)
             {
-                movies[i] = movies[i] with
+                var movieIds = movies.Select(m => m.Id).ToHashSet();
+
+                var watchlistIds = (await _context.WatchlistItems.AsNoTracking()
+                    .Where(w => w.UserId == request.UserId.Value && movieIds.Contains(w.MovieId))
+                    .Select(w => w.MovieId)
+                    .ToListAsync(ct)).ToHashSet();
+
+                var likedIds = (await _context.Likes.AsNoTracking()
+                    .Where(l => l.UserId == request.UserId.Value && movieIds.Contains(l.MovieId))
+                    .Select(l => l.MovieId)
+                    .ToListAsync(ct)).ToHashSet();
+
+                for (int i = 0; i < movies.Count; i++)
                 {
-                    IsInWatchlistByCurrentUser = watchlistIds.Contains(movies[i].Id),
-                    IsLikedByCurrentUser = likedIds.Contains(movies[i].Id)
-                };
+                    movies[i] = movies[i] with
+                    {
+                        IsInWatchlistByCurrentUser = watchlistIds.Contains(movies[i].Id),
+                        IsLikedByCurrentUser = likedIds.Contains(movies[i].Id)
+                    };
+                }
             }
+
+            isLikedByCurrentUser = await _context.CuratedListLikes.AsNoTracking()
+                .AnyAsync(l => l.CuratedListId == list.Id && l.UserId == request.UserId.Value, ct);
         }
 
-        return new ListDetailDto(list.Id, list.Title, list.TitleTr, list.Description, list.CoverImageUrl, movies);
+        return new ListDetailDto(
+            list.Id, list.Title, list.TitleTr, list.Description, list.CoverImageUrl, movies,
+            list.IsOfficial, list.CreatedByUserId, list.CreatedByUser.UserName, list.LikeCount,
+            isLikedByCurrentUser
+        );
     }
 }
 
-// ---------- Admin: Liste yönetimi ----------
+// ---------- Liste oluşturma ----------
+// IsOfficial artık istemciden gelmiyor: controller, kullanıcının rolüne göre bu değeri set ediyor.
 public record CreateListCommand(
-    string Title, string TitleTr, string Description, string CoverImageUrl, int DisplayOrder, List<Guid> MovieIds
+    string Title, string TitleTr, string Description, string CoverImageUrl, int DisplayOrder, List<Guid> MovieIds,
+    Guid CreatedByUserId, bool IsOfficial
 ) : IRequest<Guid>;
 
 public class CreateListCommandValidator : AbstractValidator<CreateListCommand>
@@ -123,6 +165,8 @@ public class CreateListCommandHandler : IRequestHandler<CreateListCommand, Guid>
             Description = request.Description,
             CoverImageUrl = request.CoverImageUrl,
             DisplayOrder = request.DisplayOrder,
+            CreatedByUserId = request.CreatedByUserId,
+            IsOfficial = request.IsOfficial,
             Items = request.MovieIds.Select((id, i) => new CuratedListItem { MovieId = id, Order = i }).ToList()
         };
         _context.CuratedLists.Add(list);
@@ -131,8 +175,11 @@ public class CreateListCommandHandler : IRequestHandler<CreateListCommand, Guid>
     }
 }
 
+// ---------- Liste güncelleme ----------
+// Sahiplik kontrolü handler'da: sahibi değilse ve admin de değilse ForbiddenException.
 public record UpdateListCommand(
-    Guid Id, string Title, string TitleTr, string Description, string CoverImageUrl, int DisplayOrder, List<Guid> MovieIds
+    Guid Id, string Title, string TitleTr, string Description, string CoverImageUrl, int DisplayOrder, List<Guid> MovieIds,
+    Guid RequestingUserId, bool IsRequestingUserAdmin
 ) : IRequest;
 
 public class UpdateListCommandValidator : AbstractValidator<UpdateListCommand>
@@ -156,6 +203,9 @@ public class UpdateListCommandHandler : IRequestHandler<UpdateListCommand>
             .FirstOrDefaultAsync(cl => cl.Id == request.Id, ct)
             ?? throw new NotFoundException(nameof(CuratedList), request.Id);
 
+        if (list.CreatedByUserId != request.RequestingUserId && !request.IsRequestingUserAdmin)
+            throw new ForbiddenException("Bu listeyi düzenleme yetkin yok.");
+
         list.Title = request.Title;
         list.TitleTr = request.TitleTr;
         list.Description = request.Description;
@@ -171,7 +221,8 @@ public class UpdateListCommandHandler : IRequestHandler<UpdateListCommand>
     }
 }
 
-public record DeleteListCommand(Guid Id) : IRequest;
+// ---------- Liste silme ----------
+public record DeleteListCommand(Guid Id, Guid RequestingUserId, bool IsRequestingUserAdmin) : IRequest;
 
 public class DeleteListCommandHandler : IRequestHandler<DeleteListCommand>
 {
@@ -182,8 +233,47 @@ public class DeleteListCommandHandler : IRequestHandler<DeleteListCommand>
     {
         var list = await _context.CuratedLists.FirstOrDefaultAsync(cl => cl.Id == request.Id, ct)
             ?? throw new NotFoundException(nameof(CuratedList), request.Id);
+
+        if (list.CreatedByUserId != request.RequestingUserId && !request.IsRequestingUserAdmin)
+            throw new ForbiddenException("Bu listeyi silme yetkin yok.");
+
         list.IsDeleted = true;
         list.UpdatedAtUtc = DateTime.UtcNow;
         await _context.SaveChangesAsync(ct);
+    }
+}
+
+// ---------- Beğenme/beğenmekten vazgeçme ----------
+public record ToggleListLikeCommand(Guid ListId, Guid UserId) : IRequest<bool>;
+
+public class ToggleListLikeCommandHandler : IRequestHandler<ToggleListLikeCommand, bool>
+{
+    private readonly IApplicationDbContext _context;
+    public ToggleListLikeCommandHandler(IApplicationDbContext context) => _context = context;
+
+    public async Task<bool> Handle(ToggleListLikeCommand request, CancellationToken ct)
+    {
+        var list = await _context.CuratedLists.FirstOrDefaultAsync(cl => cl.Id == request.ListId, ct)
+            ?? throw new NotFoundException(nameof(CuratedList), request.ListId);
+
+        var existing = await _context.CuratedListLikes
+            .FirstOrDefaultAsync(l => l.CuratedListId == request.ListId && l.UserId == request.UserId, ct);
+
+        bool isLikedNow;
+        if (existing != null)
+        {
+            _context.CuratedListLikes.Remove(existing);
+            list.LikeCount = Math.Max(0, list.LikeCount - 1);
+            isLikedNow = false;
+        }
+        else
+        {
+            _context.CuratedListLikes.Add(new CuratedListLike { CuratedListId = request.ListId, UserId = request.UserId });
+            list.LikeCount += 1;
+            isLikedNow = true;
+        }
+
+        await _context.SaveChangesAsync(ct);
+        return isLikedNow;
     }
 }

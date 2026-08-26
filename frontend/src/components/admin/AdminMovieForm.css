@@ -318,3 +318,11 @@
   opacity: 0.3;
   cursor: default;
 }
+
+.admin-movie-form__checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}

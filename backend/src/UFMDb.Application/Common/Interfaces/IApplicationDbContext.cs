@@ -12,7 +12,6 @@ public interface IApplicationDbContext
 {
     DbSet<Movie> Movies { get; }
     DbSet<Genre> Genres { get; }
-
     DbSet<MovieRating> MovieRatings { get; }
     DbSet<Country> Countries { get; }
     DbSet<Actor> Actors { get; }
@@ -26,6 +25,7 @@ public interface IApplicationDbContext
     DbSet<FavoriteMovie> FavoriteMovies { get; }
     DbSet<WatchHistory> WatchHistory { get; }
     DbSet<CuratedList> CuratedLists { get; }
+    DbSet<CuratedListLike> CuratedListLikes { get; }
     DbSet<RefreshToken> RefreshTokens { get; }
     DbSet<ActorLike> ActorLikes { get; }
     DbSet<FavoriteActor> FavoriteActors { get; }

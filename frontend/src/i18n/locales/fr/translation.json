@@ -225,14 +225,20 @@
     "removeError": "Impossible de supprimer l'entrée, veuillez réessayer.",
     "loadingMore": "Chargement…",
     "loadMore": "Afficher plus",
-    "noFilmsForFilter": "Aucun film ne correspond à ce filtre."
+    "noFilmsForFilter": "Aucun film ne correspond à ce filtre.",
+    "myLists": "Mes listes"
   },
   "lists": {
     "title": "Listes",
     "subtitle": "Des sélections de films préparées pour toi par UFMDb",
     "moviesCount": "films",
     "backToLists": "Retour aux listes",
-    "empty": "Aucune liste pour le moment"
+    "empty": "Aucune liste pour le moment",
+    "createList": "Créer une liste",
+    "official": "Officielle",
+    "community": "Communauté",
+    "byUser": "Créée par {{name}}",
+    "myListsHint": "Tu n'as pas encore créé de liste."
   },
   "actor": {
     "filmography": "Filmographie",

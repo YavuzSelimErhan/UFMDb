@@ -39,6 +39,7 @@ const EMPTY_FORM: Omit<ListFormPayload, "movieIds"> = {
   description: "",
   coverImageUrl: "",
   displayOrder: 0,
+  isOfficial: true,
 };
 
 export default function AdminListForm({ listId, onDone, onCancel }: Props) {
@@ -66,6 +67,7 @@ export default function AdminListForm({ listId, onDone, onCancel }: Props) {
       description: existingList.description,
       coverImageUrl: existingList.coverImageUrl,
       displayOrder: 0,
+      isOfficial: existingList.isOfficial,
     });
     setMovies(
       existingList.movies.map((m) => ({
@@ -211,6 +213,15 @@ export default function AdminListForm({ listId, onDone, onCancel }: Props) {
           </div>
         </div>
       </div>
+
+      <label className="admin-movie-form__checkbox-field">
+        <input
+          type="checkbox"
+          checked={form.isOfficial}
+          onChange={(e) => setForm({ ...form, isOfficial: e.target.checked })}
+        />
+        {t("admin.lists.fieldIsOfficial")}
+      </label>
 
       <div className="admin-movie-form__field">
         <label>{t("admin.lists.fieldCoverImageUrl")}</label>

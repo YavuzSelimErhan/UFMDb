@@ -13,13 +13,16 @@ import {
   Film,
   ArrowRight,
   Languages,
+  ListVideo,
+  Plus,
 } from "lucide-react";
-import { profileService } from "@/services";
+import { profileService, listService } from "@/services";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { setTheme } from "@/store/uiSlice";
 import { SUPPORTED_LANGUAGES, languageLabel } from "@/i18n/languages";
 import Dropdown from "@/components/search/Dropdown";
 import MovieCard from "@/components/movie/MovieCard";
+import ListCard from "./../Lists/ListCard";
 import FavoritesShowcase from "@/components/profile/FavoritesShowcase";
 import ProfileFilmsTab from "@/components/profile/ProfileFilmsTab";
 import ProfileHeader from "@/components/profile/ProfileHeader";
@@ -37,6 +40,7 @@ type ProfileTab =
   | "watchlist"
   | "liked"
   | "reviews"
+  | "lists"
   | "settings";
 
 export default function ProfilePage() {
@@ -70,6 +74,17 @@ export default function ProfilePage() {
     queryFn: profileService.getMyProfile,
     retry: 1,
     staleTime: 60_000,
+  });
+
+  const {
+    data: myLists,
+    isLoading: isMyListsLoading,
+    isError: isMyListsError,
+    refetch: refetchMyLists,
+  } = useQuery({
+    queryKey: ["lists", "Mine"],
+    queryFn: () => listService.getAll("Mine"),
+    enabled: tab === "lists",
   });
 
   const settingsMutation = useMutation({
@@ -126,6 +141,7 @@ export default function ProfilePage() {
         profile.likedActors.length +
         profile.likedDirectors.length,
     },
+    { key: "lists", label: t("profile.myLists"), icon: ListVideo },
     {
       key: "reviews",
       label: t("profile.reviews"),
@@ -207,6 +223,54 @@ export default function ProfilePage() {
             likedDirectors={profile.likedDirectors}
             reviews={profile.reviews}
           />
+        )}
+
+        {tab === "lists" && (
+          <section className="profile-page__section">
+            <div className="profile-page__section-header">
+              <h2>
+                <ListVideo size={17} />
+                {t("profile.myLists")}
+              </h2>
+              <Link
+                to="/lists/new"
+                className="btn-secondary profile-page__create-list"
+              >
+                <Plus size={14} /> {t("lists.createList")}
+              </Link>
+            </div>
+
+            {isMyListsLoading && <PageSpinner label={t("common.loading")} />}
+
+            {isMyListsError && !isMyListsLoading && (
+              <PageError
+                message={t("errors.listsFailed")}
+                onRetry={() => refetchMyLists()}
+              />
+            )}
+
+            {myLists && myLists.length === 0 && (
+              <EmptyState
+                icon={<ListVideo size={26} />}
+                title={t("profile.emptyContent")}
+                hint={t("lists.myListsHint")}
+              />
+            )}
+
+            {myLists && myLists.length > 0 && (
+              <div className="lists-page__grid">
+                {myLists.map((list) => (
+                  <ListCard
+                    key={list.id}
+                    list={list}
+                    displayTitle={
+                      i18n.language === "tr" ? list.titleTr : list.title
+                    }
+                  />
+                ))}
+              </div>
+            )}
+          </section>
         )}
 
         {tab === "settings" && (

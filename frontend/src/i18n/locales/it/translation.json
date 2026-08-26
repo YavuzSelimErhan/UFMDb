@@ -225,14 +225,20 @@
     "removeError": "Impossibile eliminare la voce, riprova.",
     "loadingMore": "Caricamento…",
     "loadMore": "Mostra altri",
-    "noFilmsForFilter": "Nessun film corrisponde a questo filtro."
+    "noFilmsForFilter": "Nessun film corrisponde a questo filtro.",
+    "myLists": "Le mie liste"
   },
   "lists": {
     "title": "Liste",
     "subtitle": "Selezioni di film preparate per te da UFMDb",
     "moviesCount": "film",
     "backToLists": "Torna alle liste",
-    "empty": "Ancora nessuna lista"
+    "empty": "Ancora nessuna lista",
+    "createList": "Crea lista",
+    "official": "Ufficiale",
+    "community": "Community",
+    "byUser": "Creata da {{name}}",
+    "myListsHint": "Non hai ancora creato nessuna lista."
   },
   "actor": {
     "filmography": "Filmografia",

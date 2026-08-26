@@ -225,14 +225,20 @@
     "removeError": "Eintrag konnte nicht gelöscht werden, bitte erneut versuchen.",
     "loadingMore": "Wird geladen…",
     "loadMore": "Mehr anzeigen",
-    "noFilmsForFilter": "Keine Filme entsprechen diesem Filter."
+    "noFilmsForFilter": "Keine Filme entsprechen diesem Filter.",
+    "myLists": "Meine Listen"
   },
   "lists": {
     "title": "Listen",
     "subtitle": "Filmauswahlen, die UFMDb speziell für dich zusammengestellt hat",
     "moviesCount": "Filme",
     "backToLists": "Zurück zu den Listen",
-    "empty": "Noch keine Listen vorhanden"
+    "empty": "Noch keine Listen vorhanden",
+    "createList": "Liste erstellen",
+    "official": "Offiziell",
+    "community": "Community",
+    "byUser": "Erstellt von {{name}}",
+    "myListsHint": "Du hast noch keine Liste erstellt."
   },
   "actor": {
     "filmography": "Filmografie",

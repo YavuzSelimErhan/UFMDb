@@ -225,14 +225,20 @@
     "removeError": "Kayıt silinemedi, tekrar deneyin.",
     "loadingMore": "Yükleniyor…",
     "loadMore": "Daha fazla göster",
-    "noFilmsForFilter": "Bu filtreye uyan film yok."
+    "noFilmsForFilter": "Bu filtreye uyan film yok.",
+    "myLists": "Listelerim"
   },
   "lists": {
     "title": "Listeler",
     "subtitle": "UFMDb'nin sana özel hazırladığı film seçkileri",
     "moviesCount": "film",
     "backToLists": "Listelere Dön",
-    "empty": "Henüz liste yok"
+    "empty": "Henüz liste yok",
+    "createList": "Liste Oluştur",
+    "official": "Resmi",
+    "community": "Topluluk",
+    "byUser": "{{name}} tarafından oluşturuldu",
+    "myListsHint": "Henüz bir liste oluşturmadın."
   },
   "actor": {
     "filmography": "Filmografi",

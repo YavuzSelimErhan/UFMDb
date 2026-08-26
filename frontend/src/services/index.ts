@@ -22,6 +22,7 @@ import type {
   WatchedMovie,
   ScreeningLogDay,
   Country,
+  ListScope,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -264,8 +265,8 @@ export const userService = {
 
 // ---------------- Lists (sistem/küratör listeleri) ----------------
 export const listService = {
-  getAll: async (): Promise<ListSummary[]> => {
-    const { data } = await api.get("/lists");
+  getAll: async (scope: ListScope = "Official"): Promise<ListSummary[]> => {
+    const { data } = await api.get("/lists", { params: { scope } });
     return data;
   },
   getById: async (id: string): Promise<ListDetail> => {
@@ -275,8 +276,12 @@ export const listService = {
   create: async (payload: ListFormPayload) =>
     (await api.post("/lists", payload)).data,
   update: async (id: string, payload: ListFormPayload) =>
-    (await api.put(`/lists/${id}`, { id, ...payload })).data,
+    (await api.put(`/lists/${id}`, payload)).data, // dikkat: artık body'ye id eklemiyoruz, backend UpdateListRequest'te Id yok
   remove: async (id: string) => (await api.delete(`/lists/${id}`)).data,
+  toggleLike: async (id: string): Promise<boolean> => {
+    const { data } = await api.post(`/lists/${id}/like`);
+    return data;
+  },
 };
 
 // ---------------- Screening Log (Seans Defteri) ----------------

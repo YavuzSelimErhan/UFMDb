@@ -6,6 +6,11 @@ public class NotFoundException : Exception
         : base($"\"{entityName}\" ({key}) bulunamadı.") { }
 }
 
+public class ForbiddenException : Exception
+{
+    public ForbiddenException(string message) : base(message) { }
+}
+
 public class ValidationException : Exception
 {
     public IDictionary<string, string[]> Errors { get; }

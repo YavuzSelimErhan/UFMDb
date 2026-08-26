@@ -17,6 +17,7 @@ import AdminPage from "@/pages/Admin/AdminPage";
 import ScreeningLogPage from "@/pages/ScreeningLog/ScreeningLogPage";
 import SessionManager from "@/components/common/SessionManager";
 import EditProfilePage from "@/pages/Profile/EditProfilePage";
+import CreateListPage from "@/pages/Lists/CreateListPage";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 
 function AppShell() {
@@ -42,6 +43,7 @@ function AppShell() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/edit" element={<EditProfilePage />} />
             <Route path="/log" element={<ScreeningLogPage />} />
+            <Route path="/lists/new" element={<CreateListPage />} />
           </Route>
 
           <Route element={<ProtectedRoute requireAdmin />}>
