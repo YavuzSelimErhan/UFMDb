@@ -1,8 +1,22 @@
-import { useState, useEffect, type FormEvent } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  type FormEvent,
+  type DragEvent,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { X, Image as ImageIcon, ListVideo } from "lucide-react";
-import { listService } from "@/services";
+import {
+  X,
+  Image as ImageIcon,
+  ListVideo,
+  Upload,
+  Loader2,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
+import { listService, uploadService } from "@/services";
 import MovieSearchSelect from "./MovieSearchSelect";
 import type { ListFormPayload } from "@/types";
 import "./AdminMovieForm.css";
@@ -31,9 +45,12 @@ export default function AdminListForm({ listId, onDone, onCancel }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isEditMode = !!listId;
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [movies, setMovies] = useState<MovieRow[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const { data: existingList } = useQuery({
     queryKey: ["list", listId],
@@ -58,6 +75,12 @@ export default function AdminListForm({ listId, onDone, onCancel }: Props) {
       })),
     );
   }, [existingList]);
+
+  const uploadMutation = useMutation({
+    mutationFn: (file: File) => uploadService.uploadImage(file),
+    onSuccess: (url) => setForm((f) => ({ ...f, coverImageUrl: url })),
+    onError: () => setUploadError(t("admin.lists.uploadError")),
+  });
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -92,6 +115,32 @@ export default function AdminListForm({ listId, onDone, onCancel }: Props) {
   const removeMovie = (movieId: string) =>
     setMovies((prev) => prev.filter((m) => m.movieId !== movieId));
 
+  const moveMovie = (index: number, dir: -1 | 1) => {
+    setMovies((prev) => {
+      const target = index + dir;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
+  const handleFile = (file: File | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setUploadError(t("admin.lists.invalidImageType"));
+      return;
+    }
+    setUploadError(null);
+    uploadMutation.mutate(file);
+  };
+
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleFile(e.dataTransfer.files?.[0]);
+  };
+
   return (
     <form className="admin-movie-form card" onSubmit={handleSubmit}>
       <h3>
@@ -99,11 +148,37 @@ export default function AdminListForm({ listId, onDone, onCancel }: Props) {
       </h3>
 
       <div className="admin-movie-form__top">
-        <div className="admin-movie-form__poster-preview">
-          {form.coverImageUrl ? (
+        <div
+          className={`admin-movie-form__poster-preview admin-movie-form__poster-preview--upload ${isDragging ? "is-dragging" : ""}`}
+          onClick={() => fileInputRef.current?.click()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(e) => handleFile(e.target.files?.[0])}
+          />
+          {uploadMutation.isPending ? (
+            <Loader2 size={22} className="admin-movie-form__spinner" />
+          ) : form.coverImageUrl ? (
             <img src={form.coverImageUrl} alt="" />
           ) : (
-            <ImageIcon size={22} className="text-muted" />
+            <div className="admin-movie-form__poster-preview-empty">
+              <ImageIcon size={20} className="text-muted" />
+              <span>
+                <Upload size={11} />{" "}
+                {isDragging
+                  ? t("admin.lists.dropHere")
+                  : t("admin.lists.dragOrClick")}
+              </span>
+            </div>
           )}
         </div>
 
@@ -144,7 +219,10 @@ export default function AdminListForm({ listId, onDone, onCancel }: Props) {
           onChange={(e) => setForm({ ...form, coverImageUrl: e.target.value })}
           placeholder="https://..."
         />
+        <p className="admin-movie-form__hint">{t("admin.lists.coverHint")}</p>
       </div>
+
+      {uploadError && <p className="admin-movie-form__error">{uploadError}</p>}
 
       <div className="admin-movie-form__field">
         <label>{t("admin.lists.fieldDescription")}</label>
@@ -169,6 +247,24 @@ export default function AdminListForm({ listId, onDone, onCancel }: Props) {
               <span style={{ flex: 1 }}>{m.title}</span>
               <button
                 type="button"
+                className="admin-movie-form__reorder-btn"
+                disabled={index === 0}
+                onClick={() => moveMovie(index, -1)}
+                aria-label={t("admin.lists.moveUp")}
+              >
+                <ArrowUp size={13} />
+              </button>
+              <button
+                type="button"
+                className="admin-movie-form__reorder-btn"
+                disabled={index === movies.length - 1}
+                onClick={() => moveMovie(index, 1)}
+                aria-label={t("admin.lists.moveDown")}
+              >
+                <ArrowDown size={13} />
+              </button>
+              <button
+                type="button"
                 className="admin-movie-form__remove-cast"
                 onClick={() => removeMovie(m.movieId)}
               >
@@ -184,6 +280,10 @@ export default function AdminListForm({ listId, onDone, onCancel }: Props) {
         </div>
       </div>
 
+      {mutation.isError && (
+        <p className="admin-movie-form__error">{t("admin.lists.saveError")}</p>
+      )}
+
       <div className="admin-movie-form__actions">
         {onCancel && (
           <button type="button" className="btn-secondary" onClick={onCancel}>
@@ -193,8 +293,11 @@ export default function AdminListForm({ listId, onDone, onCancel }: Props) {
         <button
           type="submit"
           className="btn-primary"
-          disabled={mutation.isPending}
+          disabled={mutation.isPending || uploadMutation.isPending}
         >
+          {mutation.isPending && (
+            <Loader2 size={14} className="admin-movie-form__spinner" />
+          )}
           {isEditMode ? t("common.save") : t("common.add")}
         </button>
       </div>
