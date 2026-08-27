@@ -67,9 +67,9 @@ export default function ListDetailPage() {
         {canEdit && (
           <Link
             to={`/lists/edit/${list.id}`}
-            className="btn-secondary list-detail-page__edit-btn"
+            className="list-detail-page__edit-btn"
           >
-            <Pencil size={14} /> {t("lists.editList")}
+            <Pencil size={13} /> <span>{t("lists.editList")}</span>
           </Link>
         )}
       </div>

@@ -207,6 +207,34 @@
   color: #e05c5c;
 }
 
+/* ---------- Sıra değiştirme (yukarı/aşağı) butonları ---------- */
+.create-list-page__reorder-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.create-list-page__reorder-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+.create-list-page__reorder-btn:hover:not(:disabled) {
+  color: var(--color-accent);
+  background-color: var(--color-accent-muted);
+}
+.create-list-page__reorder-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 .create-list-page__no-movies {
   font-size: 0.85rem;
   padding: 14px 0;
