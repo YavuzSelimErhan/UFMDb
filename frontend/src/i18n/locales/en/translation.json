@@ -420,5 +420,16 @@
     "addEntryRating": "Rating (optional)",
     "editEntry": "Edit entry",
     "saveEntry": "Save"
+  },
+  "reviews": {
+    "title": "Reviews",
+    "empty": "No reviews yet.",
+    "sortPopular": "Popular",
+    "sortNewest": "Newest",
+    "sortOldest": "Oldest",
+    "spoiler": "Spoiler",
+    "revealSpoiler": "Reveal spoiler",
+    "yourReview": "Your review",
+    "likeOwnError": "You can't like your own review."
   }
 }

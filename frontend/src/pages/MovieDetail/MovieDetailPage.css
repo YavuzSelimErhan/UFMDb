@@ -435,3 +435,31 @@
 .movie-detail__log-form-submit {
   width: 100%;
 }
+
+.movie-detail__review-spoiler-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+.movie-detail__review-spoiler-check input {
+  accent-color: var(--color-accent);
+}
+
+.movie-detail__review-actions {
+  display: flex;
+  gap: 10px;
+}
+.movie-detail__review-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #e05252;
+  border-color: #e05252;
+}
+.movie-detail__review-delete:hover {
+  background-color: rgba(224, 82, 82, 0.08);
+}

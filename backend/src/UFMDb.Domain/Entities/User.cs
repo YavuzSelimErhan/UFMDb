@@ -22,6 +22,7 @@ public class User : BaseEntity
 
     // Navigation
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
+    public ICollection<ReviewLike> ReviewsLike { get; set; } = new List<ReviewLike>();
     public ICollection<Like> Likes { get; set; } = new List<Like>();
     public ICollection<WatchlistItem> WatchlistItems { get; set; } = new List<WatchlistItem>();
     public ICollection<FavoriteMovie> FavoriteMovies { get; set; } = new List<FavoriteMovie>();

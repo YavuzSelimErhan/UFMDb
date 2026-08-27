@@ -2,7 +2,16 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Heart, Bookmark, CheckCircle2, User, Ticket, X } from "lucide-react";
+import {
+  Heart,
+  Bookmark,
+  CheckCircle2,
+  User,
+  Ticket,
+  X,
+  Trash2,
+} from "lucide-react";
+import ReviewsSection from "@/components/movie/ReviewsSection";
 import { movieService, screeningLogService } from "@/services";
 import { useAppSelector } from "@/store";
 import { getEntityTheme } from "@/utils/listTheme";
@@ -26,6 +35,7 @@ export default function MovieDetailPage() {
   const [isLogging, setIsLogging] = useState(false);
   const [logDate, setLogDate] = useState(todayLocalDateString());
   const [logRating, setLogRating] = useState(0);
+  const [containsSpoiler, setContainsSpoiler] = useState(false);
 
   const {
     data: movie,
@@ -45,6 +55,9 @@ export default function MovieDetailPage() {
   }, [movie?.myRating]);
   useEffect(() => {
     setReviewText(movie?.myReview?.content ?? "");
+  }, [movie?.myReview]);
+  useEffect(() => {
+    setContainsSpoiler(movie?.myReview?.containsSpoiler ?? false);
   }, [movie?.myReview]);
 
   const likeMutation = useMutation({
@@ -76,8 +89,28 @@ export default function MovieDetailPage() {
   });
 
   const reviewMutation = useMutation({
-    mutationFn: () => movieService.upsertReview(id!, reviewText),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["movie", id] }),
+    mutationFn: () =>
+      movieService.upsertReview(id!, reviewText, containsSpoiler),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["movie", id] });
+      queryClient.invalidateQueries({
+        queryKey: ["movie-reviews", id],
+        exact: false,
+      });
+    },
+  });
+
+  const deleteReviewMutation = useMutation({
+    mutationFn: () => movieService.deleteReview(id!),
+    onSuccess: () => {
+      setReviewText("");
+      setContainsSpoiler(false);
+      queryClient.invalidateQueries({ queryKey: ["movie", id] });
+      queryClient.invalidateQueries({
+        queryKey: ["movie-reviews", id],
+        exact: false,
+      });
+    },
   });
 
   const logMutation = useMutation({
@@ -366,17 +399,38 @@ export default function MovieDetailPage() {
                 placeholder={t("movie.reviewPlaceholder")}
                 rows={4}
               />
-              <button
-                className="btn-primary"
-                disabled={
-                  reviewText.trim().length === 0 || reviewMutation.isPending
-                }
-                onClick={() => reviewMutation.mutate()}
-              >
-                {t("common.save")}
-              </button>
+              <label className="movie-detail__review-spoiler-check">
+                <input
+                  type="checkbox"
+                  checked={containsSpoiler}
+                  onChange={(e) => setContainsSpoiler(e.target.checked)}
+                />
+                {t("movie.containsSpoiler")}
+              </label>
+              <div className="movie-detail__review-actions">
+                <button
+                  className="btn-primary"
+                  disabled={
+                    reviewText.trim().length === 0 || reviewMutation.isPending
+                  }
+                  onClick={() => reviewMutation.mutate()}
+                >
+                  {t("common.save")}
+                </button>
+                {movie.myReview && (
+                  <button
+                    className="btn-secondary movie-detail__review-delete"
+                    disabled={deleteReviewMutation.isPending}
+                    onClick={() => deleteReviewMutation.mutate()}
+                  >
+                    <Trash2 size={14} /> {t("common.delete")}
+                  </button>
+                )}
+              </div>
             </div>
           )}
+
+          <ReviewsSection movieId={id!} isAuthenticated={isAuthenticated} />
         </div>
       </div>
     </div>

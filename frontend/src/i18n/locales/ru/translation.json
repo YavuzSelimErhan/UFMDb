@@ -422,5 +422,16 @@
     "addEntryRating": "Оценка (необязательно)",
     "editEntry": "Редактировать запись",
     "saveEntry": "Сохранить"
+  },
+  "reviews": {
+    "title": "Отзывы",
+    "empty": "Пока нет отзывов.",
+    "sortPopular": "Популярные",
+    "sortNewest": "Новые",
+    "sortOldest": "Старые",
+    "spoiler": "Спойлер",
+    "revealSpoiler": "Показать спойлер",
+    "yourReview": "Ваш отзыв",
+    "likeOwnError": "Нельзя лайкнуть свой собственный отзыв."
   }
 }

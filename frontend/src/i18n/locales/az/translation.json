@@ -422,5 +422,16 @@
     "addEntryRating": "Bal (opsional)",
     "editEntry": "Qeydi redaktə et",
     "saveEntry": "Yadda saxla"
+  },
+  "reviews": {
+    "title": "Rəylər",
+    "empty": "Hələ rəy yoxdur.",
+    "sortPopular": "Populyar",
+    "sortNewest": "Ən yeni",
+    "sortOldest": "Ən köhnə",
+    "spoiler": "Spoyler",
+    "revealSpoiler": "Spoyleri göstər",
+    "yourReview": "Sənin rəyin",
+    "likeOwnError": "Öz rəyini bəyənə bilməzsən."
   }
 }

@@ -23,6 +23,9 @@ import type {
   ScreeningLogDay,
   Country,
   ListScope,
+  MovieReview,
+  ReviewSortBy,
+  ReviewLikeResult,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -68,6 +71,21 @@ export const movieService = {
   },
   deleteReview: async (id: string) =>
     (await api.delete(`/movies/${id}/reviews`)).data,
+  getReviews: async (
+    id: string,
+    page = 1,
+    pageSize = 10,
+    sortBy?: ReviewSortBy,
+  ): Promise<PagedResult<MovieReview>> => {
+    const { data } = await api.get(`/movies/${id}/reviews`, {
+      params: { page, pageSize, sortBy },
+    });
+    return data;
+  },
+  toggleReviewLike: async (reviewId: string): Promise<ReviewLikeResult> => {
+    const { data } = await api.post(`/movies/reviews/${reviewId}/like`);
+    return data;
+  },
   create: async (payload: MovieFormPayload) =>
     (await api.post("/movies", payload)).data,
   update: async (id: string, payload: MovieFormPayload) =>

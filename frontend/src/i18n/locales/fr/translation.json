@@ -422,5 +422,16 @@
     "addEntryRating": "Note (facultatif)",
     "editEntry": "Modifier l'entrée",
     "saveEntry": "Enregistrer"
+  },
+  "reviews": {
+    "title": "Avis",
+    "empty": "Aucun avis pour le moment.",
+    "sortPopular": "Populaire",
+    "sortNewest": "Plus récents",
+    "sortOldest": "Plus anciens",
+    "spoiler": "Spoiler",
+    "revealSpoiler": "Afficher le spoiler",
+    "yourReview": "Votre avis",
+    "likeOwnError": "Vous ne pouvez pas aimer votre propre avis."
   }
 }

@@ -12,7 +12,16 @@ public class Review : BaseEntity
     public User User { get; set; } = default!;
     public string Content { get; set; } = string.Empty;
     public bool ContainsSpoiler { get; set; } = false;
-    public int HelpfulCount { get; set; } = 0;
+    public int LikeCount { get; set; } = 0;
+    public ICollection<ReviewLike> Likes { get; set; } = new List<ReviewLike>();
+}
+
+public class ReviewLike : BaseEntity
+{
+    public Guid ReviewId { get; set; }
+    public Review Review { get; set; } = default!;
+    public Guid UserId { get; set; }
+    public User User { get; set; } = default!;
 }
 
 public class Like : BaseEntity

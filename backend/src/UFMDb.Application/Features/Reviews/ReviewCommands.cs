@@ -104,6 +104,7 @@ public class UpsertReviewCommandHandler : IRequestHandler<UpsertReviewCommand, G
         }
         review.Content = request.Content;
         review.ContainsSpoiler = request.ContainsSpoiler;
+        review.IsDeleted = false;
         review.UpdatedAtUtc = DateTime.UtcNow;
 
         var alreadyWatched = await _context.WatchHistory
@@ -137,6 +138,45 @@ public class DeleteReviewCommandHandler : IRequestHandler<DeleteReviewCommand>
         review.IsDeleted = true;
         review.UpdatedAtUtc = DateTime.UtcNow;
         await _context.SaveChangesAsync(ct);
+    }
+}
+
+public record ToggleReviewLikeCommand(Guid ReviewId, Guid UserId) : IRequest<ReviewLikeResultDto>;
+public record ReviewLikeResultDto(bool IsLiked, int LikeCount);
+
+public class ToggleReviewLikeCommandHandler : IRequestHandler<ToggleReviewLikeCommand, ReviewLikeResultDto>
+{
+    private readonly IApplicationDbContext _context;
+    public ToggleReviewLikeCommandHandler(IApplicationDbContext context) => _context = context;
+
+    public async Task<ReviewLikeResultDto> Handle(ToggleReviewLikeCommand request, CancellationToken ct)
+    {
+        var review = await _context.Reviews
+            .FirstOrDefaultAsync(r => r.Id == request.ReviewId && !r.IsDeleted, ct)
+            ?? throw new NotFoundException(nameof(Review), request.ReviewId);
+
+        if (review.UserId == request.UserId)
+            throw new ConflictException("Kendi yorumunu beğenemezsin.");
+
+        var existing = await _context.ReviewLikes
+            .FirstOrDefaultAsync(l => l.ReviewId == request.ReviewId && l.UserId == request.UserId, ct);
+
+        bool nowLiked;
+        if (existing is null)
+        {
+            _context.ReviewLikes.Add(new ReviewLike { ReviewId = request.ReviewId, UserId = request.UserId });
+            review.LikeCount++;
+            nowLiked = true;
+        }
+        else
+        {
+            _context.ReviewLikes.Remove(existing);
+            review.LikeCount = Math.Max(0, review.LikeCount - 1);
+            nowLiked = false;
+        }
+
+        await _context.SaveChangesAsync(ct);
+        return new ReviewLikeResultDto(nowLiked, review.LikeCount);
     }
 }
 

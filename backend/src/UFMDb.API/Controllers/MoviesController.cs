@@ -86,6 +86,19 @@ public class MoviesController : ControllerBase
         return NoContent();
     }
 
+    [HttpGet("{id:guid}/reviews")]
+    public async Task<ActionResult<PagedResult<ReviewListItemDto>>> GetReviews(
+    Guid id, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null)
+    {
+        Guid? userId = User.Identity?.IsAuthenticated == true ? _currentUser.UserId : null;
+        return Ok(await _mediator.Send(new GetMovieReviewsQuery(id, userId, page, pageSize, sortBy)));
+    }
+
+    [Authorize]
+    [HttpPost("reviews/{reviewId:guid}/like")]
+    public async Task<ActionResult<ReviewLikeResultDto>> ToggleReviewLike(Guid reviewId)
+        => Ok(await _mediator.Send(new ToggleReviewLikeCommand(reviewId, RequireUserId())));
+
     // ---------------- Admin: Film yönetimi ----------------
 
     [Authorize(Roles = "Admin")]

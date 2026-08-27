@@ -21,6 +21,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<MovieDirector> MovieDirectors => Set<MovieDirector>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Review> Reviews => Set<Review>();
+    public DbSet<ReviewLike> ReviewLikes => Set<ReviewLike>();
     public DbSet<Like> Likes => Set<Like>();
     public DbSet<WatchlistItem> WatchlistItems => Set<WatchlistItem>();
     public DbSet<FavoriteMovie> FavoriteMovies => Set<FavoriteMovie>();

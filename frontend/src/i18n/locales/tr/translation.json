@@ -422,5 +422,16 @@
     "addEntryRating": "Puan (opsiyonel)",
     "editEntry": "Kaydı düzenle",
     "saveEntry": "Kaydet"
+  },
+  "reviews": {
+    "title": "Yorumlar",
+    "empty": "Henüz yorum yapılmamış.",
+    "sortPopular": "Popüler",
+    "sortNewest": "En Yeni",
+    "sortOldest": "En Eski",
+    "spoiler": "Spoiler",
+    "revealSpoiler": "Spoiler'ı göster",
+    "yourReview": "Senin yorumun",
+    "likeOwnError": "Kendi yorumunu beğenemezsin."
   }
 }

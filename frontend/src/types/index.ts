@@ -32,6 +32,26 @@ export interface MyReview {
   containsSpoiler: boolean;
 }
 
+export interface MovieReview {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatarUrl: string | null;
+  content: string;
+  containsSpoiler: boolean;
+  likeCount: number;
+  isLikedByCurrentUser: boolean;
+  createdAtUtc: string;
+  updatedAtUtc: string | null;
+}
+
+export interface ReviewLikeResult {
+  isLiked: boolean;
+  likeCount: number;
+}
+
+export type ReviewSortBy = "newest" | "oldest" | "popular";
+
 export interface MovieDetail {
   id: string;
   title: string;

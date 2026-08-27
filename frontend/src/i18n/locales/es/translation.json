@@ -422,5 +422,16 @@
     "addEntryRating": "Valoración (opcional)",
     "editEntry": "Editar entrada",
     "saveEntry": "Guardar"
+  },
+  "reviews": {
+    "title": "Reseñas",
+    "empty": "Aún no hay reseñas.",
+    "sortPopular": "Popular",
+    "sortNewest": "Más recientes",
+    "sortOldest": "Más antiguas",
+    "spoiler": "Spoiler",
+    "revealSpoiler": "Mostrar spoiler",
+    "yourReview": "Tu reseña",
+    "likeOwnError": "No puedes darle like a tu propia reseña."
   }
 }

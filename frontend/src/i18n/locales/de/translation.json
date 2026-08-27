@@ -422,5 +422,16 @@
     "addEntryRating": "Bewertung (optional)",
     "editEntry": "Eintrag bearbeiten",
     "saveEntry": "Speichern"
+  },
+  "reviews": {
+    "title": "Bewertungen",
+    "empty": "Noch keine Bewertungen.",
+    "sortPopular": "Beliebt",
+    "sortNewest": "Neueste",
+    "sortOldest": "Älteste",
+    "spoiler": "Spoiler",
+    "revealSpoiler": "Spoiler anzeigen",
+    "yourReview": "Deine Bewertung",
+    "likeOwnError": "Du kannst deine eigene Bewertung nicht liken."
   }
 }

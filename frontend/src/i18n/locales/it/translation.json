@@ -422,5 +422,16 @@
     "addEntryRating": "Voto (opzionale)",
     "editEntry": "Modifica voce",
     "saveEntry": "Salva"
+  },
+  "reviews": {
+    "title": "Recensioni",
+    "empty": "Nessuna recensione ancora.",
+    "sortPopular": "Popolari",
+    "sortNewest": "Più recenti",
+    "sortOldest": "Meno recenti",
+    "spoiler": "Spoiler",
+    "revealSpoiler": "Mostra spoiler",
+    "yourReview": "La tua recensione",
+    "likeOwnError": "Non puoi mettere like alla tua recensione."
   }
 }

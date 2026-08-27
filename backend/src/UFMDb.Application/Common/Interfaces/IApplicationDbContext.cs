@@ -20,6 +20,7 @@ public interface IApplicationDbContext
     DbSet<MovieDirector> MovieDirectors { get; }
     DbSet<User> Users { get; }
     DbSet<Review> Reviews { get; }
+    DbSet<ReviewLike> ReviewLikes { get; }
     DbSet<Like> Likes { get; }
     DbSet<WatchlistItem> WatchlistItems { get; }
     DbSet<FavoriteMovie> FavoriteMovies { get; }

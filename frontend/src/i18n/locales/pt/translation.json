@@ -422,5 +422,16 @@
     "addEntryRating": "Avaliação (opcional)",
     "editEntry": "Editar registro",
     "saveEntry": "Salvar"
+  },
+  "reviews": {
+    "title": "Avaliações",
+    "empty": "Ainda não há avaliações.",
+    "sortPopular": "Populares",
+    "sortNewest": "Mais recentes",
+    "sortOldest": "Mais antigas",
+    "spoiler": "Spoiler",
+    "revealSpoiler": "Mostrar spoiler",
+    "yourReview": "Sua avaliação",
+    "likeOwnError": "Você não pode curtir sua própria avaliação."
   }
 }

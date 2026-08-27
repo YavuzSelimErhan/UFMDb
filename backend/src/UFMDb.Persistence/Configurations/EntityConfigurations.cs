@@ -105,6 +105,24 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
     }
 }
 
+public class ReviewLikeConfiguration : IEntityTypeConfiguration<ReviewLike>
+{
+    public void Configure(EntityTypeBuilder<ReviewLike> builder)
+    {
+        builder.HasIndex(rl => new { rl.ReviewId, rl.UserId }).IsUnique();
+
+        builder.HasOne(rl => rl.Review)
+            .WithMany(r => r.Likes)
+            .HasForeignKey(rl => rl.ReviewId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(rl => rl.User)
+            .WithMany()
+            .HasForeignKey(rl => rl.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
 public class LikeConfiguration : IEntityTypeConfiguration<Like>
 {
     public void Configure(EntityTypeBuilder<Like> b)
