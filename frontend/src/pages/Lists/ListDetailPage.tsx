@@ -1,8 +1,9 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Pencil } from "lucide-react";
 import { listService } from "@/services";
+import { useAppSelector } from "@/store";
 import MovieCard from "@/components/movie/MovieCard";
 import { getListTheme } from "@/utils/listTheme";
 import { PageSpinner, PageError } from "@/components/common/PageState";
@@ -11,6 +12,11 @@ import "./ListDetailPage.css";
 export default function ListDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { t, i18n } = useTranslation();
+
+  // NOT: auth slice'ının gerçek alan adları farklıysa (örn. userId yerine id,
+  // role yerine roles gibi) burayı kendi store yapına göre düzelt.
+  const { userId: currentUserId, role } = useAppSelector((s) => s.auth);
+  const isAdmin = role === "Admin";
 
   const {
     data: list,
@@ -49,11 +55,24 @@ export default function ListDetailPage() {
     list.movies[0]?.backdropUrl ||
     list.movies[0]?.posterUrl;
 
+  const canEdit = isAdmin || currentUserId === list.createdByUserId;
+
   return (
     <div className="container list-detail-page" style={themeStyle}>
-      <Link to="/lists" className="list-detail-page__back">
-        <ChevronLeft size={16} /> {t("lists.backToLists")}
-      </Link>
+      <div className="list-detail-page__top-row">
+        <Link to="/lists" className="list-detail-page__back">
+          <ChevronLeft size={16} /> {t("lists.backToLists")}
+        </Link>
+
+        {canEdit && (
+          <Link
+            to={`/lists/edit/${list.id}`}
+            className="btn-secondary list-detail-page__edit-btn"
+          >
+            <Pencil size={14} /> {t("lists.editList")}
+          </Link>
+        )}
+      </div>
 
       {heroImg && (
         <div className="list-detail-page__hero">
