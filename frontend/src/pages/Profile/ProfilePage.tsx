@@ -85,7 +85,7 @@ export default function ProfilePage() {
   } = useQuery({
     queryKey: ["lists", "Mine"],
     queryFn: () => listService.getAll("Mine"),
-    enabled: tab === "lists",
+    staleTime: 60_000,
   });
 
   const { data: filmsCounts } = useWatchedFilmsCounts();
@@ -149,7 +149,12 @@ export default function ProfilePage() {
         profile.likedActors.length +
         profile.likedDirectors.length,
     },
-    { key: "lists", label: t("profile.myLists"), icon: ListVideo },
+    {
+      key: "lists",
+      label: t("profile.myLists"),
+      icon: ListVideo,
+      count: myLists?.length,
+    },
     {
       key: "reviews",
       label: t("profile.reviews"),

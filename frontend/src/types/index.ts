@@ -281,7 +281,7 @@ export interface ListDetail {
   isLikedByCurrentUser: boolean;
 }
 
-export type ListScope = "All" | "Official" | "Community" | "Mine";
+export type ListScope = "All" | "Official" | "Community" | "Mine" | "Liked";
 
 export interface ListFormPayload {
   title: string;

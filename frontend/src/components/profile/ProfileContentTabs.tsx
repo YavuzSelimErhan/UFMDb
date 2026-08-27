@@ -1,21 +1,33 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Bookmark,
   Heart,
   MessageSquare,
   Users,
   Clapperboard,
+  Film,
+  ListVideo,
   Pencil,
   Trash2,
   AlertTriangle,
 } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { actorService, directorService, movieService } from "@/services";
+import {
+  actorService,
+  directorService,
+  movieService,
+  listService,
+} from "@/services";
 import MovieCard from "@/components/movie/MovieCard";
+import ListCard from "@/pages/Lists/ListCard";
 import EditReviewModal from "@/components/profile/EditReviewModal";
-import { EmptyState } from "@/components/common/PageState";
+import {
+  EmptyState,
+  PageSpinner,
+  PageError,
+} from "@/components/common/PageState";
 import type {
   MovieListItem,
   ActorListItem,
@@ -25,6 +37,7 @@ import type {
 import "./ProfileContentTabs.css";
 
 export type ContentTab = "watchlist" | "liked" | "reviews";
+type LikedSubTab = "films" | "actors" | "directors" | "lists";
 
 interface Props {
   tab: ContentTab;
@@ -43,7 +56,7 @@ export default function ProfileContentTabs({
   likedDirectors,
   reviews,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [editingReview, setEditingReview] = useState<ReviewSummary | null>(
     null,
@@ -51,6 +64,7 @@ export default function ProfileContentTabs({
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(
     null,
   );
+  const [likedSubTab, setLikedSubTab] = useState<LikedSubTab>("films");
 
   const unlikeActorMutation = useMutation({
     mutationFn: (id: string) => actorService.toggleLike(id),
@@ -70,6 +84,50 @@ export default function ProfileContentTabs({
     },
   });
 
+  const {
+    data: likedLists,
+    isLoading: isLikedListsLoading,
+    isError: isLikedListsError,
+    refetch: refetchLikedLists,
+  } = useQuery({
+    queryKey: ["lists", "Liked"],
+    queryFn: () => listService.getAll("Liked"),
+    staleTime: 60_000,
+    enabled: tab === "liked",
+  });
+
+  const likedSubTabs: {
+    key: LikedSubTab;
+    label: string;
+    icon: typeof Film;
+    count: number;
+  }[] = [
+    {
+      key: "films",
+      label: t("profile.likedFilms", "Filmler"),
+      icon: Film,
+      count: likedMovies.length,
+    },
+    {
+      key: "actors",
+      label: t("profile.likedActors"),
+      icon: Users,
+      count: likedActors.length,
+    },
+    {
+      key: "directors",
+      label: t("profile.likedDirectors"),
+      icon: Clapperboard,
+      count: likedDirectors.length,
+    },
+    {
+      key: "lists",
+      label: t("profile.likedLists", "Listeler"),
+      icon: ListVideo,
+      count: likedLists?.length ?? 0,
+    },
+  ];
+
   return (
     <div className="profile-tabs__panel">
       {tab === "watchlist" &&
@@ -88,83 +146,138 @@ export default function ProfileContentTabs({
         ))}
 
       {tab === "liked" && (
-        <>
-          {likedMovies.length > 0 ? (
-            <div className="movie-grid movie-grid--compact">
-              {likedMovies.map((m) => (
-                <MovieCard key={m.id} movie={m} onUnlike={() => {}} />
+        <div className="profile-tabs">
+          <nav className="profile-tabs__nav">
+            {likedSubTabs.map(({ key, label, icon: Icon, count }) => (
+              <button
+                key={key}
+                className={`profile-tabs__nav-item ${likedSubTab === key ? "is-active" : ""}`}
+                onClick={() => setLikedSubTab(key)}
+              >
+                <span className="profile-tabs__nav-label">
+                  <Icon size={15} /> {label}
+                </span>
+                <span className="profile-tabs__nav-count">{count}</span>
+              </button>
+            ))}
+          </nav>
+
+          <div className="profile-tabs__panel">
+            {likedSubTab === "films" &&
+              (likedMovies.length > 0 ? (
+                <div className="movie-grid movie-grid--compact">
+                  {likedMovies.map((m) => (
+                    <MovieCard key={m.id} movie={m} onUnlike={() => {}} />
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={<Heart size={26} />}
+                  title={t("profile.emptyContent")}
+                  hint={t("profile.likedHint")}
+                />
               ))}
-            </div>
-          ) : (
-            <EmptyState
-              icon={<Heart size={26} />}
-              title={t("profile.emptyContent")}
-              hint={t("profile.likedHint")}
-            />
-          )}
 
-          {(likedActors.length > 0 || likedDirectors.length > 0) && (
-            <div className="profile-tabs__people">
-              {likedActors.length > 0 && (
-                <div className="profile-tabs__people-group">
-                  <p className="profile-tabs__people-label">
-                    <Users size={14} /> {t("profile.likedActors")}
-                  </p>
-                  <div className="person-grid person-grid--compact">
-                    {likedActors.map((a) => (
-                      <div key={a.id} className="person-grid__item card">
-                        <Link
-                          to={`/actors/${a.id}`}
-                          className="person-grid__link"
-                        >
-                          <img src={a.photoUrl} alt={a.fullName} />
-                          <span>{a.fullName}</span>
-                        </Link>
-                        <button
-                          className="person-grid__unlike"
-                          disabled={unlikeActorMutation.isPending}
-                          aria-label={t("movie.unlike")}
-                          onClick={() => unlikeActorMutation.mutate(a.id)}
-                        >
-                          <Heart size={12} fill="currentColor" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+            {likedSubTab === "actors" &&
+              (likedActors.length > 0 ? (
+                <div className="person-grid person-grid--compact">
+                  {likedActors.map((a) => (
+                    <div key={a.id} className="person-grid__item card">
+                      <Link
+                        to={`/actors/${a.id}`}
+                        className="person-grid__link"
+                      >
+                        <img src={a.photoUrl} alt={a.fullName} />
+                        <span>{a.fullName}</span>
+                      </Link>
+                      <button
+                        className="person-grid__unlike"
+                        disabled={unlikeActorMutation.isPending}
+                        aria-label={t("movie.unlike")}
+                        onClick={() => unlikeActorMutation.mutate(a.id)}
+                      >
+                        <Heart size={12} fill="currentColor" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              )}
+              ) : (
+                <EmptyState
+                  icon={<Users size={26} />}
+                  title={t("profile.emptyContent")}
+                  hint={t(
+                    "profile.likedActorsHint",
+                    "Henüz beğendiğin bir oyuncu yok.",
+                  )}
+                />
+              ))}
 
-              {likedDirectors.length > 0 && (
-                <div className="profile-tabs__people-group">
-                  <p className="profile-tabs__people-label">
-                    <Clapperboard size={14} /> {t("profile.likedDirectors")}
-                  </p>
-                  <div className="person-grid person-grid--compact">
-                    {likedDirectors.map((d) => (
-                      <div key={d.id} className="person-grid__item card">
-                        <Link
-                          to={`/directors/${d.id}`}
-                          className="person-grid__link"
-                        >
-                          <img src={d.photoUrl} alt={d.fullName} />
-                          <span>{d.fullName}</span>
-                        </Link>
-                        <button
-                          className="person-grid__unlike"
-                          disabled={unlikeDirectorMutation.isPending}
-                          aria-label={t("movie.unlike")}
-                          onClick={() => unlikeDirectorMutation.mutate(d.id)}
-                        >
-                          <Heart size={12} fill="currentColor" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+            {likedSubTab === "directors" &&
+              (likedDirectors.length > 0 ? (
+                <div className="person-grid person-grid--compact">
+                  {likedDirectors.map((d) => (
+                    <div key={d.id} className="person-grid__item card">
+                      <Link
+                        to={`/directors/${d.id}`}
+                        className="person-grid__link"
+                      >
+                        <img src={d.photoUrl} alt={d.fullName} />
+                        <span>{d.fullName}</span>
+                      </Link>
+                      <button
+                        className="person-grid__unlike"
+                        disabled={unlikeDirectorMutation.isPending}
+                        aria-label={t("movie.unlike")}
+                        onClick={() => unlikeDirectorMutation.mutate(d.id)}
+                      >
+                        <Heart size={12} fill="currentColor" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              )}
-            </div>
-          )}
-        </>
+              ) : (
+                <EmptyState
+                  icon={<Clapperboard size={26} />}
+                  title={t("profile.emptyContent")}
+                  hint={t(
+                    "profile.likedDirectorsHint",
+                    "Henüz beğendiğin bir yönetmen yok.",
+                  )}
+                />
+              ))}
+
+            {likedSubTab === "lists" &&
+              (isLikedListsLoading ? (
+                <PageSpinner label={t("common.loading")} />
+              ) : isLikedListsError ? (
+                <PageError
+                  message={t("errors.listsFailed")}
+                  onRetry={() => refetchLikedLists()}
+                />
+              ) : likedLists && likedLists.length > 0 ? (
+                <div className="lists-page__grid">
+                  {likedLists.map((list) => (
+                    <ListCard
+                      key={list.id}
+                      list={list}
+                      displayTitle={
+                        i18n.language === "tr" ? list.titleTr : list.title
+                      }
+                    />
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={<ListVideo size={26} />}
+                  title={t("profile.emptyContent")}
+                  hint={t(
+                    "profile.likedListsHint",
+                    "Henüz beğendiğin bir liste yok.",
+                  )}
+                />
+              ))}
+          </div>
+        </div>
       )}
 
       {tab === "reviews" &&

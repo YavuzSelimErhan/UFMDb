@@ -17,7 +17,7 @@ public record ListDetailDto(
 );
 
 // ---------- Liste listeleme: scope filtresiyle (resmi / topluluk / benim listelerim) ----------
-public enum ListScope { All, Official, Community, Mine }
+public enum ListScope { All, Official, Community, Mine, Liked }
 
 public record GetListsQuery(ListScope Scope, Guid? UserId) : IRequest<List<ListSummaryDto>>;
 public class GetListsQueryHandler : IRequestHandler<GetListsQuery, List<ListSummaryDto>>
@@ -35,6 +35,10 @@ public class GetListsQueryHandler : IRequestHandler<GetListsQuery, List<ListSumm
             ListScope.Community => query.Where(cl => !cl.IsOfficial),
             ListScope.Mine => request.UserId.HasValue
                 ? query.Where(cl => cl.CreatedByUserId == request.UserId.Value)
+                : query.Where(cl => false), // giriş yapmamışsa boş dön
+            ListScope.Liked => request.UserId.HasValue
+                ? query.Where(cl => _context.CuratedListLikes
+                    .Any(l => l.CuratedListId == cl.Id && l.UserId == request.UserId.Value))
                 : query.Where(cl => false), // giriş yapmamışsa boş dön
             _ => query
         };
