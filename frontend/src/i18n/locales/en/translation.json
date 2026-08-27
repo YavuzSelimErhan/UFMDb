@@ -234,6 +234,8 @@
     "moviesCount": "movies",
     "backToLists": "Back to Lists",
     "editList": "Edit List",
+    "deleteList": "Delete List",
+    "deleteConfirm": "Are you sure?",
     "empty": "No lists yet",
     "createList": "Create List",
     "official": "Official",

@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Heart, Layers } from "lucide-react";
+import { Heart, Layers, Pencil, Trash2, Check, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { listService } from "@/services";
@@ -16,10 +16,22 @@ interface Props {
 
 export default function ListCard({ list, displayTitle }: Props) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { isAuthenticated } = useAppSelector((s) => s.auth);
+  const {
+    isAuthenticated,
+    userId: currentUserId,
+    role,
+  } = useAppSelector((s) => s.auth);
   const [isLiked, setIsLiked] = useState(list.isLikedByCurrentUser);
   const [likeCount, setLikeCount] = useState(list.likeCount);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  // NOT: ListSummary tipinde createdByUserId yoksa (sadece ListDetail'de
+  // varsa) bu satır her zaman false döner ve ikonlar hiç görünmez —
+  // gerekirse backend'in liste özet DTO'suna da bu alanı eklemek gerekir.
+  const isAdmin = role === "Admin";
+  const canEdit = isAdmin || currentUserId === list.createdByUserId;
 
   const likeMutation = useMutation({
     mutationFn: () => listService.toggleLike(list.id),
@@ -39,6 +51,13 @@ export default function ListCard({ list, displayTitle }: Props) {
         setIsLiked(context.prevLiked);
         setLikeCount(context.prevCount);
       }
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => listService.remove(list.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lists"] });
     },
   });
 
@@ -94,6 +113,67 @@ export default function ListCard({ list, displayTitle }: Props) {
           >
             <Heart size={13} fill={isLiked ? "currentColor" : "none"} />
           </button>
+        )}
+
+        {canEdit && !isDeleteOpen && (
+          <div className="list-card__owner-actions">
+            <button
+              type="button"
+              className="list-card__icon-btn"
+              title={t("lists.editList")}
+              aria-label={t("lists.editList")}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                navigate(`/lists/edit/${list.id}`);
+              }}
+            >
+              <Pencil size={13} />
+            </button>
+            <button
+              type="button"
+              className="list-card__icon-btn list-card__icon-btn--danger"
+              title={t("lists.deleteList")}
+              aria-label={t("lists.deleteList")}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsDeleteOpen(true);
+              }}
+            >
+              <Trash2 size={13} />
+            </button>
+          </div>
+        )}
+
+        {canEdit && isDeleteOpen && (
+          <div className="list-card__owner-actions">
+            <button
+              type="button"
+              className="list-card__icon-btn list-card__icon-btn--confirm"
+              disabled={deleteMutation.isPending}
+              aria-label={t("common.confirm")}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                deleteMutation.mutate();
+              }}
+            >
+              <Check size={13} />
+            </button>
+            <button
+              type="button"
+              className="list-card__icon-btn"
+              aria-label={t("common.cancel")}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsDeleteOpen(false);
+              }}
+            >
+              <X size={13} />
+            </button>
+          </div>
         )}
       </div>
 

@@ -234,6 +234,8 @@
     "moviesCount": "фильмов",
     "backToLists": "Назад к спискам",
     "editList": "Редактировать список",
+    "deleteList": "Удалить список",
+    "deleteConfirm": "Вы уверены?",
     "empty": "Списков пока нет",
     "createList": "Создать список",
     "official": "Официальные",

@@ -1,7 +1,8 @@
-import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, Pencil } from "lucide-react";
+import { ChevronLeft, Pencil, Trash2, Check, X } from "lucide-react";
 import { listService } from "@/services";
 import { useAppSelector } from "@/store";
 import MovieCard from "@/components/movie/MovieCard";
@@ -12,11 +13,15 @@ import "./ListDetailPage.css";
 export default function ListDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // NOT: auth slice'ının gerçek alan adları farklıysa (örn. userId yerine id,
   // role yerine roles gibi) burayı kendi store yapına göre düzelt.
   const { userId: currentUserId, role } = useAppSelector((s) => s.auth);
   const isAdmin = role === "Admin";
+
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const {
     data: list,
@@ -28,6 +33,15 @@ export default function ListDetailPage() {
     queryFn: () => listService.getById(id!),
     enabled: !!id,
     retry: 1,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => listService.remove(id!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lists"] });
+      queryClient.removeQueries({ queryKey: ["list", id] });
+      navigate("/lists");
+    },
   });
 
   if (isLoading) return <PageSpinner label={t("common.loading")} />;
@@ -65,12 +79,46 @@ export default function ListDetailPage() {
         </Link>
 
         {canEdit && (
-          <Link
-            to={`/lists/edit/${list.id}`}
-            className="list-detail-page__edit-btn"
-          >
-            <Pencil size={13} /> <span>{t("lists.editList")}</span>
-          </Link>
+          <div className="list-detail-page__owner-actions">
+            <Link
+              to={`/lists/edit/${list.id}`}
+              className="list-detail-page__edit-btn"
+            >
+              <Pencil size={13} /> <span>{t("lists.editList")}</span>
+            </Link>
+
+            {!isDeleteOpen ? (
+              <button
+                type="button"
+                className="list-detail-page__delete-btn"
+                onClick={() => setIsDeleteOpen(true)}
+              >
+                <Trash2 size={13} /> <span>{t("lists.deleteList")}</span>
+              </button>
+            ) : (
+              <div className="list-detail-page__delete-confirm">
+                <span>{t("lists.deleteConfirm")}</span>
+                <button
+                  type="button"
+                  className="list-detail-page__delete-confirm-yes"
+                  disabled={deleteMutation.isPending}
+                  aria-label={t("common.confirm")}
+                  onClick={() => deleteMutation.mutate()}
+                >
+                  <Check size={13} />
+                </button>
+                <button
+                  type="button"
+                  className="list-detail-page__delete-confirm-no"
+                  disabled={deleteMutation.isPending}
+                  aria-label={t("common.cancel")}
+                  onClick={() => setIsDeleteOpen(false)}
+                >
+                  <X size={13} />
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
 

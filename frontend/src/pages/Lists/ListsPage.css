@@ -430,3 +430,41 @@
     flex-direction: column;
   }
 }
+/* ---------- Sahip aksiyonları: düzenle/sil (sahne üzerinde, sol üst) ---------- */
+.list-card__owner-actions {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+}
+
+.list-card__icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+.list-card__icon-btn:hover {
+  transform: scale(1.08);
+  background-color: rgba(0, 0, 0, 0.65);
+}
+.list-card__icon-btn--danger:hover {
+  color: #ff8a80;
+}
+.list-card__icon-btn--confirm {
+  background-color: #d3554f;
+}
+.list-card__icon-btn--confirm:hover {
+  background-color: #bf4a44;
+}

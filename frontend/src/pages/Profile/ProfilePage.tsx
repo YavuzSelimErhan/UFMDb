@@ -27,6 +27,7 @@ import FavoritesShowcase from "@/components/profile/FavoritesShowcase";
 import ProfileFilmsTab from "@/components/profile/ProfileFilmsTab";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileContentTabs from "@/components/profile/ProfileContentTabs";
+import { useWatchedFilmsCounts } from "@/hooks/useWatchedFilmsCounts";
 import {
   PageSpinner,
   PageError,
@@ -87,6 +88,8 @@ export default function ProfilePage() {
     enabled: tab === "lists",
   });
 
+  const { data: filmsCounts } = useWatchedFilmsCounts();
+
   const settingsMutation = useMutation({
     mutationFn: ({ language, theme }: { language: string; theme: string }) =>
       profileService.updateSettings(language, theme),
@@ -125,7 +128,12 @@ export default function ProfilePage() {
     count?: number;
   }[] = [
     { key: "profile", label: t("profile.tabProfile"), icon: Pencil },
-    { key: "films", label: t("profile.tabFilms"), icon: Film },
+    {
+      key: "films",
+      label: t("profile.tabFilms"),
+      icon: Film,
+      count: filmsCounts?.all,
+    },
     {
       key: "watchlist",
       label: t("profile.watchlist"),

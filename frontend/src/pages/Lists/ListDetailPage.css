@@ -127,3 +127,85 @@
     display: none;
   }
 }
+
+.list-detail-page__owner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ---------- Sil butonu: tema rengi yerine sabit bir "tehlike" rengi —
+   listeler farklı temalarda farklı vurgu renkleri kullandığı için, silme
+   aksiyonu her zaman aynı, tanınabilir kırmızı tonda kalmalı ---------- */
+.list-detail-page__delete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #d3554f;
+  background-color: transparent;
+  border: 1px solid rgba(211, 85, 79, 0.4);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+.list-detail-page__delete-btn:hover {
+  background-color: rgba(211, 85, 79, 0.12);
+  border-color: #d3554f;
+}
+
+/* ---------- Onay durumu: "emin misin?" metni + evet/hayır ---------- */
+.list-detail-page__delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+  background-color: rgba(211, 85, 79, 0.08);
+  border: 1px solid rgba(211, 85, 79, 0.3);
+  padding: 5px 6px 5px 12px;
+  border-radius: var(--radius-pill);
+}
+.list-detail-page__delete-confirm-yes,
+.list-detail-page__delete-confirm-no {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  transition: background-color var(--transition-fast);
+}
+.list-detail-page__delete-confirm-yes {
+  color: #fff;
+  background-color: #d3554f;
+}
+.list-detail-page__delete-confirm-yes:hover {
+  background-color: #bf4a44;
+}
+.list-detail-page__delete-confirm-no {
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+}
+.list-detail-page__delete-confirm-no:hover {
+  color: var(--color-text-primary);
+}
+
+@media (max-width: 480px) {
+  .list-detail-page__owner-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .list-detail-page__delete-btn span {
+    display: none;
+  }
+  .list-detail-page__delete-confirm span {
+    display: none;
+  }
+}

@@ -6,6 +6,7 @@ import { ArrowUpDown, LayoutGrid, LayoutList } from "lucide-react";
 import { profileService, movieService } from "@/services";
 import Dropdown from "@/components/search/Dropdown";
 import MovieCard from "@/components/movie/MovieCard";
+import { useWatchedFilmsCounts } from "@/hooks/useWatchedFilmsCounts";
 import type { WatchedMovie } from "@/types";
 import "./ProfileFilmsTab.css";
 
@@ -69,36 +70,9 @@ export default function ProfileFilmsTab() {
     setSearchParams(n, { replace: true });
   };
 
-  // Sayaçlar: filtreden bağımsız, sadece kendi verisi değişince (mutation
-  // sonrası invalidate ile) tazelenir — entries'e bağlı değil, bu yüzden
-  // "daha fazla yükle" veya silme her tetiklenişinde tekrar çekilmez.
-  const { data: counts = { all: 0, rated: 0, unrated: 0 } } = useQuery({
-    queryKey: ["watched-films-counts"],
-    queryFn: async () => {
-      const [all, rated, unrated] = await Promise.all([
-        profileService.getWatchedFilms({ page: 1, pageSize: 1 }),
-        profileService.getWatchedFilms({
-          page: 1,
-          pageSize: 1,
-          hasRating: true,
-        }),
-        profileService.getWatchedFilms({
-          page: 1,
-          pageSize: 1,
-          hasRating: false,
-        }),
-      ]);
-      return {
-        all: all.totalCount,
-        rated: rated.totalCount,
-        unrated: unrated.totalCount,
-      };
-    },
-    staleTime: 60_000,
-  });
+  const { data: counts = { all: 0, rated: 0, unrated: 0 } } =
+    useWatchedFilmsCounts();
 
-  // Ana liste: (filter, sortBy, lastPageParam) aynı kaldığı sürece cache'ten
-  // anında gelir — Films sekmesine tekrar girmek artık network beklemez.
   const {
     data,
     isLoading,

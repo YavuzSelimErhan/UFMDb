@@ -234,6 +234,8 @@
     "moviesCount": "film",
     "backToLists": "Listelere Dön",
     "editList": "Listeyi Düzenle",
+    "deleteList": "Listeyi Sil",
+    "deleteConfirm": "Emin misin?",
     "empty": "Henüz liste yok",
     "createList": "Liste Oluştur",
     "official": "Resmi",

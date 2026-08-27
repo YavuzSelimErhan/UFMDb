@@ -234,6 +234,8 @@
     "moviesCount": "Filme",
     "backToLists": "Zurück zu den Listen",
     "editList": "Liste bearbeiten",
+    "deleteList": "Liste löschen",
+    "deleteConfirm": "Bist du sicher?",
     "empty": "Noch keine Listen vorhanden",
     "createList": "Liste erstellen",
     "official": "Offiziell",

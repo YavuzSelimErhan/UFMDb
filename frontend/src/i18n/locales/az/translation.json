@@ -234,6 +234,8 @@
     "moviesCount": "film",
     "backToLists": "Siyahılara Qayıt",
     "editList": "Siyahını redaktə et",
+    "deleteList": "Siyahını sil",
+    "deleteConfirm": "Əminsiniz?",
     "empty": "Hələ siyahı yoxdur",
     "createList": "Siyahı yarat",
     "official": "Rəsmi",
