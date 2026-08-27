@@ -6,6 +6,7 @@ using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.Features.Actors;
 using UFMDb.Application.Features.Users;
+using UFMDb.Application.Features.Reviews;
 
 
 namespace UFMDb.API.Controllers;
@@ -154,6 +155,10 @@ public class ProfileController : ControllerBase
         await _mediator.Send(new RemoveWatchedMovieCommand(RequireUserId(), movieId));
         return NoContent();
     }
+
+    [HttpGet("liked-reviews")]
+    public async Task<IActionResult> GetLikedReviews()
+    => Ok(await _mediator.Send(new GetLikedReviewsQuery(RequireUserId())));
 
     [HttpPost("avatar")]
     public async Task<IActionResult> UploadAvatar(IFormFile file)

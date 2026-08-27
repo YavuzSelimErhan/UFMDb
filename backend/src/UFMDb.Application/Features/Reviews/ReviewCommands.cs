@@ -180,6 +180,57 @@ public class ToggleReviewLikeCommandHandler : IRequestHandler<ToggleReviewLikeCo
     }
 }
 
+public record LikedReviewItemDto(
+    Guid Id,
+    Guid MovieId,
+    string MovieTitle,
+    string PosterUrl,
+    Guid UserId,
+    string UserName,
+    string? UserAvatarUrl,
+    string Content,
+    bool ContainsSpoiler,
+    int LikeCount,
+    DateTime CreatedAtUtc
+);
+
+public record GetLikedReviewsQuery(Guid UserId) : IRequest<List<LikedReviewItemDto>>;
+
+public class GetLikedReviewsQueryHandler : IRequestHandler<GetLikedReviewsQuery, List<LikedReviewItemDto>>
+{
+    private readonly IApplicationDbContext _context;
+    public GetLikedReviewsQueryHandler(IApplicationDbContext context) => _context = context;
+
+    public async Task<List<LikedReviewItemDto>> Handle(GetLikedReviewsQuery request, CancellationToken ct)
+    {
+        var items = await _context.ReviewLikes.AsNoTracking()
+            .Where(rl => rl.UserId == request.UserId)
+            .Join(_context.Reviews.AsNoTracking().Where(r => !r.IsDeleted),
+                rl => rl.ReviewId,
+                r => r.Id,
+                (rl, r) => r)
+            .Include(r => r.User)
+            .Include(r => r.Movie)
+            .OrderByDescending(r => r.CreatedAtUtc)
+            .Select(r => new LikedReviewItemDto(
+                r.Id,
+                r.MovieId,
+                r.Movie.Title,
+                r.Movie.PosterUrl,
+                r.UserId,
+                r.User.UserName,
+                r.User.AvatarUrl,
+                r.Content,
+                r.ContainsSpoiler,
+                r.LikeCount,
+                r.CreatedAtUtc
+            ))
+            .ToListAsync(ct);
+
+        return items;
+    }
+}
+
 // ---------- İzlendi toggle: kapatınca o filme ait TÜM seansları (ve puanlarını) siler ----------
 public record ToggleWatchedCommand(Guid MovieId, Guid UserId) : IRequest<bool>;
 
