@@ -19,6 +19,7 @@ import {
   directorService,
   movieService,
   listService,
+  profileService,
 } from "@/services";
 import MovieCard from "@/components/movie/MovieCard";
 import ListCard from "@/pages/Lists/ListCard";
@@ -37,7 +38,7 @@ import type {
 import "./ProfileContentTabs.css";
 
 export type ContentTab = "watchlist" | "liked" | "reviews";
-type LikedSubTab = "films" | "actors" | "directors" | "lists";
+type LikedSubTab = "films" | "actors" | "directors" | "lists" | "reviews";
 
 interface Props {
   tab: ContentTab;
@@ -83,6 +84,11 @@ export default function ProfileContentTabs({
       setConfirmingDeleteId(null);
     },
   });
+  const unlikeReviewMutation = useMutation({
+    mutationFn: (reviewId: string) => movieService.toggleReviewLike(reviewId),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["liked-reviews"] }),
+  });
 
   const {
     data: likedLists,
@@ -92,6 +98,18 @@ export default function ProfileContentTabs({
   } = useQuery({
     queryKey: ["lists", "Liked"],
     queryFn: () => listService.getAll("Liked"),
+    staleTime: 60_000,
+    enabled: tab === "liked",
+  });
+
+  const {
+    data: likedReviews,
+    isLoading: isLikedReviewsLoading,
+    isError: isLikedReviewsError,
+    refetch: refetchLikedReviews,
+  } = useQuery({
+    queryKey: ["liked-reviews"],
+    queryFn: () => profileService.getLikedReviews(),
     staleTime: 60_000,
     enabled: tab === "liked",
   });
@@ -119,6 +137,12 @@ export default function ProfileContentTabs({
       label: t("profile.likedDirectors"),
       icon: Clapperboard,
       count: likedDirectors.length,
+    },
+    {
+      key: "reviews",
+      label: t("profile.likedReviews"),
+      icon: MessageSquare,
+      count: likedReviews?.length ?? 0,
     },
     {
       key: "lists",
@@ -244,6 +268,92 @@ export default function ProfileContentTabs({
                   hint={t(
                     "profile.likedDirectorsHint",
                     "Henüz beğendiğin bir yönetmen yok.",
+                  )}
+                />
+              ))}
+
+            {likedSubTab === "reviews" &&
+              (isLikedReviewsLoading ? (
+                <PageSpinner label={t("common.loading")} />
+              ) : isLikedReviewsError ? (
+                <PageError
+                  message={t("errors.listsFailed")}
+                  onRetry={() => refetchLikedReviews()}
+                />
+              ) : likedReviews && likedReviews.length > 0 ? (
+                <div className="review-journal">
+                  {likedReviews.map((r) => (
+                    <div
+                      key={r.id}
+                      className="review-entry review-entry--liked card"
+                    >
+                      <Link
+                        to={`/movies/${r.movieId}`}
+                        className="review-entry__poster-link"
+                      >
+                        <img
+                          src={r.posterUrl}
+                          alt={r.movieTitle}
+                          className="review-entry__poster"
+                        />
+                      </Link>
+
+                      <div className="review-entry__body">
+                        <div className="review-entry__header">
+                          <Link
+                            to={`/movies/${r.movieId}`}
+                            className="review-entry__title"
+                          >
+                            {r.movieTitle}
+                          </Link>
+                          {r.containsSpoiler && (
+                            <span className="review-entry__spoiler-badge">
+                              <AlertTriangle size={11} /> {t("movie.spoiler")}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="review-entry__reviewer">
+                          {r.userAvatarUrl ? (
+                            <img
+                              src={r.userAvatarUrl}
+                              alt=""
+                              className="review-entry__reviewer-avatar"
+                            />
+                          ) : (
+                            <span className="review-entry__reviewer-avatar review-entry__reviewer-avatar--fallback">
+                              <Users size={11} />
+                            </span>
+                          )}
+                          <span className="review-entry__reviewer-name">
+                            {r.userName}
+                          </span>
+                        </div>
+
+                        {r.content && (
+                          <p className="review-entry__content">{r.content}</p>
+                        )}
+                      </div>
+
+                      <button
+                        className="review-entry__like-btn active"
+                        disabled={unlikeReviewMutation.isPending}
+                        aria-label={t("movie.unlike")}
+                        onClick={() => unlikeReviewMutation.mutate(r.id)}
+                      >
+                        <Heart size={14} fill="currentColor" />
+                        {r.likeCount}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={<MessageSquare size={26} />}
+                  title={t("profile.emptyContent")}
+                  hint={t(
+                    "profile.likedReviewsHint",
+                    "Henüz beğendiğin bir yorum yok.",
                   )}
                 />
               ))}

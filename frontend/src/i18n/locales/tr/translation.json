@@ -168,6 +168,8 @@
     "likedActors": "Beğendiğim Oyuncular",
     "favoriteDirectorsTab": "Favori Yönetmenler",
     "likedDirectors": "Beğendiğin Yönetmenler",
+    "likedReviews": "Beğenilen Yorumlar",
+    "likedReviewsHint": "Henüz beğendiğin bir yorum yok.",
     "noReviews": "Henüz bir inceleme yazmadın.",
     "member": "UFMDb üyesi",
     "emptyContent": "Henüz içerik yok",

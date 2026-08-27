@@ -247,6 +247,20 @@ export interface ReviewSummary {
   createdAtUtc: string;
 }
 
+export interface LikedReviewItem {
+  id: string;
+  movieId: string;
+  movieTitle: string;
+  posterUrl: string;
+  userId: string;
+  userName: string;
+  userAvatarUrl: string | null;
+  content: string;
+  containsSpoiler: boolean;
+  likeCount: number;
+  createdAtUtc: string;
+}
+
 export interface ProfileData {
   userId: string;
   userName: string;

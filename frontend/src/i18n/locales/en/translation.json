@@ -168,6 +168,8 @@
     "likedActors": "Liked Actors",
     "favoriteDirectorsTab": "Favorite Directors",
     "likedDirectors": "Directors You Liked",
+    "likedReviews": "Liked Reviews",
+    "likedReviewsHint": "Reviews you've liked will show up here.",
     "noReviews": "You haven't written any reviews yet.",
     "member": "UFMDb member",
     "emptyContent": "Nothing here yet",

@@ -26,6 +26,7 @@ import type {
   MovieReview,
   ReviewSortBy,
   ReviewLikeResult,
+  LikedReviewItem,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -245,6 +246,10 @@ export const profileService = {
   },
   removeWatchedFilm: async (movieId: string) =>
     (await api.delete(`/profile/watched-films/${movieId}`)).data,
+  getLikedReviews: async (): Promise<LikedReviewItem[]> => {
+    const { data } = await api.get("/profile/liked-reviews");
+    return data;
+  },
 };
 
 // ---------------- Genres ----------------
