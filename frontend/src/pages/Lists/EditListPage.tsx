@@ -194,7 +194,20 @@ export default function EditListPage() {
             {uploadMutation.isPending ? (
               <Loader2 size={22} className="create-list-page__spinner" />
             ) : form.coverImageUrl ? (
-              <img src={form.coverImageUrl} alt="" />
+              <>
+                <img src={form.coverImageUrl} alt="" />
+                <button
+                  type="button"
+                  className="create-list-page__cover-remove"
+                  onClick={(e) => {
+                    e.stopPropagation(); // cover'a tıklamayla dosya seçiciyi tetiklemesin
+                    setForm((f) => ({ ...f, coverImageUrl: "" }));
+                  }}
+                  aria-label={t("common.delete")}
+                >
+                  <X size={14} />
+                </button>
+              </>
             ) : (
               <div className="create-list-page__cover-empty">
                 <ImageIcon size={20} />

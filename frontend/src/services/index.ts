@@ -308,9 +308,7 @@ export const uploadService = {
   uploadImage: async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append("file", file);
-    const { data } = await api.post("/uploads/image", formData, {
-      headers: { "Content-Type": undefined },
-    });
+    const { data } = await api.post("/uploads/image", formData);
     return data.url;
   },
 };

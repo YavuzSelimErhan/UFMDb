@@ -9,6 +9,8 @@ import {
   ListVideo,
   Upload,
   Loader2,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { listService, uploadService } from "@/services";
 // NOT: gerçek yol farklıysa (AdminListForm.tsx'in bulunduğu klasöre göre) sadece bu satırı düzelt.
@@ -77,6 +79,16 @@ export default function CreateListPage() {
   const removeMovie = (movieId: string) =>
     setMovies((prev) => prev.filter((m) => m.movieId !== movieId));
 
+  const moveMovie = (index: number, direction: -1 | 1) => {
+    setMovies((prev) => {
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
+      return next;
+    });
+  };
+
   const handleFile = (file: File | undefined) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
@@ -127,7 +139,20 @@ export default function CreateListPage() {
             {uploadMutation.isPending ? (
               <Loader2 size={22} className="create-list-page__spinner" />
             ) : form.coverImageUrl ? (
-              <img src={form.coverImageUrl} alt="" />
+              <>
+                <img src={form.coverImageUrl} alt="" />
+                <button
+                  type="button"
+                  className="create-list-page__cover-remove"
+                  onClick={(e) => {
+                    e.stopPropagation(); // cover'a tıklamayla dosya seçiciyi tetiklemesin
+                    setForm((f) => ({ ...f, coverImageUrl: "" }));
+                  }}
+                  aria-label={t("common.delete")}
+                >
+                  <X size={14} />
+                </button>
+              </>
             ) : (
               <div className="create-list-page__cover-empty">
                 <ImageIcon size={20} />
@@ -198,6 +223,28 @@ export default function CreateListPage() {
                   {index + 1}
                 </span>
                 <span style={{ flex: 1 }}>{m.title}</span>
+                <div className="create-list-page__reorder-group">
+                  <button
+                    type="button"
+                    className="create-list-page__reorder-btn"
+                    onClick={() => moveMovie(index, -1)}
+                    disabled={index === 0}
+                    aria-label={t("admin.lists.moveUp")}
+                    title={t("admin.lists.moveUp")}
+                  >
+                    <ArrowUp size={13} />
+                  </button>
+                  <button
+                    type="button"
+                    className="create-list-page__reorder-btn"
+                    onClick={() => moveMovie(index, 1)}
+                    disabled={index === movies.length - 1}
+                    aria-label={t("admin.lists.moveDown")}
+                    title={t("admin.lists.moveDown")}
+                  >
+                    <ArrowDown size={13} />
+                  </button>
+                </div>
                 <button
                   type="button"
                   className="create-list-page__remove-movie"
