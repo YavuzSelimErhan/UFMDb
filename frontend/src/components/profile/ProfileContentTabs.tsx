@@ -180,23 +180,24 @@ export default function ProfileContentTabs({
 
             {likedSubTab === "actors" &&
               (likedActors.length > 0 ? (
-                <div className="person-grid person-grid--compact">
+                <div className="person-card-grid">
                   {likedActors.map((a) => (
-                    <div key={a.id} className="person-grid__item card">
+                    <div key={a.id} className="person-card">
                       <Link
                         to={`/actors/${a.id}`}
-                        className="person-grid__link"
+                        className="person-card__media"
                       >
                         <img src={a.photoUrl} alt={a.fullName} />
-                        <span>{a.fullName}</span>
+                        <div className="person-card__scrim" />
+                        <span className="person-card__name">{a.fullName}</span>
                       </Link>
                       <button
-                        className="person-grid__unlike"
+                        className="person-card__unlike"
                         disabled={unlikeActorMutation.isPending}
                         aria-label={t("movie.unlike")}
                         onClick={() => unlikeActorMutation.mutate(a.id)}
                       >
-                        <Heart size={12} fill="currentColor" />
+                        <Heart size={13} fill="currentColor" />
                       </button>
                     </div>
                   ))}
@@ -214,23 +215,24 @@ export default function ProfileContentTabs({
 
             {likedSubTab === "directors" &&
               (likedDirectors.length > 0 ? (
-                <div className="person-grid person-grid--compact">
+                <div className="person-card-grid">
                   {likedDirectors.map((d) => (
-                    <div key={d.id} className="person-grid__item card">
+                    <div key={d.id} className="person-card">
                       <Link
                         to={`/directors/${d.id}`}
-                        className="person-grid__link"
+                        className="person-card__media"
                       >
                         <img src={d.photoUrl} alt={d.fullName} />
-                        <span>{d.fullName}</span>
+                        <div className="person-card__scrim" />
+                        <span className="person-card__name">{d.fullName}</span>
                       </Link>
                       <button
-                        className="person-grid__unlike"
+                        className="person-card__unlike"
                         disabled={unlikeDirectorMutation.isPending}
                         aria-label={t("movie.unlike")}
                         onClick={() => unlikeDirectorMutation.mutate(d.id)}
                       >
-                        <Heart size={12} fill="currentColor" />
+                        <Heart size={13} fill="currentColor" />
                       </button>
                     </div>
                   ))}
@@ -255,7 +257,7 @@ export default function ProfileContentTabs({
                   onRetry={() => refetchLikedLists()}
                 />
               ) : likedLists && likedLists.length > 0 ? (
-                <div className="lists-page__grid">
+                <div className="profile-tabs__lists-grid">
                   {likedLists.map((list) => (
                     <ListCard
                       key={list.id}
