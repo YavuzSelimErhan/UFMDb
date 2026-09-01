@@ -10,6 +10,8 @@ import {
   Ticket,
   X,
   Trash2,
+  PenLine,
+  AlertTriangle,
 } from "lucide-react";
 import ReviewsSection from "@/components/movie/ReviewsSection";
 import { movieService, screeningLogService } from "@/services";
@@ -393,44 +395,54 @@ export default function MovieDetailPage() {
 
           {isAuthenticated && !isUnreleased && (
             <div className="movie-detail__review-box card">
-              <h3>{t("movie.writeReview")}</h3>
-              <p className="movie-detail__review-rating-hint">
-                {t("movie.yourRating")}:{" "}
-                {myRating > 0 ? `${myRating} / 5` : "—"}
-              </p>
+              <div className="movie-detail__review-header">
+                <span className="movie-detail__review-eyebrow">
+                  <PenLine size={12} /> {t("movie.writeReview")}
+                </span>
+                <span className="movie-detail__review-rating-hint">
+                  {t("movie.yourRating")}:{" "}
+                  <strong>{myRating > 0 ? `${myRating} / 5` : "—"}</strong>
+                </span>
+              </div>
+
               <textarea
                 value={reviewText}
                 onChange={(e) => setReviewText(e.target.value)}
                 placeholder={t("movie.reviewPlaceholder")}
                 rows={4}
               />
-              <label className="movie-detail__review-spoiler-check">
-                <input
-                  type="checkbox"
-                  checked={containsSpoiler}
-                  onChange={(e) => setContainsSpoiler(e.target.checked)}
-                />
-                {t("movie.containsSpoiler")}
-              </label>
-              <div className="movie-detail__review-actions">
+
+              <div className="movie-detail__review-footer">
                 <button
-                  className="btn-primary"
-                  disabled={
-                    reviewText.trim().length === 0 || reviewMutation.isPending
-                  }
-                  onClick={() => reviewMutation.mutate()}
+                  type="button"
+                  className={`movie-detail__spoiler-toggle ${containsSpoiler ? "active" : ""}`}
+                  onClick={() => setContainsSpoiler((s) => !s)}
+                  aria-pressed={containsSpoiler}
                 >
-                  {t("common.save")}
+                  <AlertTriangle size={13} />
+                  {t("movie.containsSpoiler")}
                 </button>
-                {movie.myReview && (
+
+                <div className="movie-detail__review-actions">
                   <button
-                    className="btn-secondary movie-detail__review-delete"
-                    disabled={deleteReviewMutation.isPending}
-                    onClick={() => deleteReviewMutation.mutate()}
+                    className="btn-primary"
+                    disabled={
+                      reviewText.trim().length === 0 || reviewMutation.isPending
+                    }
+                    onClick={() => reviewMutation.mutate()}
                   >
-                    <Trash2 size={14} /> {t("common.delete")}
+                    {t("common.save")}
                   </button>
-                )}
+                  {movie.myReview && (
+                    <button
+                      className="btn-secondary movie-detail__review-delete"
+                      disabled={deleteReviewMutation.isPending}
+                      onClick={() => deleteReviewMutation.mutate()}
+                    >
+                      <Trash2 size={14} /> {t("common.delete")}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           )}

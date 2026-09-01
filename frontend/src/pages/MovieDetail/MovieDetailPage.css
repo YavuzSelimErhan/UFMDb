@@ -300,36 +300,94 @@
   box-shadow: 0 4px 14px var(--color-shadow);
 }
 
-/* ---------- Yorum kutusu ---------- */
+/* ---------- Yorum kutusu: bilet kökenli kimliğe bağlandı ---------- */
 .movie-detail__review-box {
+  position: relative;
   margin-top: 10px;
-  padding: 22px;
+  padding: 20px 22px 22px;
   max-width: 700px;
   border-radius: var(--radius-lg);
+  border-top: 3px dashed var(--print-accent, var(--color-accent));
 }
-.movie-detail__review-box h3 {
-  font-family: var(--font-display);
-  margin-bottom: 4px;
+
+.movie-detail__review-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
 }
+
+.movie-detail__review-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: var(--print-accent, var(--color-accent));
+}
+
 .movie-detail__review-rating-hint {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--color-text-secondary);
-  margin-bottom: 10px;
 }
+.movie-detail__review-rating-hint strong {
+  color: var(--color-text-primary);
+}
+
 .movie-detail__review-box textarea {
   width: 100%;
-  margin: 4px 0 12px;
-  padding: 12px;
+  margin: 0 0 14px;
+  padding: 12px 14px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
+  border: 1px dashed var(--color-border);
   background-color: var(--color-bg);
   color: var(--color-text-primary);
+  font-family: inherit;
   resize: vertical;
   transition: border-color var(--transition-fast);
 }
 .movie-detail__review-box textarea:focus {
   outline: none;
-  border-color: var(--color-accent);
+  border-style: solid;
+  border-color: var(--print-accent, var(--color-accent));
+}
+
+.movie-detail__review-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Spoiler damgası: yorum kutusunun bilet kimliğine uyan kesikli-çerçeve rozet */
+.movie-detail__spoiler-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: var(--radius-pill);
+  border: 1px dashed var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+.movie-detail__spoiler-toggle:hover {
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-secondary);
+}
+.movie-detail__spoiler-toggle.active {
+  border-style: solid;
+  border-color: #e05252;
+  color: #e05252;
+  background-color: rgba(224, 82, 82, 0.08);
 }
 
 @media (max-width: 768px) {
@@ -355,6 +413,9 @@
     flex-wrap: wrap;
     width: 100%;
   }
+  .movie-detail__review-footer {
+    align-items: flex-start;
+  }
 }
 
 @media (max-width: 480px) {
@@ -372,6 +433,13 @@
   }
   .movie-detail__log-form-row {
     gap: 14px;
+  }
+  .movie-detail__review-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .movie-detail__review-actions {
+    justify-content: flex-end;
   }
 }
 
@@ -434,19 +502,6 @@
 
 .movie-detail__log-form-submit {
   width: 100%;
-}
-
-.movie-detail__review-spoiler-check {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.82rem;
-  color: var(--color-text-secondary);
-  margin-bottom: 14px;
-  cursor: pointer;
-}
-.movie-detail__review-spoiler-check input {
-  accent-color: var(--color-accent);
 }
 
 .movie-detail__review-actions {
