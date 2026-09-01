@@ -1,83 +1,51 @@
 .profile-header {
   position: relative;
   margin-bottom: 20px;
-}
-
-.profile-header__cover {
-  position: relative;
-  height: 130px;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: linear-gradient(
-    120deg,
-    color-mix(in srgb, var(--color-accent) 18%, var(--color-bg)) 0%,
-    var(--color-bg-elevated) 45%,
-    var(--color-bg) 100%
-  );
 }
 
-.profile-header__cover-glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    circle at 25% 20%,
-    var(--color-shadow-accent),
-    transparent 60%
+/* Perforated strip along the top, echoing a film/ticket edge */
+.profile-header__perf {
+  height: 14px;
+  background-color: var(--color-accent);
+  background-image: radial-gradient(
+    circle,
+    var(--color-bg-elevated) 0 3px,
+    transparent 3.2px
   );
-}
-.profile-header__cover::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, var(--color-bg) 4%, transparent 65%);
+  background-size: 20px 100%;
+  background-position: 10px center;
+  background-repeat: repeat-x;
 }
 
-.profile-header__reel {
-  position: absolute;
-  top: 14px;
-  right: 24px;
-  z-index: 1;
+.profile-header__body {
   display: flex;
-  gap: 7px;
-}
-.profile-header__reel span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  opacity: 0.4;
-}
-.profile-header__reel span:nth-child(odd) {
-  opacity: 0.65;
+  gap: 28px;
+  padding: 30px 32px 26px;
 }
 
-.profile-header__avatar-wrap {
-  position: absolute;
-  left: 28px;
-  top: 82px;
-  z-index: 3;
+/* ---------- Avatar ---------- */
+.profile-header__avatar-col {
+  flex: 0 0 auto;
 }
 
 .profile-header__avatar {
-  width: 96px;
-  height: 96px;
+  width: 108px;
+  height: 108px;
   border-radius: 50%;
-  padding: 3px;
-  background: linear-gradient(
-    135deg,
-    var(--color-accent),
-    var(--color-accent-secondary)
-  );
-  box-shadow: 0 8px 24px var(--color-shadow-accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 0;
+  border: 3px solid var(--color-accent);
+  box-shadow: 0 8px 22px var(--color-shadow-accent);
   cursor: pointer;
-  border: none;
-  transition: transform 200ms;
+  background: none;
+  display: block;
+  transition: transform var(--transition-fast);
 }
 .profile-header__avatar:hover {
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 
 .profile-header__avatar img,
@@ -85,7 +53,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 3px solid var(--color-bg);
+  display: block;
 }
 .profile-header__avatar img {
   object-fit: cover;
@@ -96,177 +64,194 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: 2rem;
+  font-style: italic;
+  font-size: 2.4rem;
   font-weight: 800;
   color: var(--color-text-primary);
 }
 
-.profile-header__body {
-  padding: 18px 20px 0 128px;
+/* ---------- Identity ---------- */
+.profile-header__info {
+  flex: 1;
+  min-width: 0;
 }
 
-/* Buton ile kimlik bloğunun asla üst üste binmemesi için:
-   - satır artık sarabiliyor (flex-wrap)
-   - identity için gerçek bir min-width var (0 yerine),
-     böylece isim/rozetler aşırı sıkışıp butona yapışmıyor
-   - alan kalmayınca buton kendi satırına düşüyor, row-gap ile boşluk bırakıyor */
-.profile-header__top {
+.profile-header__top-row {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  flex-wrap: wrap;
   gap: 16px;
-  row-gap: 12px;
-}
-
-.profile-header__identity {
-  flex: 1 1 260px;
-  min-width: 220px;
+  flex-wrap: wrap;
 }
 
 .profile-header__name-row {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: baseline;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .profile-header__name {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: 1.5rem;
   font-weight: 800;
+  font-size: 1.9rem;
+  margin: 0;
+  line-height: 1.1;
   color: var(--color-text-primary);
-  margin-bottom: 2px;
   overflow-wrap: break-word;
 }
 
-.profile-header__rating-badge {
+.profile-header__rating {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.76rem;
-  font-weight: 700;
+  gap: 5px;
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.82rem;
+  font-weight: 600;
   color: var(--color-accent);
   background: var(--color-accent-muted);
-  padding: 3px 9px;
+  border: 1px solid var(--color-accent);
+  padding: 3px 10px 3px 8px;
   border-radius: var(--radius-pill);
   flex-shrink: 0;
 }
 
-.profile-header__since {
+.profile-header__handle {
   font-family: "SF Mono", "Fira Code", monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 0.76rem;
+  letter-spacing: 0.03em;
   color: var(--color-text-muted);
+  margin: 6px 0 14px;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
 }
-
+.profile-header__handle strong {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
 .profile-header__dot {
   margin: 0 8px;
   opacity: 0.5;
 }
 
-.profile-header__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.profile-header__meta-tag {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  padding: 3px 10px;
-  border-radius: var(--radius-pill);
-}
-
-.profile-header__bio {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 0.88rem;
-  color: var(--color-text-secondary);
-  margin-top: 12px;
-  max-width: 480px;
-  line-height: 1.5;
-  opacity: 0.9;
-}
-
 .profile-header__edit-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   flex-shrink: 0;
-  margin-left: auto;
   white-space: nowrap;
 }
 
-/* Stats strip */
+.profile-header__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.profile-header__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-card);
+}
+.profile-header__badge svg {
+  opacity: 0.7;
+}
+
+.profile-header__bio {
+  position: relative;
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--color-text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  max-width: 520px;
+  padding-left: 16px;
+  border-left: 2px solid var(--color-accent);
+}
+
+/* ---------- Perf divider between info and stats ---------- */
+.profile-header__perf-divider {
+  height: 10px;
+  margin: 0 32px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent);
+  background-image: radial-gradient(
+    circle,
+    var(--color-bg-elevated) 0 2.6px,
+    transparent 2.8px
+  );
+  background-size: 16px 100%;
+  background-position: 8px center;
+  background-repeat: repeat-x;
+  opacity: 0.9;
+}
+
+/* ---------- Ticket-strip stats ---------- */
 .profile-header__stats {
   display: flex;
-  align-items: stretch;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 22px;
-  padding-top: 16px;
-  border-top: 1px solid var(--color-border);
+  margin: 22px 32px 26px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
 }
 
 .profile-header__stat {
+  flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 10px 18px;
-  border-radius: var(--radius-md);
-  transition:
-    background-color var(--transition-fast),
-    transform var(--transition-fast);
+  gap: 10px;
+  padding: 14px 10px;
+  border-right: 1px dashed var(--color-border);
+  text-decoration: none;
+  transition: background-color var(--transition-fast);
+}
+.profile-header__stat:last-child {
+  border-right: none;
 }
 .profile-header__stat:hover {
   background-color: var(--color-bg-card-hover);
-  transform: translateY(-2px);
 }
 
 .profile-header__stat-icon {
   color: var(--color-accent);
-  margin-bottom: 2px;
+  flex-shrink: 0;
+}
+
+.profile-header__stat-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
 }
 
 .profile-header__stat-value {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: 1.15rem;
-  font-weight: 800;
+  font-size: 1.05rem;
+  font-weight: 700;
   color: var(--color-text-primary);
 }
 
 .profile-header__stat-label {
   font-family: "SF Mono", "Fira Code", monospace;
   font-size: 0.6rem;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
+  margin-top: 2px;
 }
 
-.profile-header__stat-divider {
-  width: 1px;
-  align-self: center;
-  height: 32px;
-  background-color: var(--color-border);
-  margin: 0 6px;
-}
-
+/* ---------- Avatar lightbox (unchanged behaviour) ---------- */
 .avatar-lightbox {
   position: fixed;
   inset: 0;
@@ -310,51 +295,36 @@
 }
 
 @media (max-width: 640px) {
-  .profile-header__cover {
-    height: 100px;
-  }
-  .profile-header__avatar-wrap {
-    left: 20px;
-    top: 62px;
-  }
-  .profile-header__avatar {
-    width: 80px;
-    height: 80px;
-  }
   .profile-header__body {
-    padding: 14px 16px 0 20px;
-  }
-  .profile-header__top {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    padding: 26px 20px 20px;
   }
-  .profile-header__identity {
-    min-width: 0;
-    flex-basis: auto;
+  .profile-header__avatar {
+    width: 84px;
+    height: 84px;
+  }
+  .profile-header__top-row {
+    flex-direction: column;
   }
   .profile-header__edit-btn {
     align-self: flex-start;
-    margin-left: 0;
-  }
-  .profile-header__meta {
-    gap: 6px;
   }
   .profile-header__bio {
     max-width: 100%;
-    font-size: 0.82rem;
+    font-size: 0.86rem;
+  }
+  .profile-header__perf-divider {
+    margin: 0 20px;
   }
   .profile-header__stats {
-    justify-content: space-between;
-    gap: 2px;
+    flex-wrap: wrap;
+    margin: 18px 20px 20px;
   }
   .profile-header__stat {
-    padding: 8px 6px;
-    flex: 1;
-    min-width: 0;
-  }
-  .profile-header__stat-divider {
-    display: none;
+    flex: 1 1 45%;
+    border-right: none;
+    border-bottom: 1px dashed var(--color-border);
   }
   .profile-header__stat-label {
     font-size: 0.55rem;

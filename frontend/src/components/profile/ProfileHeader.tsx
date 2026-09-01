@@ -6,7 +6,6 @@ import {
   Star,
   X,
   MapPin,
-  Cake,
   Users,
   UserCheck,
   Film,
@@ -72,12 +71,6 @@ export default function ProfileHeader({
         ? t("profile.genderFemale")
         : null;
 
-  const metaTags = [
-    profile.country,
-    age !== null ? `${age}` : null,
-    genderLabel,
-  ].filter(Boolean) as string[];
-
   const stats = [
     {
       key: "followers",
@@ -118,107 +111,96 @@ export default function ProfileHeader({
 
   return (
     <div className="profile-header">
-      <div className="profile-header__cover">
-        <div className="profile-header__cover-glow" />
-        <div className="profile-header__reel" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-        </div>
-      </div>
-
-      <div className="profile-header__avatar-wrap">
-        <button
-          type="button"
-          className="profile-header__avatar"
-          onClick={() => profile.avatarUrl && setIsAvatarExpanded(true)}
-          aria-label={t("profile.viewAvatar")}
-        >
-          {profile.avatarUrl ? (
-            <img src={getImageUrl(profile.avatarUrl)} alt={profile.userName} />
-          ) : (
-            <span>{profile.userName[0]?.toUpperCase()}</span>
-          )}
-        </button>
-      </div>
+      <div className="profile-header__perf" aria-hidden="true" />
 
       <div className="profile-header__body">
-        <div className="profile-header__top">
-          <div className="profile-header__identity">
-            <div className="profile-header__name-row">
-              <h1 className="profile-header__name">
-                {profile.fullName || profile.userName}
-              </h1>
-              {profile.averageGivenRating !== null && (
-                <span className="profile-header__rating-badge">
-                  <Star size={12} fill="currentColor" />
-                  {profile.averageGivenRating.toFixed(1)}
-                </span>
-              )}
-            </div>
-            <p className="profile-header__since">
-              @{profile.userName}
-              {memberSince && (
-                <>
-                  <span className="profile-header__dot">·</span>
-                  {t("profile.member")} {memberSince}
-                </>
-              )}
-            </p>
-
-            {metaTags.length > 0 && (
-              <div className="profile-header__meta">
-                {profile.country && (
-                  <span className="profile-header__meta-tag">
-                    <MapPin size={11} /> {profile.country}
-                  </span>
-                )}
-                {age !== null && (
-                  <span className="profile-header__meta-tag">
-                    <Cake size={11} /> {age}
-                  </span>
-                )}
-                {genderLabel && (
-                  <span className="profile-header__meta-tag">
-                    {genderLabel}
-                  </span>
-                )}
-              </div>
-            )}
-
-            {profile.biography && (
-              <p className="profile-header__bio">"{profile.biography}"</p>
-            )}
-          </div>
-
+        <div className="profile-header__avatar-col">
           <button
-            className="btn-secondary profile-header__edit-btn"
-            onClick={onEditClick}
+            type="button"
+            className="profile-header__avatar"
+            onClick={() => profile.avatarUrl && setIsAvatarExpanded(true)}
+            aria-label={t("profile.viewAvatar")}
           >
-            <Pencil size={14} /> {t("profile.editProfile")}
+            {profile.avatarUrl ? (
+              <img
+                src={getImageUrl(profile.avatarUrl)}
+                alt={profile.userName}
+              />
+            ) : (
+              <span>{profile.userName[0]?.toUpperCase()}</span>
+            )}
           </button>
         </div>
 
-        <div className="profile-header__stats">
-          {stats.map(({ key, to, icon: Icon, value, label }, idx) => (
-            <>
-              {idx === 2 && (
-                <div
-                  className="profile-header__stat-divider"
-                  key={`divider-${key}`}
-                />
+        <div className="profile-header__info">
+          <div className="profile-header__top-row">
+            <div>
+              <div className="profile-header__name-row">
+                <h1 className="profile-header__name">
+                  {profile.fullName || profile.userName}
+                </h1>
+                {profile.averageGivenRating !== null && (
+                  <span className="profile-header__rating">
+                    <Star size={13} fill="currentColor" />
+                    {profile.averageGivenRating.toFixed(1)}
+                  </span>
+                )}
+              </div>
+              <p className="profile-header__handle">
+                <strong>@{profile.userName}</strong>
+                {memberSince && (
+                  <>
+                    <span className="profile-header__dot">·</span>
+                    {t("profile.member")} {memberSince}
+                  </>
+                )}
+              </p>
+            </div>
+
+            <button
+              className="btn-secondary profile-header__edit-btn"
+              onClick={onEditClick}
+            >
+              <Pencil size={14} /> {t("profile.editProfile")}
+            </button>
+          </div>
+
+          {(profile.country || age !== null || genderLabel) && (
+            <div className="profile-header__badges">
+              {profile.country && (
+                <span className="profile-header__badge">
+                  <MapPin size={13} /> {profile.country}
+                </span>
               )}
-              <Link to={to} className="profile-header__stat" key={key}>
-                <Icon size={14} className="profile-header__stat-icon" />
-                <span className="profile-header__stat-value">{value}</span>
-                <span className="profile-header__stat-label">{label}</span>
-              </Link>
-            </>
-          ))}
+              {age !== null && (
+                <span className="profile-header__badge">{age}</span>
+              )}
+              {genderLabel && (
+                <span className="profile-header__badge">{genderLabel}</span>
+              )}
+            </div>
+          )}
+
+          {profile.biography && (
+            <p className="profile-header__bio">
+              &ldquo;{profile.biography}&rdquo;
+            </p>
+          )}
         </div>
+      </div>
+
+      <div className="profile-header__perf-divider" aria-hidden="true" />
+
+      <div className="profile-header__stats">
+        {stats.map(({ key, to, icon: Icon, value, label }) => (
+          <Link to={to} className="profile-header__stat" key={key}>
+            <Icon size={16} className="profile-header__stat-icon" />
+            <span className="profile-header__stat-text">
+              <span className="profile-header__stat-value">{value}</span>
+              <span className="profile-header__stat-label">{label}</span>
+            </span>
+          </Link>
+        ))}
       </div>
 
       {isAvatarExpanded && profile.avatarUrl && (
