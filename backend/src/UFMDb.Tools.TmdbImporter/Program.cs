@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using UFMDb.Domain.Entities;
+using UFMDb.Domain.Enums;
 using UFMDb.Persistence;
 using UFMDb.Tools.TmdbImporter;
 
@@ -29,6 +30,7 @@ var targetMovieCount = int.Parse(configuration["Tmdb:TargetMovieCount"] ?? "200"
 var minVoteCount = int.Parse(configuration["Tmdb:MinVoteCount"] ?? "1000");
 var upcomingMovieCount = int.Parse(configuration["Tmdb:UpcomingMovieCount"] ?? "50");
 var upcomingWindowDays = int.Parse(configuration["Tmdb:UpcomingWindowDays"] ?? "180");
+var postReleaseRefreshDays = int.Parse(configuration["Tmdb:PostReleaseRefreshDays"] ?? "30");
 var turkishMovieCount = int.Parse(configuration["Tmdb:TurkishMovieCount"] ?? "200");
 var castLimit = 12; // her filmden alınacak maksimum oyuncu sayısı
 
@@ -608,6 +610,16 @@ async Task ImportMoviesAsync(List<int> movieIds, Dictionary<int, Guid> genreMapp
             movie.RatingCount = detail.VoteCount;
             movie.ViewCount = detail.VoteCount;
 
+            // Sadece yeni filmlerde lifecycle durumunu ReleaseDate'e göre otomatik ata.
+            // Mevcut filmleri güncellerken durumu ezmiyoruz — o iş refresh-* job'larının sorumluluğunda.
+            if (isNew)
+            {
+                movie.LifecycleStatus = movie.ReleaseDate.Date > DateTime.UtcNow.Date
+                    ? MovieLifecycleStatus.Upcoming
+                    : MovieLifecycleStatus.Stable;
+                movie.LastTmdbSyncAt = DateTime.UtcNow;
+            }
+
             if (isNew) db.Movies.Add(movie);
 
             // ---- Türler (temizle + yeniden kur) ----
@@ -737,6 +749,120 @@ async Task FetchUpcomingMoviesAsync()
     }
 
     await ImportMoviesAsync(newIds, genreMap);
+}
+
+// ---------------- Opsiyonel: vizyona yeni giren filmleri yeniden çekme modu ----------------
+// Kullanım: dotnet run --project src/UFMDb.Tools.TmdbImporter -- refresh-released
+if (args.Contains("refresh-released"))
+{
+    await RefreshNewlyReleasedMoviesAsync(dbOptions);
+    return;
+}
+
+async Task RefreshNewlyReleasedMoviesAsync(DbContextOptions<ApplicationDbContext> options)
+{
+    var today = DateTime.UtcNow.Date;
+
+    List<int> tmdbIdsToRefresh;
+    await using (var db = new ApplicationDbContext(options))
+    {
+        tmdbIdsToRefresh = await db.Movies
+            .Where(m => m.TmdbId != null
+                     && m.LifecycleStatus == MovieLifecycleStatus.Upcoming
+                     && m.ReleaseDate <= today)
+            .Select(m => m.TmdbId!.Value)
+            .ToListAsync(cts.Token);
+    }
+
+    Console.WriteLine($"Vizyon tarihi geçmiş ve hâlâ 'Upcoming' durumunda olan {tmdbIdsToRefresh.Count} film bulundu.\n");
+
+    if (tmdbIdsToRefresh.Count == 0)
+    {
+        Console.WriteLine("Güncellenecek film yok, çıkılıyor.");
+        return;
+    }
+
+    await ImportMoviesAsync(tmdbIdsToRefresh, genreMap);
+
+    await using var db2 = new ApplicationDbContext(options);
+    var movies = await db2.Movies
+        .Where(m => m.TmdbId != null && tmdbIdsToRefresh.Contains(m.TmdbId!.Value))
+        .ToListAsync(cts.Token);
+
+    var now = DateTime.UtcNow;
+    foreach (var m in movies)
+    {
+        m.LifecycleStatus = MovieLifecycleStatus.NewlyReleased;
+        m.LastTmdbSyncAt = now;
+    }
+    await db2.SaveChangesAsync(cts.Token);
+
+    Console.WriteLine($"{movies.Count} film 'NewlyReleased' durumuna geçirildi.");
+}
+
+// ---------------- Tek seferlik: mevcut kayıtların LifecycleStatus'unu ReleaseDate'e göre düzelt ----------------
+// Kullanım: dotnet run --project src/UFMDb.Tools.TmdbImporter -- backfill-lifecycle
+if (args.Contains("backfill-lifecycle"))
+{
+    await using var db = new ApplicationDbContext(dbOptions);
+    var today = DateTime.UtcNow.Date;
+
+    var upcomingCount = await db.Movies
+        .Where(m => m.ReleaseDate.Date > today && m.LifecycleStatus != MovieLifecycleStatus.Upcoming)
+        .ExecuteUpdateAsync(s => s.SetProperty(m => m.LifecycleStatus, MovieLifecycleStatus.Upcoming), cts.Token);
+
+    Console.WriteLine($"{upcomingCount} film 'Upcoming' olarak işaretlendi.");
+    return;
+}
+
+// ---------------- Opsiyonel: vizyondan belirli süre sonra tekrar çekme modu ----------------
+// Kullanım: dotnet run --project src/UFMDb.Tools.TmdbImporter -- refresh-post-release
+if (args.Contains("refresh-post-release"))
+{
+    await RefreshPostReleaseMoviesAsync(dbOptions);
+    return;
+}
+
+async Task RefreshPostReleaseMoviesAsync(DbContextOptions<ApplicationDbContext> options)
+{
+    var cutoff = DateTime.UtcNow.Date.AddDays(-postReleaseRefreshDays);
+
+    List<int> tmdbIdsToRefresh;
+    await using (var db = new ApplicationDbContext(options))
+    {
+        tmdbIdsToRefresh = await db.Movies
+            .Where(m => m.TmdbId != null
+                     && m.LifecycleStatus == MovieLifecycleStatus.NewlyReleased
+                     && m.ReleaseDate <= cutoff)
+            .Select(m => m.TmdbId!.Value)
+            .ToListAsync(cts.Token);
+    }
+
+    Console.WriteLine($"Vizyona girmesinin üzerinden {postReleaseRefreshDays}+ gün geçmiş ve hâlâ 'NewlyReleased' durumunda olan {tmdbIdsToRefresh.Count} film bulundu.\n");
+
+    if (tmdbIdsToRefresh.Count == 0)
+    {
+        Console.WriteLine("Güncellenecek film yok, çıkılıyor.");
+        return;
+    }
+
+    await ImportMoviesAsync(tmdbIdsToRefresh, genreMap);
+
+    await using var db2 = new ApplicationDbContext(options);
+    var movies = await db2.Movies
+        .Where(m => m.TmdbId != null && tmdbIdsToRefresh.Contains(m.TmdbId!.Value))
+        .ToListAsync(cts.Token);
+
+    var now = DateTime.UtcNow;
+    foreach (var m in movies)
+    {
+        m.LifecycleStatus = MovieLifecycleStatus.Stable;
+        m.PostReleaseSyncedAt = now;
+        m.LastTmdbSyncAt = now;
+    }
+    await db2.SaveChangesAsync(cts.Token);
+
+    Console.WriteLine($"{movies.Count} film 'Stable' durumuna geçirildi.");
 }
 
 // ---------------- Opsiyonel: en yüksek oy sayısına sahip Türk filmlerini çekme modu ----------------

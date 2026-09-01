@@ -1,4 +1,5 @@
 using UFMDb.Domain.Common;
+using UFMDb.Domain.Enums;
 
 namespace UFMDb.Domain.Entities;
 
@@ -29,6 +30,17 @@ public class Movie : BaseEntity
     /// formülün "çapa" noktasıdır ve az oylu filmlerde güvenilirliği korur.</summary>
     public double SeedRating { get; set; } = 0;
     public int SeedVoteCount { get; set; } = 0;
+
+    /// <summary>Filmin TMDB senkronizasyon yaşam döngüsü. Yeni film importunda ReleaseDate'e göre
+    /// otomatik atanır; Upcoming -> NewlyReleased geçişi refresh-released job'ı, 
+    /// NewlyReleased -> Stable geçişi refresh-post-release job'ı tarafından yapılır.</summary>
+    public MovieLifecycleStatus LifecycleStatus { get; set; } = MovieLifecycleStatus.Stable;
+
+    /// <summary>Bu filmin TMDB'den en son ne zaman (herhangi bir sebeple) çekildiği.</summary>
+    public DateTime? LastTmdbSyncAt { get; set; }
+
+    /// <summary>Vizyon sonrası "ikinci tur" senkronizasyonun ne zaman yapıldığı. Null ise henüz yapılmadı.</summary>
+    public DateTime? PostReleaseSyncedAt { get; set; }
 
     // Navigation
     public ICollection<MovieGenre> MovieGenres { get; set; } = new List<MovieGenre>();

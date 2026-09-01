@@ -27,7 +27,7 @@ function todayLocalDateString(): string {
 
 export default function MovieDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAppSelector((s) => s.auth);
   const [reviewText, setReviewText] = useState("");
@@ -192,7 +192,10 @@ export default function MovieDetailPage() {
                 {t("movie.releaseDate")}
               </span>
               <span className="movie-detail__ticket-value">
-                {movie.releaseYear}
+                {new Date(movie.releaseDate).toLocaleDateString(
+                  i18n.language === "tr" ? "tr-TR" : "en-US",
+                  { day: "numeric", month: "long", year: "numeric" },
+                )}
               </span>
             </div>
             <div className="movie-detail__ticket-cell">
@@ -276,6 +279,8 @@ export default function MovieDetailPage() {
               <button
                 className={`btn-secondary movie-detail__action-btn ${movie.isWatchedByCurrentUser ? "active" : ""}`}
                 onClick={() => watchedMutation.mutate()}
+                disabled={isUnreleased}
+                title={isUnreleased ? t("movie.notYetReleased") : undefined}
               >
                 <CheckCircle2
                   size={16}

@@ -15,21 +15,23 @@ public class MovieConfiguration : IEntityTypeConfiguration<Movie>
         b.Property(m => m.PosterUrl).HasMaxLength(500);
         b.Property(m => m.BackdropUrl).HasMaxLength(500);
         b.Property(m => m.AverageRating).HasColumnType("decimal(3,2)");
+
+        // Enum'u DB'de okunabilir string olarak sakla (int yerine) — migration sonrası
+        // veritabanına bakıldığında "Upcoming"/"Stable" görmek int'ten daha az hataya açık.
+        b.Property(m => m.LifecycleStatus)
+            .HasConversion<string>()
+            .HasMaxLength(20);
+
         b.HasIndex(m => m.Title);
         b.HasIndex(m => m.ReleaseYear);
-        // TMDB senkronizasyonu için: aynı filmi tekrar tekrar upsert edebilmek amacıyla unique.
-        // Filtrelenmiş index: TmdbId NULL olan (elle eklenmiş) filmler bu kısıtlamadan etkilenmez.
         b.HasIndex(m => m.TmdbId).IsUnique().HasFilter("\"TmdbId\" IS NOT NULL");
-
-        // "upcoming" rail'i: ReleaseDate >= bugün filtresi + releaseDate asc sıralaması
         b.HasIndex(m => m.ReleaseDate);
-
-        // "popularity" sıralaması (popular + trending rail'leri, GetMoviesQueryHandler'da
-        // OrderByDescending(RatingCount).ThenByDescending(AverageRating))
         b.HasIndex(m => new { m.RatingCount, m.AverageRating });
-
-        // "newest" sıralaması
         b.HasIndex(m => m.CreatedAtUtc);
+
+        // refresh-released ve refresh-post-release job'larının WHERE LifecycleStatus = ... AND ReleaseDate ...
+        // sorgularını hızlandırmak için bileşik index.
+        b.HasIndex(m => new { m.LifecycleStatus, m.ReleaseDate });
     }
 }
 
