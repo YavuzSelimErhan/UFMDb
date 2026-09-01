@@ -229,7 +229,10 @@
     "loadingMore": "Loading…",
     "loadMore": "Load more",
     "noFilmsForFilter": "No films match this filter.",
-    "myLists": "My Lists"
+    "myLists": "My Lists",
+    "statFollowers": "Followers",
+    "statFollowing": "Following",
+    "statLists": "Lists"
   },
   "lists": {
     "title": "Lists",

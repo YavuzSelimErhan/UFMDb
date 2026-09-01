@@ -229,7 +229,10 @@
     "loadingMore": "Wird geladen…",
     "loadMore": "Mehr anzeigen",
     "noFilmsForFilter": "Keine Filme entsprechen diesem Filter.",
-    "myLists": "Meine Listen"
+    "myLists": "Meine Listen",
+    "statFollowers": "Follower",
+    "statFollowing": "Gefolgt",
+    "statLists": "Listen"
   },
   "lists": {
     "title": "Listen",

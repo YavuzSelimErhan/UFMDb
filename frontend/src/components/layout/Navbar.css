@@ -37,7 +37,7 @@
 .navbar__links {
   display: flex;
   align-items: center;
-  gap: 26px;
+  gap: 20px;
   font-weight: 500;
   font-size: 0.92rem;
   flex: 1;

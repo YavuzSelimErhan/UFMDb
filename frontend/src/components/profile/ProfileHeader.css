@@ -5,7 +5,7 @@
 
 .profile-header__cover {
   position: relative;
-  height: 170px;
+  height: 130px;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: linear-gradient(
@@ -51,45 +51,10 @@
   opacity: 0.65;
 }
 
-.profile-header__stats {
-  position: absolute;
-  right: 24px;
-  bottom: 16px;
-  z-index: 2;
-  display: flex;
-  gap: 22px;
-}
-
-.profile-header__stat {
-  text-align: center;
-}
-.profile-header__stat-value {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: var(--color-text-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-.profile-header__stat-value--accent {
-  color: var(--color-accent);
-}
-.profile-header__stat-label {
-  font-family: "SF Mono", "Fira Code", monospace;
-  font-size: 0.62rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-  margin-top: 2px;
-}
-
 .profile-header__avatar-wrap {
   position: absolute;
   left: 28px;
-  top: 112px;
+  top: 82px;
   z-index: 3;
 }
 
@@ -107,6 +72,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  border: none;
+  transition: transform 200ms;
+}
+.profile-header__avatar:hover {
+  transform: scale(1.04);
 }
 
 .profile-header__avatar img,
@@ -131,11 +102,26 @@
 }
 
 .profile-header__body {
+  padding: 18px 4px 0 128px;
+}
+
+.profile-header__top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  padding: 48px 4px 0 128px;
+}
+
+.profile-header__identity {
+  min-width: 0;
+  flex: 1;
+}
+
+.profile-header__name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .profile-header__name {
@@ -147,9 +133,16 @@
   margin-bottom: 2px;
 }
 
-.profile-header__identity {
-  min-width: 0;
-  flex: 1;
+.profile-header__rating-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  background: var(--color-accent-muted);
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
 }
 
 .profile-header__since {
@@ -199,22 +192,68 @@
   opacity: 0.9;
 }
 
-.profile-header__since {
-  font-family: "SF Mono", "Fira Code", monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
+.profile-header__edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
-.profile-header__avatar {
-  cursor: pointer;
-  border: none;
-  padding: 3px;
-  transition: transform 200ms;
+/* Stats strip */
+.profile-header__stats {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
 }
-.profile-header__avatar:hover {
-  transform: scale(1.04);
+
+.profile-header__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  transition:
+    background-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+.profile-header__stat:hover {
+  background-color: var(--color-bg-card-hover);
+  transform: translateY(-2px);
+}
+
+.profile-header__stat-icon {
+  color: var(--color-accent);
+  margin-bottom: 2px;
+}
+
+.profile-header__stat-value {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.profile-header__stat-label {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.profile-header__stat-divider {
+  width: 1px;
+  align-self: center;
+  height: 32px;
+  background-color: var(--color-border);
+  margin: 0 6px;
 }
 
 .avatar-lightbox {
@@ -261,29 +300,23 @@
 
 @media (max-width: 640px) {
   .profile-header__cover {
-    height: 210px;
-  }
-  .profile-header__stats {
-    right: 16px;
-    bottom: 12px;
-    gap: 14px;
-  }
-  .profile-header__stat-value {
-    font-size: 1.05rem;
+    height: 100px;
   }
   .profile-header__avatar-wrap {
     left: 20px;
-    top: 96px;
+    top: 62px;
   }
   .profile-header__avatar {
     width: 80px;
     height: 80px;
   }
   .profile-header__body {
+    padding: 14px 4px 0 20px;
+  }
+  .profile-header__top {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
-    padding: 42px 4px 0 20px;
   }
   .profile-header__edit-btn {
     align-self: flex-start;
@@ -294,5 +327,20 @@
   .profile-header__bio {
     max-width: 100%;
     font-size: 0.82rem;
+  }
+  .profile-header__stats {
+    justify-content: space-between;
+    gap: 2px;
+  }
+  .profile-header__stat {
+    padding: 8px 6px;
+    flex: 1;
+    min-width: 0;
+  }
+  .profile-header__stat-divider {
+    display: none;
+  }
+  .profile-header__stat-label {
+    font-size: 0.55rem;
   }
 }

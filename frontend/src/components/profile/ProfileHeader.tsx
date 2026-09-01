@@ -1,6 +1,18 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Pencil, Star, X, MapPin, Cake } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+  Pencil,
+  Star,
+  X,
+  MapPin,
+  Cake,
+  Users,
+  UserCheck,
+  Film,
+  MessageSquare,
+  ListVideo,
+} from "lucide-react";
 import type { ProfileData } from "@/types";
 import { getImageUrl } from "@/utils/getImageUrl";
 import "./ProfileHeader.css";
@@ -8,6 +20,7 @@ import "./ProfileHeader.css";
 interface Props {
   profile: ProfileData;
   onEditClick: () => void;
+  listsCount?: number;
 }
 
 function calculateAge(birthDate: string): number | null {
@@ -22,7 +35,11 @@ function calculateAge(birthDate: string): number | null {
   return age;
 }
 
-export default function ProfileHeader({ profile, onEditClick }: Props) {
+export default function ProfileHeader({
+  profile,
+  onEditClick,
+  listsCount,
+}: Props) {
   const { t, i18n } = useTranslation();
   const [isAvatarExpanded, setIsAvatarExpanded] = useState(false);
 
@@ -61,6 +78,44 @@ export default function ProfileHeader({ profile, onEditClick }: Props) {
     genderLabel,
   ].filter(Boolean) as string[];
 
+  const stats = [
+    {
+      key: "followers",
+      to: "/profile/followers",
+      icon: Users,
+      value: profile.followerCount ?? 0,
+      label: t("profile.statFollowers"),
+    },
+    {
+      key: "following",
+      to: "/profile/following",
+      icon: UserCheck,
+      value: profile.followingCount ?? 0,
+      label: t("profile.statFollowing"),
+    },
+    {
+      key: "films",
+      to: "/profile?tab=films",
+      icon: Film,
+      value: profile.totalWatchedCount ?? 0,
+      label: t("profile.statFilms"),
+    },
+    {
+      key: "reviews",
+      to: "/profile?tab=reviews",
+      icon: MessageSquare,
+      value: profile.reviews.length,
+      label: t("profile.statReviews"),
+    },
+    {
+      key: "lists",
+      to: "/profile?tab=lists",
+      icon: ListVideo,
+      value: listsCount ?? 0,
+      label: t("profile.statLists"),
+    },
+  ];
+
   return (
     <div className="profile-header">
       <div className="profile-header__cover">
@@ -72,39 +127,6 @@ export default function ProfileHeader({ profile, onEditClick }: Props) {
           <span />
           <span />
           <span />
-        </div>
-        <div className="profile-header__stats">
-          <div className="profile-header__stat">
-            <p className="profile-header__stat-value">
-              {profile.totalWatchedCount ?? 0}
-            </p>
-            <p className="profile-header__stat-label">
-              {t("profile.statFilms")}
-            </p>
-          </div>
-          <div className="profile-header__stat">
-            <p className="profile-header__stat-value">
-              {profile.reviews.length}
-            </p>
-            <p className="profile-header__stat-label">
-              {t("profile.statReviews")}
-            </p>
-          </div>
-          <div className="profile-header__stat">
-            <p className="profile-header__stat-value profile-header__stat-value--accent">
-              {profile.averageGivenRating !== null ? (
-                <>
-                  <Star size={16} fill="currentColor" />{" "}
-                  {profile.averageGivenRating.toFixed(1)}
-                </>
-              ) : (
-                "—"
-              )}
-            </p>
-            <p className="profile-header__stat-label">
-              {t("profile.statAverage")}
-            </p>
-          </div>
         </div>
       </div>
 
@@ -124,49 +146,79 @@ export default function ProfileHeader({ profile, onEditClick }: Props) {
       </div>
 
       <div className="profile-header__body">
-        <div className="profile-header__identity">
-          <h1 className="profile-header__name">
-            {profile.fullName || profile.userName}
-          </h1>
-          <p className="profile-header__since">
-            @{profile.userName}
-            {memberSince && (
-              <>
-                <span className="profile-header__dot">·</span>
-                {t("profile.member")} {memberSince}
-              </>
-            )}
-          </p>
-
-          {metaTags.length > 0 && (
-            <div className="profile-header__meta">
-              {profile.country && (
-                <span className="profile-header__meta-tag">
-                  <MapPin size={11} /> {profile.country}
+        <div className="profile-header__top">
+          <div className="profile-header__identity">
+            <div className="profile-header__name-row">
+              <h1 className="profile-header__name">
+                {profile.fullName || profile.userName}
+              </h1>
+              {profile.averageGivenRating !== null && (
+                <span className="profile-header__rating-badge">
+                  <Star size={12} fill="currentColor" />
+                  {profile.averageGivenRating.toFixed(1)}
                 </span>
-              )}
-              {age !== null && (
-                <span className="profile-header__meta-tag">
-                  <Cake size={11} /> {age}
-                </span>
-              )}
-              {genderLabel && (
-                <span className="profile-header__meta-tag">{genderLabel}</span>
               )}
             </div>
-          )}
+            <p className="profile-header__since">
+              @{profile.userName}
+              {memberSince && (
+                <>
+                  <span className="profile-header__dot">·</span>
+                  {t("profile.member")} {memberSince}
+                </>
+              )}
+            </p>
 
-          {profile.biography && (
-            <p className="profile-header__bio">"{profile.biography}"</p>
-          )}
+            {metaTags.length > 0 && (
+              <div className="profile-header__meta">
+                {profile.country && (
+                  <span className="profile-header__meta-tag">
+                    <MapPin size={11} /> {profile.country}
+                  </span>
+                )}
+                {age !== null && (
+                  <span className="profile-header__meta-tag">
+                    <Cake size={11} /> {age}
+                  </span>
+                )}
+                {genderLabel && (
+                  <span className="profile-header__meta-tag">
+                    {genderLabel}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {profile.biography && (
+              <p className="profile-header__bio">"{profile.biography}"</p>
+            )}
+          </div>
+
+          <button
+            className="btn-secondary profile-header__edit-btn"
+            onClick={onEditClick}
+          >
+            <Pencil size={14} /> {t("profile.editProfile")}
+          </button>
         </div>
 
-        <button
-          className="btn-secondary profile-header__edit-btn"
-          onClick={onEditClick}
-        >
-          <Pencil size={14} /> {t("profile.editProfile")}
-        </button>
+        <div className="profile-header__stats">
+          {stats.map(({ key, to, icon: Icon, value, label }, idx) => (
+            <>
+              {idx === 2 && (
+                <div
+                  className="profile-header__stat-divider"
+                  key={`divider-${key}`}
+                />
+              )}
+              <Link to={to} className="profile-header__stat" key={key}>
+                <Icon size={14} className="profile-header__stat-icon" />
+                <span className="profile-header__stat-value">{value}</span>
+                <span className="profile-header__stat-label">{label}</span>
+              </Link>
+            </>
+          ))}
+        </div>
       </div>
 
       {isAvatarExpanded && profile.avatarUrl && (

@@ -229,7 +229,10 @@
     "loadingMore": "Загрузка…",
     "loadMore": "Показать ещё",
     "noFilmsForFilter": "Нет фильмов, соответствующих этому фильтру.",
-    "myLists": "Мои списки"
+    "myLists": "Мои списки",
+    "statFollowers": "Подписчики",
+    "statFollowing": "Подписки",
+    "statLists": "Списки"
   },
   "lists": {
     "title": "Списки",

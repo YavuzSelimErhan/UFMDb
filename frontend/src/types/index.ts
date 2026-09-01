@@ -285,6 +285,8 @@ export interface ProfileData {
   averageGivenRating: number | null;
   ratingsCount: number;
   memberSinceUtc: string;
+  followerCount: number;
+  followingCount: number;
 }
 export interface ListSummary {
   id: string;

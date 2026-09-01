@@ -169,6 +169,7 @@ export default function ProfilePage() {
       <ProfileHeader
         profile={profile}
         onEditClick={() => navigate("/profile/edit")}
+        listsCount={myLists?.length}
       />
 
       <nav className="profile-page__toptabs">

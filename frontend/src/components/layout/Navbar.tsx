@@ -72,7 +72,6 @@ export default function Navbar() {
         </Link>
 
         <nav className="navbar__links">
-          <Link to="/">{t("nav.home")}</Link>
           <Link to="/search">
             <Search size={16} /> {t("nav.search")}
           </Link>

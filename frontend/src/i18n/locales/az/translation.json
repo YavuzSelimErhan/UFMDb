@@ -229,7 +229,10 @@
     "loadingMore": "Yüklənir…",
     "loadMore": "Daha çox göstər",
     "noFilmsForFilter": "Bu filtrə uyğun film yoxdur.",
-    "myLists": "Siyahılarım"
+    "myLists": "Siyahılarım",
+    "statFollowers": "İzləyici",
+    "statFollowing": "İzlənilən",
+    "statLists": "Siyahı"
   },
   "lists": {
     "title": "Siyahılar",

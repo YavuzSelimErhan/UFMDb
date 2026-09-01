@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Users as UsersIcon, Search } from "lucide-react";
+import { Users as UsersIcon, Search, X } from "lucide-react";
 import { followService } from "@/services";
 import UserCard from "@/components/user/UserCard";
 import {
@@ -44,13 +44,23 @@ export default function UsersPage() {
           <p className="text-muted">{t("users.pageSubtitle")}</p>
         </div>
         <div className="users-page__search">
-          <Search size={16} />
           <input
             type="text"
             placeholder={t("users.searchPlaceholder") ?? ""}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          <Search size={16} className="users-page__search-icon" />
+          {search && (
+            <button
+              type="button"
+              className="users-page__search-clear"
+              onClick={() => setSearch("")}
+              aria-label={t("common.clear") ?? "Temizle"}
+            >
+              <X size={16} />
+            </button>
+          )}
         </div>
       </div>
 

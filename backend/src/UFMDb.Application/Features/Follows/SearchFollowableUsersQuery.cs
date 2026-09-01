@@ -24,9 +24,12 @@ public class SearchFollowableUsersQueryHandler : IRequestHandler<SearchFollowabl
             query = query.Where(u => u.Id != request.CurrentUserId.Value);
 
         if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = $"%{request.Search.Trim()}%";
             query = query.Where(u =>
-                u.UserName.Contains(request.Search) ||
-                (u.FullName != null && u.FullName.Contains(request.Search)));
+                EF.Functions.ILike(u.UserName, search) ||
+                (u.FullName != null && EF.Functions.ILike(u.FullName, search)));
+        }
 
         var totalCount = await query.CountAsync(ct);
 

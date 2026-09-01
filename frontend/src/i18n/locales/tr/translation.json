@@ -229,7 +229,10 @@
     "loadingMore": "Yükleniyor…",
     "loadMore": "Daha fazla göster",
     "noFilmsForFilter": "Bu filtreye uyan film yok.",
-    "myLists": "Listelerim"
+    "myLists": "Listelerim",
+    "statFollowers": "Takipçi",
+    "statFollowing": "Takip",
+    "statLists": "Liste"
   },
   "lists": {
     "title": "Listeler",
