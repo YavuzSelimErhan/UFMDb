@@ -362,5 +362,29 @@ export interface Country {
   movieCount: number;
 }
 
+export interface UserSummaryDto {
+  id: string;
+  userName: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  isFollowedByCurrentUser: boolean;
+}
+
+export type UserGender = "NotSpecified" | "Male" | "Female";
+
+export interface PublicProfileDto {
+  id: string;
+  userName: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  biography: string | null;
+  country: string | null;
+  gender: UserGender;
+  followerCount: number;
+  followingCount: number;
+  isFollowedByCurrentUser: boolean;
+  isCurrentUser: boolean;
+}
+
 export type ThemeMode = "dark" | "light";
 export type LanguageCode = "tr" | "en";

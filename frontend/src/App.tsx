@@ -20,6 +20,8 @@ import EditProfilePage from "@/pages/Profile/EditProfilePage";
 import CreateListPage from "@/pages/Lists/CreateListPage";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import EditListPage from "@/pages/Lists/EditListPage";
+import UsersPage from "@/pages/Users/UsersPage";
+import UserProfilePage from "@/pages/Users/UserProfilePage";
 
 function AppShell() {
   useScrollRestoration();
@@ -46,6 +48,8 @@ function AppShell() {
             <Route path="/log" element={<ScreeningLogPage />} />
             <Route path="/lists/new" element={<CreateListPage />} />
             <Route path="/lists/edit/:id" element={<EditListPage />} />
+            <Route path="/users" element={<UsersPage />} />
+            <Route path="/users/:userName" element={<UserProfilePage />} />
           </Route>
 
           <Route element={<ProtectedRoute requireAdmin />}>

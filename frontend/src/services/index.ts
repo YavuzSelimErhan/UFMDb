@@ -27,6 +27,8 @@ import type {
   ReviewSortBy,
   ReviewLikeResult,
   LikedReviewItem,
+  UserSummaryDto,
+  PublicProfileDto,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -333,5 +335,35 @@ export const uploadService = {
     formData.append("file", file);
     const { data } = await api.post("/uploads/image", formData);
     return data.url;
+  },
+};
+
+// ---------------- Follows ----------------
+export const followService = {
+  searchUsers: async (
+    search?: string,
+    page = 1,
+    pageSize = 20,
+  ): Promise<PagedResult<UserSummaryDto>> => {
+    const { data } = await api.get("/follows/users/search", {
+      params: { search, page, pageSize },
+    });
+    return data;
+  },
+  getProfileByUserName: async (userName: string): Promise<PublicProfileDto> => {
+    const { data } = await api.get(`/users/by-username/${userName}`);
+    return data;
+  },
+  toggleFollow: async (targetUserId: string): Promise<boolean> => {
+    const { data } = await api.post(`/follows/users/${targetUserId}/toggle`);
+    return data;
+  },
+  getFollowers: async (userId: string): Promise<UserSummaryDto[]> => {
+    const { data } = await api.get(`/follows/users/${userId}/followers`);
+    return data;
+  },
+  getFollowing: async (userId: string): Promise<UserSummaryDto[]> => {
+    const { data } = await api.get(`/follows/users/${userId}/following`);
+    return data;
   },
 };

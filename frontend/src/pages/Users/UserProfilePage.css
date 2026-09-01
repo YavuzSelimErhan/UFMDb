@@ -1,0 +1,137 @@
+.user-profile {
+  padding-top: 48px;
+  padding-bottom: 60px;
+}
+
+.user-profile__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+  padding: 26px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.user-profile__header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 10% 0%,
+    var(--user-accent-soft),
+    transparent 55%
+  );
+  pointer-events: none;
+}
+
+.user-profile__avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-elevated);
+  border: 3px solid var(--user-accent);
+  color: var(--user-accent);
+  box-shadow: 0 10px 24px var(--user-accent-soft);
+}
+.user-profile__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-profile__info {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.user-profile__name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.user-profile__name-row h1 {
+  font-size: 1.5rem;
+}
+
+.user-profile__edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.user-profile__username {
+  font-size: 0.86rem;
+  color: var(--color-text-muted);
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+
+.user-profile__bio {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  max-width: 60ch;
+}
+
+.user-profile__meta-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+.user-profile__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.user-profile__stats {
+  display: flex;
+  gap: 22px;
+  margin-top: 4px;
+}
+.user-profile__stat {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 0.86rem;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+}
+.user-profile__stat:hover {
+  color: var(--color-accent);
+}
+.user-profile__stat strong {
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+}
+
+@media (max-width: 600px) {
+  .user-profile__header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 22px 18px;
+  }
+  .user-profile__name-row,
+  .user-profile__meta-row,
+  .user-profile__stats {
+    justify-content: center;
+  }
+}

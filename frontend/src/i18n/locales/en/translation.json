@@ -3,6 +3,7 @@
     "home": "Home",
     "search": "Search",
     "lists": "Lists",
+    "users": "Users",
     "profile": "Profile",
     "admin": "Admin Panel",
     "login": "Log In",
@@ -433,5 +434,18 @@
     "revealSpoiler": "Reveal spoiler",
     "yourReview": "Your review",
     "likeOwnError": "You can't like your own review."
+  },
+  "users": {
+    "pageTitle": "Users",
+    "pageSubtitle": "Discover and follow other movie buffs",
+    "searchPlaceholder": "Search users...",
+    "empty": "No users found",
+    "emptySearchHint": "Try a different search",
+    "follow": "Follow",
+    "following": "Following",
+    "followersLabel": "Followers",
+    "followingLabel": "Following",
+    "noFollowers": "No followers yet",
+    "noFollowing": "Not following anyone yet"
   }
 }

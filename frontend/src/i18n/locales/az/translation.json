@@ -3,6 +3,7 @@
     "home": "Ana Səhifə",
     "search": "Axtar",
     "lists": "Siyahılar",
+    "users": "İstifadəçilər",
     "profile": "Profilim",
     "admin": "Admin Panel",
     "login": "Daxil ol",
@@ -435,5 +436,18 @@
     "revealSpoiler": "Spoyleri göstər",
     "yourReview": "Sənin rəyin",
     "likeOwnError": "Öz rəyini bəyənə bilməzsən."
+  },
+  "users": {
+    "pageTitle": "İstifadəçilər",
+    "pageSubtitle": "Digər kinosevərləri kəşf et və izlə",
+    "searchPlaceholder": "İstifadəçi axtar...",
+    "empty": "İstifadəçi tapılmadı",
+    "emptySearchHint": "Fərqli bir axtarış sınayın",
+    "follow": "İzlə",
+    "following": "İzlənilir",
+    "followersLabel": "İzləyici",
+    "followingLabel": "İzlənilən",
+    "noFollowers": "Hələ izləyicisi yoxdur",
+    "noFollowing": "Hələ heç kimi izləmir"
   }
 }

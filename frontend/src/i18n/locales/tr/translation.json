@@ -3,6 +3,7 @@
     "home": "Ana Sayfa",
     "search": "Ara",
     "lists": "Listeler",
+    "users": "Kullanıcılar",
     "profile": "Profilim",
     "admin": "Admin Panel",
     "login": "Giriş Yap",
@@ -435,5 +436,18 @@
     "revealSpoiler": "Spoiler'ı göster",
     "yourReview": "Senin yorumun",
     "likeOwnError": "Kendi yorumunu beğenemezsin."
+  },
+  "users": {
+    "pageTitle": "Kullanıcılar",
+    "pageSubtitle": "Diğer sinefilleri keşfet ve takip et",
+    "searchPlaceholder": "Kullanıcı ara...",
+    "empty": "Kullanıcı bulunamadı",
+    "emptySearchHint": "Farklı bir arama dene",
+    "follow": "Takip Et",
+    "following": "Takip Ediliyor",
+    "followersLabel": "Takipçi",
+    "followingLabel": "Takip Edilen",
+    "noFollowers": "Henüz takipçisi yok",
+    "noFollowing": "Henüz kimseyi takip etmiyor"
   }
 }

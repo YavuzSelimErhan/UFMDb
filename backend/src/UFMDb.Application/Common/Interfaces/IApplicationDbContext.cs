@@ -32,6 +32,7 @@ public interface IApplicationDbContext
     DbSet<FavoriteActor> FavoriteActors { get; }
     DbSet<DirectorLike> DirectorLikes { get; }
     DbSet<FavoriteDirector> FavoriteDirectors { get; }
+    DbSet<Follow> Follows { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

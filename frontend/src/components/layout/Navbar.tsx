@@ -6,6 +6,7 @@ import {
   Search,
   ListVideo,
   User,
+  Users as UsersIcon,
   Shield,
   Sun,
   Moon,
@@ -77,6 +78,9 @@ export default function Navbar() {
           </Link>
           <Link to="/lists">
             <ListVideo size={16} /> {t("nav.lists")}
+          </Link>
+          <Link to="/users">
+            <UsersIcon size={16} /> {t("nav.users")}
           </Link>
           {isAuthenticated && (
             <Link to="/log">
@@ -158,6 +162,9 @@ export default function Navbar() {
           </Link>
           <Link to="/lists">
             <ListVideo size={16} /> {t("nav.lists")}
+          </Link>
+          <Link to="/users">
+            <UsersIcon size={16} /> {t("nav.users")}
           </Link>
           {isAuthenticated && (
             <Link to="/log">

@@ -3,6 +3,7 @@
     "home": "Home",
     "search": "Cerca",
     "lists": "Liste",
+    "users": "Utenti",
     "profile": "Il mio profilo",
     "admin": "Pannello admin",
     "login": "Accedi",
@@ -435,5 +436,18 @@
     "revealSpoiler": "Mostra spoiler",
     "yourReview": "La tua recensione",
     "likeOwnError": "Non puoi mettere like alla tua recensione."
+  },
+  "users": {
+    "pageTitle": "Utenti",
+    "pageSubtitle": "Scopri e segui altri cinefili",
+    "searchPlaceholder": "Cerca utenti...",
+    "empty": "Nessun utente trovato",
+    "emptySearchHint": "Prova una ricerca diversa",
+    "follow": "Segui",
+    "following": "Seguito",
+    "followersLabel": "Follower",
+    "followingLabel": "Seguiti",
+    "noFollowers": "Nessun follower ancora",
+    "noFollowing": "Non segue ancora nessuno"
   }
 }

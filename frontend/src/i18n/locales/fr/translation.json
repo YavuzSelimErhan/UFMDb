@@ -3,6 +3,7 @@
     "home": "Accueil",
     "search": "Rechercher",
     "lists": "Listes",
+    "users": "Utilisateurs",
     "profile": "Mon profil",
     "admin": "Panneau admin",
     "login": "Connexion",
@@ -435,5 +436,18 @@
     "revealSpoiler": "Afficher le spoiler",
     "yourReview": "Votre avis",
     "likeOwnError": "Vous ne pouvez pas aimer votre propre avis."
+  },
+  "users": {
+    "pageTitle": "Utilisateurs",
+    "pageSubtitle": "Découvre et suis d'autres cinéphiles",
+    "searchPlaceholder": "Rechercher un utilisateur...",
+    "empty": "Aucun utilisateur trouvé",
+    "emptySearchHint": "Essaie une autre recherche",
+    "follow": "Suivre",
+    "following": "Suivi(e)",
+    "followersLabel": "Abonnés",
+    "followingLabel": "Abonnements",
+    "noFollowers": "Pas encore d'abonnés",
+    "noFollowing": "Ne suit encore personne"
   }
 }

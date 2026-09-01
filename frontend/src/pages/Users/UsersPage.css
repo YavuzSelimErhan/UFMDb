@@ -1,0 +1,87 @@
+.users-page {
+  padding-top: 48px;
+  padding-bottom: 60px;
+}
+
+.users-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.users-page__header h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.7rem;
+  margin-bottom: 6px;
+}
+.users-page__header h1 svg {
+  color: var(--color-accent);
+}
+
+.users-page__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-card);
+  color: var(--color-text-muted);
+  min-width: 260px;
+}
+.users-page__search input {
+  border: none;
+  background: none;
+  color: var(--color-text-primary);
+  font-size: 0.88rem;
+  width: 100%;
+}
+.users-page__search input:focus {
+  outline: none;
+}
+
+.users-page__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  transition: opacity var(--transition-fast);
+}
+.users-page__grid.is-fetching {
+  opacity: 0.6;
+}
+
+@media (max-width: 900px) {
+  .users-page__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 560px) {
+  .users-page__grid {
+    grid-template-columns: 1fr;
+  }
+  .users-page__search {
+    min-width: 0;
+    width: 100%;
+  }
+  .users-page__header {
+    flex-direction: column;
+  }
+}
+
+.users-page__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+.users-page__pagination-label {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+}

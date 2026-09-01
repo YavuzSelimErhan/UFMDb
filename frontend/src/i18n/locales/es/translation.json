@@ -3,6 +3,7 @@
     "home": "Inicio",
     "search": "Buscar",
     "lists": "Listas",
+    "users": "Usuarios",
     "profile": "Mi perfil",
     "admin": "Panel de administración",
     "login": "Iniciar sesión",
@@ -435,5 +436,18 @@
     "revealSpoiler": "Mostrar spoiler",
     "yourReview": "Tu reseña",
     "likeOwnError": "No puedes darle like a tu propia reseña."
+  },
+  "users": {
+    "pageTitle": "Usuarios",
+    "pageSubtitle": "Descubre y sigue a otros cinéfilos",
+    "searchPlaceholder": "Buscar usuarios...",
+    "empty": "No se encontraron usuarios",
+    "emptySearchHint": "Prueba con otra búsqueda",
+    "follow": "Seguir",
+    "following": "Siguiendo",
+    "followersLabel": "Seguidores",
+    "followingLabel": "Siguiendo",
+    "noFollowers": "Aún no tiene seguidores",
+    "noFollowing": "Aún no sigue a nadie"
   }
 }

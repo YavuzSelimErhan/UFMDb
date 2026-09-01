@@ -360,13 +360,13 @@ export default function MovieDetailPage() {
                   <Link
                     key={d.id}
                     to={`/directors/${d.id}`}
-                    className="movie-detail__director-chip"
+                    className="movie-detail__director-card"
                   >
                     {d.photoUrl ? (
                       <img src={d.photoUrl} alt="" />
                     ) : (
-                      <span className="movie-detail__director-chip-fallback">
-                        <User size={12} />
+                      <span className="movie-detail__director-card-fallback">
+                        <User size={18} />
                       </span>
                     )}
                     <span>{d.fullName}</span>

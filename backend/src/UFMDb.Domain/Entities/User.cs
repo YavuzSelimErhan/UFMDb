@@ -35,6 +35,8 @@ public class User : BaseEntity
     public ICollection<MovieRating> MovieRatings { get; set; } = new List<MovieRating>();
     public ICollection<CuratedList> CreatedLists { get; set; } = new List<CuratedList>();
     public ICollection<CuratedListLike> CuratedListLikes { get; set; } = new List<CuratedListLike>();
+    public ICollection<Follow> Following { get; set; } = new List<Follow>(); // bu kullanıcının takip ettikleri (FollowerId = bu kullanıcı)
+    public ICollection<Follow> Followers { get; set; } = new List<Follow>(); // bu kullanıcıyı takip edenler (FollowingId = bu kullanıcı)
 }
 
 public class RefreshToken : BaseEntity
@@ -65,4 +67,13 @@ public class WatchHistory : BaseEntity
     public Movie Movie { get; set; } = default!;
     public DateTime WatchedAtUtc { get; set; } = DateTime.UtcNow;
     public decimal? Rating { get; set; } // eklendi — bu SPESİFİK seansta verilen puan
+}
+
+/// <summary>Takip ilişkisi: Follower, Following'i takip ediyor.</summary>
+public class Follow : BaseEntity
+{
+    public Guid FollowerId { get; set; }   // takip eden
+    public User Follower { get; set; } = default!;
+    public Guid FollowingId { get; set; }  // takip edilen
+    public User Following { get; set; } = default!;
 }

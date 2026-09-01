@@ -3,6 +3,7 @@
     "home": "Startseite",
     "search": "Suchen",
     "lists": "Listen",
+    "users": "Benutzer",
     "profile": "Mein Profil",
     "admin": "Admin-Bereich",
     "login": "Anmelden",
@@ -435,5 +436,18 @@
     "revealSpoiler": "Spoiler anzeigen",
     "yourReview": "Deine Bewertung",
     "likeOwnError": "Du kannst deine eigene Bewertung nicht liken."
+  },
+  "users": {
+    "pageTitle": "Benutzer",
+    "pageSubtitle": "Entdecke und folge anderen Filmfans",
+    "searchPlaceholder": "Benutzer suchen...",
+    "empty": "Keine Benutzer gefunden",
+    "emptySearchHint": "Versuche eine andere Suche",
+    "follow": "Folgen",
+    "following": "Gefolgt",
+    "followersLabel": "Follower",
+    "followingLabel": "Gefolgte",
+    "noFollowers": "Noch keine Follower",
+    "noFollowing": "Folgt noch niemandem"
   }
 }

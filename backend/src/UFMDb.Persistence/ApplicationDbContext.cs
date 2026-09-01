@@ -33,6 +33,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<FavoriteActor> FavoriteActors => Set<FavoriteActor>();
     public DbSet<DirectorLike> DirectorLikes => Set<DirectorLike>();
     public DbSet<FavoriteDirector> FavoriteDirectors => Set<FavoriteDirector>();
+    public DbSet<Follow> Follows => Set<Follow>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
