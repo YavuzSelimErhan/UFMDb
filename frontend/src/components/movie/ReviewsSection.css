@@ -9,11 +9,13 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .reviews-section__count {
-  font-size: 0.85rem;
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
   font-weight: 500;
   color: var(--color-text-muted);
 }
@@ -47,24 +49,46 @@
 .reviews-section__status {
   color: var(--color-text-muted);
   font-size: 0.86rem;
+  padding: 18px 0;
 }
 
 .reviews-section__list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
+/* ---------- Review kartı: "izleyici bileti" ---------- */
 .review-item {
-  padding: 16px 18px;
+  position: relative;
+  padding: 16px 18px 16px 24px;
   border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* Poster kenarındaki noktalı rayla aynı dil — sol kenarda ince perforasyon şeridi */
+.review-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 6px;
+  background-image: radial-gradient(
+    circle,
+    var(--print-accent, var(--color-accent)) 0 1.8px,
+    transparent 2px
+  );
+  background-size: 100% 12px;
+  background-repeat: repeat-y;
+  opacity: 0.7;
 }
 
 .review-item__header {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .review-item__avatar {
@@ -95,8 +119,21 @@
   color: var(--color-text-primary);
 }
 .review-item__date {
-  font-size: 0.72rem;
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
   color: var(--color-text-muted);
+}
+
+/* Bilet detay sayfasındaki #printCode ile aynı imza öğesi */
+.review-item__serial {
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  color: var(--print-accent, var(--color-accent));
+  flex-shrink: 0;
 }
 
 .review-item__spoiler-badge {
@@ -110,6 +147,23 @@
   border: 1px solid var(--color-border);
   color: var(--color-text-muted);
   flex-shrink: 0;
+}
+
+/* Bilet detay sayfasındaki kalın perforasyondan ilham alan ince ayraç */
+.review-item__perf {
+  height: 6px;
+  margin: 2px 0 12px;
+  border-radius: var(--radius-pill);
+  background-color: var(--print-accent, var(--color-accent));
+  background-image: radial-gradient(
+    circle,
+    var(--color-bg) 0 1.6px,
+    transparent 1.8px
+  );
+  background-size: 10px 100%;
+  background-position: 5px center;
+  background-repeat: repeat-x;
+  opacity: 0.5;
 }
 
 .review-item__content {
@@ -145,25 +199,41 @@
   transition: all var(--transition-fast);
 }
 .review-item__like-btn:hover:not(:disabled) {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
+  border-color: var(--print-accent, var(--color-accent));
+  color: var(--print-accent, var(--color-accent));
 }
 .review-item__like-btn.active {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  background-color: var(--color-accent-muted);
+  border-color: var(--print-accent, var(--color-accent));
+  color: var(--print-accent, var(--color-accent));
+  background-color: var(--print-accent-soft, var(--color-accent-muted));
 }
 .review-item__like-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
+.review-item__own-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.review-item__like-error {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #e25c5c;
+}
+
+/* ---------- Sayfalama: "makara sayacı" ---------- */
 .reviews-section__pager {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 14px;
-  margin-top: 16px;
+  margin-top: 18px;
 }
 .reviews-section__pager-btn {
   display: flex;
@@ -174,17 +244,20 @@
   border-radius: 50%;
   border: 1px solid var(--color-border);
   color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
 }
 .reviews-section__pager-btn:hover:not(:disabled) {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
+  border-color: var(--print-accent, var(--color-accent));
+  color: var(--print-accent, var(--color-accent));
 }
 .reviews-section__pager-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 .reviews-section__pager-label {
-  font-size: 0.8rem;
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.76rem;
   font-weight: 600;
   color: var(--color-text-secondary);
 }
@@ -194,79 +267,10 @@
     flex-direction: column;
     align-items: flex-start;
   }
-}
-
-.review-item__own-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
-  color: var(--text-muted, #888);
-}
-
-.review-item__like-error {
-  display: block;
-  margin-top: 4px;
-  font-size: 0.8rem;
-  color: #e25c5c;
-}
-
-.review-entry--liked {
-  align-items: flex-start;
-}
-
-.review-entry__reviewer {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
-}
-.review-entry__reviewer-avatar {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-.review-entry__reviewer-avatar--fallback {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--color-bg-elevated);
-  color: var(--color-text-muted);
-}
-.review-entry__reviewer-name {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-
-.review-entry__like-btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  flex-shrink: 0;
-  padding: 6px 12px;
-  border-radius: var(--radius-pill);
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--color-text-muted);
-  border: 1px solid var(--color-border);
-  transition:
-    background-color 150ms,
-    color 150ms;
-}
-.review-entry__like-btn.active {
-  color: #e84393;
-  border-color: transparent;
-  background-color: rgba(232, 67, 147, 0.12);
-}
-.review-entry__like-btn:hover {
-  background-color: rgba(232, 67, 147, 0.2);
-}
-
-@media (max-width: 560px) {
-  .review-entry--liked {
+  .review-item {
+    padding-left: 20px;
+  }
+  .review-item__header {
     flex-wrap: wrap;
   }
 }

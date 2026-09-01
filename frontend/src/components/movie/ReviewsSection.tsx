@@ -153,6 +153,7 @@ function ReviewItem({
 }) {
   const { t } = useTranslation();
   const [revealed, setRevealed] = useState(!review.containsSpoiler);
+  const serial = review.id.replace(/-/g, "").slice(0, 6).toUpperCase();
 
   return (
     <div className="review-item card">
@@ -174,12 +175,15 @@ function ReviewItem({
             {new Date(review.createdAtUtc).toLocaleDateString()}
           </span>
         </div>
+        <span className="review-item__serial">#{serial}</span>
         {review.containsSpoiler && (
           <span className="review-item__spoiler-badge">
             <EyeOff size={11} /> {t("reviews.spoiler")}
           </span>
         )}
       </div>
+
+      <div className="review-item__perf" aria-hidden="true" />
 
       {revealed ? (
         <p className="review-item__content">{review.content}</p>
