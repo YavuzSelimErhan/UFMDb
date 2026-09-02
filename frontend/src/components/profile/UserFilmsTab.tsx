@@ -6,7 +6,7 @@ import { followService } from "@/services";
 import MovieCard from "@/components/movie/MovieCard";
 import { EmptyState } from "@/components/common/PageState";
 import type { WatchedMovie } from "@/types";
-import "../Profile/ProfileFilmsTab.css";
+import "./ProfileFilmsTab.css";
 
 const PAGE_SIZE = 24;
 
