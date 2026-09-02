@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.Features.Follows;
+using UFMDb.Application.Features.Users;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -46,4 +47,16 @@ public class FollowsController : ControllerBase
     public async Task<IActionResult> SearchUsers(
     [FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default) =>
     Ok(await _mediator.Send(new SearchFollowableUsersQuery(search, page, pageSize, _currentUser.UserId), ct));
+
+    [HttpGet("~/api/users/by-username/{userName}/full-profile")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetFullProfile(string userName, CancellationToken ct) =>
+    Ok(await _mediator.Send(new GetPublicFullProfileQuery(userName, _currentUser.UserId), ct));
+
+    [HttpGet("~/api/users/{userId:guid}/watched-films")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetUserWatchedFilms(
+        Guid userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
+        [FromQuery] string? sortBy = null, [FromQuery] bool? hasRating = null, CancellationToken ct = default) =>
+        Ok(await _mediator.Send(new GetUserWatchedMoviesQuery(userId, page, pageSize, sortBy, hasRating), ct));
 }

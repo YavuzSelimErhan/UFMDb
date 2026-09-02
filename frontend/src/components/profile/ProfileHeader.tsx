@@ -8,18 +8,25 @@ import {
   MapPin,
   Users,
   UserCheck,
+  UserPlus,
   Film,
   MessageSquare,
   ListVideo,
 } from "lucide-react";
-import type { ProfileData } from "@/types";
+import type { ProfileData, PublicFullProfileDto } from "@/types";
 import { getImageUrl } from "@/utils/getImageUrl";
+import FollowListModal from "@/components/user/FollowListModal";
 import "./ProfileHeader.css";
 
 interface Props {
-  profile: ProfileData;
-  onEditClick: () => void;
+  profile: ProfileData | PublicFullProfileDto;
+  userId: string;
+  onEditClick?: () => void;
   listsCount?: number;
+  isCurrentUser?: boolean;
+  isFollowedByCurrentUser?: boolean;
+  onFollowToggle?: () => void;
+  isFollowLoading?: boolean;
 }
 
 function calculateAge(birthDate: string): number | null {
@@ -36,11 +43,19 @@ function calculateAge(birthDate: string): number | null {
 
 export default function ProfileHeader({
   profile,
+  userId,
   onEditClick,
   listsCount,
+  isCurrentUser = true,
+  isFollowedByCurrentUser = false,
+  onFollowToggle,
+  isFollowLoading = false,
 }: Props) {
   const { t, i18n } = useTranslation();
   const [isAvatarExpanded, setIsAvatarExpanded] = useState(false);
+  const [followModal, setFollowModal] = useState<
+    "followers" | "following" | null
+  >(null);
 
   useEffect(() => {
     if (!isAvatarExpanded) return;
@@ -71,38 +86,58 @@ export default function ProfileHeader({
         ? t("profile.genderFemale")
         : null;
 
-  const stats = [
+  const targetUserName = profile.userName;
+
+  type StatItem = {
+    key: string;
+    icon: typeof Users;
+    value: number;
+    label: string;
+  } & ({ kind: "link"; to: string } | { kind: "button"; onClick: () => void });
+
+  const stats: StatItem[] = [
     {
       key: "followers",
-      to: "/profile/followers",
+      kind: "button",
+      onClick: () => setFollowModal("followers"),
       icon: Users,
       value: profile.followerCount ?? 0,
       label: t("profile.statFollowers"),
     },
     {
       key: "following",
-      to: "/profile/following",
+      kind: "button",
+      onClick: () => setFollowModal("following"),
       icon: UserCheck,
       value: profile.followingCount ?? 0,
       label: t("profile.statFollowing"),
     },
     {
       key: "films",
-      to: "/profile?tab=films",
+      kind: "link",
+      to: isCurrentUser
+        ? "/profile?tab=films"
+        : `/users/${targetUserName}?tab=films`,
       icon: Film,
       value: profile.totalWatchedCount ?? 0,
       label: t("profile.statFilms"),
     },
     {
       key: "reviews",
-      to: "/profile?tab=reviews",
+      kind: "link",
+      to: isCurrentUser
+        ? "/profile?tab=reviews"
+        : `/users/${targetUserName}?tab=reviews`,
       icon: MessageSquare,
       value: profile.reviews.length,
       label: t("profile.statReviews"),
     },
     {
       key: "lists",
-      to: "/profile?tab=lists",
+      kind: "link",
+      to: isCurrentUser
+        ? "/profile?tab=lists"
+        : `/users/${targetUserName}?tab=lists`,
       icon: ListVideo,
       value: listsCount ?? 0,
       label: t("profile.statLists"),
@@ -157,12 +192,30 @@ export default function ProfileHeader({
               </p>
             </div>
 
-            <button
-              className="btn-secondary profile-header__edit-btn"
-              onClick={onEditClick}
-            >
-              <Pencil size={14} /> {t("profile.editProfile")}
-            </button>
+            {isCurrentUser ? (
+              <button
+                className="btn-secondary profile-header__edit-btn"
+                onClick={onEditClick}
+              >
+                <Pencil size={14} /> {t("profile.editProfile")}
+              </button>
+            ) : (
+              <button
+                className="btn-secondary profile-header__edit-btn"
+                onClick={onFollowToggle}
+                disabled={isFollowLoading}
+              >
+                {isFollowedByCurrentUser ? (
+                  <>
+                    <UserCheck size={14} /> {t("profile.following")}
+                  </>
+                ) : (
+                  <>
+                    <UserPlus size={14} /> {t("profile.follow")}
+                  </>
+                )}
+              </button>
+            )}
           </div>
 
           {(profile.country || age !== null || genderLabel) && (
@@ -192,16 +245,39 @@ export default function ProfileHeader({
       <div className="profile-header__perf-divider" aria-hidden="true" />
 
       <div className="profile-header__stats">
-        {stats.map(({ key, to, icon: Icon, value, label }) => (
-          <Link to={to} className="profile-header__stat" key={key}>
-            <Icon size={16} className="profile-header__stat-icon" />
-            <span className="profile-header__stat-text">
-              <span className="profile-header__stat-value">{value}</span>
-              <span className="profile-header__stat-label">{label}</span>
-            </span>
-          </Link>
-        ))}
+        {stats.map((s) =>
+          s.kind === "link" ? (
+            <Link to={s.to} className="profile-header__stat" key={s.key}>
+              <s.icon size={16} className="profile-header__stat-icon" />
+              <span className="profile-header__stat-text">
+                <span className="profile-header__stat-value">{s.value}</span>
+                <span className="profile-header__stat-label">{s.label}</span>
+              </span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className="profile-header__stat"
+              key={s.key}
+              onClick={s.onClick}
+            >
+              <s.icon size={16} className="profile-header__stat-icon" />
+              <span className="profile-header__stat-text">
+                <span className="profile-header__stat-value">{s.value}</span>
+                <span className="profile-header__stat-label">{s.label}</span>
+              </span>
+            </button>
+          ),
+        )}
       </div>
+
+      {followModal && (
+        <FollowListModal
+          userId={userId}
+          mode={followModal}
+          onClose={() => setFollowModal(null)}
+        />
+      )}
 
       {isAvatarExpanded && profile.avatarUrl && (
         <div

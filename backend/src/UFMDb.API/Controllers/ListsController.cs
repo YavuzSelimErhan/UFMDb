@@ -63,6 +63,11 @@ public class ListsController : ControllerBase
     [HttpPost("{id:guid}/like")]
     public async Task<ActionResult<bool>> ToggleLike(Guid id)
         => Ok(await _mediator.Send(new ToggleListLikeCommand(id, RequireUserId())));
+
+    [HttpGet("~/api/users/{userId:guid}/lists")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetUserLists(Guid userId, CancellationToken ct)
+    => Ok(await _mediator.Send(new GetListsQuery(ListScope.Mine, userId), ct));
 }
 
 public record CreateListRequest(string Title, string TitleTr, string Description, string CoverImageUrl, int DisplayOrder, List<Guid> MovieIds, bool IsOfficial);

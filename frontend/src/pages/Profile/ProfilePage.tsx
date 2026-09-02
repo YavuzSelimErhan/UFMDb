@@ -168,6 +168,7 @@ export default function ProfilePage() {
     <div className="container profile-page">
       <ProfileHeader
         profile={profile}
+        userId={profile.userId}
         onEditClick={() => navigate("/profile/edit")}
         listsCount={myLists?.length}
       />

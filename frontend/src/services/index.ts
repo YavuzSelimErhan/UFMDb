@@ -29,6 +29,7 @@ import type {
   LikedReviewItem,
   UserSummaryDto,
   PublicProfileDto,
+  PublicFullProfileDto,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -364,6 +365,27 @@ export const followService = {
   },
   getFollowing: async (userId: string): Promise<UserSummaryDto[]> => {
     const { data } = await api.get(`/follows/users/${userId}/following`);
+    return data;
+  },
+  getFullProfileByUserName: async (
+    userName: string,
+  ): Promise<PublicFullProfileDto> => {
+    const { data } = await api.get(
+      `/users/by-username/${userName}/full-profile`,
+    );
+    return data;
+  },
+  getUserLists: async (userId: string): Promise<ListSummary[]> => {
+    const { data } = await api.get(`/users/${userId}/lists`);
+    return data;
+  },
+  getWatchedFilms: async (
+    userId: string,
+    params: { page: number; pageSize: number },
+  ): Promise<PagedResult<WatchedMovie>> => {
+    const { data } = await api.get(`/users/${userId}/watched-films`, {
+      params,
+    });
     return data;
   },
 };

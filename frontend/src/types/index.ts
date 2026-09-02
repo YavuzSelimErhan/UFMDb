@@ -388,5 +388,34 @@ export interface PublicProfileDto {
   isCurrentUser: boolean;
 }
 
+export interface PublicFullProfileDto {
+  id: string;
+  userName: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  biography: string | null;
+  country: string | null;
+  birthDate: string | null;
+  gender: UserGender;
+  favoriteMovies: FavoriteSlot[];
+  recentlyWatched: RecentlyWatchedItem[];
+  likedMovies: MovieListItem[];
+  watchlist: MovieListItem[];
+  reviews: ReviewSummary[];
+  favoriteActors: FavoriteActorSlot[];
+  likedActors: ActorListItem[];
+  favoriteDirectors: FavoriteDirectorSlot[];
+  likedDirectors: DirectorListItem[];
+  totalWatchedCount: number;
+  averageGivenRating: number | null;
+  ratingsCount: number;
+  memberSinceUtc: string;
+  followerCount: number;
+  followingCount: number;
+  listsCount: number;
+  isFollowedByCurrentUser: boolean;
+  isCurrentUser: boolean;
+}
+
 export type ThemeMode = "dark" | "light";
 export type LanguageCode = "tr" | "en";
