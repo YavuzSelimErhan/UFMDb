@@ -42,6 +42,7 @@ type LikedSubTab = "films" | "actors" | "directors" | "lists" | "reviews";
 
 interface Props {
   tab: ContentTab;
+  isOwnProfile: boolean;
   watchlist: MovieListItem[];
   likedMovies: MovieListItem[];
   likedActors: ActorListItem[];
@@ -51,6 +52,7 @@ interface Props {
 
 export default function ProfileContentTabs({
   tab,
+  isOwnProfile,
   watchlist,
   likedMovies,
   likedActors,
@@ -99,7 +101,7 @@ export default function ProfileContentTabs({
     queryKey: ["lists", "Liked"],
     queryFn: () => listService.getAll("Liked"),
     staleTime: 60_000,
-    enabled: tab === "liked",
+    enabled: tab === "liked" && isOwnProfile,
   });
 
   const {
@@ -111,7 +113,7 @@ export default function ProfileContentTabs({
     queryKey: ["liked-reviews"],
     queryFn: () => profileService.getLikedReviews(),
     staleTime: 60_000,
-    enabled: tab === "liked",
+    enabled: tab === "liked" && isOwnProfile,
   });
 
   const likedSubTabs: {
@@ -158,7 +160,7 @@ export default function ProfileContentTabs({
         (watchlist.length > 0 ? (
           <div className="movie-grid movie-grid--compact">
             {watchlist.map((m) => (
-              <MovieCard key={m.id} movie={m} />
+              <MovieCard key={m.id} movie={m} interactive={isOwnProfile} />
             ))}
           </div>
         ) : (
@@ -191,7 +193,12 @@ export default function ProfileContentTabs({
               (likedMovies.length > 0 ? (
                 <div className="movie-grid movie-grid--compact">
                   {likedMovies.map((m) => (
-                    <MovieCard key={m.id} movie={m} onUnlike={() => {}} />
+                    <MovieCard
+                      key={m.id}
+                      movie={m}
+                      interactive={isOwnProfile}
+                      onUnlike={isOwnProfile ? () => {} : undefined}
+                    />
                   ))}
                 </div>
               ) : (
@@ -215,14 +222,16 @@ export default function ProfileContentTabs({
                         <div className="person-card__scrim" />
                         <span className="person-card__name">{a.fullName}</span>
                       </Link>
-                      <button
-                        className="person-card__unlike"
-                        disabled={unlikeActorMutation.isPending}
-                        aria-label={t("movie.unlike")}
-                        onClick={() => unlikeActorMutation.mutate(a.id)}
-                      >
-                        <Heart size={13} fill="currentColor" />
-                      </button>
+                      {isOwnProfile && (
+                        <button
+                          className="person-card__unlike"
+                          disabled={unlikeActorMutation.isPending}
+                          aria-label={t("movie.unlike")}
+                          onClick={() => unlikeActorMutation.mutate(a.id)}
+                        >
+                          <Heart size={13} fill="currentColor" />
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -250,14 +259,16 @@ export default function ProfileContentTabs({
                         <div className="person-card__scrim" />
                         <span className="person-card__name">{d.fullName}</span>
                       </Link>
-                      <button
-                        className="person-card__unlike"
-                        disabled={unlikeDirectorMutation.isPending}
-                        aria-label={t("movie.unlike")}
-                        onClick={() => unlikeDirectorMutation.mutate(d.id)}
-                      >
-                        <Heart size={13} fill="currentColor" />
-                      </button>
+                      {isOwnProfile && (
+                        <button
+                          className="person-card__unlike"
+                          disabled={unlikeDirectorMutation.isPending}
+                          aria-label={t("movie.unlike")}
+                          onClick={() => unlikeDirectorMutation.mutate(d.id)}
+                        >
+                          <Heart size={13} fill="currentColor" />
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -273,7 +284,12 @@ export default function ProfileContentTabs({
               ))}
 
             {likedSubTab === "reviews" &&
-              (isLikedReviewsLoading ? (
+              (!isOwnProfile ? (
+                <EmptyState
+                  icon={<MessageSquare size={26} />}
+                  title={t("profile.notAvailableForOthers")}
+                />
+              ) : isLikedReviewsLoading ? (
                 <PageSpinner label={t("common.loading")} />
               ) : isLikedReviewsError ? (
                 <PageError
@@ -335,15 +351,17 @@ export default function ProfileContentTabs({
                         )}
                       </div>
 
-                      <button
-                        className="review-entry__like-btn active"
-                        disabled={unlikeReviewMutation.isPending}
-                        aria-label={t("movie.unlike")}
-                        onClick={() => unlikeReviewMutation.mutate(r.id)}
-                      >
-                        <Heart size={14} fill="currentColor" />
-                        {r.likeCount}
-                      </button>
+                      {isOwnProfile && (
+                        <button
+                          className="review-entry__like-btn active"
+                          disabled={unlikeReviewMutation.isPending}
+                          aria-label={t("movie.unlike")}
+                          onClick={() => unlikeReviewMutation.mutate(r.id)}
+                        >
+                          <Heart size={14} fill="currentColor" />
+                          {r.likeCount}
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -359,7 +377,12 @@ export default function ProfileContentTabs({
               ))}
 
             {likedSubTab === "lists" &&
-              (isLikedListsLoading ? (
+              (!isOwnProfile ? (
+                <EmptyState
+                  icon={<ListVideo size={26} />}
+                  title={t("profile.notAvailableForOthers")}
+                />
+              ) : isLikedListsLoading ? (
                 <PageSpinner label={t("common.loading")} />
               ) : isLikedListsError ? (
                 <PageError
@@ -441,22 +464,24 @@ export default function ProfileContentTabs({
                     )}
                   </div>
 
-                  <div className="review-entry__actions">
-                    <button
-                      className="review-entry__action-btn"
-                      onClick={() => setEditingReview(r)}
-                      aria-label={t("common.edit")}
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      className="review-entry__action-btn review-entry__action-btn--danger"
-                      onClick={() => setConfirmingDeleteId(r.movieId)}
-                      aria-label={t("common.delete")}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
+                  {isOwnProfile && (
+                    <div className="review-entry__actions">
+                      <button
+                        className="review-entry__action-btn"
+                        onClick={() => setEditingReview(r)}
+                        aria-label={t("common.edit")}
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        className="review-entry__action-btn review-entry__action-btn--danger"
+                        onClick={() => setConfirmingDeleteId(r.movieId)}
+                        aria-label={t("common.delete")}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  )}
 
                   {confirmingDeleteId === r.movieId && (
                     <div className="review-entry__confirm">

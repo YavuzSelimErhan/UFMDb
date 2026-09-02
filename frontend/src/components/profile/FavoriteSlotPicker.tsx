@@ -8,9 +8,10 @@ import "./FavoriteSlotPicker.css";
 
 interface Props {
   slots: FavoriteSlot[];
+  isOwnProfile: boolean;
 }
 
-export default function FavoriteSlotPicker({ slots }: Props) {
+export default function FavoriteSlotPicker({ slots, isOwnProfile }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [editingSlot, setEditingSlot] = useState<number | null>(null);
@@ -46,90 +47,96 @@ export default function FavoriteSlotPicker({ slots }: Props) {
 
   return (
     <div className="favorite-slots">
-      {slots.map(({ slot, movie }) => (
-        <div key={slot} className="favorite-slot">
-          {editingSlot === slot ? (
-            <div className="favorite-slot__editor card">
-              <div className="favorite-slot__search-row">
-                <Search size={14} />
-                <input
-                  autoFocus
-                  placeholder={t("profile.searchPlaceholder")}
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                />
-                <button
-                  onClick={() => {
-                    setEditingSlot(null);
-                    setQuery("");
-                  }}
-                >
-                  <X size={14} />
-                </button>
-              </div>
-              {query.trim().length > 0 && (
-                <div className="favorite-slot__results">
-                  {results?.items.length ? (
-                    results.items.map((m) => (
-                      <button
-                        key={m.id}
-                        className="favorite-slot__result"
-                        onClick={() =>
-                          setMutation.mutate({ slot, movieId: m.id })
-                        }
-                        disabled={setMutation.isPending}
-                      >
-                        <img src={m.posterUrl} alt="" />
-                        <span>
-                          {m.title}{" "}
-                          <span className="text-muted">({m.releaseYear})</span>
-                        </span>
-                      </button>
-                    ))
-                  ) : (
-                    <p className="text-muted favorite-slot__no-results">
-                      {t("search.noResults")}
-                    </p>
-                  )}
+      {slots
+        .filter((s) => isOwnProfile || s.movie)
+        .map(({ slot, movie }) => (
+          <div key={slot} className="favorite-slot">
+            {isOwnProfile && editingSlot === slot ? (
+              <div className="favorite-slot__editor card">
+                <div className="favorite-slot__search-row">
+                  <Search size={14} />
+                  <input
+                    autoFocus
+                    placeholder={t("profile.searchPlaceholder")}
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                  />
+                  <button
+                    onClick={() => {
+                      setEditingSlot(null);
+                      setQuery("");
+                    }}
+                  >
+                    <X size={14} />
+                  </button>
                 </div>
-              )}
-            </div>
-          ) : movie ? (
-            <div className="favorite-slot__filled">
-              <span className="favorite-slot__number">
-                {String(slot).padStart(2, "0")}
-              </span>
-              <img src={movie.posterUrl} alt={movie.title} />
-              <div className="favorite-slot__overlay">
-                <button
-                  className="favorite-slot__change-btn"
-                  onClick={() => setEditingSlot(slot)}
-                >
-                  {t("common.edit")}
-                </button>
-                <button
-                  className="favorite-slot__remove-btn"
-                  onClick={() => removeMutation.mutate(slot)}
-                >
-                  <X size={13} /> {t("profile.removeFavorite")}
-                </button>
+                {query.trim().length > 0 && (
+                  <div className="favorite-slot__results">
+                    {results?.items.length ? (
+                      results.items.map((m) => (
+                        <button
+                          key={m.id}
+                          className="favorite-slot__result"
+                          onClick={() =>
+                            setMutation.mutate({ slot, movieId: m.id })
+                          }
+                          disabled={setMutation.isPending}
+                        >
+                          <img src={m.posterUrl} alt="" />
+                          <span>
+                            {m.title}{" "}
+                            <span className="text-muted">
+                              ({m.releaseYear})
+                            </span>
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <p className="text-muted favorite-slot__no-results">
+                        {t("search.noResults")}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
-              <p className="favorite-slot__title">{movie.title}</p>
-            </div>
-          ) : (
-            <button
-              className="favorite-slot__empty"
-              onClick={() => setEditingSlot(slot)}
-            >
-              <span className="favorite-slot__number">
-                {String(slot).padStart(2, "0")}
-              </span>
-              <Plus size={22} />
-              <span>{t("profile.chooseMovie")}</span>
-            </button>
-          )}
-        </div>
-      ))}
+            ) : movie ? (
+              <div className="favorite-slot__filled">
+                <span className="favorite-slot__number">
+                  {String(slot).padStart(2, "0")}
+                </span>
+                <img src={movie.posterUrl} alt={movie.title} />
+                {isOwnProfile && (
+                  <div className="favorite-slot__overlay">
+                    <button
+                      className="favorite-slot__change-btn"
+                      onClick={() => setEditingSlot(slot)}
+                    >
+                      {t("common.edit")}
+                    </button>
+                    <button
+                      className="favorite-slot__remove-btn"
+                      onClick={() => removeMutation.mutate(slot)}
+                    >
+                      <X size={13} /> {t("profile.removeFavorite")}
+                    </button>
+                  </div>
+                )}
+                <p className="favorite-slot__title">{movie.title}</p>
+              </div>
+            ) : isOwnProfile ? (
+              <button
+                className="favorite-slot__empty"
+                onClick={() => setEditingSlot(slot)}
+              >
+                <span className="favorite-slot__number">
+                  {String(slot).padStart(2, "0")}
+                </span>
+                <Plus size={22} />
+                <span>{t("profile.chooseMovie")}</span>
+              </button>
+            ) : null}
+          </div>
+        ))}
     </div>
   );
 }

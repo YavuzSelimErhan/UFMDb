@@ -173,6 +173,7 @@ export default function UserProfilePage() {
               movies={profile.favoriteMovies}
               actors={profile.favoriteActors}
               directors={profile.favoriteDirectors}
+              isOwnProfile={profile.isCurrentUser}
             />
             <section className="profile-page__section">
               <h2>
@@ -186,6 +187,7 @@ export default function UserProfilePage() {
                       key={item.movie.id}
                       movie={item.movie}
                       userRating={item.userRating}
+                      interactive={profile.isCurrentUser}
                     />
                   ))}
                 </div>
@@ -205,6 +207,7 @@ export default function UserProfilePage() {
         {(tab === "watchlist" || tab === "liked" || tab === "reviews") && (
           <ProfileContentTabs
             tab={tab}
+            isOwnProfile={profile.isCurrentUser}
             watchlist={profile.watchlist}
             likedMovies={profile.likedMovies}
             likedActors={profile.likedActors}

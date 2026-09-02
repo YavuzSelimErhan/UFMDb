@@ -10,6 +10,7 @@ import "./MovieCard.css";
 
 interface Props {
   movie: MovieListItem;
+  interactive?: boolean;
   userRating?: number | null;
   onUnlike?: () => void;
   onRate?: (value: number) => void;
@@ -24,6 +25,7 @@ interface Props {
 
 export default function MovieCard({
   movie,
+  interactive = true,
   userRating,
   onUnlike,
   onRate,
@@ -245,7 +247,7 @@ export default function MovieCard({
         )}
 
         <div className="movie-card__actions">
-          {isAuthenticated && (
+          {interactive && isAuthenticated && (
             <button
               className={`movie-card__bookmark ${inWatchlist ? "is-active" : ""}`}
               disabled={watchlistMutation.isPending}
@@ -265,7 +267,7 @@ export default function MovieCard({
             </button>
           )}
 
-          {isAuthenticated && !onUnlike && (
+          {interactive && isAuthenticated && !onUnlike && (
             <button
               className={`movie-card__like ${isLiked ? "is-active" : ""}`}
               disabled={likeMutation.isPending}

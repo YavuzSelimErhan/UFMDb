@@ -15,6 +15,7 @@ interface Props {
   movies: FavoriteSlot[];
   actors: FavoriteActorSlot[];
   directors: FavoriteDirectorSlot[];
+  isOwnProfile: boolean;
 }
 
 type FavTab = "movies" | "actors" | "directors";
@@ -47,6 +48,7 @@ export default function FavoritesShowcase({
   movies,
   actors,
   directors,
+  isOwnProfile,
 }: Props) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<FavTab>("movies");
@@ -98,10 +100,17 @@ export default function FavoritesShowcase({
       </div>
 
       <div className="fav-showcase__panel">
-        {tab === "movies" && <FavoriteSlotPicker slots={movies} />}
-        {tab === "actors" && <FavoriteActorSlotPicker slots={actors} />}
+        {tab === "movies" && (
+          <FavoriteSlotPicker slots={movies} isOwnProfile={isOwnProfile} />
+        )}
+        {tab === "actors" && (
+          <FavoriteActorSlotPicker slots={actors} isOwnProfile={isOwnProfile} />
+        )}
         {tab === "directors" && (
-          <FavoriteDirectorSlotPicker slots={directors} />
+          <FavoriteDirectorSlotPicker
+            slots={directors}
+            isOwnProfile={isOwnProfile}
+          />
         )}
       </div>
     </section>

@@ -234,7 +234,8 @@
     "statFollowing": "Takip",
     "statLists": "Liste",
     "follow": "Takip Et",
-    "following": "Takip Ediliyor"
+    "following": "Takip Ediliyor",
+    "notAvailableForOthers": "Bu içerik yalnızca kendi profilinde görüntülenebilir."
   },
   "lists": {
     "title": "Listeler",
