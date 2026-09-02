@@ -15,5 +15,9 @@ public static class BayesianRating
 
     /// <summary>"C" — referans alınan genel ortalama puan (oy almış filmler üzerinden).</summary>
     public static async Task<double> GetGlobalAverageAsync(IQueryable<Movie> moviesWithVotes, CancellationToken ct)
-        => await moviesWithVotes.Select(m => (double?)m.AverageRating).AverageAsync(ct) ?? 0.0;
+    {
+        var hasAny = await moviesWithVotes.AnyAsync(ct);
+        if (!hasAny) return 0.0;
+        return await moviesWithVotes.AverageAsync(m => m.AverageRating, ct);
+    }
 }
