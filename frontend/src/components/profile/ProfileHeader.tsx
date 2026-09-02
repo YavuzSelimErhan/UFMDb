@@ -13,13 +13,13 @@ import {
   MessageSquare,
   ListVideo,
 } from "lucide-react";
-import type { ProfileData, PublicFullProfileDto } from "@/types";
+import type { PublicFullProfileDto } from "@/types";
 import { getImageUrl } from "@/utils/getImageUrl";
 import FollowListModal from "@/components/user/FollowListModal";
 import "./ProfileHeader.css";
 
 interface Props {
-  profile: ProfileData | PublicFullProfileDto;
+  profile: PublicFullProfileDto;
   userId: string;
   onEditClick?: () => void;
   listsCount?: number;
