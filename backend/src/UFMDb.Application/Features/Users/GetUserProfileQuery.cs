@@ -49,7 +49,7 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, P
 }
 
 public record PublicFullProfileDto(
-    Guid Id, string UserName, string? FullName, string? AvatarUrl, string? Biography, string? Country, string Gender, DateTime? birthdate,
+    Guid Id, string UserName, string? FullName, string? AvatarUrl, string? Biography, string? Country, string Gender, DateTime? BirthDate,
     List<FavoriteSlotDto> FavoriteMovies,
     List<RecentlyWatchedItemDto> RecentlyWatched,
     List<MovieListItemDto> LikedMovies,

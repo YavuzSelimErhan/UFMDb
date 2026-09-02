@@ -137,7 +137,7 @@
     "favoriteMoviesTab": "Favori Filmler",
     "recentlyWatched": "Son İzlenenler",
     "liked": "Beğenilenler",
-    "watchlist": "İzleme Listem",
+    "watchlist": "İzleme Listesi",
     "settings": "Ayarlar",
     "theme": "Tema",
     "language": "Dil",
@@ -164,7 +164,7 @@
     "searchDirectorPlaceholder": "Yönetmen ara...",
     "removeFavorite": "Kaldır",
     "slot": "Slot",
-    "reviews": "İncelemelerim",
+    "reviews": "İncelemeler",
     "favoriteActorsTab": "Favori Oyuncular",
     "likedActors": "Beğendiğim Oyuncular",
     "favoriteDirectorsTab": "Favori Yönetmenler",
@@ -229,10 +229,12 @@
     "loadingMore": "Yükleniyor…",
     "loadMore": "Daha fazla göster",
     "noFilmsForFilter": "Bu filtreye uyan film yok.",
-    "myLists": "Listelerim",
+    "myLists": "Listeler",
     "statFollowers": "Takipçi",
     "statFollowing": "Takip",
-    "statLists": "Liste"
+    "statLists": "Liste",
+    "follow": "Takip Et",
+    "following": "Takip Ediliyor"
   },
   "lists": {
     "title": "Listeler",
