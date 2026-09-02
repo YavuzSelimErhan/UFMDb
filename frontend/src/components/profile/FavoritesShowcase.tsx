@@ -68,9 +68,19 @@ export default function FavoritesShowcase({
       <div className="fav-showcase__header">
         <div className="fav-showcase__label-wrap">
           <p className="fav-showcase__eyebrow">
-            {t("profile.showcaseEyebrow")}
+            {t(
+              isOwnProfile
+                ? "profile.showcaseEyebrow"
+                : "profile.showcaseEyebrowOther",
+            )}
           </p>
-          <h2 className="fav-showcase__title">{t("profile.showcaseTitle")}</h2>
+          <h2 className="fav-showcase__title">
+            {t(
+              isOwnProfile
+                ? "profile.showcaseTitle"
+                : "profile.showcaseTitleOther",
+            )}
+          </h2>
         </div>
 
         <div className="fav-showcase__tabs">

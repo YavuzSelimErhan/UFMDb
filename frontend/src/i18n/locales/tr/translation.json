@@ -235,7 +235,15 @@
     "statLists": "Liste",
     "follow": "Takip Et",
     "following": "Takip Ediliyor",
-    "notAvailableForOthers": "Bu içerik yalnızca kendi profilinde görüntülenebilir."
+    "notAvailableForOthers": "Bu içerik yalnızca kendi profilinde görüntülenebilir.",
+    "likedHintOther": "Henüz beğenilen film yok.",
+    "likedActorsHintOther": "Henüz beğenilen bir oyuncu yok.",
+    "likedDirectorsHintOther": "Henüz beğenilen bir yönetmen yok.",
+    "likedReviewsHintOther": "Henüz beğenilen bir yorum yok.",
+    "likedListsHintOther": "Henüz beğenilen bir liste yok.",
+    "showcaseEyebrowOther": "VİTRİN",
+    "showcaseTitleOther": "Favoriler",
+    "noReviewsOther": "Henüz bir inceleme yazılmamış."
   },
   "lists": {
     "title": "Listeler",

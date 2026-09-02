@@ -205,7 +205,11 @@ export default function ProfileContentTabs({
                 <EmptyState
                   icon={<Heart size={26} />}
                   title={t("profile.emptyContent")}
-                  hint={t("profile.likedHint")}
+                  hint={t(
+                    isOwnProfile
+                      ? "profile.likedHint"
+                      : "profile.likedHintOther",
+                  )}
                 />
               ))}
 
@@ -240,8 +244,9 @@ export default function ProfileContentTabs({
                   icon={<Users size={26} />}
                   title={t("profile.emptyContent")}
                   hint={t(
-                    "profile.likedActorsHint",
-                    "Henüz beğendiğin bir oyuncu yok.",
+                    isOwnProfile
+                      ? "profile.likedActorsHint"
+                      : "profile.likedActorsHintOther",
                   )}
                 />
               ))}
@@ -277,8 +282,9 @@ export default function ProfileContentTabs({
                   icon={<Clapperboard size={26} />}
                   title={t("profile.emptyContent")}
                   hint={t(
-                    "profile.likedDirectorsHint",
-                    "Henüz beğendiğin bir yönetmen yok.",
+                    isOwnProfile
+                      ? "profile.likedDirectorsHint"
+                      : "profile.likedDirectorsHintOther",
                   )}
                 />
               ))}
@@ -370,8 +376,9 @@ export default function ProfileContentTabs({
                   icon={<MessageSquare size={26} />}
                   title={t("profile.emptyContent")}
                   hint={t(
-                    "profile.likedReviewsHint",
-                    "Henüz beğendiğin bir yorum yok.",
+                    isOwnProfile
+                      ? "profile.likedReviewsHint"
+                      : "profile.likedReviewsHintOther",
                   )}
                 />
               ))}
@@ -406,8 +413,9 @@ export default function ProfileContentTabs({
                   icon={<ListVideo size={26} />}
                   title={t("profile.emptyContent")}
                   hint={t(
-                    "profile.likedListsHint",
-                    "Henüz beğendiğin bir liste yok.",
+                    isOwnProfile
+                      ? "profile.likedListsHint"
+                      : "profile.likedListsHintOther",
                   )}
                 />
               ))}
@@ -510,7 +518,9 @@ export default function ProfileContentTabs({
         ) : (
           <EmptyState
             icon={<MessageSquare size={26} />}
-            title={t("profile.noReviews")}
+            title={t(
+              isOwnProfile ? "profile.noReviews" : "profile.noReviewsOther",
+            )}
           />
         ))}
 

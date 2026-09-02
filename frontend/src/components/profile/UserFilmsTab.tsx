@@ -79,6 +79,7 @@ export default function UserFilmsTab({ userId }: { userId: string }) {
                 year: "numeric",
               },
             )}
+            interactive={false}
           />
         ))}
       </div>

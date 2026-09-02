@@ -125,7 +125,7 @@ export default function FavoriteDirectorSlotPicker({
                   {String(slot).padStart(2, "0")}
                 </span>
                 <Plus size={22} />
-                <span>{t("profile.chooseMovie")}</span>
+                <span>{t("profile.chooseDirector")}</span>
               </button>
             ) : null}
           </div>
