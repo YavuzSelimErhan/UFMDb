@@ -1,7 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UFMDb.Application.Common.Interfaces;
-using UFMDb.Application.Common.Services;
 using UFMDb.Application.DTOs;
 namespace UFMDb.Application.Features.Movies.GetMovies;
 
@@ -71,28 +70,10 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             query = query.Where(m => m.AverageRating >= f.MinRating.Value);
 
         var isDescending = !string.Equals(f.SortDirection, "asc", StringComparison.OrdinalIgnoreCase);
-
-        // "rating" sýralamasý sadece istendiðinde genel ortalamayý ("C") hesaplýyoruz —
-        // diðer sortBy deðerlerinde gereksiz bir ek sorguya girmesin.
-        double globalAverage = 0;
-        if (f.SortBy == "rating")
-        {
-            globalAverage = await BayesianRating.GetGlobalAverageAsync(
-                _context.Movies.AsNoTracking().Where(m => !m.IsDeleted && m.RatingCount > 0), ct);
-        }
-        const int m0 = BayesianRating.MinVotesForRanking;
-
         query = (f.SortBy, isDescending) switch
         {
-            // Artýk saf AverageRating deðil, IMDb tarzý aðýrlýklý puana (WR) göre sýralanýyor —
-            // az oylu filmler genel ortalamaya çekiliyor, aramadan/listeden kaybolmuyorlar,
-            // sadece tepede çýkamýyorlar.
-            ("rating", true) => query.OrderByDescending(m =>
-                ((double)m.RatingCount / (m.RatingCount + m0)) * m.AverageRating
-                + ((double)m0 / (m.RatingCount + m0)) * globalAverage),
-            ("rating", false) => query.OrderBy(m =>
-                ((double)m.RatingCount / (m.RatingCount + m0)) * m.AverageRating
-                + ((double)m0 / (m.RatingCount + m0)) * globalAverage),
+            ("rating", true) => query.OrderByDescending(m => m.AverageRating),
+            ("rating", false) => query.OrderBy(m => m.AverageRating),
             ("year", true) => query.OrderByDescending(m => m.ReleaseYear),
             ("year", false) => query.OrderBy(m => m.ReleaseYear),
             ("popularity", true) => query.OrderByDescending(m => m.RatingCount).ThenByDescending(m => m.AverageRating),

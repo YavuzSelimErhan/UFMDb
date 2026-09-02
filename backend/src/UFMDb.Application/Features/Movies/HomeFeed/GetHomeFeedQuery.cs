@@ -1,7 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UFMDb.Application.Common.Interfaces;
-using UFMDb.Application.Common.Services;
 using UFMDb.Application.DTOs;
 namespace UFMDb.Application.Features.Movies.HomeFeed;
 public record HomeFeedDto(
@@ -32,31 +31,13 @@ public class GetHomeFeedQueryHandler : IRequestHandler<GetHomeFeedQuery, HomeFee
                 .ToListAsync(ct)).ToHashSet()
             : new HashSet<Guid>();
         var baseQuery = _context.Movies.AsNoTracking().Where(m => !m.IsDeleted);
-
-        // "C" — az oylu filmleri bu genel ortalamaya doğru çekiyoruz.
-        var globalAverage = await BayesianRating.GetGlobalAverageAsync(
-            baseQuery.Where(m => m.RatingCount > 0), ct);
-        const int m0 = BayesianRating.MinVotesForRanking;
-
-        // featured: ağırlıklı puan + beğeni sayısını birlikte kullanıyor, tek oyla
-        // ekrana çıkan bir film artık öne çıkamaz (WR genel ortalamaya çok yakın kalır).
         var featured = await baseQuery
             .Where(m => m.RatingCount > 0)
-            .OrderByDescending(m =>
-                (((double)m.RatingCount / (m.RatingCount + m0)) * m.AverageRating
-                 + ((double)m0 / (m.RatingCount + m0)) * globalAverage) * 1000 + m.LikeCount)
+            .OrderByDescending(m => m.AverageRating * 1000 + m.LikeCount)
             .Take(6).Select(MapToListItemProjection()).ToListAsync(ct);
-
         var popular = await baseQuery.OrderByDescending(m => m.LikeCount).Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
-
-        // topRated: artık saf AverageRating değil, IMDb tarzı ağırlıklı puana (WR) göre sıralanıyor.
-        var topRated = await baseQuery
-            .Where(m => m.RatingCount > 0)
-            .OrderByDescending(m =>
-                ((double)m.RatingCount / (m.RatingCount + m0)) * m.AverageRating
-                + ((double)m0 / (m.RatingCount + m0)) * globalAverage)
-            .Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
-
+        var topRated = await baseQuery.Where(m => m.RatingCount > 0)
+            .OrderByDescending(m => m.AverageRating).Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
         var trending = await baseQuery
             .OrderByDescending(m => m.ViewCount * 0.6 + m.LikeCount * 0.4)
             .Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
