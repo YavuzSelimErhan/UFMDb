@@ -23,7 +23,7 @@ import { SUPPORTED_LANGUAGES, languageLabel } from "@/i18n/languages";
 import Dropdown from "@/components/search/Dropdown";
 import MovieCard from "@/components/movie/MovieCard";
 import ListCard from "./../Lists/ListCard";
-import FavoritesShowcase from "@/components/profile/FavoritesShowcase";
+import Favorites from "@/components/profile/Favorites";
 import ProfileFilmsTab from "@/components/profile/ProfileFilmsTab";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileContentTabs from "@/components/profile/ProfileContentTabs";
@@ -192,11 +192,11 @@ export default function ProfilePage() {
       <div className="profile-page__tabcontent">
         {tab === "profile" && (
           <>
-            <FavoritesShowcase
+            <Favorites
               movies={profile.favoriteMovies}
               actors={profile.favoriteActors}
               directors={profile.favoriteDirectors}
-              isOwnProfile={true}
+              isOwnProfile
             />
             <section className="profile-page__section">
               <h2>

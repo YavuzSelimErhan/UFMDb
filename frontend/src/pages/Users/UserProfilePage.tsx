@@ -13,7 +13,7 @@ import {
 import { followService } from "@/services";
 import MovieCard from "@/components/movie/MovieCard";
 import ListCard from "../Lists/ListCard";
-import FavoritesShowcase from "@/components/profile/FavoritesShowcase";
+import Favorites from "@/components/profile/Favorites";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileContentTabs from "@/components/profile/ProfileContentTabs";
 import UserFilmsTab from "@/components/profile/UserFilmsTab";
@@ -169,7 +169,7 @@ export default function UserProfilePage() {
       <div className="profile-page__tabcontent">
         {tab === "profile" && (
           <>
-            <FavoritesShowcase
+            <Favorites
               movies={profile.favoriteMovies}
               actors={profile.favoriteActors}
               directors={profile.favoriteDirectors}
