@@ -212,7 +212,12 @@
   justify-content: center;
   gap: 10px;
   padding: 14px 10px;
+  border: none;
   border-right: 1px dashed var(--color-border);
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
   text-decoration: none;
   transition: background-color var(--transition-fast);
 }

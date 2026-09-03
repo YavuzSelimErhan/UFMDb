@@ -8,7 +8,13 @@ import {
   Upload,
   Loader2,
   ImageOff,
+  Camera,
   Clapperboard,
+  Info,
+  IdCard,
+  PenLine,
+  MapPin,
+  CalendarDays,
 } from "lucide-react";
 import { profileService, countryService } from "@/services";
 import Dropdown from "@/components/search/Dropdown";
@@ -145,6 +151,17 @@ function EditProfileFormBody({
     saveMutation.mutate();
   };
 
+  const memberSinceDate = profile.memberSinceUtc
+    ? new Date(profile.memberSinceUtc)
+    : null;
+  const memberSince =
+    memberSinceDate && !isNaN(memberSinceDate.getTime())
+      ? memberSinceDate.toLocaleDateString(
+          language === "tr" ? "tr-TR" : "en-US",
+          { month: "long", year: "numeric" },
+        )
+      : null;
+
   return (
     <div className="container edit-profile-page">
       <button
@@ -154,6 +171,11 @@ function EditProfileFormBody({
       >
         <ArrowLeft size={16} /> {t("common.back")}
       </button>
+
+      <div
+        className="edit-profile-filmstrip edit-profile-filmstrip--top"
+        aria-hidden="true"
+      />
 
       <form className="edit-profile-shell" onSubmit={handleSubmit}>
         {/* ---------- Sol panel: kimlik kartı ---------- */}
@@ -189,6 +211,11 @@ function EditProfileFormBody({
               ) : (
                 <span>{name[0]?.toUpperCase()}</span>
               )}
+              {!uploadMutation.isPending && (
+                <span className="edit-profile-pass__avatar-badge">
+                  <Camera size={13} />
+                </span>
+              )}
             </div>
             <p className="edit-profile-pass__dropzone-text">
               <Upload size={12} />{" "}
@@ -209,16 +236,38 @@ function EditProfileFormBody({
           <p className="edit-profile-pass__name">{fullNameValue || name}</p>
           <p className="edit-profile-pass__handle">@{name}</p>
 
+          {(countryValue || memberSince) && (
+            <div className="edit-profile-pass__ticket">
+              {countryValue && (
+                <div className="edit-profile-pass__ticket-row">
+                  <MapPin size={13} />
+                  <span>{countryValue}</span>
+                </div>
+              )}
+              {memberSince && (
+                <div className="edit-profile-pass__ticket-row">
+                  <CalendarDays size={13} />
+                  <span>{memberSince}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="edit-profile-pass__perf" />
         </div>
 
         {/* ---------- Sağ panel: form alanları ---------- */}
         <div className="edit-profile-fields">
+          <div className="edit-profile-page__callout">
+            <Info size={16} />
+            <span>{t("profile.editCallout")}</span>
+          </div>
+
           {error && <p className="edit-profile-page__error">{error}</p>}
 
           <section className="edit-profile-section">
             <p className="edit-profile-section__label">
-              {t("profile.tabProfile")}
+              <User size={13} /> {t("profile.tabProfile")}
             </p>
 
             <div className="edit-profile-page__field">
@@ -247,7 +296,8 @@ function EditProfileFormBody({
 
           <section className="edit-profile-section">
             <p className="edit-profile-section__label">
-              {t("profile.country")} · {t("profile.gender")}
+              <IdCard size={13} /> {t("profile.country")} ·{" "}
+              {t("profile.gender")}
             </p>
 
             <div className="edit-profile-page__row">
@@ -294,9 +344,11 @@ function EditProfileFormBody({
             </div>
           </section>
 
+          <div className="edit-profile-page__perf-divider" aria-hidden="true" />
+
           <section className="edit-profile-section">
             <p className="edit-profile-section__label">
-              {t("profile.biography")}
+              <PenLine size={13} /> {t("profile.biography")}
             </p>
             <div className="edit-profile-page__field">
               <label>
@@ -332,6 +384,11 @@ function EditProfileFormBody({
           </div>
         </div>
       </form>
+
+      <div
+        className="edit-profile-filmstrip edit-profile-filmstrip--bottom"
+        aria-hidden="true"
+      />
     </div>
   );
 }

@@ -18,16 +18,38 @@
   color: var(--color-text-primary);
 }
 
+/* ---------- Film şeridi bantları: shell'i bir bilet gibi çerçeveler ---------- */
+.edit-profile-filmstrip {
+  height: 12px;
+  background-color: var(--color-accent);
+  background-image: radial-gradient(
+    circle,
+    var(--color-bg) 0 2.8px,
+    transparent 3px
+  );
+  background-size: 18px 100%;
+  background-position: 9px center;
+  background-repeat: repeat-x;
+  opacity: 0;
+  animation: edit-profile-shell-in 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.edit-profile-filmstrip--top {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+.edit-profile-filmstrip--bottom {
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
 /* ---------- İki panelli shell ---------- */
 .edit-profile-shell {
-  --pass-w: 240px;
+  --pass-w: 260px;
   position: relative;
   display: grid;
   grid-template-columns: var(--pass-w) 1fr;
   gap: 0;
-  border-radius: var(--radius-lg);
+  border-left: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
   overflow: hidden;
-  border: 1px solid var(--color-border);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
   opacity: 0;
   animation: edit-profile-shell-in 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -46,8 +68,7 @@
 
 /* Panel ayracının tam hizasında, üst ve alt kenarda "koparılmış bilet
    kökü" çentikleri. Shell'in overflow:hidden'ı dış yarıyı keser, geriye
-   kenardan delinmiş bir yarım daire izlenimi kalır. Lists sayfasındaki
-   bilet çentikleriyle aynı motif. */
+   kenardan delinmiş bir yarım daire izlenimi kalır. */
 .edit-profile-shell::before,
 .edit-profile-shell::after {
   content: "";
@@ -86,7 +107,7 @@
     var(--color-bg-card) 0%,
     var(--color-bg) 100%
   );
-  padding: 30px 22px 26px;
+  padding: 32px 22px 26px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -128,7 +149,11 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-accent);
-  margin-bottom: 20px;
+  background: var(--color-accent-muted);
+  border: 1px solid var(--color-accent);
+  padding: 4px 11px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 22px;
 }
 
 .edit-profile-pass__dropzone {
@@ -154,10 +179,11 @@
 }
 
 .edit-profile-pass__avatar {
-  width: 92px;
-  height: 92px;
+  position: relative;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
-  overflow: hidden;
+  overflow: visible;
   background: linear-gradient(
     135deg,
     var(--color-accent),
@@ -177,8 +203,9 @@
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid var(--color-bg-card);
+  display: block;
 }
-.edit-profile-pass__avatar span {
+.edit-profile-pass__avatar span:not(.edit-profile-pass__avatar-badge) {
   width: 100%;
   height: 100%;
   border-radius: 50%;
@@ -191,6 +218,21 @@
   font-size: 1.9rem;
   font-weight: 800;
   color: var(--color-text-primary);
+}
+
+.edit-profile-pass__avatar-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  border: 2px solid var(--color-bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
 }
 
 .edit-profile-pass__dropzone-text {
@@ -213,7 +255,7 @@
   gap: 4px;
   font-size: 0.68rem;
   font-weight: 600;
-  color: #d3554f;
+  color: var(--color-danger, #d3554f);
   padding: 3px 10px;
   border-radius: var(--radius-pill);
   background-color: rgba(211, 85, 79, 0.1);
@@ -244,6 +286,36 @@
   margin-top: 2px;
 }
 
+/* ---------- Kimlik kartındaki ticket satırları (ülke / üyelik tarihi) ---------- */
+.edit-profile-pass__ticket {
+  position: relative;
+  z-index: 1;
+  margin-top: 20px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.edit-profile-pass__ticket-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 12px;
+  border-top: 1px dashed var(--color-border);
+  font-size: 0.74rem;
+  color: var(--color-text-secondary);
+}
+.edit-profile-pass__ticket-row:first-child {
+  border-top: none;
+}
+.edit-profile-pass__ticket-row svg {
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
 .edit-profile-pass__perf {
   position: absolute;
   top: 0;
@@ -268,6 +340,24 @@
 .edit-profile-fields {
   background-color: var(--color-bg-elevated);
   padding: 30px 32px;
+}
+
+/* ---------- Bilgi kutusu ---------- */
+.edit-profile-page__callout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--color-accent-muted);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+.edit-profile-page__callout svg {
+  color: var(--color-accent);
+  flex-shrink: 0;
 }
 
 .edit-profile-section {
@@ -352,6 +442,7 @@
 .edit-profile-page__field textarea {
   resize: vertical;
   min-height: 90px;
+  line-height: 1.55;
 }
 .edit-profile-page__field input:focus,
 .edit-profile-page__field textarea:focus {
@@ -364,6 +455,23 @@
   font-weight: 400;
   color: var(--color-text-muted);
   font-size: 0.72rem;
+}
+
+/* ---------- Perf-divider: ProfileHeader ile aynı desen, sayfalar arası tutarlılık ---------- */
+.edit-profile-page__perf-divider {
+  height: 10px;
+  margin: 4px 0 24px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent);
+  background-image: radial-gradient(
+    circle,
+    var(--color-bg-elevated) 0 2.6px,
+    transparent 2.8px
+  );
+  background-size: 16px 100%;
+  background-position: 8px center;
+  background-repeat: repeat-x;
+  opacity: 0.9;
 }
 
 .edit-profile-page__actions {
@@ -394,6 +502,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .edit-profile-shell,
+  .edit-profile-filmstrip,
   .edit-profile-pass__avatar,
   .edit-profile-pass__dropzone,
   .edit-profile-page__field input,
@@ -401,7 +510,8 @@
     animation: none !important;
     transition: none !important;
   }
-  .edit-profile-shell {
+  .edit-profile-shell,
+  .edit-profile-filmstrip {
     opacity: 1;
     transform: none;
   }
