@@ -169,6 +169,7 @@ export default function ProfilePage() {
       <ProfileHeader
         profile={profile}
         userId={profile.userId}
+        isCurrentUser
         onEditClick={() => navigate("/profile/edit")}
         listsCount={myLists?.length}
       />

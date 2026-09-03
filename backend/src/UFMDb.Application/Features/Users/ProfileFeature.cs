@@ -35,7 +35,9 @@ public record ProfileDto(
     int TotalWatchedCount,
     decimal? AverageGivenRating,
     int RatingsCount,
-    DateTime MemberSinceUtc
+    DateTime MemberSinceUtc,
+    int FollowerCount,
+    int FollowingCount
 );
 
 public record GetProfileQuery(Guid UserId) : IRequest<ProfileDto>;
@@ -151,6 +153,10 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             .OrderByDescending(l => l.CreatedAtUtc)
             .Select(l => new DirectorListItemDto(l.Director.Id, l.Director.FullName, l.Director.PhotoUrl, l.Director.Nationality))
             .ToListAsync(ct);
+        var followerCount = await _context.Follows.AsNoTracking()
+    .CountAsync(f => f.FollowingId == request.UserId, ct);
+        var followingCount = await _context.Follows.AsNoTracking()
+            .CountAsync(f => f.FollowerId == request.UserId, ct);
 
         return new ProfileDto(
             user.Id, user.UserName, user.AvatarUrl, user.PreferredLanguage, user.PreferredTheme,
@@ -167,7 +173,9 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             totalWatchedCount,
             averageGivenRating,
             ratingsCount,
-            user.CreatedAtUtc
+            user.CreatedAtUtc,
+            followerCount, 
+            followingCount
         );
     }
 
