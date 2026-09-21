@@ -11,7 +11,7 @@ import "./ProfileFilmsTab.css";
 const PAGE_SIZE = 24;
 
 export default function UserFilmsTab({ userId }: { userId: string }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [entries, setEntries] = useState<WatchedMovie[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
