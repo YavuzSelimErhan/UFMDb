@@ -21,7 +21,7 @@ import { useAppDispatch, useAppSelector } from "@/store";
 import { setTheme } from "@/store/uiSlice";
 import { SUPPORTED_LANGUAGES, languageLabel } from "@/i18n/languages";
 import Dropdown from "@/components/search/Dropdown";
-import MovieCard from "@/components/movie/MovieCard";
+import RecentlyWatchedCard from "@/components/movie/RecentlyWatchedCard";
 import ListCard from "./../Lists/ListCard";
 import Favorites from "@/components/profile/Favorites";
 import ProfileFilmsTab from "@/components/profile/ProfileFilmsTab";
@@ -205,13 +205,12 @@ export default function ProfilePage() {
               </h2>
               {profile.recentlyWatched.length > 0 ? (
                 <>
-                  <div className="movie-grid movie-grid--compact">
+                  <div className="rw-grid">
                     {profile.recentlyWatched.map((item) => (
-                      <MovieCard
+                      <RecentlyWatchedCard
                         key={item.movie.id}
                         movie={item.movie}
-                        userRating={item.userRating}
-                        interactive={true}
+                        rating={item.userRating}
                       />
                     ))}
                   </div>

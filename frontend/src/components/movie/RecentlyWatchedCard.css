@@ -1,0 +1,109 @@
+.rw-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 20px;
+}
+
+.rw-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.rw-card__poster-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--color-bg-elevated);
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+}
+.rw-card:hover .rw-card__poster-wrap {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 26px var(--color-shadow);
+}
+
+.rw-card__poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.rw-card__poster-fallback {
+  display: none;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  text-align: center;
+  background: linear-gradient(
+    160deg,
+    var(--fallback-accent) 0%,
+    var(--fallback-accent-soft) 100%
+  );
+}
+.rw-card__poster-fallback.is-visible {
+  display: flex;
+}
+.rw-card__poster-fallback span {
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.rw-card__info {
+  padding-top: 8px;
+}
+
+.rw-card__title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--transition-fast);
+}
+.rw-card:hover .rw-card__title {
+  color: var(--color-accent);
+}
+
+/* ---------- Letterboxd tarzı yıldız satırı ---------- */
+.rw-card__stars {
+  display: flex;
+  gap: 1px;
+  margin-top: 5px;
+  color: #d4af37;
+}
+.rw-card__star {
+  position: relative;
+  display: inline-flex;
+}
+.rw-card__star-base {
+  color: var(--color-border);
+}
+.rw-card__star-fill {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: block;
+}
+
+@media (max-width: 480px) {
+  .rw-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+}

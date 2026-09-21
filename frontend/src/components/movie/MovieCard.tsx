@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { movieService } from "@/services";
 import { useAppSelector } from "@/store";
+import { getEntityTheme } from "@/utils/listTheme";
 import type { MovieListItem } from "@/types";
 import "./MovieCard.css";
 
@@ -47,6 +48,7 @@ export default function MovieCard({
   const [isRatingOpen, setIsRatingOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [hoverValue, setHoverValue] = useState<number | null>(null);
+  const [posterFailed, setPosterFailed] = useState(false);
 
   // movie prop'u cache invalidation sonrası güncellenip aynı MovieCard
   // instance'ı yeniden kullanıldığında (key değişmediği için remount
@@ -60,6 +62,13 @@ export default function MovieCard({
   useEffect(() => {
     setIsLiked(movie.isLikedByCurrentUser);
   }, [movie.isLikedByCurrentUser]);
+
+  // Farklı bir film için aynı kart instance'ı yeniden kullanılırsa
+  // (liste kaydırma/sayfalama gibi durumlarda), önceki filmin poster
+  // hatası bu filme taşınmasın diye sıfırlanır.
+  useEffect(() => {
+    setPosterFailed(false);
+  }, [movie.id]);
 
   const watchlistMutation = useMutation({
     mutationFn: () => movieService.toggleWatchlist(movie.id),
@@ -119,6 +128,8 @@ export default function MovieCard({
   };
 
   const displayValue = hoverValue ?? userRating ?? 0;
+  const showPosterFallback = !movie.posterUrl || posterFailed;
+  const theme = getEntityTheme(movie.id);
 
   return (
     <Link
@@ -126,12 +137,29 @@ export default function MovieCard({
       className={`movie-card card${compact ? " movie-card--compact" : ""}`}
     >
       <div className="movie-card__poster-wrap">
-        <img
-          src={movie.posterUrl}
-          alt={movie.title}
-          loading="lazy"
-          className="movie-card__poster"
-        />
+        {showPosterFallback ? (
+          <div
+            className="movie-card__poster-fallback"
+            style={
+              {
+                "--fallback-accent": theme.accent,
+                "--fallback-accent-soft": theme.accentSoft,
+              } as React.CSSProperties
+            }
+          >
+            <span className="movie-card__poster-fallback-title">
+              {movie.title}
+            </span>
+          </div>
+        ) : (
+          <img
+            src={movie.posterUrl}
+            alt={movie.title}
+            loading="lazy"
+            className="movie-card__poster"
+            onError={() => setPosterFailed(true)}
+          />
+        )}
 
         <div className="movie-card__rating">
           <Star size={13} fill="#4a90e2" stroke="#4a90e2" />
