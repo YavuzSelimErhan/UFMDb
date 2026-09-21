@@ -27,16 +27,8 @@ const SORT_OPTIONS = [
   { value: "title-asc", labelKey: "titleAsc" },
 ];
 
-function formatDate(iso: string, locale: string): string {
-  return new Date(iso).toLocaleDateString(locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 export default function ProfileFilmsTab() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
 
@@ -178,30 +170,6 @@ export default function ProfileFilmsTab() {
     }
   };
 
-  const handleDelete = async (movieId: string) => {
-    setSavingMovieId(movieId);
-    try {
-      await profileService.removeWatchedFilm(movieId);
-      queryClient.setQueryData(
-        ["watched-films", filter, sortBy, lastPageParam],
-        (
-          prev:
-            | { items: WatchedMovie[]; page: number; totalPages: number }
-            | undefined,
-        ) =>
-          prev && {
-            ...prev,
-            items: prev.items.filter((e) => e.movieId !== movieId),
-          },
-      );
-      queryClient.invalidateQueries({ queryKey: ["watched-films-counts"] });
-    } catch {
-      setActionError(t("profile.removeError"));
-    } finally {
-      setSavingMovieId(null);
-    }
-  };
-
   const error = actionError ?? (loadError ? t("profile.filmsLoadError") : null);
 
   return (
@@ -302,10 +270,6 @@ export default function ProfileFilmsTab() {
                 userRating={entry.userRating}
                 onRate={(value) => handleRate(entry.movieId, value)}
                 isRatingSaving={savingMovieId === entry.movieId}
-                showDelete
-                onDelete={() => handleDelete(entry.movieId)}
-                isDeleting={savingMovieId === entry.movieId}
-                subtitle={formatDate(entry.watchedAtUtc, i18n.language)}
               />
             ))}
           </div>

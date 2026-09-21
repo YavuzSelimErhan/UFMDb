@@ -21,7 +21,7 @@ import { useAppDispatch, useAppSelector } from "@/store";
 import { setTheme } from "@/store/uiSlice";
 import { SUPPORTED_LANGUAGES, languageLabel } from "@/i18n/languages";
 import Dropdown from "@/components/search/Dropdown";
-import RecentlyWatchedCard from "@/components/movie/RecentlyWatchedCard";
+import MovieCard from "@/components/movie/MovieCard";
 import ListCard from "./../Lists/ListCard";
 import Favorites from "@/components/profile/Favorites";
 import ProfileFilmsTab from "@/components/profile/ProfileFilmsTab";
@@ -207,10 +207,10 @@ export default function ProfilePage() {
                 <>
                   <div className="rw-grid">
                     {profile.recentlyWatched.map((item) => (
-                      <RecentlyWatchedCard
+                      <MovieCard
                         key={item.movie.id}
                         movie={item.movie}
-                        rating={item.userRating}
+                        userRating={item.userRating}
                       />
                     ))}
                   </div>

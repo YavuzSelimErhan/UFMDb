@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Star, Bookmark, Heart, Trash2, Check, X, Pencil } from "lucide-react";
+import { Star, Bookmark, Heart, Ticket } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { movieService } from "@/services";
@@ -16,9 +16,7 @@ interface Props {
   onUnlike?: () => void;
   onRate?: (value: number) => void;
   isRatingSaving?: boolean;
-  showDelete?: boolean;
-  onDelete?: () => void;
-  isDeleting?: boolean;
+  onLogClick?: () => void;
   rank?: number;
   compact?: boolean;
   subtitle?: string;
@@ -31,9 +29,7 @@ export default function MovieCard({
   onUnlike,
   onRate,
   isRatingSaving,
-  showDelete,
-  onDelete,
-  isDeleting,
+  onLogClick,
   rank,
   compact,
   subtitle,
@@ -45,8 +41,6 @@ export default function MovieCard({
     movie.isInWatchlistByCurrentUser,
   );
   const [isLiked, setIsLiked] = useState(movie.isLikedByCurrentUser);
-  const [isRatingOpen, setIsRatingOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [hoverValue, setHoverValue] = useState<number | null>(null);
   const [posterFailed, setPosterFailed] = useState(false);
 
@@ -131,6 +125,10 @@ export default function MovieCard({
   const showPosterFallback = !movie.posterUrl || posterFailed;
   const theme = getEntityTheme(movie.id);
 
+  // Puan satırı: onRate verilmişse tıklanabilir/gezinebilir, sadece
+  // userRating varsa salt-okunur, ikisi de yoksa hiç render edilmiyor.
+  const showRatingRow = Boolean(onRate) || userRating != null;
+
   return (
     <Link
       to={`/movies/${movie.id}`}
@@ -161,116 +159,9 @@ export default function MovieCard({
           />
         )}
 
-        <div className="movie-card__rating">
-          <Star size={13} fill="#4a90e2" stroke="#4a90e2" />
-          <span>{movie.averageRating.toFixed(1)}</span>
-        </div>
-
         {rank && (
           <div className="movie-card__rank">
             <span>{rank}</span>
-          </div>
-        )}
-
-        {!isRatingOpen && userRating != null && (
-          <button
-            type="button"
-            className={`movie-card__user-rating${onRate ? " is-clickable" : ""}`}
-            title={t("movie.yourRating")}
-            onClick={
-              onRate
-                ? (e) => {
-                    stop(e);
-                    setIsRatingOpen(true);
-                  }
-                : undefined
-            }
-          >
-            <Star size={12} fill="#d4af37" stroke="#d4af37" />
-            <span>{userRating.toFixed(1)}</span>
-            {onRate && (
-              <Pencil size={10} className="movie-card__user-rating-edit" />
-            )}
-          </button>
-        )}
-
-        {!isRatingOpen && onRate && userRating == null && (
-          <button
-            type="button"
-            className="movie-card__rate-cta"
-            title={t("profile.rateFilm")}
-            onClick={(e) => {
-              stop(e);
-              setIsRatingOpen(true);
-            }}
-          >
-            <Star size={13} />
-          </button>
-        )}
-
-        {isRatingOpen && (
-          <div className="movie-card__rate-panel" onClick={stop}>
-            <div
-              className="movie-card__rate-stars"
-              onMouseLeave={() => setHoverValue(null)}
-            >
-              {[1, 2, 3, 4, 5].map((i) => {
-                const fillRatio = Math.max(
-                  0,
-                  Math.min(1, displayValue - (i - 1)),
-                );
-                return (
-                  <span key={i} className="movie-card__rate-star">
-                    <Star size={15} className="movie-card__rate-star-base" />
-                    <span
-                      className="movie-card__rate-star-fill"
-                      style={{ width: `${fillRatio * 100}%` }}
-                    >
-                      <Star size={15} fill="currentColor" />
-                    </span>
-                    <button
-                      type="button"
-                      className="movie-card__rate-hit movie-card__rate-hit--left"
-                      disabled={isRatingSaving}
-                      onMouseEnter={() => setHoverValue(i - 0.5)}
-                      onClick={(e) => {
-                        stop(e);
-                        onRate?.(i - 0.5);
-                        setIsRatingOpen(false);
-                      }}
-                      aria-label={t("profile.giveStarRating", {
-                        value: (i - 0.5).toFixed(1),
-                      })}
-                    />
-                    <button
-                      type="button"
-                      className="movie-card__rate-hit movie-card__rate-hit--right"
-                      disabled={isRatingSaving}
-                      onMouseEnter={() => setHoverValue(i)}
-                      onClick={(e) => {
-                        stop(e);
-                        onRate?.(i);
-                        setIsRatingOpen(false);
-                      }}
-                      aria-label={t("profile.giveStarRating", {
-                        value: i.toFixed(1),
-                      })}
-                    />
-                  </span>
-                );
-              })}
-            </div>
-            <button
-              type="button"
-              className="movie-card__rate-close"
-              onClick={(e) => {
-                stop(e);
-                setIsRatingOpen(false);
-              }}
-              aria-label={t("common.close")}
-            >
-              <X size={11} />
-            </button>
           </div>
         )}
 
@@ -292,6 +183,21 @@ export default function MovieCard({
                 size={13}
                 fill={inWatchlist ? "currentColor" : "none"}
               />
+            </button>
+          )}
+
+          {interactive && isAuthenticated && onLogClick && (
+            <button
+              type="button"
+              className="movie-card__log"
+              title={t("movie.logScreening")}
+              aria-label={t("movie.logScreening")}
+              onClick={(e) => {
+                stop(e);
+                onLogClick();
+              }}
+            >
+              <Ticket size={13} />
             </button>
           )}
 
@@ -325,56 +231,71 @@ export default function MovieCard({
             </button>
           )}
         </div>
-
-        {showDelete && !isDeleteOpen && (
-          <button
-            type="button"
-            className="movie-card__delete"
-            title={t("profile.removeFromWatched")}
-            aria-label={t("profile.removeFromWatched")}
-            onClick={(e) => {
-              stop(e);
-              setIsDeleteOpen(true);
-            }}
-          >
-            <Trash2 size={13} />
-          </button>
-        )}
-
-        {isDeleteOpen && (
-          <div className="movie-card__delete-confirm" onClick={stop}>
-            <button
-              type="button"
-              className="movie-card__delete-confirm-yes"
-              disabled={isDeleting}
-              aria-label={t("common.confirm")}
-              onClick={(e) => {
-                stop(e);
-                onDelete?.();
-              }}
-            >
-              <Check size={13} />
-            </button>
-            <button
-              type="button"
-              className="movie-card__delete-confirm-no"
-              aria-label={t("common.cancel")}
-              onClick={(e) => {
-                stop(e);
-                setIsDeleteOpen(false);
-              }}
-            >
-              <X size={13} />
-            </button>
-          </div>
-        )}
       </div>
+
       <div className="movie-card__info">
         <h3 className="movie-card__title">{movie.title}</h3>
         <p className="movie-card__meta text-muted">
           {subtitle ??
             `${movie.releaseYear} · ${movie.genres.slice(0, 2).join(", ")}`}
         </p>
+
+        {showRatingRow && (
+          <div
+            className={`movie-card__rate-row${onRate ? " is-interactive" : ""}`}
+            onClick={stop}
+          >
+            {[1, 2, 3, 4, 5].map((i) => {
+              const fillRatio = Math.max(
+                0,
+                Math.min(1, displayValue - (i - 1)),
+              );
+              return (
+                <span key={i} className="movie-card__rate-row-star">
+                  <Star size={18} className="movie-card__rate-row-star-base" />
+                  <span
+                    className="movie-card__rate-row-star-fill"
+                    style={{ width: `${fillRatio * 100}%` }}
+                  >
+                    <Star size={18} fill="currentColor" />
+                  </span>
+                  {onRate && (
+                    <>
+                      <button
+                        type="button"
+                        className="movie-card__rate-row-hit movie-card__rate-row-hit--left"
+                        disabled={isRatingSaving}
+                        onMouseEnter={() => setHoverValue(i - 0.5)}
+                        onMouseLeave={() => setHoverValue(null)}
+                        onClick={(e) => {
+                          stop(e);
+                          onRate(i - 0.5);
+                        }}
+                        aria-label={t("profile.giveStarRating", {
+                          value: (i - 0.5).toFixed(1),
+                        })}
+                      />
+                      <button
+                        type="button"
+                        className="movie-card__rate-row-hit movie-card__rate-row-hit--right"
+                        disabled={isRatingSaving}
+                        onMouseEnter={() => setHoverValue(i)}
+                        onMouseLeave={() => setHoverValue(null)}
+                        onClick={(e) => {
+                          stop(e);
+                          onRate(i);
+                        }}
+                        aria-label={t("profile.giveStarRating", {
+                          value: i.toFixed(1),
+                        })}
+                      />
+                    </>
+                  )}
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
     </Link>
   );

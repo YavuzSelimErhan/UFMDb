@@ -47,23 +47,6 @@
   opacity: 1;
 }
 
-.movie-card__rating {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background-color: rgba(10, 12, 16, 0.78);
-  backdrop-filter: blur(6px);
-  color: #fff;
-  padding: 4px 9px;
-  border-radius: var(--radius-pill);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
 .movie-card__info {
   padding: 12px 13px 15px;
 }
@@ -89,7 +72,7 @@
   text-overflow: ellipsis;
 }
 
-/* ---------- Sol üst: watchlist + unlike ikonları, alt alta ---------- */
+/* ---------- Sol üst: watchlist + log + like/unlike ikonları, alt alta ---------- */
 .movie-card__actions {
   position: absolute;
   top: 8px;
@@ -100,56 +83,9 @@
   gap: 6px;
 }
 
-.movie-card__bookmark {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(10, 12, 16, 0.78);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  transition:
-    background 150ms,
-    border-color 150ms,
-    transform 150ms;
-}
-.movie-card__bookmark:hover {
-  transform: scale(1.08);
-}
-.movie-card__bookmark.is-active {
-  background: var(--card-accent, var(--color-accent));
-  border-color: var(--card-accent, var(--color-accent));
-  color: #fff;
-}
-
-.movie-card__like {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(10, 12, 16, 0.78);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  transition:
-    background 150ms,
-    border-color 150ms,
-    transform 150ms;
-}
-.movie-card__like:hover {
-  transform: scale(1.08);
-}
-.movie-card__like.is-active {
-  background: #e0245e;
-  border-color: #e0245e;
-  color: #fff;
-}
-
+.movie-card__bookmark,
+.movie-card__log,
+.movie-card__like,
 .movie-card__unlike {
   width: 28px;
   height: 28px;
@@ -160,29 +96,38 @@
   background: rgba(10, 12, 16, 0.78);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #e0245e;
-  transition: transform 150ms;
+  color: #fff;
+  transition:
+    background 150ms,
+    border-color 150ms,
+    transform 150ms;
 }
+.movie-card__bookmark:hover,
+.movie-card__log:hover,
+.movie-card__like:hover,
 .movie-card__unlike:hover {
   transform: scale(1.08);
 }
 
-/* ---------- Sol alt: kullanıcının kendi puanı ---------- */
-.movie-card__user-rating {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background-color: rgba(10, 12, 16, 0.78);
-  backdrop-filter: blur(6px);
-  color: #d4af37;
-  padding: 4px 9px;
-  border-radius: var(--radius-pill);
-  font-size: 0.75rem;
-  font-weight: 700;
+.movie-card__bookmark.is-active {
+  background: var(--card-accent, var(--color-accent));
+  border-color: var(--card-accent, var(--color-accent));
+  color: #fff;
+}
+
+.movie-card__log:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.movie-card__like.is-active {
+  background: #e0245e;
+  border-color: #e0245e;
+  color: #fff;
+}
+
+.movie-card__unlike {
+  color: #e0245e;
 }
 
 /* ---------- Grid yerleşimi (kullanım yerinde) ---------- */
@@ -232,177 +177,51 @@
   border-radius: 6px;
 }
 
-/* ---------- Kendi puanın: tıklanabilir hale getir ---------- */
-.movie-card__user-rating {
-  border: none;
-  cursor: default;
-}
-.movie-card__user-rating.is-clickable {
-  cursor: pointer;
-  transition:
-    transform 150ms,
-    background 150ms,
-    box-shadow 150ms;
-}
-.movie-card__user-rating-edit {
-  display: none;
-  color: rgba(255, 255, 255, 0.7);
-  margin-left: 2px;
-}
-.movie-card__user-rating.is-clickable:hover {
-  background-color: rgba(10, 12, 16, 0.95);
-  transform: scale(1.06);
-  box-shadow: 0 0 0 1px #d4af37;
-}
-.movie-card__user-rating.is-clickable:hover .movie-card__user-rating-edit {
-  display: inline-flex;
-}
-
-.movie-card__rate-cta {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  z-index: 1;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
+/* ---------- Puan satırı: kartın bilgi alanında, tam genişlik, 5 yıldız ---------- */
+.movie-card__rate-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(10, 12, 16, 0.78);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #d4af37;
-  transition:
-    transform 150ms,
-    background 150ms;
-}
-.movie-card__rate-cta:hover {
-  transform: scale(1.08);
-  background-color: rgba(10, 12, 16, 0.92);
-}
-
-/* ---------- Puanlama paneli ---------- */
-.movie-card__rate-panel {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  right: 8px;
-  z-index: 3;
-  display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  background: rgba(8, 10, 14, 0.92);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: var(--radius-pill);
-  padding: 5px 8px;
+  width: 100%;
+  margin-top: 9px;
+  color: #d4af37;
 }
-.movie-card__rate-stars {
-  display: flex;
-  gap: 2px;
-}
-.movie-card__rate-star {
+
+.movie-card__rate-row-star {
   position: relative;
   display: inline-flex;
-  color: #d4af37;
 }
-.movie-card__rate-star-base {
-  color: rgba(255, 255, 255, 0.3);
+.movie-card__rate-row-star-base {
+  color: rgba(255, 255, 255, 0.18);
 }
-.movie-card__rate-star-fill {
+.movie-card__rate-row-star-fill {
   position: absolute;
   inset: 0;
   overflow: hidden;
   display: block;
 }
-.movie-card__rate-hit {
+
+.movie-card__rate-row-hit {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: -6px;
+  bottom: -6px;
   width: 50%;
   padding: 0;
   border: none;
   background: transparent;
   cursor: pointer;
 }
-.movie-card__rate-hit--left {
+.movie-card__rate-row-hit--left {
   left: 0;
 }
-.movie-card__rate-hit--right {
+.movie-card__rate-row-hit--right {
   right: 0;
 }
-.movie-card__rate-close {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  flex-shrink: 0;
+
+/* Sadece görüntüleme amaçlı (onRate verilmemiş) satırlarda imleç değişmesin */
+.movie-card__rate-row:not(.is-interactive) {
+  pointer-events: none;
 }
 
-/* ---------- Sağ alt: silme (Films sekmesi) ---------- */
-.movie-card__delete {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  z-index: 1;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(10, 12, 16, 0.78);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #e0245e;
-  transition:
-    transform 150ms,
-    background 150ms;
-}
-.movie-card__delete:hover {
-  transform: scale(1.08);
-  background: rgba(224, 36, 94, 0.85);
-  color: #fff;
-}
-
-.movie-card__delete-confirm {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  z-index: 3;
-  display: flex;
-  gap: 5px;
-  background: rgba(8, 10, 14, 0.92);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: var(--radius-pill);
-  padding: 4px;
-}
-.movie-card__delete-confirm-yes,
-.movie-card__delete-confirm-no {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.movie-card__delete-confirm-yes {
-  background: #e0245e;
-  color: #fff;
-}
-.movie-card__delete-confirm-no {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-}
 .movie-card.card {
   background: transparent;
   border-color: transparent;

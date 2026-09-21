@@ -11,7 +11,7 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { followService } from "@/services";
-import RecentlyWatchedCard from "@/components/movie/RecentlyWatchedCard";
+import MovieCard from "@/components/movie/MovieCard";
 import ListCard from "../Lists/ListCard";
 import Favorites from "@/components/profile/Favorites";
 import ProfileHeader from "@/components/profile/ProfileHeader";
@@ -183,10 +183,10 @@ export default function UserProfilePage() {
               {profile.recentlyWatched.length > 0 ? (
                 <div className="rw-grid">
                   {profile.recentlyWatched.map((item) => (
-                    <RecentlyWatchedCard
+                    <MovieCard
                       key={item.movie.id}
                       movie={item.movie}
-                      rating={item.userRating}
+                      userRating={item.userRating}
                     />
                   ))}
                 </div>
