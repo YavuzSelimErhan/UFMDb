@@ -6,7 +6,6 @@ import {
   Heart,
   Bookmark,
   CheckCircle2,
-  User,
   Ticket,
   X,
   Trash2,
@@ -18,6 +17,7 @@ import { movieService, screeningLogService } from "@/services";
 import { useAppSelector } from "@/store";
 import { getEntityTheme } from "@/utils/listTheme";
 import StarRating from "@/components/movie/StarRating";
+import PersonAvatar from "@/components/common/PersonAvatar";
 import { PageSpinner, PageError } from "@/components/common/PageState";
 import "./MovieDetailPage.css";
 
@@ -362,13 +362,12 @@ export default function MovieDetailPage() {
                     to={`/directors/${d.id}`}
                     className="movie-detail__director-card"
                   >
-                    {d.photoUrl ? (
-                      <img src={d.photoUrl} alt="" />
-                    ) : (
-                      <span className="movie-detail__director-card-fallback">
-                        <User size={18} />
-                      </span>
-                    )}
+                    <PersonAvatar
+                      id={d.id}
+                      photoUrl={d.photoUrl}
+                      fullName={d.fullName}
+                      size="sm"
+                    />
                     <span>{d.fullName}</span>
                   </Link>
                 ))}
@@ -385,7 +384,12 @@ export default function MovieDetailPage() {
                   to={`/actors/${c.actorId}`}
                   className="movie-detail__cast-item"
                 >
-                  <img src={c.photoUrl} alt={c.fullName} />
+                  <PersonAvatar
+                    id={c.actorId}
+                    photoUrl={c.photoUrl}
+                    fullName={c.fullName}
+                    size="sm"
+                  />
                   <span>{c.fullName}</span>
                   <span className="text-muted">{c.characterName}</span>
                 </Link>

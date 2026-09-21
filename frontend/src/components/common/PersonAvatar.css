@@ -1,0 +1,45 @@
+.person-avatar {
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.person-avatar--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    160deg,
+    var(--fallback-accent) 0%,
+    var(--fallback-accent-soft) 100%
+  );
+  color: #fff;
+}
+
+.person-avatar__icon {
+  width: 42%;
+  height: 42%;
+  opacity: 0.9;
+}
+
+/* ---------- boyutlar ---------- */
+.person-avatar--sm {
+  width: 48px;
+  height: 48px;
+}
+.person-avatar--md {
+  width: 76px;
+  height: 76px;
+}
+.person-avatar--lg {
+  width: 180px;
+  height: 180px;
+}
+
+@media (max-width: 480px) {
+  .person-avatar--lg {
+    width: 120px;
+    height: 120px;
+  }
+}

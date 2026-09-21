@@ -5,6 +5,7 @@ import { Heart } from "lucide-react";
 import { directorService } from "@/services";
 import { useAppSelector } from "@/store";
 import MovieCard from "@/components/movie/MovieCard";
+import PersonAvatar from "@/components/common/PersonAvatar";
 import { PageSpinner, PageError } from "@/components/common/PageState";
 import "./DirectorDetailPage.css";
 
@@ -46,9 +47,11 @@ export default function DirectorDetailPage() {
   return (
     <div className="container actor-page">
       <div className="actor-page__header">
-        <img
-          src={director.photoUrl}
-          alt={director.fullName}
+        <PersonAvatar
+          id={director.id}
+          photoUrl={director.photoUrl}
+          fullName={director.fullName}
+          size="lg"
           className="actor-page__photo"
         />
         <div className="actor-page__header-info">
