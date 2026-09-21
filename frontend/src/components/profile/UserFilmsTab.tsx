@@ -71,14 +71,6 @@ export default function UserFilmsTab({ userId }: { userId: string }) {
             key={entry.movieId}
             movie={entry.movie}
             userRating={entry.userRating}
-            subtitle={new Date(entry.watchedAtUtc).toLocaleDateString(
-              i18n.language,
-              {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              },
-            )}
             interactive={false}
           />
         ))}
