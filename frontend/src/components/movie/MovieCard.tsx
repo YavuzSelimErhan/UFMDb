@@ -19,7 +19,6 @@ interface Props {
   onLogClick?: () => void;
   rank?: number;
   compact?: boolean;
-  subtitle?: string;
 }
 
 export default function MovieCard({
@@ -32,7 +31,6 @@ export default function MovieCard({
   onLogClick,
   rank,
   compact,
-  subtitle,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -231,16 +229,12 @@ export default function MovieCard({
             </button>
           )}
         </div>
+
+        <span className="movie-card__title-overlay">{movie.title}</span>
       </div>
 
-      <div className="movie-card__info">
-        <h3 className="movie-card__title">{movie.title}</h3>
-        <p className="movie-card__meta text-muted">
-          {subtitle ??
-            `${movie.releaseYear} · ${movie.genres.slice(0, 2).join(", ")}`}
-        </p>
-
-        {showRatingRow && (
+      {showRatingRow && (
+        <div className="movie-card__info">
           <div
             className={`movie-card__rate-row${onRate ? " is-interactive" : ""}`}
             onClick={stop}
@@ -295,8 +289,8 @@ export default function MovieCard({
               );
             })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </Link>
   );
 }

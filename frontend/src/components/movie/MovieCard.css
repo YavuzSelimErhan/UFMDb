@@ -11,8 +11,8 @@
 
 .movie-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 16px 32px var(--color-shadow);
-  border-color: var(--color-accent-dim);
+  box-shadow: 0 16px 32px var(--color-shadow-accent);
+  border-color: var(--color-accent);
 }
 
 .movie-card__poster-wrap {
@@ -48,28 +48,39 @@
 }
 
 .movie-card__info {
-  padding: 12px 13px 15px;
+  padding: 10px 13px 13px;
 }
 
-.movie-card__title {
+/* ---------- Film adı: poster üzerinde, sadece hover'da (2s bekleyince) ---------- */
+.movie-card__title-overlay {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  z-index: 1;
   font-size: 0.85rem;
   font-weight: 600;
   line-height: 1.3;
-  white-space: nowrap;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  transition: color var(--transition-fast);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
 }
-.movie-card:hover .movie-card__title {
-  color: var(--color-accent);
-}
-
-.movie-card__meta {
-  font-size: 0.7rem;
-  margin-top: 5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.movie-card:hover .movie-card__title-overlay {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 220ms ease 1.8s,
+    transform 220ms ease 1.8s;
 }
 
 /* ---------- Sol üst: watchlist + log + like/unlike ikonları, alt alta ---------- */
@@ -228,8 +239,8 @@
   box-shadow: none;
 }
 .movie-card.card:hover {
-  border-color: transparent;
-  box-shadow: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 16px 32px var(--color-shadow-accent);
 }
 .movie-card__info {
   background: transparent;

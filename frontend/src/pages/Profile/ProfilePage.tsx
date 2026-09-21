@@ -211,7 +211,6 @@ export default function ProfilePage() {
                         key={item.movie.id}
                         movie={item.movie}
                         userRating={item.userRating}
-                        interactive={false}
                         compact
                       />
                     ))}

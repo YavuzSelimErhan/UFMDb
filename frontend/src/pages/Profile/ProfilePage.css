@@ -337,3 +337,10 @@
 .profile-page__create-list {
   flex-shrink: 0;
 }
+.rw-grid {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x proximity;
+}

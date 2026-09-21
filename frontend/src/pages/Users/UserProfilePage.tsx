@@ -187,7 +187,6 @@ export default function UserProfilePage() {
                       key={item.movie.id}
                       movie={item.movie}
                       userRating={item.userRating}
-                      interactive={false}
                       compact
                     />
                   ))}
