@@ -1,11 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpDown, LayoutGrid, LayoutList } from "lucide-react";
+import {
+  useInfiniteQuery,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import { profileService, movieService } from "@/services";
-import Dropdown from "@/components/search/Dropdown";
 import MovieCard from "@/components/movie/MovieCard";
+import FilmsToolbar, {
+  type FilterType,
+  type ViewMode,
+} from "@/components/profile/FilmsToolbar";
+import FilmsGrid from "@/components/profile/FilmsGrid";
 import { useWatchedFilmsCounts } from "@/hooks/useWatchedFilmsCounts";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import type { WatchedMovie } from "@/types";
@@ -14,21 +21,7 @@ import "./ProfileFilmsTab.css";
 const PAGE_SIZE = 24;
 const DEFAULT_SORT = "release-desc";
 
-type FilterType = "all" | "rated" | "unrated";
-type ViewMode = "grid" | "masonry";
 type FilmsPage = { items: WatchedMovie[]; page: number; totalPages: number };
-
-// İzlenme tarihine göre sıralama kaldırıldı; varsayılan artık çıkış
-// tarihine göre yeni -> eski.
-const SORT_OPTIONS = [
-  { value: "release-desc", labelKey: "releaseDesc" },
-  { value: "release-asc", labelKey: "releaseAsc" },
-  { value: "rating-desc", labelKey: "myRatingDesc" },
-  { value: "rating-asc", labelKey: "myRatingAsc" },
-  { value: "movie-rating-desc", labelKey: "filmRatingDesc" },
-  { value: "movie-rating-asc", labelKey: "filmRatingAsc" },
-  { value: "title-asc", labelKey: "titleAsc" },
-];
 
 export default function ProfileFilmsTab() {
   const { t } = useTranslation();
@@ -39,8 +32,7 @@ export default function ProfileFilmsTab() {
   const sortBy = searchParams.get("fs") || DEFAULT_SORT;
   const viewMode = (searchParams.get("fv") as ViewMode) || "grid";
   // Sayfadan ayrılıp geri dönüldüğünde kaldığı yere devam edebilmesi için
-  // son görüntülenen sayfa URL'de tutulur; veri artık tek seferde değil
-  // sayfa sayfa (ve React Query cache'i üzerinden) getirilir.
+  // son görüntülenen sayfa URL'de tutulur.
   const restorePageParam = Number(searchParams.get("fp")) || 1;
 
   const [savingMovieId, setSavingMovieId] = useState<string | null>(null);
@@ -75,6 +67,7 @@ export default function ProfileFilmsTab() {
   const {
     data,
     isLoading,
+    isFetching,
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
@@ -92,6 +85,10 @@ export default function ProfileFilmsTab() {
     getNextPageParam: (last: FilmsPage) =>
       last.page < last.totalPages ? last.page + 1 : undefined,
     staleTime: 30_000,
+    // Filtre/sıralama değişince ekran her seferinde boş skeleton'a dönmez;
+    // önceki sonuçlar yenisi gelene kadar (hafifçe soluklaşarak) ekranda
+    // kalır. Bkz. FilmsGrid `dimmed` prop'u.
+    placeholderData: keepPreviousData,
   });
 
   // İlk yüklemede, kullanıcı daha önce N. sayfaya kadar gezinmişse
@@ -170,132 +167,38 @@ export default function ProfileFilmsTab() {
 
   return (
     <div className="films-tab">
-      <div className="films-toolbar">
-        <div
-          className="filter-pills"
-          role="tablist"
-          aria-label={t("profile.filmsFilterAriaLabel")}
-        >
-          <button
-            type="button"
-            role="tab"
-            aria-selected={filter === "all"}
-            className={`pill${filter === "all" ? " pill-active" : ""}`}
-            onClick={() => setFilter("all")}
-          >
-            {t("profile.filmsFilterAll")}{" "}
-            <span className="pill-count">{counts.all}</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={filter === "rated"}
-            className={`pill${filter === "rated" ? " pill-active" : ""}`}
-            onClick={() => setFilter("rated")}
-          >
-            {t("profile.filmsFilterRated")}{" "}
-            <span className="pill-count">{counts.rated}</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={filter === "unrated"}
-            className={`pill${filter === "unrated" ? " pill-active" : ""}`}
-            onClick={() => setFilter("unrated")}
-          >
-            {t("profile.filmsFilterUnrated")}{" "}
-            <span className="pill-count">{counts.unrated}</span>
-          </button>
-        </div>
-
-        <div className="toolbar-right">
-          <Dropdown
-            icon={<ArrowUpDown size={14} />}
-            value={sortBy}
-            options={SORT_OPTIONS.map((o) => ({
-              value: o.value,
-              label: t(`profile.filmsSort.${o.labelKey}`),
-            }))}
-            onChange={setSortBy}
-          />
-
-          <div
-            className="view-toggle"
-            role="group"
-            aria-label={t("profile.viewModeAriaLabel")}
-          >
-            <button
-              type="button"
-              className={`view-btn${viewMode === "grid" ? " view-btn-active" : ""}`}
-              onClick={() => setViewMode("grid")}
-              aria-label={t("profile.gridView")}
-              aria-pressed={viewMode === "grid"}
-            >
-              <LayoutGrid size={14} />
-            </button>
-            <button
-              type="button"
-              className={`view-btn${viewMode === "masonry" ? " view-btn-active" : ""}`}
-              onClick={() => setViewMode("masonry")}
-              aria-label={t("profile.freeView")}
-              aria-pressed={viewMode === "masonry"}
-            >
-              <LayoutList size={14} />
-            </button>
-          </div>
-        </div>
-      </div>
+      <FilmsToolbar
+        filter={filter}
+        onFilterChange={setFilter}
+        counts={counts}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+      />
 
       {error && <p className="films-error">{error}</p>}
 
-      {isLoading ? (
-        <div className="movie-grid movie-grid--6">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="film-skeleton" />
-          ))}
-        </div>
-      ) : entries.length > 0 ? (
-        <>
-          <div
-            className={`movie-grid movie-grid--6${viewMode === "masonry" ? " movie-grid-masonry" : ""}`}
-            aria-busy={isFetchingNextPage}
-          >
-            {entries.map((entry) => (
-              <MovieCard
-                key={entry.movieId}
-                movie={entry.movie}
-                userRating={entry.userRating}
-                onRate={(value) => handleRate(entry.movieId, value)}
-                isRatingSaving={savingMovieId === entry.movieId}
-                onLogClick={() => openLog(entry.movie)}
-              />
-            ))}
-            {isFetchingNextPage &&
-              Array.from({ length: 6 }).map((_, i) => (
-                <div key={`more-${i}`} className="film-skeleton" />
-              ))}
-          </div>
+      <FilmsGrid
+        entries={entries}
+        getKey={(entry) => entry.movieId}
+        renderCard={(entry) => (
+          <MovieCard
+            movie={entry.movie}
+            userRating={entry.userRating}
+            onRate={(value) => handleRate(entry.movieId, value)}
+            isRatingSaving={savingMovieId === entry.movieId}
+            onLogClick={() => openLog(entry.movie)}
+          />
+        )}
+        isLoading={isLoading}
+        isFetchingNextPage={isFetchingNextPage}
+        hasNextPage={!!hasNextPage}
+        onLoadMore={loadMore}
+        viewMode={viewMode}
+        dimmed={isFetching && !isFetchingNextPage && !isLoading}
+      />
 
-          {hasNextPage && (
-            <div className="load-more-wrap">
-              <button
-                type="button"
-                className="load-more-btn btn-secondary"
-                onClick={loadMore}
-                disabled={isFetchingNextPage}
-              >
-                {isFetchingNextPage
-                  ? t("profile.loadingMore")
-                  : t("profile.loadMore")}
-              </button>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="empty-state">
-          <p>{t("profile.noFilmsForFilter")}</p>
-        </div>
-      )}
       {logModal}
     </div>
   );

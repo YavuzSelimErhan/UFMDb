@@ -1,93 +1,82 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
-import { Film } from "lucide-react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { followService } from "@/services";
 import MovieCard from "@/components/movie/MovieCard";
-import { EmptyState } from "@/components/common/PageState";
+import FilmsGrid from "@/components/profile/FilmsGrid";
+import { PageError } from "@/components/common/PageState";
 import type { WatchedMovie } from "@/types";
 import "./ProfileFilmsTab.css";
 
 const PAGE_SIZE = 24;
 
+type FilmsPage = { items: WatchedMovie[]; page: number; totalPages: number };
+
+/**
+ * Başka bir kullanıcının izlediği filmler listesi. ProfileFilmsTab'daki
+ * filtre/sıralama araç çubuğu yok (bu bir başkasının profili), ama
+ * sayfalama, iskelet yükleme, boş durum ve artık hata yönetimi de dahil
+ * olmak üzere aynı FilmsGrid altyapısını paylaşıyor.
+ */
 export default function UserFilmsTab({ userId }: { userId: string }) {
   const { t } = useTranslation();
-  const [entries, setEntries] = useState<WatchedMovie[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isFetching, setIsFetching] = useState(false);
 
-  const { isLoading } = useQuery({
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    isError,
+    refetch,
+  } = useInfiniteQuery({
     queryKey: ["user-watched-films", userId],
-    queryFn: async () => {
-      const result = await followService.getWatchedFilms(userId, {
-        page: 1,
+    queryFn: ({ pageParam }) =>
+      followService.getWatchedFilms(userId, {
+        page: pageParam,
         pageSize: PAGE_SIZE,
-      });
-      setEntries(result.items);
-      setTotalPages(result.totalPages);
-      setPage(1);
-      return result;
-    },
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (last: FilmsPage) =>
+      last.page < last.totalPages ? last.page + 1 : undefined,
     staleTime: 30_000,
   });
 
-  const loadMore = async () => {
-    setIsFetching(true);
-    try {
-      const result = await followService.getWatchedFilms(userId, {
-        page: page + 1,
-        pageSize: PAGE_SIZE,
-      });
-      setEntries((prev) => [...prev, ...result.items]);
-      setPage(result.page);
-      setTotalPages(result.totalPages);
-    } finally {
-      setIsFetching(false);
-    }
-  };
+  const entries = useMemo(
+    () => data?.pages.flatMap((p) => p.items) ?? [],
+    [data],
+  );
 
-  if (isLoading) {
+  // Önceki sürümde hata yönetimi hiç yoktu (fetch başarısız olursa sessizce
+  // takılı kalıyordu). Artık diğer sekmelerle tutarlı bir hata + yeniden
+  // deneme ekranı gösteriyor.
+  if (isError) {
     return (
-      <div className="movie-grid movie-grid--6">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className="film-skeleton" />
-        ))}
-      </div>
-    );
-  }
-
-  if (entries.length === 0) {
-    return (
-      <EmptyState icon={<Film size={26} />} title={t("profile.emptyContent")} />
+      <PageError
+        message={t("errors.userFilmsFailed")}
+        onRetry={() => refetch()}
+      />
     );
   }
 
   return (
     <div className="films-tab">
-      <div className="movie-grid movie-grid--6">
-        {entries.map((entry) => (
+      <FilmsGrid
+        entries={entries}
+        getKey={(entry) => entry.movieId}
+        renderCard={(entry) => (
           <MovieCard
-            key={entry.movieId}
             movie={entry.movie}
             userRating={entry.userRating}
             interactive={false}
           />
-        ))}
-      </div>
-
-      {page < totalPages && (
-        <div className="load-more-wrap">
-          <button
-            type="button"
-            className="load-more-btn btn-secondary"
-            onClick={loadMore}
-            disabled={isFetching}
-          >
-            {isFetching ? t("profile.loadingMore") : t("profile.loadMore")}
-          </button>
-        </div>
-      )}
+        )}
+        isLoading={isLoading}
+        isFetchingNextPage={isFetchingNextPage}
+        hasNextPage={!!hasNextPage}
+        onLoadMore={() => fetchNextPage()}
+        emptyTitle={t("profile.emptyContent")}
+      />
     </div>
   );
 }

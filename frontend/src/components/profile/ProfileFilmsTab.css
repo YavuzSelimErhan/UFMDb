@@ -112,6 +112,22 @@
   color: #d3554f;
 }
 
+/* Grid wrapper (used for the fade-while-refetching effect) */
+
+.films-grid {
+  transition: opacity 0.15s ease;
+}
+
+.films-grid--dimmed {
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .films-grid {
+    transition: none;
+  }
+}
+
 /* Grid */
 
 .movie-grid--6 {
@@ -141,6 +157,17 @@
   .movie-grid--6 {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* Ekran dışındaki kartlar için layout/paint/style hesaplamasını atlar.
+   contain-intrinsic-size, kart yaklaşık boyutuna göre bir tahmindir; kart
+   tasarımınız değişirse (rozet, başlık satır sayısı vb.) bu değeri gerçek
+   ortalama kart yüksekliğine göre ayarlayın ki scroll sırasında sıçrama
+   olmasın. */
+.film-card-cv {
+  content-visibility: auto;
+  contain: layout style;
+  contain-intrinsic-size: 210px 360px;
 }
 
 .confirm-btn {
@@ -219,4 +246,18 @@
 
 .load-more-btn {
   border-radius: var(--radius-pill);
+}
+
+/* Erişilebilirlik: görsel olarak gizli ama ekran okuyucular tarafından
+   okunabilir aria-live duyuru bölgesi için. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
