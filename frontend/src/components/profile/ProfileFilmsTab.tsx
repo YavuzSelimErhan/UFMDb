@@ -7,6 +7,7 @@ import { profileService, movieService } from "@/services";
 import Dropdown from "@/components/search/Dropdown";
 import MovieCard from "@/components/movie/MovieCard";
 import { useWatchedFilmsCounts } from "@/hooks/useWatchedFilmsCounts";
+import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import type { WatchedMovie } from "@/types";
 import "./ProfileFilmsTab.css";
 
@@ -39,6 +40,7 @@ export default function ProfileFilmsTab() {
 
   const [savingMovieId, setSavingMovieId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const { openLog, logModal } = useScreeningLogModal();
 
   const hasRatingParam = filter === "all" ? undefined : filter === "rated";
 
@@ -270,6 +272,7 @@ export default function ProfileFilmsTab() {
                 userRating={entry.userRating}
                 onRate={(value) => handleRate(entry.movieId, value)}
                 isRatingSaving={savingMovieId === entry.movieId}
+                onLogClick={() => openLog(entry.movie)}
               />
             ))}
           </div>
@@ -292,6 +295,7 @@ export default function ProfileFilmsTab() {
           <p>{t("profile.noFilmsForFilter")}</p>
         </div>
       )}
+      {logModal}
     </div>
   );
 }

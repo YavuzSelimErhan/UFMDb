@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { followService } from "@/services";
 import MovieCard from "@/components/movie/MovieCard";
+import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import ListCard from "../Lists/ListCard";
 import Favorites from "@/components/profile/Favorites";
 import ProfileHeader from "@/components/profile/ProfileHeader";
@@ -38,6 +39,7 @@ export default function UserProfilePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const tab = (searchParams.get("tab") as ProfileTab) || "profile";
+  const { openLog, logModal } = useScreeningLogModal();
 
   const setTab = (next: ProfileTab) => {
     const n = new URLSearchParams(searchParams);
@@ -188,6 +190,7 @@ export default function UserProfilePage() {
                       movie={item.movie}
                       userRating={item.userRating}
                       compact
+                      onLogClick={() => openLog(item.movie)}
                     />
                   ))}
                 </div>
@@ -257,6 +260,7 @@ export default function UserProfilePage() {
           </section>
         )}
       </div>
+      {logModal}
     </div>
   );
 }

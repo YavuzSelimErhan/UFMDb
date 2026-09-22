@@ -16,6 +16,7 @@ import {
   countryService,
 } from "@/services";
 import MovieCard from "@/components/movie/MovieCard";
+import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import YearPicker from "@/components/search/YearPicker";
 import Pagination from "@/components/common/Pagination";
 import Dropdown from "@/components/search/Dropdown";
@@ -143,6 +144,7 @@ function writeFilterParams(n: URLSearchParams, filter: MovieSearchFilter) {
 export default function SearchPage() {
   const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { openLog, logModal } = useScreeningLogModal();
 
   const tab = (searchParams.get("tab") as Tab) || "movies";
   const theme = THEME[tab];
@@ -447,7 +449,11 @@ export default function SearchPage() {
               <>
                 <div className="movie-grid">
                   {data.items.map((m) => (
-                    <MovieCard key={m.id} movie={m} />
+                    <MovieCard
+                      key={m.id}
+                      movie={m}
+                      onLogClick={() => openLog(m)}
+                    />
                   ))}
                 </div>
                 <Pagination
@@ -485,6 +491,8 @@ export default function SearchPage() {
           onPageChange={setPersonPage}
         />
       )}
+
+      {logModal}
     </div>
   );
 }

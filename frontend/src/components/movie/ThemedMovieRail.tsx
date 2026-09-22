@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import MovieCard from "@/components/movie/MovieCard";
+import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import type { MovieListItem } from "@/types";
 import "./ThemedMovieRail.css";
 
@@ -61,6 +62,7 @@ export default function ThemedMovieRail({
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
   const [progress, setProgress] = useState(0);
+  const { openLog, logModal } = useScreeningLogModal();
   const colors = THEME_COLORS[theme];
 
   const sync = () => {
@@ -157,6 +159,7 @@ export default function ThemedMovieRail({
               movie={m}
               rank={showRank ? i + 1 : undefined}
               compact
+              onLogClick={() => openLog(m)}
             />
           ))}
         </div>
@@ -176,6 +179,8 @@ export default function ThemedMovieRail({
           style={{ width: `${progress}%` }}
         />
       </div>
+
+      {logModal}
     </section>
   );
 }

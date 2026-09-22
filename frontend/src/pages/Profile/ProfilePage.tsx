@@ -22,6 +22,7 @@ import { setTheme } from "@/store/uiSlice";
 import { SUPPORTED_LANGUAGES, languageLabel } from "@/i18n/languages";
 import Dropdown from "@/components/search/Dropdown";
 import MovieCard from "@/components/movie/MovieCard";
+import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import ListCard from "./../Lists/ListCard";
 import Favorites from "@/components/profile/Favorites";
 import ProfileFilmsTab from "@/components/profile/ProfileFilmsTab";
@@ -51,6 +52,7 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = (searchParams.get("tab") as ProfileTab) || "profile";
+  const { openLog, logModal } = useScreeningLogModal();
 
   const setTab = (next: ProfileTab) => {
     const n = new URLSearchParams(searchParams);
@@ -212,6 +214,7 @@ export default function ProfilePage() {
                         movie={item.movie}
                         userRating={item.userRating}
                         compact
+                        onLogClick={() => openLog(item.movie)}
                       />
                     ))}
                   </div>
@@ -323,6 +326,7 @@ export default function ProfilePage() {
           </section>
         )}
       </div>
+      {logModal}
     </div>
   );
 }

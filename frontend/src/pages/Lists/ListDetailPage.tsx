@@ -6,6 +6,7 @@ import { ChevronLeft, Pencil, Trash2, Check, X } from "lucide-react";
 import { listService } from "@/services";
 import { useAppSelector } from "@/store";
 import MovieCard from "@/components/movie/MovieCard";
+import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import { getListTheme } from "@/utils/listTheme";
 import { PageSpinner, PageError } from "@/components/common/PageState";
 import "./ListDetailPage.css";
@@ -22,6 +23,7 @@ export default function ListDetailPage() {
   const isAdmin = role === "Admin";
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const { openLog, logModal } = useScreeningLogModal();
 
   const {
     data: list,
@@ -143,9 +145,10 @@ export default function ListDetailPage() {
 
       <div className="movie-grid">
         {list.movies.map((m) => (
-          <MovieCard key={m.id} movie={m} />
+          <MovieCard key={m.id} movie={m} onLogClick={() => openLog(m)} />
         ))}
       </div>
+      {logModal}
     </div>
   );
 }

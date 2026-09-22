@@ -5,6 +5,7 @@ import { Heart } from "lucide-react";
 import { actorService } from "@/services";
 import { useAppSelector } from "@/store";
 import MovieCard from "@/components/movie/MovieCard";
+import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import PersonAvatar from "@/components/common/PersonAvatar";
 import { PageSpinner, PageError } from "@/components/common/PageState";
 import "./ActorDetailPage.css";
@@ -14,6 +15,7 @@ export default function ActorDetailPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAppSelector((s) => s.auth);
+  const { openLog, logModal } = useScreeningLogModal();
 
   const {
     data: actor,
@@ -89,9 +91,10 @@ export default function ActorDetailPage() {
       <h2 className="actor-page__section-title">{t("actor.filmography")}</h2>
       <div className="movie-grid">
         {actor.filmography.map((m) => (
-          <MovieCard key={m.id} movie={m} />
+          <MovieCard key={m.id} movie={m} onLogClick={() => openLog(m)} />
         ))}
       </div>
+      {logModal}
     </div>
   );
 }

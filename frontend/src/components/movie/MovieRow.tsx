@@ -1,5 +1,6 @@
 import type { MovieListItem } from '@/types';
 import MovieCard from '@/components/movie/MovieCard';
+import { useScreeningLogModal } from '@/hooks/useScreeningLogModal';
 import './MovieRow.css';
 
 interface Props {
@@ -8,6 +9,8 @@ interface Props {
 }
 
 export default function MovieRow({ title, movies }: Props) {
+  const { openLog, logModal } = useScreeningLogModal();
+
   if (movies.length === 0) return null;
 
   return (
@@ -16,10 +19,11 @@ export default function MovieRow({ title, movies }: Props) {
       <div className="movie-row__scroll">
         {movies.map((m) => (
           <div key={m.id} className="movie-row__item">
-            <MovieCard movie={m} />
+            <MovieCard movie={m} onLogClick={() => openLog(m)} />
           </div>
         ))}
       </div>
+      {logModal}
     </section>
   );
 }

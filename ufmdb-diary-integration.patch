@@ -1,0 +1,641 @@
+diff --git a/frontend/src/components/movie/LogScreeningModal.css b/frontend/src/components/movie/LogScreeningModal.css
+new file mode 100644
+index 0000000..9ca8d7e
+--- /dev/null
++++ b/frontend/src/components/movie/LogScreeningModal.css
+@@ -0,0 +1,122 @@
++.log-screening-backdrop {
++  position: fixed;
++  inset: 0;
++  z-index: 100;
++  background: rgba(5, 7, 10, 0.7);
++  backdrop-filter: blur(6px);
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  padding: 20px;
++  animation: log-screening-fade-in 0.2s ease;
++}
++
++.log-screening-modal {
++  width: 100%;
++  max-width: 420px;
++  background-color: var(--color-bg-elevated);
++  border: 1px solid var(--color-border);
++  border-radius: var(--radius-lg);
++  padding: 24px;
++  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
++}
++
++.log-screening-modal__header {
++  display: flex;
++  align-items: flex-start;
++  justify-content: space-between;
++  gap: 12px;
++  margin-bottom: 18px;
++}
++.log-screening-modal__eyebrow {
++  display: inline-flex;
++  align-items: center;
++  gap: 5px;
++  font-family:
++    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
++  font-size: 0.65rem;
++  letter-spacing: 0.08em;
++  color: var(--color-accent);
++  margin-bottom: 6px;
++}
++.log-screening-modal__header h3 {
++  font-family: var(--font-display);
++  font-style: italic;
++  font-size: 1.1rem;
++  font-weight: 800;
++  color: var(--color-text-primary);
++  margin: 0;
++}
++.log-screening-modal__close {
++  width: 30px;
++  height: 30px;
++  border-radius: 50%;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  color: var(--color-text-muted);
++  border: 1px solid var(--color-border);
++  flex-shrink: 0;
++  transition:
++    background-color 150ms,
++    color 150ms;
++}
++.log-screening-modal__close:hover {
++  background-color: var(--color-bg-card-hover);
++  color: var(--color-text-primary);
++}
++
++.log-screening-modal__row {
++  display: flex;
++  flex-wrap: wrap;
++  gap: 20px;
++  margin-bottom: 20px;
++}
++.log-screening-modal__field {
++  display: flex;
++  flex-direction: column;
++  gap: 6px;
++}
++.log-screening-modal__field label {
++  font-size: 0.78rem;
++  font-weight: 600;
++  color: var(--color-text-secondary);
++}
++.log-screening-modal__field input[type="date"] {
++  padding: 8px 10px;
++  border-radius: var(--radius-sm);
++  border: 1px solid var(--color-border);
++  background-color: var(--color-bg);
++  color: var(--color-text-primary);
++  height: 38px;
++}
++
++.log-screening-modal__submit {
++  width: 100%;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  gap: 6px;
++}
++.log-screening-modal__spinner {
++  animation: log-screening-spin 0.8s linear infinite;
++}
++
++@keyframes log-screening-fade-in {
++  from {
++    opacity: 0;
++    transform: translateY(6px);
++  }
++  to {
++    opacity: 1;
++    transform: translateY(0);
++  }
++}
++@keyframes log-screening-spin {
++  from {
++    transform: rotate(0deg);
++  }
++  to {
++    transform: rotate(360deg);
++  }
++}
+diff --git a/frontend/src/components/movie/LogScreeningModal.tsx b/frontend/src/components/movie/LogScreeningModal.tsx
+new file mode 100644
+index 0000000..375911b
+--- /dev/null
++++ b/frontend/src/components/movie/LogScreeningModal.tsx
+@@ -0,0 +1,106 @@
++import { useState } from "react";
++import { useMutation, useQueryClient } from "@tanstack/react-query";
++import { useTranslation } from "react-i18next";
++import { X, Loader2, Ticket } from "lucide-react";
++import { screeningLogService } from "@/services";
++import StarRating from "./StarRating";
++import type { MovieListItem } from "@/types";
++import "./LogScreeningModal.css";
++
++function todayLocalDateString(): string {
++  const d = new Date();
++  const offsetMs = d.getTimezoneOffset() * 60000;
++  return new Date(d.getTime() - offsetMs).toISOString().slice(0, 10);
++}
++
++export type LoggableMovie = Pick<MovieListItem, "id" | "title">;
++
++interface Props {
++  movie: LoggableMovie;
++  onClose: () => void;
++}
++
++/**
++ * Film kartlarındaki "Seans Ekle" (günlük) butonuna basıldığında açılan
++ * modal. MovieDetailPage'deki satır-içi log formuyla aynı davranışı,
++ * kartların bulunduğu her yerden (raflar, arama, profil, listeler...)
++ * tek bir bileşenden kullanılabilir hale getirir.
++ */
++export default function LogScreeningModal({ movie, onClose }: Props) {
++  const { t } = useTranslation();
++  const queryClient = useQueryClient();
++  const [logDate, setLogDate] = useState(todayLocalDateString());
++  const [logRating, setLogRating] = useState(0);
++
++  const logMutation = useMutation({
++    mutationFn: () =>
++      screeningLogService.log(
++        movie.id,
++        `${logDate}T12:00:00.000Z`,
++        logRating > 0 ? logRating : null,
++      ),
++    onSuccess: () => {
++      queryClient.invalidateQueries({ queryKey: ["movie", movie.id] });
++      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
++      queryClient.invalidateQueries({ queryKey: ["screening-log"] });
++      queryClient.invalidateQueries({ queryKey: ["list"] });
++      queryClient.invalidateQueries({ queryKey: ["movies"] });
++      queryClient.invalidateQueries({ queryKey: ["home-feed"] });
++      onClose();
++    },
++  });
++
++  return (
++    <div className="log-screening-backdrop" onClick={onClose}>
++      <div
++        className="log-screening-modal card"
++        onClick={(e) => e.stopPropagation()}
++      >
++        <div className="log-screening-modal__header">
++          <div>
++            <span className="log-screening-modal__eyebrow">
++              <Ticket size={12} /> {t("log.boxOffice")}
++            </span>
++            <h3>{movie.title}</h3>
++          </div>
++          <button
++            type="button"
++            className="log-screening-modal__close"
++            onClick={onClose}
++            aria-label={t("common.cancel")}
++          >
++            <X size={16} />
++          </button>
++        </div>
++
++        <div className="log-screening-modal__row">
++          <div className="log-screening-modal__field">
++            <label>{t("log.addEntryDate")}</label>
++            <input
++              type="date"
++              value={logDate}
++              onChange={(e) => setLogDate(e.target.value)}
++              max={todayLocalDateString()}
++            />
++          </div>
++          <div className="log-screening-modal__field">
++            <label>{t("log.addEntryRating")}</label>
++            <StarRating value={logRating} onChange={setLogRating} />
++          </div>
++        </div>
++
++        <button
++          type="button"
++          className="btn-primary log-screening-modal__submit"
++          disabled={logMutation.isPending}
++          onClick={() => logMutation.mutate()}
++        >
++          {logMutation.isPending && (
++            <Loader2 size={14} className="log-screening-modal__spinner" />
++          )}
++          {t("log.addEntrySubmit")}
++        </button>
++      </div>
++    </div>
++  );
++}
+diff --git a/frontend/src/components/movie/MovieRow.tsx b/frontend/src/components/movie/MovieRow.tsx
+index 7984885..8b893a4 100644
+--- a/frontend/src/components/movie/MovieRow.tsx
++++ b/frontend/src/components/movie/MovieRow.tsx
+@@ -1,5 +1,6 @@
+ import type { MovieListItem } from '@/types';
+ import MovieCard from '@/components/movie/MovieCard';
++import { useScreeningLogModal } from '@/hooks/useScreeningLogModal';
+ import './MovieRow.css';
+ 
+ interface Props {
+@@ -8,6 +9,8 @@ interface Props {
+ }
+ 
+ export default function MovieRow({ title, movies }: Props) {
++  const { openLog, logModal } = useScreeningLogModal();
++
+   if (movies.length === 0) return null;
+ 
+   return (
+@@ -16,10 +19,11 @@ export default function MovieRow({ title, movies }: Props) {
+       <div className="movie-row__scroll">
+         {movies.map((m) => (
+           <div key={m.id} className="movie-row__item">
+-            <MovieCard movie={m} />
++            <MovieCard movie={m} onLogClick={() => openLog(m)} />
+           </div>
+         ))}
+       </div>
++      {logModal}
+     </section>
+   );
+ }
+diff --git a/frontend/src/components/movie/ThemedMovieRail.tsx b/frontend/src/components/movie/ThemedMovieRail.tsx
+index a9d6de3..a7fb466 100644
+--- a/frontend/src/components/movie/ThemedMovieRail.tsx
++++ b/frontend/src/components/movie/ThemedMovieRail.tsx
+@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
+ import { useTranslation } from "react-i18next";
+ import { ChevronLeft, ChevronRight } from "lucide-react";
+ import MovieCard from "@/components/movie/MovieCard";
++import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
+ import type { MovieListItem } from "@/types";
+ import "./ThemedMovieRail.css";
+ 
+@@ -61,6 +62,7 @@ export default function ThemedMovieRail({
+   const [atStart, setAtStart] = useState(true);
+   const [atEnd, setAtEnd] = useState(false);
+   const [progress, setProgress] = useState(0);
++  const { openLog, logModal } = useScreeningLogModal();
+   const colors = THEME_COLORS[theme];
+ 
+   const sync = () => {
+@@ -157,6 +159,7 @@ export default function ThemedMovieRail({
+               movie={m}
+               rank={showRank ? i + 1 : undefined}
+               compact
++              onLogClick={() => openLog(m)}
+             />
+           ))}
+         </div>
+@@ -176,6 +179,8 @@ export default function ThemedMovieRail({
+           style={{ width: `${progress}%` }}
+         />
+       </div>
++
++      {logModal}
+     </section>
+   );
+ }
+diff --git a/frontend/src/components/profile/ProfileContentTabs.tsx b/frontend/src/components/profile/ProfileContentTabs.tsx
+index add61e0..d5a870f 100644
+--- a/frontend/src/components/profile/ProfileContentTabs.tsx
++++ b/frontend/src/components/profile/ProfileContentTabs.tsx
+@@ -24,6 +24,7 @@ import {
+ import MovieCard from "@/components/movie/MovieCard";
+ import ListCard from "@/pages/Lists/ListCard";
+ import EditReviewModal from "@/components/profile/EditReviewModal";
++import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
+ import {
+   EmptyState,
+   PageSpinner,
+@@ -68,6 +69,7 @@ export default function ProfileContentTabs({
+     null,
+   );
+   const [likedSubTab, setLikedSubTab] = useState<LikedSubTab>("films");
++  const { openLog, logModal } = useScreeningLogModal();
+ 
+   const unlikeActorMutation = useMutation({
+     mutationFn: (id: string) => actorService.toggleLike(id),
+@@ -160,7 +162,12 @@ export default function ProfileContentTabs({
+         (watchlist.length > 0 ? (
+           <div className="movie-grid movie-grid--compact">
+             {watchlist.map((m) => (
+-              <MovieCard key={m.id} movie={m} interactive={isOwnProfile} />
++              <MovieCard
++                key={m.id}
++                movie={m}
++                interactive={isOwnProfile}
++                onLogClick={isOwnProfile ? () => openLog(m) : undefined}
++              />
+             ))}
+           </div>
+         ) : (
+@@ -198,6 +205,7 @@ export default function ProfileContentTabs({
+                       movie={m}
+                       interactive={isOwnProfile}
+                       onUnlike={isOwnProfile ? () => {} : undefined}
++                      onLogClick={isOwnProfile ? () => openLog(m) : undefined}
+                     />
+                   ))}
+                 </div>
+@@ -530,6 +538,7 @@ export default function ProfileContentTabs({
+           onClose={() => setEditingReview(null)}
+         />
+       )}
++      {logModal}
+     </div>
+   );
+ }
+diff --git a/frontend/src/components/profile/ProfileFilmsTab.tsx b/frontend/src/components/profile/ProfileFilmsTab.tsx
+index 6799ef0..2da24ec 100644
+--- a/frontend/src/components/profile/ProfileFilmsTab.tsx
++++ b/frontend/src/components/profile/ProfileFilmsTab.tsx
+@@ -7,6 +7,7 @@ import { profileService, movieService } from "@/services";
+ import Dropdown from "@/components/search/Dropdown";
+ import MovieCard from "@/components/movie/MovieCard";
+ import { useWatchedFilmsCounts } from "@/hooks/useWatchedFilmsCounts";
++import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
+ import type { WatchedMovie } from "@/types";
+ import "./ProfileFilmsTab.css";
+ 
+@@ -39,6 +40,7 @@ export default function ProfileFilmsTab() {
+ 
+   const [savingMovieId, setSavingMovieId] = useState<string | null>(null);
+   const [actionError, setActionError] = useState<string | null>(null);
++  const { openLog, logModal } = useScreeningLogModal();
+ 
+   const hasRatingParam = filter === "all" ? undefined : filter === "rated";
+ 
+@@ -270,6 +272,7 @@ export default function ProfileFilmsTab() {
+                 userRating={entry.userRating}
+                 onRate={(value) => handleRate(entry.movieId, value)}
+                 isRatingSaving={savingMovieId === entry.movieId}
++                onLogClick={() => openLog(entry.movie)}
+               />
+             ))}
+           </div>
+@@ -292,6 +295,7 @@ export default function ProfileFilmsTab() {
+           <p>{t("profile.noFilmsForFilter")}</p>
+         </div>
+       )}
++      {logModal}
+     </div>
+   );
+ }
+diff --git a/frontend/src/hooks/useScreeningLogModal.tsx b/frontend/src/hooks/useScreeningLogModal.tsx
+new file mode 100644
+index 0000000..c2badd6
+--- /dev/null
++++ b/frontend/src/hooks/useScreeningLogModal.tsx
+@@ -0,0 +1,29 @@
++import { useState } from "react";
++import LogScreeningModal, {
++  type LoggableMovie,
++} from "@/components/movie/LogScreeningModal";
++
++/**
++ * MovieCard'ların bulunduğu her sayfada tekrar eden state'i (hangi film
++ * için log modali açık) ve modalin kendisini tek yerden sağlar.
++ *
++ * Kullanım:
++ *   const { openLog, logModal } = useScreeningLogModal();
++ *   <MovieCard movie={m} onLogClick={() => openLog(m)} />
++ *   ...
++ *   {logModal}
++ */
++export function useScreeningLogModal() {
++  const [loggingMovie, setLoggingMovie] = useState<LoggableMovie | null>(
++    null,
++  );
++
++  const logModal = loggingMovie ? (
++    <LogScreeningModal
++      movie={loggingMovie}
++      onClose={() => setLoggingMovie(null)}
++    />
++  ) : null;
++
++  return { openLog: setLoggingMovie, logModal };
++}
+diff --git a/frontend/src/pages/ActorDetail/ActorDetailPage.tsx b/frontend/src/pages/ActorDetail/ActorDetailPage.tsx
+index f9d5c08..c7d2648 100644
+--- a/frontend/src/pages/ActorDetail/ActorDetailPage.tsx
++++ b/frontend/src/pages/ActorDetail/ActorDetailPage.tsx
+@@ -5,6 +5,7 @@ import { Heart } from "lucide-react";
+ import { actorService } from "@/services";
+ import { useAppSelector } from "@/store";
+ import MovieCard from "@/components/movie/MovieCard";
++import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
+ import PersonAvatar from "@/components/common/PersonAvatar";
+ import { PageSpinner, PageError } from "@/components/common/PageState";
+ import "./ActorDetailPage.css";
+@@ -14,6 +15,7 @@ export default function ActorDetailPage() {
+   const { t } = useTranslation();
+   const queryClient = useQueryClient();
+   const { isAuthenticated } = useAppSelector((s) => s.auth);
++  const { openLog, logModal } = useScreeningLogModal();
+ 
+   const {
+     data: actor,
+@@ -89,9 +91,10 @@ export default function ActorDetailPage() {
+       <h2 className="actor-page__section-title">{t("actor.filmography")}</h2>
+       <div className="movie-grid">
+         {actor.filmography.map((m) => (
+-          <MovieCard key={m.id} movie={m} />
++          <MovieCard key={m.id} movie={m} onLogClick={() => openLog(m)} />
+         ))}
+       </div>
++      {logModal}
+     </div>
+   );
+ }
+diff --git a/frontend/src/pages/DirectorDetail/DirectorDetailPage.tsx b/frontend/src/pages/DirectorDetail/DirectorDetailPage.tsx
+index 1f1b39d..e22e146 100644
+--- a/frontend/src/pages/DirectorDetail/DirectorDetailPage.tsx
++++ b/frontend/src/pages/DirectorDetail/DirectorDetailPage.tsx
+@@ -5,6 +5,7 @@ import { Heart } from "lucide-react";
+ import { directorService } from "@/services";
+ import { useAppSelector } from "@/store";
+ import MovieCard from "@/components/movie/MovieCard";
++import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
+ import PersonAvatar from "@/components/common/PersonAvatar";
+ import { PageSpinner, PageError } from "@/components/common/PageState";
+ import "./DirectorDetailPage.css";
+@@ -14,6 +15,7 @@ export default function DirectorDetailPage() {
+   const { t } = useTranslation();
+   const queryClient = useQueryClient();
+   const { isAuthenticated } = useAppSelector((s) => s.auth);
++  const { openLog, logModal } = useScreeningLogModal();
+ 
+   const {
+     data: director,
+@@ -91,9 +93,10 @@ export default function DirectorDetailPage() {
+       <h2 className="actor-page__section-title">{t("director.filmography")}</h2>
+       <div className="movie-grid">
+         {director.filmography.map((m) => (
+-          <MovieCard key={m.id} movie={m} />
++          <MovieCard key={m.id} movie={m} onLogClick={() => openLog(m)} />
+         ))}
+       </div>
++      {logModal}
+     </div>
+   );
+ }
+diff --git a/frontend/src/pages/Lists/ListDetailPage.tsx b/frontend/src/pages/Lists/ListDetailPage.tsx
+index b6da5a6..d601b79 100644
+--- a/frontend/src/pages/Lists/ListDetailPage.tsx
++++ b/frontend/src/pages/Lists/ListDetailPage.tsx
+@@ -6,6 +6,7 @@ import { ChevronLeft, Pencil, Trash2, Check, X } from "lucide-react";
+ import { listService } from "@/services";
+ import { useAppSelector } from "@/store";
+ import MovieCard from "@/components/movie/MovieCard";
++import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
+ import { getListTheme } from "@/utils/listTheme";
+ import { PageSpinner, PageError } from "@/components/common/PageState";
+ import "./ListDetailPage.css";
+@@ -22,6 +23,7 @@ export default function ListDetailPage() {
+   const isAdmin = role === "Admin";
+ 
+   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
++  const { openLog, logModal } = useScreeningLogModal();
+ 
+   const {
+     data: list,
+@@ -143,9 +145,10 @@ export default function ListDetailPage() {
+ 
+       <div className="movie-grid">
+         {list.movies.map((m) => (
+-          <MovieCard key={m.id} movie={m} />
++          <MovieCard key={m.id} movie={m} onLogClick={() => openLog(m)} />
+         ))}
+       </div>
++      {logModal}
+     </div>
+   );
+ }
+diff --git a/frontend/src/pages/Profile/ProfilePage.tsx b/frontend/src/pages/Profile/ProfilePage.tsx
+index bfe6bb5..8ca5195 100644
+--- a/frontend/src/pages/Profile/ProfilePage.tsx
++++ b/frontend/src/pages/Profile/ProfilePage.tsx
+@@ -22,6 +22,7 @@ import { setTheme } from "@/store/uiSlice";
+ import { SUPPORTED_LANGUAGES, languageLabel } from "@/i18n/languages";
+ import Dropdown from "@/components/search/Dropdown";
+ import MovieCard from "@/components/movie/MovieCard";
++import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
+ import ListCard from "./../Lists/ListCard";
+ import Favorites from "@/components/profile/Favorites";
+ import ProfileFilmsTab from "@/components/profile/ProfileFilmsTab";
+@@ -51,6 +52,7 @@ export default function ProfilePage() {
+   const navigate = useNavigate();
+   const [searchParams, setSearchParams] = useSearchParams();
+   const tab = (searchParams.get("tab") as ProfileTab) || "profile";
++  const { openLog, logModal } = useScreeningLogModal();
+ 
+   const setTab = (next: ProfileTab) => {
+     const n = new URLSearchParams(searchParams);
+@@ -212,6 +214,7 @@ export default function ProfilePage() {
+                         movie={item.movie}
+                         userRating={item.userRating}
+                         compact
++                        onLogClick={() => openLog(item.movie)}
+                       />
+                     ))}
+                   </div>
+@@ -323,6 +326,7 @@ export default function ProfilePage() {
+           </section>
+         )}
+       </div>
++      {logModal}
+     </div>
+   );
+ }
+diff --git a/frontend/src/pages/Search/SearchPage.tsx b/frontend/src/pages/Search/SearchPage.tsx
+index a524401..4638afb 100644
+--- a/frontend/src/pages/Search/SearchPage.tsx
++++ b/frontend/src/pages/Search/SearchPage.tsx
+@@ -16,6 +16,7 @@ import {
+   countryService,
+ } from "@/services";
+ import MovieCard from "@/components/movie/MovieCard";
++import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
+ import YearPicker from "@/components/search/YearPicker";
+ import Pagination from "@/components/common/Pagination";
+ import Dropdown from "@/components/search/Dropdown";
+@@ -143,6 +144,7 @@ function writeFilterParams(n: URLSearchParams, filter: MovieSearchFilter) {
+ export default function SearchPage() {
+   const { t, i18n } = useTranslation();
+   const [searchParams, setSearchParams] = useSearchParams();
++  const { openLog, logModal } = useScreeningLogModal();
+ 
+   const tab = (searchParams.get("tab") as Tab) || "movies";
+   const theme = THEME[tab];
+@@ -447,7 +449,11 @@ export default function SearchPage() {
+               <>
+                 <div className="movie-grid">
+                   {data.items.map((m) => (
+-                    <MovieCard key={m.id} movie={m} />
++                    <MovieCard
++                      key={m.id}
++                      movie={m}
++                      onLogClick={() => openLog(m)}
++                    />
+                   ))}
+                 </div>
+                 <Pagination
+@@ -485,6 +491,8 @@ export default function SearchPage() {
+           onPageChange={setPersonPage}
+         />
+       )}
++
++      {logModal}
+     </div>
+   );
+ }
+diff --git a/frontend/src/pages/Users/UserProfilePage.tsx b/frontend/src/pages/Users/UserProfilePage.tsx
+index 946bf66..13577ed 100644
+--- a/frontend/src/pages/Users/UserProfilePage.tsx
++++ b/frontend/src/pages/Users/UserProfilePage.tsx
+@@ -12,6 +12,7 @@ import {
+ } from "lucide-react";
+ import { followService } from "@/services";
+ import MovieCard from "@/components/movie/MovieCard";
++import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
+ import ListCard from "../Lists/ListCard";
+ import Favorites from "@/components/profile/Favorites";
+ import ProfileHeader from "@/components/profile/ProfileHeader";
+@@ -38,6 +39,7 @@ export default function UserProfilePage() {
+   const [searchParams, setSearchParams] = useSearchParams();
+   const queryClient = useQueryClient();
+   const tab = (searchParams.get("tab") as ProfileTab) || "profile";
++  const { openLog, logModal } = useScreeningLogModal();
+ 
+   const setTab = (next: ProfileTab) => {
+     const n = new URLSearchParams(searchParams);
+@@ -188,6 +190,7 @@ export default function UserProfilePage() {
+                       movie={item.movie}
+                       userRating={item.userRating}
+                       compact
++                      onLogClick={() => openLog(item.movie)}
+                     />
+                   ))}
+                 </div>
+@@ -257,6 +260,7 @@ export default function UserProfilePage() {
+           </section>
+         )}
+       </div>
++      {logModal}
+     </div>
+   );
+ }
