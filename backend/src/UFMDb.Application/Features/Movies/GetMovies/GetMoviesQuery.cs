@@ -87,9 +87,10 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
         };
 
         var totalCount = await query.CountAsync(ct);
+        var pageSize = f.PageSize is < 1 or > 100 ? 20 : f.PageSize;
         var items = await query
-            .Skip((f.Page - 1) * f.PageSize)
-            .Take(f.PageSize)
+            .Skip((f.Page - 1) * pageSize)
+            .Take(pageSize)
             .Select(m => new MovieListItemDto(
                 m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
                 m.MovieGenres.Select(mg => mg.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
@@ -121,6 +122,6 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             }
         }
 
-        return new PagedResult<MovieListItemDto>(items, totalCount, f.Page, f.PageSize);
+        return new PagedResult<MovieListItemDto>(items, totalCount, f.Page, pageSize);
     }
 }

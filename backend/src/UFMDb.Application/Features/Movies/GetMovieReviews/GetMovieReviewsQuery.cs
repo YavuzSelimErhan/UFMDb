@@ -35,9 +35,11 @@ public class GetMovieReviewsQueryHandler : IRequestHandler<GetMovieReviewsQuery,
 
         var totalCount = await query.CountAsync(ct);
 
+        var pageSize = request.PageSize is < 1 or > 100 ? 10 : request.PageSize;
+
         var pageItems = await query
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
+            .Skip((request.Page - 1) * pageSize)
+            .Take(pageSize)
             .Select(r => new
             {
                 r.Id,
@@ -67,6 +69,6 @@ public class GetMovieReviewsQueryHandler : IRequestHandler<GetMovieReviewsQuery,
             r.LikeCount, likedReviewIds.Contains(r.Id), r.CreatedAtUtc, r.UpdatedAtUtc
         )).ToList();
 
-        return new PagedResult<ReviewListItemDto>(items, totalCount, request.Page, request.PageSize);
+        return new PagedResult<ReviewListItemDto>(items, totalCount, request.Page, pageSize);
     }
 }

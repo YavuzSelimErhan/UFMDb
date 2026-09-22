@@ -23,14 +23,15 @@ public class GetDirectorsQueryHandler : IRequestHandler<GetDirectorsQuery, Paged
             query = query.Where(d => EF.Functions.ILike(d.FullName, $"%{request.Search.Trim()}%"));
 
         var total = await query.CountAsync(ct);
+        var pageSize = request.PageSize is < 1 or > 100 ? 20 : request.PageSize;
         var items = await query
             .OrderByDescending(d => d.MovieDirectors.Count)
             .ThenByDescending(d => d.LikeCount)
             .ThenBy(d => d.FullName)
-            .Skip((request.Page - 1) * request.PageSize).Take(request.PageSize)
+            .Skip((request.Page - 1) * pageSize).Take(pageSize)
             .Select(d => new DirectorListItemDto(d.Id, d.FullName, d.PhotoUrl, d.Nationality)).ToListAsync(ct);
 
-        return new PagedResult<DirectorListItemDto>(items, total, request.Page, request.PageSize);
+        return new PagedResult<DirectorListItemDto>(items, total, request.Page, pageSize);
     }
 }
 

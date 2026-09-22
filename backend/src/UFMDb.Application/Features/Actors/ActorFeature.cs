@@ -24,14 +24,15 @@ public class GetActorsQueryHandler : IRequestHandler<GetActorsQuery, PagedResult
             query = query.Where(a => EF.Functions.ILike(a.FullName, $"%{request.Search.Trim()}%"));
 
         var total = await query.CountAsync(ct);
+        var pageSize = request.PageSize is < 1 or > 100 ? 20 : request.PageSize;
         var items = await query
             .OrderByDescending(a => a.MovieActors.Count)
             .ThenByDescending(a => a.LikeCount)
             .ThenBy(a => a.FullName)
-            .Skip((request.Page - 1) * request.PageSize).Take(request.PageSize)
+            .Skip((request.Page - 1) * pageSize).Take(pageSize)
             .Select(a => new ActorListItemDto(a.Id, a.FullName, a.PhotoUrl, a.Nationality)).ToListAsync(ct);
 
-        return new PagedResult<ActorListItemDto>(items, total, request.Page, request.PageSize);
+        return new PagedResult<ActorListItemDto>(items, total, request.Page, pageSize);
     }
 }
 

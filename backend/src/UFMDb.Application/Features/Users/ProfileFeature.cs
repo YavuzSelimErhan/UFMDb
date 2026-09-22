@@ -464,9 +464,10 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
 
         var allSorted = all.ToList();
         var totalCount = allSorted.Count;
-        var page = allSorted.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+        var pageSize = request.PageSize is < 1 or > 100 ? 24 : request.PageSize;
+        var page = allSorted.Skip((request.Page - 1) * pageSize).Take(pageSize).ToList();
 
-        return new PagedResult<WatchedMovieDto>(page, totalCount, request.Page, request.PageSize);
+        return new PagedResult<WatchedMovieDto>(page, totalCount, request.Page, pageSize);
     }
 
     private static MovieListItemDto ToListItem(Movie m, HashSet<Guid> likedIds, HashSet<Guid> watchlistIds) => new(
@@ -550,6 +551,19 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
 // ---------- Günlüğe ekle: artık isteğe bağlı puan da alabiliyor ----------
 public record LogScreeningCommand(Guid UserId, Guid MovieId, DateTime WatchedAtUtc, decimal? Rating) : IRequest<Guid>;
 
+public class LogScreeningCommandValidator : AbstractValidator<LogScreeningCommand>
+{
+    public LogScreeningCommandValidator()
+    {
+        RuleFor(x => x.Rating)
+            .InclusiveBetween(0.5m, 5.0m)
+            .When(x => x.Rating.HasValue);
+        RuleFor(x => x.WatchedAtUtc)
+            .LessThanOrEqualTo(_ => DateTime.UtcNow.AddDays(1))
+            .WithMessage("İzlenme tarihi gelecekte olamaz.");
+    }
+}
+
 public class LogScreeningCommandHandler : IRequestHandler<LogScreeningCommand, Guid>
 {
     private readonly IApplicationDbContext _context;
@@ -581,6 +595,19 @@ public class LogScreeningCommandHandler : IRequestHandler<LogScreeningCommand, G
 
 // ---------- Günlük kaydını düzenle: tarih ve/veya puan ----------
 public record UpdateScreeningLogEntryCommand(Guid UserId, Guid EntryId, DateTime WatchedAtUtc, decimal? Rating) : IRequest;
+
+public class UpdateScreeningLogEntryCommandValidator : AbstractValidator<UpdateScreeningLogEntryCommand>
+{
+    public UpdateScreeningLogEntryCommandValidator()
+    {
+        RuleFor(x => x.Rating)
+            .InclusiveBetween(0.5m, 5.0m)
+            .When(x => x.Rating.HasValue);
+        RuleFor(x => x.WatchedAtUtc)
+            .LessThanOrEqualTo(_ => DateTime.UtcNow.AddDays(1))
+            .WithMessage("İzlenme tarihi gelecekte olamaz.");
+    }
+}
 
 public class UpdateScreeningLogEntryCommandHandler : IRequestHandler<UpdateScreeningLogEntryCommand>
 {

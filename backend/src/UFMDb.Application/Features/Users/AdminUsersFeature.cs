@@ -26,12 +26,13 @@ public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, PagedResult<A
             query = query.Where(u => u.UserName.Contains(request.Search) || u.Email.Contains(request.Search));
 
         var total = await query.CountAsync(ct);
+        var pageSize = request.PageSize is < 1 or > 100 ? 20 : request.PageSize;
         var items = await query.OrderBy(u => u.UserName)
-            .Skip((request.Page - 1) * request.PageSize).Take(request.PageSize)
+            .Skip((request.Page - 1) * pageSize).Take(pageSize)
             .Select(u => new AdminUserDto(u.Id, u.UserName, u.Email, u.Role.ToString(), u.IsActive, u.CreatedAtUtc))
             .ToListAsync(ct);
 
-        return new PagedResult<AdminUserDto>(items, total, request.Page, request.PageSize);
+        return new PagedResult<AdminUserDto>(items, total, request.Page, pageSize);
     }
 }
 
