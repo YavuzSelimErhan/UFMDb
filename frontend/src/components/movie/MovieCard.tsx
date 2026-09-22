@@ -264,12 +264,12 @@ export default function MovieCard({
               );
               return (
                 <span key={i} className="movie-card__rate-row-star">
-                  <Star size={18} className="movie-card__rate-row-star-base" />
+                  <Star size={15} className="movie-card__rate-row-star-base" />
                   <span
                     className="movie-card__rate-row-star-fill"
                     style={{ width: `${fillRatio * 100}%` }}
                   >
-                    <Star size={18} fill="currentColor" />
+                    <Star size={15} fill="currentColor" />
                   </span>
                   {onRate && (
                     <>

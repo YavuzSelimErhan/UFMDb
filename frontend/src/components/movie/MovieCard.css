@@ -17,7 +17,7 @@
 
 .movie-card:focus-visible {
   outline: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   box-shadow:
     0 0 0 2px var(--color-bg),
     0 0 0 4px var(--color-accent);
@@ -28,7 +28,7 @@
   width: 100%;
   aspect-ratio: 2 / 3;
   overflow: hidden;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   background-color: var(--color-bg-elevated);
 }
 
@@ -69,6 +69,7 @@
   font-size: 0.86rem;
   font-weight: 700;
   line-height: 1.32;
+  min-height: calc(1.32em * 2);
   color: var(--color-text-primary);
   letter-spacing: -0.01em;
   display: -webkit-box;
@@ -231,18 +232,22 @@
   border-radius: 6px;
 }
 
-/* ---------- Puan satırı: kartın bilgi alanında, tam genişlik, 5 yıldız ---------- */
+/* ---------- Puan satırı: kartın bilgi alanında, sola yaslı, sıkı gruplu ---------- */
 .movie-card__rate-row {
   display: flex;
-  justify-content: space-between;
-  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1px;
   margin-top: 9px;
+  margin-left: 2px;
   color: #d4af37;
 }
 
 .movie-card__rate-row-star {
   position: relative;
   display: inline-flex;
+  width: 15px;
+  height: 15px;
 }
 .movie-card__rate-row-star-base {
   color: rgba(255, 255, 255, 0.18);
@@ -256,8 +261,8 @@
 
 .movie-card__rate-row-hit {
   position: absolute;
-  top: -6px;
-  bottom: -6px;
+  top: -4px;
+  bottom: -4px;
   width: 50%;
   padding: 0;
   border: none;
@@ -279,6 +284,7 @@
 .movie-card.card {
   background: transparent;
   border-color: transparent;
+  border-radius: var(--radius-sm);
   box-shadow: none;
 }
 .movie-card.card:hover {
