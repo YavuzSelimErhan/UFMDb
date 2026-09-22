@@ -60,7 +60,7 @@
 }
 
 .movie-card__info {
-  padding: 10px 13px 13px;
+  padding: 10px 0 12px;
 }
 
 /* ---------- Film adı: poster altında, her zaman görünür (mobilde hover yok) ---------- */
@@ -205,7 +205,7 @@
 }
 
 .movie-card--compact .movie-card__info {
-  padding: 8px 3px 10px;
+  padding: 8px 0 9px;
 }
 .movie-card--compact .movie-card__title {
   font-size: 0.8rem;
