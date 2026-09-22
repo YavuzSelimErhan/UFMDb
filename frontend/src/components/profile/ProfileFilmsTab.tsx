@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowUpDown, LayoutGrid, LayoutList } from "lucide-react";
 import { profileService, movieService } from "@/services";
 import Dropdown from "@/components/search/Dropdown";
@@ -12,13 +12,15 @@ import type { WatchedMovie } from "@/types";
 import "./ProfileFilmsTab.css";
 
 const PAGE_SIZE = 24;
+const DEFAULT_SORT = "release-desc";
 
 type FilterType = "all" | "rated" | "unrated";
 type ViewMode = "grid" | "masonry";
+type FilmsPage = { items: WatchedMovie[]; page: number; totalPages: number };
 
+// İzlenme tarihine göre sıralama kaldırıldı; varsayılan artık çıkış
+// tarihine göre yeni -> eski.
 const SORT_OPTIONS = [
-  { value: "watched-desc", labelKey: "watchedDesc" },
-  { value: "watched-asc", labelKey: "watchedAsc" },
   { value: "release-desc", labelKey: "releaseDesc" },
   { value: "release-asc", labelKey: "releaseAsc" },
   { value: "rating-desc", labelKey: "myRatingDesc" },
@@ -34,9 +36,12 @@ export default function ProfileFilmsTab() {
   const queryClient = useQueryClient();
 
   const filter = (searchParams.get("ff") as FilterType) || "all";
-  const sortBy = searchParams.get("fs") || "watched-desc";
+  const sortBy = searchParams.get("fs") || DEFAULT_SORT;
   const viewMode = (searchParams.get("fv") as ViewMode) || "grid";
-  const lastPageParam = Number(searchParams.get("fp")) || 1;
+  // Sayfadan ayrılıp geri dönüldüğünde kaldığı yere devam edebilmesi için
+  // son görüntülenen sayfa URL'de tutulur; veri artık tek seferde değil
+  // sayfa sayfa (ve React Query cache'i üzerinden) getirilir.
+  const restorePageParam = Number(searchParams.get("fp")) || 1;
 
   const [savingMovieId, setSavingMovieId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -53,7 +58,7 @@ export default function ProfileFilmsTab() {
 
   const setSortBy = (v: string) => {
     const n = new URLSearchParams(searchParams);
-    v === "watched-desc" ? n.delete("fs") : n.set("fs", v);
+    v === DEFAULT_SORT ? n.delete("fs") : n.set("fs", v);
     n.delete("fp");
     setSearchParams(n, { replace: true });
   };
@@ -70,77 +75,67 @@ export default function ProfileFilmsTab() {
   const {
     data,
     isLoading,
-    isFetching,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
     error: loadError,
-  } = useQuery({
-    queryKey: ["watched-films", filter, sortBy, lastPageParam],
-    queryFn: async () => {
-      const first = await profileService.getWatchedFilms({
-        page: 1,
+  } = useInfiniteQuery({
+    queryKey: ["watched-films", filter, sortBy],
+    queryFn: ({ pageParam }) =>
+      profileService.getWatchedFilms({
+        page: pageParam,
         pageSize: PAGE_SIZE,
         sortBy,
         hasRating: hasRatingParam,
-      });
-
-      const pagesToFetch = Math.min(lastPageParam, first.totalPages);
-      let items = first.items;
-      let lastResult = first;
-
-      if (pagesToFetch >= 2) {
-        // Sıralı await yerine tüm ara sayfalar paralel çekiliyor —
-        // önceki sürümde her sayfa bir öncekinin bitmesini bekliyordu.
-        const rest = await Promise.all(
-          Array.from({ length: pagesToFetch - 1 }, (_, i) =>
-            profileService.getWatchedFilms({
-              page: i + 2,
-              pageSize: PAGE_SIZE,
-              sortBy,
-              hasRating: hasRatingParam,
-            }),
-          ),
-        );
-        for (const r of rest) items = [...items, ...r.items];
-        lastResult = rest[rest.length - 1] ?? first;
-      }
-
-      return {
-        items,
-        page: lastResult.page,
-        totalPages: lastResult.totalPages,
-      };
-    },
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (last: FilmsPage) =>
+      last.page < last.totalPages ? last.page + 1 : undefined,
     staleTime: 30_000,
   });
 
-  const entries = data?.items ?? [];
-  const page = data?.page ?? 1;
-  const totalPages = data?.totalPages ?? 1;
+  // İlk yüklemede, kullanıcı daha önce N. sayfaya kadar gezinmişse
+  // (fp parametresi) o sayfaya kadar olan sayfaları arka planda getirir.
+  // Her sayfa ayrı ayrı cache'lendiği için filtre/sıralama değişmeden
+  // geri dönüldüğünde bu adım React Query cache'inden anında karşılanır.
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    restoredRef.current = false;
+  }, [filter, sortBy]);
+
+  useEffect(() => {
+    if (restoredRef.current || isLoading) return;
+    restoredRef.current = true;
+
+    const pagesLoaded = data?.pages.length ?? 0;
+    if (pagesLoaded >= restorePageParam) return;
+
+    let cancelled = false;
+    (async () => {
+      for (let i = pagesLoaded; i < restorePageParam && !cancelled; i++) {
+        if (!hasNextPage) break;
+        // eslint-disable-next-line no-await-in-loop
+        await fetchNextPage();
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading]);
+
+  const entries = useMemo(
+    () => data?.pages.flatMap((p) => p.items) ?? [],
+    [data],
+  );
 
   const loadMore = async () => {
     setActionError(null);
     try {
-      const result = await profileService.getWatchedFilms({
-        page: page + 1,
-        pageSize: PAGE_SIZE,
-        sortBy,
-        hasRating: hasRatingParam,
-      });
-
-      queryClient.setQueryData(
-        ["watched-films", filter, sortBy, lastPageParam],
-        (
-          prev:
-            | { items: WatchedMovie[]; page: number; totalPages: number }
-            | undefined,
-        ) => ({
-          items: [...(prev?.items ?? entries), ...result.items],
-          page: result.page,
-          totalPages: result.totalPages,
-        }),
-      );
-
+      const result = await fetchNextPage();
+      const nextPage = result.data?.pages.length ?? restorePageParam;
       const n = new URLSearchParams(searchParams);
-      result.page > 1 ? n.set("fp", String(result.page)) : n.delete("fp");
+      nextPage > 1 ? n.set("fp", String(nextPage)) : n.delete("fp");
       setSearchParams(n, { replace: true });
     } catch {
       setActionError(t("profile.filmsLoadError"));
@@ -152,17 +147,16 @@ export default function ProfileFilmsTab() {
     try {
       await movieService.upsertRating(movieId, value);
       queryClient.setQueryData(
-        ["watched-films", filter, sortBy, lastPageParam],
-        (
-          prev:
-            | { items: WatchedMovie[]; page: number; totalPages: number }
-            | undefined,
-        ) =>
+        ["watched-films", filter, sortBy],
+        (prev: { pages: FilmsPage[]; pageParams: unknown[] } | undefined) =>
           prev && {
             ...prev,
-            items: prev.items.map((e) =>
-              e.movieId === movieId ? { ...e, userRating: value } : e,
-            ),
+            pages: prev.pages.map((p) => ({
+              ...p,
+              items: p.items.map((e) =>
+                e.movieId === movieId ? { ...e, userRating: value } : e,
+              ),
+            })),
           },
       );
     } catch {
@@ -264,6 +258,7 @@ export default function ProfileFilmsTab() {
         <>
           <div
             className={`movie-grid movie-grid--6${viewMode === "masonry" ? " movie-grid-masonry" : ""}`}
+            aria-busy={isFetchingNextPage}
           >
             {entries.map((entry) => (
               <MovieCard
@@ -275,17 +270,23 @@ export default function ProfileFilmsTab() {
                 onLogClick={() => openLog(entry.movie)}
               />
             ))}
+            {isFetchingNextPage &&
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={`more-${i}`} className="film-skeleton" />
+              ))}
           </div>
 
-          {page < totalPages && (
+          {hasNextPage && (
             <div className="load-more-wrap">
               <button
                 type="button"
                 className="load-more-btn btn-secondary"
                 onClick={loadMore}
-                disabled={isFetching}
+                disabled={isFetchingNextPage}
               >
-                {isFetching ? t("profile.loadingMore") : t("profile.loadMore")}
+                {isFetchingNextPage
+                  ? t("profile.loadingMore")
+                  : t("profile.loadMore")}
               </button>
             </div>
           )}

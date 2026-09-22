@@ -58,6 +58,9 @@
   border-radius: var(--radius-pill);
   background-color: var(--color-bg-elevated);
   color: var(--color-text-muted);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .pill-active .pill-count {
@@ -169,12 +172,6 @@
   justify-content: center;
 }
 
-.film-skeleton {
-  aspect-ratio: 2 / 3;
-  border-radius: var(--radius-md);
-  background: var(--color-bg-elevated);
-}
-
 /* Loading skeleton */
 
 @keyframes skeleton-sheen {
@@ -183,6 +180,25 @@
   }
   100% {
     background-position: -200% 0;
+  }
+}
+
+.film-skeleton {
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    100deg,
+    var(--color-bg-elevated) 40%,
+    var(--color-border) 50%,
+    var(--color-bg-elevated) 60%
+  );
+  background-size: 250% 100%;
+  animation: skeleton-sheen 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .film-skeleton {
+    animation: none;
   }
 }
 
