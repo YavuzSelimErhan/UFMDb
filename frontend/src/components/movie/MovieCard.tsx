@@ -152,6 +152,7 @@ export default function MovieCard({
             src={movie.posterUrl}
             alt={movie.title}
             loading="lazy"
+            decoding="async"
             className="movie-card__poster"
             onError={() => setPosterFailed(true)}
           />
@@ -229,12 +230,29 @@ export default function MovieCard({
             </button>
           )}
         </div>
-
-        <span className="movie-card__title-overlay">{movie.title}</span>
       </div>
 
-      {showRatingRow && (
-        <div className="movie-card__info">
+      <div className="movie-card__info">
+        <h3 className="movie-card__title">{movie.title}</h3>
+
+        {(movie.ratingCount > 0 ||
+          movie.releaseYear > 0 ||
+          movie.genres?.[0]) && (
+          <div className="movie-card__meta">
+            {movie.ratingCount > 0 && (
+              <span className="movie-card__meta-rating">
+                <Star size={12} fill="currentColor" />
+                {movie.averageRating.toFixed(1)}
+              </span>
+            )}
+            {movie.releaseYear > 0 && <span>{movie.releaseYear}</span>}
+            {movie.genres?.[0] && (
+              <span className="movie-card__meta-genre">{movie.genres[0]}</span>
+            )}
+          </div>
+        )}
+
+        {showRatingRow && (
           <div
             className={`movie-card__rate-row${onRate ? " is-interactive" : ""}`}
             onClick={stop}
@@ -289,8 +307,8 @@ export default function MovieCard({
               );
             })}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </Link>
   );
 }
