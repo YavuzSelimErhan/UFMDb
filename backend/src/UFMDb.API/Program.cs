@@ -1,5 +1,8 @@
 using System.Text;
+using System.Text.Json;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UFMDb.API.Middleware;
@@ -95,6 +98,41 @@ builder.Services.AddCors(options =>
     });
 });
 
+// ---------------- Rate Limiting (brute-force koruması: login/register) ----------------
+// Sadece auth endpoint'lerine uygulanır (bkz. AuthController: [EnableRateLimiting("AuthLimiter")]).
+// IP bazlı fixed window: dakikada 5 istek, aşan istekler kuyruğa alınmadan direkt reddedilir
+// (QueueLimit = 0) çünkü login/register'da bekletmenin bir anlamı yok.
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("AuthLimiter", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+            }));
+
+    // ExceptionHandlingMiddleware ile aynı {status, title, errors} gövde şekli
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.ContentType = "application/json";
+
+        var payload = JsonSerializer.Serialize(new
+        {
+            status = StatusCodes.Status429TooManyRequests,
+            title = "Çok fazla istek gönderildi. Lütfen bir süre sonra tekrar deneyin.",
+            errors = (object?)null
+        });
+
+        await context.HttpContext.Response.WriteAsync(payload, cancellationToken);
+    };
+});
+
 // ---------------- Global Logging ----------------
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
@@ -137,6 +175,7 @@ app.UseResponseCompression();
 app.UseCors(CorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.MapControllers();
 app.UseOutputCache();
 

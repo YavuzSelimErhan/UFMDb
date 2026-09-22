@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using UFMDb.Application.Features.Auth;
 
 namespace UFMDb.API.Controllers;
@@ -34,6 +35,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
+    [EnableRateLimiting("AuthLimiter")]
     public async Task<ActionResult<AuthResponseDto>> Register(RegisterCommand command)
     {
         var result = await _mediator.Send(command);
@@ -42,6 +44,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [EnableRateLimiting("AuthLimiter")]
     public async Task<ActionResult<AuthResponseDto>> Login(LoginCommand command)
     {
         var result = await _mediator.Send(command);
