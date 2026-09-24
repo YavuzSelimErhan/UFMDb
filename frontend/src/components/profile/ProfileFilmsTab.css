@@ -134,6 +134,17 @@
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 16px;
+  /* Grid item'ların varsayılan min-width'i "auto" (içeriğin doğal minimum
+     genişliği) olduğundan, poster/başlık içeriği bir sütunun 1fr payından
+     daha geniş olmak isterse sütun büyür ve grid, kapsayıcının/sayfanın
+     dışına taşar (son sütunun kesilerek görünmesi buradan geliyordu).
+     min-width: 0 ile sütunların 1fr paylarına sıkışmasını zorluyoruz. */
+  min-width: 0;
+}
+
+.movie-grid--6 > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .movie-grid-masonry {

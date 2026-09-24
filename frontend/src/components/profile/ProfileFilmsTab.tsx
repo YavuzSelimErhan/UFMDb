@@ -133,7 +133,11 @@ export default function ProfileFilmsTab() {
       const nextPage = result.data?.pages.length ?? restorePageParam;
       const n = new URLSearchParams(searchParams);
       nextPage > 1 ? n.set("fp", String(nextPage)) : n.delete("fp");
-      setSearchParams(n, { replace: true });
+      // preventScrollReset: "Daha fazla yükle" sadece mevcut listenin
+      // altına yeni film ekler; React Router'ın varsayılan davranışı
+      // (search params değişince sayfayı en üste kaydırması) burada
+      // istenmiyor — kullanıcı olduğu yerde kalmalı.
+      setSearchParams(n, { replace: true, preventScrollReset: true });
     } catch {
       setActionError(t("profile.filmsLoadError"));
     }

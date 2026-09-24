@@ -1,7 +1,6 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Film } from "lucide-react";
-import { useInfiniteScrollSentinel } from "@/hooks/useInfiniteScrollSentinel";
 import { EmptyState } from "@/components/common/PageState";
 import "./ProfileFilmsTab.css";
 
@@ -26,11 +25,14 @@ interface FilmsGridProps<T> {
 
 /**
  * ProfileFilmsTab ve UserFilmsTab arasında paylaşılan izlenen-filmler
- * grid'i: yükleme iskeleti, kart listesi, otomatik (IntersectionObserver)
- * + manuel (buton) sayfalama ve boş durum. Kart içeriği tamamen
- * `renderCard` ile dışarıdan verildiği için hem kendi profilindeki
- * (puanlanabilir) hem başka kullanıcı profilindeki (salt okunur) kartlarla
- * çalışır.
+ * grid'i: yükleme iskeleti, kart listesi, "Daha fazla yükle" butonuyla
+ * isteğe bağlı sayfalama ve boş durum. Bilinçli olarak otomatik
+ * (IntersectionObserver ile kaydırınca kendi kendine yükleyen) bir sistem
+ * KULLANMIYORUZ: çok sayıda filmi olan bir kullanıcı footer'a hiç
+ * ulaşamayabilir ve sürekli arka planda veri çekilmesi istenmiyor. Kart
+ * içeriği tamamen `renderCard` ile dışarıdan verildiği için hem kendi
+ * profilindeki (puanlanabilir) hem başka kullanıcı profilindeki (salt
+ * okunur) kartlarla çalışır.
  */
 export default function FilmsGrid<T>({
   entries,
@@ -47,11 +49,6 @@ export default function FilmsGrid<T>({
   skeletonCount = 12,
 }: FilmsGridProps<T>) {
   const { t } = useTranslation();
-
-  const sentinelRef = useInfiniteScrollSentinel({
-    onIntersect: onLoadMore,
-    enabled: hasNextPage && !isFetchingNextPage && !isLoading,
-  });
 
   // Yeni film eklendiğinde ekran okuyuculara toplam sayıyı duyurur.
   const announceRef = useRef<HTMLDivElement | null>(null);
@@ -101,10 +98,6 @@ export default function FilmsGrid<T>({
             <div key={`more-${i}`} className="film-skeleton" />
           ))}
       </div>
-
-      {/* IntersectionObserver tetikleyicisi: butona dokunmadan otomatik
-          yükleme sağlar, kendisi hiçbir şey render etmez. */}
-      <div ref={sentinelRef} aria-hidden="true" style={{ height: 1 }} />
 
       <div className="sr-only" aria-live="polite" ref={announceRef} />
 
