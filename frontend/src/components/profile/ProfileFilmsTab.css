@@ -205,9 +205,10 @@
 /* Perf: off-screen kartlar için layout/paint maliyetini düşürür — yüzlerce
    filmi olan bir profilde fark yaratır. */
 .film-card-cv {
+  min-width: 0;
   contain: layout style;
   content-visibility: auto;
-  contain-intrinsic-size: auto 380px;
+  contain-intrinsic-size: auto 1px auto 380px;
 }
 
 /* Filtre/sıralama değişince arka planda yeni sayfa gelirken (keepPreviousData)
