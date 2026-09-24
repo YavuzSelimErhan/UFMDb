@@ -14,6 +14,12 @@ interface FilmsGridProps<T> {
   isFetchingNextPage: boolean;
   hasNextPage: boolean;
   onLoadMore: () => void;
+  /** Kaç sayfa şu an cache'te yüklü. > 1 ve onShowLess verilmişse
+   *  "Daha az göster" butonu görünür. */
+  loadedPages?: number;
+  /** Verilirse ve loadedPages > 1 ise, sayfaları ilk sayfaya kırpan bir
+   *  "Daha az göster" butonu render edilir. */
+  onShowLess?: () => void;
   viewMode?: ViewMode;
   /** Arka planda yeni sonuç yüklenirken mevcut grid'i hafifçe soluklaştırır
    *  (ör. filtre/sıralama değişimi + keepPreviousData). */
@@ -25,14 +31,14 @@ interface FilmsGridProps<T> {
 
 /**
  * ProfileFilmsTab ve UserFilmsTab arasında paylaşılan izlenen-filmler
- * grid'i: yükleme iskeleti, kart listesi, "Daha fazla yükle" butonuyla
- * isteğe bağlı sayfalama ve boş durum. Bilinçli olarak otomatik
- * (IntersectionObserver ile kaydırınca kendi kendine yükleyen) bir sistem
- * KULLANMIYORUZ: çok sayıda filmi olan bir kullanıcı footer'a hiç
- * ulaşamayabilir ve sürekli arka planda veri çekilmesi istenmiyor. Kart
- * içeriği tamamen `renderCard` ile dışarıdan verildiği için hem kendi
- * profilindeki (puanlanabilir) hem başka kullanıcı profilindeki (salt
- * okunur) kartlarla çalışır.
+ * grid'i: yükleme iskeleti, kart listesi, "Daha fazla yükle" / "Daha az
+ * göster" ile isteğe bağlı sayfalama ve boş durum. Bilinçli olarak
+ * otomatik (IntersectionObserver ile kaydırınca kendi kendine yükleyen)
+ * bir sistem KULLANMIYORUZ: çok sayıda filmi olan bir kullanıcı footer'a
+ * hiç ulaşamayabilir ve sürekli arka planda veri çekilmesi istenmiyor.
+ * Kart içeriği tamamen `renderCard` ile dışarıdan verildiği için hem
+ * kendi profilindeki (puanlanabilir) hem başka kullanıcı profilindeki
+ * (salt okunur) kartlarla çalışır.
  */
 export default function FilmsGrid<T>({
   entries,
@@ -42,6 +48,8 @@ export default function FilmsGrid<T>({
   isFetchingNextPage,
   hasNextPage,
   onLoadMore,
+  loadedPages = 1,
+  onShowLess,
   viewMode = "grid",
   dimmed = false,
   emptyTitle,
@@ -82,6 +90,8 @@ export default function FilmsGrid<T>({
     );
   }
 
+  const canShowLess = !!onShowLess && loadedPages > 1;
+
   return (
     <div className={`films-grid${dimmed ? " films-grid--dimmed" : ""}`}>
       <div
@@ -101,18 +111,30 @@ export default function FilmsGrid<T>({
 
       <div className="sr-only" aria-live="polite" ref={announceRef} />
 
-      {hasNextPage && (
-        <div className="load-more-wrap">
-          <button
-            type="button"
-            className="load-more-btn btn-secondary"
-            onClick={onLoadMore}
-            disabled={isFetchingNextPage}
-          >
-            {isFetchingNextPage
-              ? t("profile.loadingMore")
-              : t("profile.loadMore")}
-          </button>
+      {(hasNextPage || canShowLess) && (
+        <div className="load-more-wrap load-more-wrap--actions">
+          {hasNextPage && (
+            <button
+              type="button"
+              className="load-more-btn btn-secondary"
+              onClick={onLoadMore}
+              disabled={isFetchingNextPage}
+            >
+              {isFetchingNextPage
+                ? t("profile.loadingMore")
+                : t("profile.loadMore")}
+            </button>
+          )}
+          {canShowLess && (
+            <button
+              type="button"
+              className="show-less-btn"
+              onClick={onShowLess}
+              disabled={isFetchingNextPage}
+            >
+              {t("profile.showLess")}
+            </button>
+          )}
         </div>
       )}
     </div>

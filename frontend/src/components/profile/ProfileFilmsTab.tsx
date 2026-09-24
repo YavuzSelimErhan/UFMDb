@@ -22,6 +22,29 @@ const PAGE_SIZE = 24;
 const DEFAULT_SORT = "release-desc";
 
 type FilmsPage = { items: WatchedMovie[]; page: number; totalPages: number };
+type FilmsCache = { pages: FilmsPage[]; pageParams: unknown[] };
+
+// "fp" (kaçıncı sayfaya kadar yüklendiği) sadece "sayfadan ayrılıp geri
+// dönünce kaldığı yerden devam etsin" için URL'de tutuluyor. Bunu
+// setSearchParams (React Router navigasyonu) yerine doğrudan
+// history.replaceState ile güncelliyoruz. Neden: bir "Daha fazla yükle"
+// tıklamasını router navigasyonu olarak işaretlemek, uygulamada varsa
+// global bir scroll-restorasyon/`ScrollToTop` davranışını tetikleyip
+// sayfayı en üste zıplatabiliyor — preventScrollReset her kurulumda bunu
+// engellemeyebiliyor. history.replaceState hiçbir navigasyon event'i
+// tetiklemediği için bu sorunu kökten çözüyor; filtre/sıralama/görünüm
+// değişiklikleri hâlâ normal setSearchParams ile, router üzerinden gider.
+function readFpFromUrl(): number {
+  return Number(new URLSearchParams(window.location.search).get("fp")) || 1;
+}
+
+function writeFpToUrl(page: number) {
+  const url = new URL(window.location.href);
+  page > 1
+    ? url.searchParams.set("fp", String(page))
+    : url.searchParams.delete("fp");
+  window.history.replaceState(window.history.state, "", url);
+}
 
 export default function ProfileFilmsTab() {
   const { t } = useTranslation();
@@ -31,32 +54,35 @@ export default function ProfileFilmsTab() {
   const filter = (searchParams.get("ff") as FilterType) || "all";
   const sortBy = searchParams.get("fs") || DEFAULT_SORT;
   const viewMode = (searchParams.get("fv") as ViewMode) || "grid";
-  // Sayfadan ayrılıp geri dönüldüğünde kaldığı yere devam edebilmesi için
-  // son görüntülenen sayfa URL'de tutulur.
-  const restorePageParam = Number(searchParams.get("fp")) || 1;
+
+  // Sadece ilk mount'ta okunur; sonrasında pagination bookkeeping'i
+  // router'dan bağımsız olarak writeFpToUrl ile yürütülür.
+  const [restorePageParam] = useState(readFpFromUrl);
 
   const [savingMovieId, setSavingMovieId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const { openLog, logModal } = useScreeningLogModal();
+  const topRef = useRef<HTMLDivElement | null>(null);
 
   const hasRatingParam = filter === "all" ? undefined : filter === "rated";
 
   const setFilter = (v: FilterType) => {
-    const n = new URLSearchParams(searchParams);
+    const n = new URLSearchParams(window.location.search);
     v === "all" ? n.delete("ff") : n.set("ff", v);
     n.delete("fp");
     setSearchParams(n, { replace: true });
   };
 
   const setSortBy = (v: string) => {
-    const n = new URLSearchParams(searchParams);
+    const n = new URLSearchParams(window.location.search);
     v === DEFAULT_SORT ? n.delete("fs") : n.set("fs", v);
     n.delete("fp");
     setSearchParams(n, { replace: true });
   };
 
   const setViewMode = (v: ViewMode) => {
-    const n = new URLSearchParams(searchParams);
+    const n = new URLSearchParams(window.location.search);
+    // fp bilerek dokunulmuyor: görünüm değişse de kaldığı sayfa korunur.
     v === "grid" ? n.delete("fv") : n.set("fv", v);
     setSearchParams(n, { replace: true });
   };
@@ -85,16 +111,9 @@ export default function ProfileFilmsTab() {
     getNextPageParam: (last: FilmsPage) =>
       last.page < last.totalPages ? last.page + 1 : undefined,
     staleTime: 30_000,
-    // Filtre/sıralama değişince ekran her seferinde boş skeleton'a dönmez;
-    // önceki sonuçlar yenisi gelene kadar (hafifçe soluklaşarak) ekranda
-    // kalır. Bkz. FilmsGrid `dimmed` prop'u.
     placeholderData: keepPreviousData,
   });
 
-  // İlk yüklemede, kullanıcı daha önce N. sayfaya kadar gezinmişse
-  // (fp parametresi) o sayfaya kadar olan sayfaları arka planda getirir.
-  // Her sayfa ayrı ayrı cache'lendiği için filtre/sıralama değişmeden
-  // geri dönüldüğünde bu adım React Query cache'inden anında karşılanır.
   const restoredRef = useRef(false);
   useEffect(() => {
     restoredRef.current = false;
@@ -125,22 +144,32 @@ export default function ProfileFilmsTab() {
     () => data?.pages.flatMap((p) => p.items) ?? [],
     [data],
   );
+  const loadedPages = data?.pages.length ?? 1;
 
   const loadMore = async () => {
     setActionError(null);
     try {
       const result = await fetchNextPage();
       const nextPage = result.data?.pages.length ?? restorePageParam;
-      const n = new URLSearchParams(searchParams);
-      nextPage > 1 ? n.set("fp", String(nextPage)) : n.delete("fp");
-      // preventScrollReset: "Daha fazla yükle" sadece mevcut listenin
-      // altına yeni film ekler; React Router'ın varsayılan davranışı
-      // (search params değişince sayfayı en üste kaydırması) burada
-      // istenmiyor — kullanıcı olduğu yerde kalmalı.
-      setSearchParams(n, { replace: true, preventScrollReset: true });
+      writeFpToUrl(nextPage);
     } catch {
       setActionError(t("profile.filmsLoadError"));
     }
+  };
+
+  // Açılmış sayfaları tek sayfaya kırpar ve toolbar'a geri kaydırır —
+  // "sürekli genişleyip hiç küçülmüyor" sorununu çözer.
+  const showLess = () => {
+    queryClient.setQueryData(
+      ["watched-films", filter, sortBy],
+      (prev: FilmsCache | undefined) =>
+        prev && {
+          pages: prev.pages.slice(0, 1),
+          pageParams: prev.pageParams.slice(0, 1),
+        },
+    );
+    writeFpToUrl(1);
+    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const handleRate = async (movieId: string, value: number) => {
@@ -149,7 +178,7 @@ export default function ProfileFilmsTab() {
       await movieService.upsertRating(movieId, value);
       queryClient.setQueryData(
         ["watched-films", filter, sortBy],
-        (prev: { pages: FilmsPage[]; pageParams: unknown[] } | undefined) =>
+        (prev: FilmsCache | undefined) =>
           prev && {
             ...prev,
             pages: prev.pages.map((p) => ({
@@ -171,15 +200,17 @@ export default function ProfileFilmsTab() {
 
   return (
     <div className="films-tab">
-      <FilmsToolbar
-        filter={filter}
-        onFilterChange={setFilter}
-        counts={counts}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-      />
+      <div ref={topRef}>
+        <FilmsToolbar
+          filter={filter}
+          onFilterChange={setFilter}
+          counts={counts}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
+      </div>
 
       {error && <p className="films-error">{error}</p>}
 
@@ -199,6 +230,8 @@ export default function ProfileFilmsTab() {
         isFetchingNextPage={isFetchingNextPage}
         hasNextPage={!!hasNextPage}
         onLoadMore={loadMore}
+        loadedPages={loadedPages}
+        onShowLess={loadedPages > 1 ? showLess : undefined}
         viewMode={viewMode}
         dimmed={isFetching && !isFetchingNextPage && !isLoading}
       />

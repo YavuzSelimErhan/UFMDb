@@ -112,39 +112,12 @@
   color: #d3554f;
 }
 
-/* Grid wrapper (used for the fade-while-refetching effect) */
-
-.films-grid {
-  transition: opacity 0.15s ease;
-}
-
-.films-grid--dimmed {
-  opacity: 0.55;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .films-grid {
-    transition: none;
-  }
-}
-
 /* Grid */
 
 .movie-grid--6 {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 16px;
-  /* Grid item'ların varsayılan min-width'i "auto" (içeriğin doğal minimum
-     genişliği) olduğundan, poster/başlık içeriği bir sütunun 1fr payından
-     daha geniş olmak isterse sütun büyür ve grid, kapsayıcının/sayfanın
-     dışına taşar (son sütunun kesilerek görünmesi buradan geliyordu).
-     min-width: 0 ile sütunların 1fr paylarına sıkışmasını zorluyoruz. */
-  min-width: 0;
-}
-
-.movie-grid--6 > * {
-  min-width: 0;
-  max-width: 100%;
 }
 
 .movie-grid-masonry {
@@ -168,17 +141,6 @@
   .movie-grid--6 {
     grid-template-columns: repeat(2, 1fr);
   }
-}
-
-/* Ekran dışındaki kartlar için layout/paint/style hesaplamasını atlar.
-   contain-intrinsic-size, kart yaklaşık boyutuna göre bir tahmindir; kart
-   tasarımınız değişirse (rozet, başlık satır sayısı vb.) bu değeri gerçek
-   ortalama kart yüksekliğine göre ayarlayın ki scroll sırasında sıçrama
-   olmasın. */
-.film-card-cv {
-  content-visibility: auto;
-  contain: layout style;
-  contain-intrinsic-size: 210px 360px;
 }
 
 .confirm-btn {
@@ -240,6 +202,22 @@
   }
 }
 
+/* Perf: off-screen kartlar için layout/paint maliyetini düşürür — yüzlerce
+   filmi olan bir profilde fark yaratır. */
+.film-card-cv {
+  contain: layout style;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 380px;
+}
+
+/* Filtre/sıralama değişince arka planda yeni sayfa gelirken (keepPreviousData)
+   mevcut grid'i tam skeleton'a dönmeden hafifçe soluklaştırır. */
+.films-grid--dimmed {
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
+
 /* Empty state / load more */
 
 .empty-state {
@@ -255,12 +233,37 @@
   margin-top: 22px;
 }
 
+.load-more-wrap--actions {
+  gap: 10px;
+}
+
 .load-more-btn {
   border-radius: var(--radius-pill);
 }
 
-/* Erişilebilirlik: görsel olarak gizli ama ekran okuyucular tarafından
-   okunabilir aria-live duyuru bölgesi için. */
+.show-less-btn {
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.show-less-btn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+.show-less-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
