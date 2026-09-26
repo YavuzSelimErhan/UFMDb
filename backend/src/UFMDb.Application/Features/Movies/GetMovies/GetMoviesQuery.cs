@@ -11,6 +11,12 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
     private readonly IApplicationDbContext _context;
     public GetMoviesQueryHandler(IApplicationDbContext context) => _context = context;
 
+    /// <summary>"En yüksek puanlı" sıralamasına girebilmek için gereken minimum gerçek oy sayısı.
+    /// Bunun altındaki filmler (ör. 1 oyla 5 yıldız alan yeni bir film) AverageRating'i ne olursa
+    /// olsun listenin altına düşer; MovieRatingRecalculator'daki Bayesian ortalamayı bastırmaz,
+    /// sadece "az veriyle öne çıkma" sıralama hilesini engeller.</summary>
+    private const int MinVotesForRatingRank = 10;
+
     public async Task<PagedResult<MovieListItemDto>> Handle(GetMoviesQuery request, CancellationToken ct)
     {
         var f = request.Filter;
@@ -72,8 +78,14 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
         var isDescending = !string.Equals(f.SortDirection, "asc", StringComparison.OrdinalIgnoreCase);
         query = (f.SortBy, isDescending) switch
         {
-            ("rating", true) => query.OrderByDescending(m => m.AverageRating),
-            ("rating", false) => query.OrderBy(m => m.AverageRating),
+            ("rating", true) => query
+                .OrderByDescending(m => m.RatingCount >= MinVotesForRatingRank)
+                .ThenByDescending(m => m.AverageRating)
+                .ThenByDescending(m => m.RatingCount),
+            ("rating", false) => query
+                .OrderByDescending(m => m.RatingCount >= MinVotesForRatingRank)
+                .ThenBy(m => m.AverageRating)
+                .ThenBy(m => m.RatingCount),
             ("year", true) => query.OrderByDescending(m => m.ReleaseYear),
             ("year", false) => query.OrderBy(m => m.ReleaseYear),
             ("popularity", true) => query.OrderByDescending(m => m.RatingCount).ThenByDescending(m => m.AverageRating),
