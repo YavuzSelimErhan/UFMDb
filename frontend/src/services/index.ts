@@ -30,6 +30,7 @@ import type {
   UserSummaryDto,
   PublicProfileDto,
   PublicFullProfileDto,
+  NotificationItem,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -387,5 +388,25 @@ export const followService = {
       params,
     });
     return data;
+  },
+};
+
+// ---------------- Notifications ----------------
+export const notificationService = {
+  getAll: async (page = 1, pageSize = 20): Promise<NotificationItem[]> => {
+    const { data } = await api.get("/notifications", {
+      params: { page, pageSize },
+    });
+    return data;
+  },
+  getUnreadCount: async (): Promise<number> => {
+    const { data } = await api.get("/notifications/unread-count");
+    return data;
+  },
+  markRead: async (id: string): Promise<void> => {
+    await api.post(`/notifications/${id}/read`);
+  },
+  markAllRead: async (): Promise<void> => {
+    await api.post("/notifications/read-all");
   },
 };

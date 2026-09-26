@@ -34,6 +34,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<DirectorLike> DirectorLikes => Set<DirectorLike>();
     public DbSet<FavoriteDirector> FavoriteDirectors => Set<FavoriteDirector>();
     public DbSet<Follow> Follows => Set<Follow>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

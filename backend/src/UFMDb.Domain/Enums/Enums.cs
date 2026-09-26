@@ -37,3 +37,9 @@ public enum MovieLifecycleStatus
     /// <summary>Vizyon üzerinden yeterli süre geçti, veriler oturmuþ kabul edilir.</summary>
     Stable = 2
 }
+
+/// <summary>Bildirim turu. Ileride yeni turler (yorum begenisi, liste begenisi vb.) buraya eklenebilir.</summary>
+public enum NotificationType
+{
+    Follow = 0
+}

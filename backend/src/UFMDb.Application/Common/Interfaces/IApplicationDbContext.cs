@@ -34,5 +34,7 @@ public interface IApplicationDbContext
     DbSet<FavoriteDirector> FavoriteDirectors { get; }
     DbSet<Follow> Follows { get; }
 
+    DbSet<Notification> Notifications { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

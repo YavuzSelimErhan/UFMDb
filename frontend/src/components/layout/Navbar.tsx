@@ -22,6 +22,7 @@ import { logout } from "@/store/authSlice";
 import { authService } from "@/services";
 import { SUPPORTED_LANGUAGES, languageLabel } from "@/i18n/languages";
 import Dropdown from "@/components/search/Dropdown";
+import NotificationBell from "@/components/common/NotificationBell";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -109,6 +110,8 @@ export default function Navbar() {
               {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
             </button>
           </div>
+
+          {isAuthenticated && <NotificationBell />}
 
           {isAuthenticated ? (
             <div className="navbar__user">

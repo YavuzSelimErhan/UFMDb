@@ -419,3 +419,17 @@ export interface PublicFullProfileDto {
 
 export type ThemeMode = "dark" | "light";
 export type LanguageCode = "tr" | "en";
+
+export type NotificationType = "Follow";
+
+export interface NotificationItem {
+  id: string;
+  type: NotificationType;
+  actorUserId: string | null;
+  actorUserName: string | null;
+  actorFullName: string | null;
+  actorAvatarUrl: string | null;
+  entityId: string | null;
+  isRead: boolean;
+  createdAtUtc: string;
+}

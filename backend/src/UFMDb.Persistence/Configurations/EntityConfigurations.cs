@@ -316,3 +316,25 @@ public class FollowConfiguration : IEntityTypeConfiguration<Follow>
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
+
+public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
+{
+    public void Configure(EntityTypeBuilder<Notification> b)
+    {
+        b.ToTable("Notifications");
+
+        // Bildirim listesi / okunmamis sayaci hep RecipientUserId + IsRead ile sorgulanacak
+        b.HasIndex(n => new { n.RecipientUserId, n.IsRead });
+        b.HasIndex(n => n.CreatedAtUtc);
+
+        b.HasOne(n => n.RecipientUser)
+            .WithMany()
+            .HasForeignKey(n => n.RecipientUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        b.HasOne(n => n.ActorUser)
+            .WithMany()
+            .HasForeignKey(n => n.ActorUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}

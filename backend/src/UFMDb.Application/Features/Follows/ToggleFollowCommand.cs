@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Domain.Entities;
+using UFMDb.Domain.Enums;
 namespace UFMDb.Application.Features.Follows;
 
 public record ToggleFollowCommand(Guid CurrentUserId, Guid TargetUserId) : IRequest<bool>;
@@ -46,6 +47,14 @@ public class ToggleFollowCommandHandler : IRequestHandler<ToggleFollowCommand, b
             FollowerId = request.CurrentUserId,
             FollowingId = request.TargetUserId,
         });
+
+        _context.Notifications.Add(new Notification
+        {
+            RecipientUserId = request.TargetUserId,
+            ActorUserId = request.CurrentUserId,
+            Type = NotificationType.Follow,
+        });
+
         await _context.SaveChangesAsync(ct);
         return true;
     }
