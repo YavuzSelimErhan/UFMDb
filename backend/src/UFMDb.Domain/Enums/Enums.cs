@@ -30,11 +30,11 @@ public enum Gender
 
 public enum MovieLifecycleStatus
 {
-    /// <summary>Vizyon tarihi henüz gelmedi.</summary>
+    /// <summary>Vizyon tarihi henÃ¼z gelmedi.</summary>
     Upcoming = 0,
-    /// <summary>Vizyona girdi ama vizyon-sonrası ikinci senkronizasyon henüz yapılmadı (veriler henüz "olgunlaşmamış" olabilir).</summary>
+    /// <summary>Vizyona girdi ama vizyon-sonrasÄ± ikinci senkronizasyon henÃ¼z yapÄ±lmadÄ± (veriler henÃ¼z "olgunlaÅŸmamÄ±ÅŸ" olabilir).</summary>
     NewlyReleased = 1,
-    /// <summary>Vizyon üzerinden yeterli süre geçti, veriler oturmuş kabul edilir.</summary>
+    /// <summary>Vizyon Ã¼zerinden yeterli sÃ¼re geÃ§ti, veriler oturmuÅŸ kabul edilir.</summary>
     Stable = 2
 }
 

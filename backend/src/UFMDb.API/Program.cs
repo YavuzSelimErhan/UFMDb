@@ -6,7 +6,6 @@ using Microsoft.IdentityModel.Tokens;
 using UFMDb.API.Middleware;
 using UFMDb.API.RateLimiting;
 using UFMDb.Application;
-using UFMDb.Application.Common.Interfaces;
 using UFMDb.Infrastructure;
 using UFMDb.Persistence;
 using UFMDb.Persistence.Seed;
@@ -121,12 +120,11 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/api/uploads"
 });
 
-// ---------------- Migration + Seed (development kolaylığı) ----------------
+// ---------------- Migration (development kolaylığı) ----------------
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
-    await DbInitializer.SeedAsync(db, hasher);
+    await DbInitializer.MigrateAsync(db);
 }
 
 // ---------------- Middleware Pipeline ----------------

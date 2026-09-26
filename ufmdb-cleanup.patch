@@ -1,0 +1,386 @@
+diff --git a/README.md b/README.md
+index 199eaea..8f2d898 100644
+--- a/README.md
++++ b/README.md
+@@ -7,11 +7,14 @@ Modern, ölçeklenebilir, Clean Architecture tabanlı film veritabanı uygulamas
+ ```
+ backend/
+   src/
+-    UFMDb.Domain          → Entity'ler, enum'lar, ortak taban sınıflar (bağımlılık yok)
+-    UFMDb.Application     → CQRS (MediatR), DTO'lar, validasyon, arayüzler (Domain'e bağımlı)
+-    UFMDb.Infrastructure  → JWT, şifreleme, harici servisler (Application'a bağımlı)
+-    UFMDb.Persistence     → EF Core DbContext, konfigürasyonlar, seed (Application'a bağımlı)
+-    UFMDb.API             → Controller'lar, middleware, Program.cs (tüm katmanları birleştirir)
++    UFMDb.Domain             → Entity'ler, enum'lar, ortak taban sınıflar (bağımlılık yok)
++    UFMDb.Application        → CQRS (MediatR), DTO'lar, validasyon, arayüzler (Domain'e bağımlı)
++    UFMDb.Infrastructure     → JWT, şifreleme, harici servisler (Application'a bağımlı)
++    UFMDb.Persistence        → EF Core DbContext (PostgreSQL/Npgsql), konfigürasyonlar, migration'lar
++    UFMDb.API                → Controller'lar, middleware, Program.cs (tüm katmanları birleştirir)
++    UFMDb.Tools.TmdbImporter → TMDB'den gerçek film verisi çeken bağımsız console aracı
++  tests/
++    UFMDb.Tests              → xUnit testleri (auth, validasyon, rate limiting, exception handling)
+ frontend/
+   src/
+     components/  pages/  features/  services/  store/  i18n/  types/  styles/
+@@ -41,18 +44,14 @@ cp src/UFMDb.API/appsettings.example.json src/UFMDb.API/appsettings.json
+ #    → ConnectionStrings:DefaultConnection (Postgres bağlantı bilgilerin)
+ #    → JwtSettings:Secret (production'da MUTLAKA rastgele, en az 32 karakter bir değerle değiştir)
+ 
+-# 3. İlk migration'ı oluştur (proje ilk kez klonlandığında bu adım gereklidir)
+-dotnet ef migrations add InitialCreate \
+-  --project src/UFMDb.Persistence \
+-  --startup-project src/UFMDb.API
+-
+-# 4. API'yi çalıştır (migration + 50 film seed otomatik uygulanır, bkz. Program.cs)
++# 3. API'yi çalıştır — migration dosyaları repo'da zaten mevcut, Program.cs başlangıçta
++#    bekleyen migration'ları otomatik uygular; yeniden migration oluşturmana gerek yok
+ dotnet run --project src/UFMDb.API
+ ```
+ 
+-API varsayılan olarak `https://localhost:7001` üzerinde ayağa kalkar; Swagger UI `/swagger` altında görüntülenebilir.
++API varsayılan olarak `https://localhost:7001` üzerinde ayağa kalkar; Swagger UI `/swagger` altında görüntülenebilir (yalnızca `Development` ortamında açık).
+ 
+-**Varsayılan admin hesabı:** `admin@ufmdb.com` / `Admin123!` (ilk girişten sonra değiştirilmesi önerilir)
++**Veri:** Uygulama veritabanını boş kurar — demo/seed verisi yoktur. Film/oyuncu verisini içeri almak için aşağıdaki TMDB Import Aracı'nı kullan. Bir admin hesabına ihtiyacın varsa `POST /api/auth/register` ile kayıt ol, sonra rolünü doğrudan veritabanından ya da (elindeki ilk admin üzerinden) `PUT /api/users/{id}/role` ile `Admin` yap.
+ 
+ ## 💻 Frontend'i Çalıştırma
+ 
+@@ -62,16 +61,29 @@ npm install
+ npm run dev
+ ```
+ 
++**Stack:** React 18 + TypeScript, Redux Toolkit (global state), TanStack Query (sunucu state/cache), React Router 6, i18next (TR/EN), axios.
++
+ `vite.config.ts` içindeki proxy ayarı `/api` isteklerini backend'e yönlendirir; backend portunuz farklıysa güncelleyin.
+ 
++## 🧪 Backend Testlerini Çalıştırma
++
++```bash
++cd backend
++dotnet test tests/UFMDb.Tests
++```
++
++Auth akışları (login/register/refresh/logout), şifre hashleme, rate limiting politikası ve global exception handling middleware'i kapsanır.
++
+ ## 🔑 Öne Çıkan Tasarım Kararları
+ 
+ - **CQRS + MediatR**: Her endpoint tek bir Command/Query'ye karşılık gelir; okuma ve yazma yolları ayrıştırılmıştır.
+ - **Soft delete + global query filter**: `IsDeleted` alanı olan tüm entity'ler otomatik olarak sorgulardan filtrelenir.
+-- **Dinamik ortalama puan**: Review eklendiğinde/güncellendiğinde `Movie.AverageRating` anlık olarak yeniden hesaplanır (Letterboxd tarzı 0.5 adımlı puanlama).
+-- **JWT + Refresh Token**: Access token kısa ömürlü; refresh token tablo bazlı tutulur, ileride token rotation eklenebilir.
+-- **i18n altyapısı**: Hem backend (Genre.NameTr gibi alanlar) hem frontend (i18next) TR/EN'i destekler.
+-- **Sosyal özelliklere hazır mimari**: `Review.HelpfulCount`, ayrı `Like`/`WatchlistItem` tabloları gibi alanlar, takip/feed gibi özellikler eklenmek istendiğinde mevcut şemayı bozmadan genişletilebilir şekilde tasarlanmıştır.
++- **Ağırlıklı ortalama puan**: `Movie.AverageRating`, TMDB'den gelen orijinal oy sayısı/ortalaması (`SeedVoteCount`/`SeedRating`) hiç silinmeden bir çapa olarak tutulur; sitede verilen yeni puanlar bunun üzerine gerçek oy sayılarıyla ağırlıklandırılarak eklenir (bkz. `MovieRatingRecalculator`, tek doğru kaynak). Letterboxd tarzı 0.5 adımlı puanlama kullanılır.
++- **JWT + Refresh Token rotation**: Access token kısa ömürlü; refresh token'lar tablo bazlı tutulur ve her kullanımda rotate edilir.
++- **Rate limiting**: `/api/auth/*` uçları IP bazlı sabit pencereli limitleyici ile korunur (bkz. `UFMDb.API/RateLimiting`).
++- **i18n altyapısı**: Hem backend (`Genre.NameTr` gibi alanlar) hem frontend (i18next) TR/EN'i destekler.
++- **Sosyal özellikler**: Takip sistemi, kullanıcı profilleri, liste beğenileri, review'lara yorum/beğeni gibi özellikler mevcut ve genişlemeye açık şekilde tasarlanmış.
++- **Seans defteri (screening log)**: Bir filmi birden çok kez izleyip her seansı ayrı ayrı kaydedebilirsin (rewatch desteği); bir filme dair "güncel puanın" her zaman en son puanladığın seansı yansıtır.
+ 
+ ## 🎬 Gerçek Film Verisi: TMDB Import Aracı
+ 
+@@ -85,15 +97,12 @@ Proje, [The Movie Database (TMDB)](https://www.themoviedb.org/) API'sinden gerç
+ ```bash
+ cd backend
+ 
+-# 1. Yeni migration'ı oluştur (TmdbId kolonları eklendi, şema değişikliği var)
+-dotnet ef migrations add AddTmdbIdColumns --project src/UFMDb.Persistence --startup-project src/UFMDb.API
+-
+-# 2. appsettings.json'ı örnek dosyadan oluştur ve API anahtarını gir
++# 1. appsettings.json'ı örnek dosyadan oluştur ve API anahtarını gir
+ cp src/UFMDb.Tools.TmdbImporter/appsettings.example.json src/UFMDb.Tools.TmdbImporter/appsettings.json
+ #    → Tmdb:ApiKey alanına gerçek anahtarını yaz (https://www.themoviedb.org/settings/api)
+ #    → ConnectionStrings:DefaultConnection'ın ana API ile aynı olduğundan emin ol
+ 
+-# 3. Import'u çalıştır (varsayılan: 1000 film, min. 100 oy)
++# 2. Import'u çalıştır (varsayılan hedef sayılar appsettings'teki Tmdb ayarlarından okunur)
+ dotnet run --project src/UFMDb.Tools.TmdbImporter
+ ```
+ 
+@@ -106,26 +115,15 @@ Terminalde ilerleme şu şekilde akar:
+ 
+ ### Nasıl çalışır (idempotent upsert)
+ - Her film/oyuncu/tür, TMDB'deki ID'siyle eşleştirilir (`TmdbId` kolonu) — bizim kendi `Guid` Id'lerimiz asla değişmez.
+-- Aracı **istediğin zaman tekrar çalıştırabilirsin**: yeni film ekler, var olanları günceller, hiçbir review/like/watchlist verisine dokunmaz (onlar bizim Guid Id'lerimize bağlı).
+-- TMDB'nin 0-10'luk puan skalası, bizim 0-5'lik (yarım yıldız destekli) skalamıza **ikiye bölünerek** çevrilir. Bu değer başlangıç baseline'ıdır; gerçek kullanıcı review'ları geldikçe normal ortalama hesaplama mantığıyla güncellenmeye devam eder.
++- Aracı **istediğin zaman tekrar çalıştırabilirsin**: yeni film ekler, var olanları günceller, hiçbir review/rating/watchlist verisine dokunmaz (onlar bizim Guid Id'lerimize bağlı).
++- TMDB'nin 0-10'luk puan skalası, bizim 0-5'lik (yarım yıldız destekli) skalamıza **ikiye bölünerek** çevrilip `SeedRating`/`SeedVoteCount` olarak saklanır — bu, sitede birikmiş gerçek kullanıcı puanlarının üzerine eklenen sabit bir çapadır, asla ezilmez.
+ - Oyuncu biyografi/uyruk/doğum tarihi alanları TMDB'nin credits endpoint'inde gelmediği için boş bırakılır (binlerce ek API çağrısı gerektireceğinden performans amaçlı atlandı) — admin panelden istediğin oyuncuyu sonradan düzenleyebilirsin.
+ 
+ ### İleride yeni kolon eklersen
+-Örneğin `Movie.Budget` gibi yeni bir alan eklemek istersen: migration'ı oluştur, `TmdbMovieDetail` modeline `Budget` alanını ekle, upsert bloğuna `movie.Budget = detail.Budget;` satırını ekle, ve aracı tekrar çalıştır — **var olan 1000 film de bu yeni alanla güncellenir**, hiçbir veri kaybı olmaz.
+-
+-### Demo/seed verisini temizleme
+-TMDB import'unu çalıştırdıktan sonra, `DbInitializer` tarafından oluşturulan 50 sahte demo filmini (ve artık hiçbir gerçek filmde oynamayan demo aktörlerini) temizlemek için:
+-
+-```bash
+-dotnet run --project src/UFMDb.Tools.TmdbImporter -- cleanup-demo
+-```
+-
+-Bu, `TmdbId` değeri `NULL` olan (yani gerçek TMDB verisiyle eşleşmemiş) tüm filmleri ve yetim kalan aktörleri güvenli bir sırayla (ilişkili tabloları önce temizleyerek) siler. Gerçek TMDB verisine hiç dokunmaz.
+-
+-**Not:** Demo veri, gerçek oyuncu isimleri (Leonardo DiCaprio, Tom Hanks vb.) kullandığı için TMDB import'u bu kişileri ayrıca (gerçek `TmdbId` ile) oluşturmuş olabilir — yani geçici olarak aynı isim iki kez görünmüş olabilir. `cleanup-demo` komutu, filmi olmayan (yetim) demo kopyalarını temizleyerek bunu da çözer.
++Örneğin `Movie.Budget` gibi yeni bir alan eklemek istersen: migration'ı oluştur, `TmdbMovieDetail` modeline `Budget` alanını ekle, upsert bloğuna `movie.Budget = detail.Budget;` satırını ekle, ve aracı tekrar çalıştır — **var olan filmler de bu yeni alanla güncellenir**, hiçbir veri kaybı olmaz.
+ 
+-### Küratör listelerini gerçek verilerle yeniden kurma
+-Demo veriyle oluşturulmuş eski küratör listelerini temizleyip, gerçek TMDB filmlerinden **10 tür bazlı liste** oluşturmak için:
++### Küratör listelerini gerçek verilerle kurma
++İçe aktarılan TMDB filmlerinden **10 tür bazlı liste** oluşturmak (ve varsa eski küratör listelerini sıfırlamak) için:
+ 
+ ```bash
+ dotnet run --project src/UFMDb.Tools.TmdbImporter -- rebuild-curated-lists
+@@ -135,11 +133,12 @@ Bu komut önce tüm mevcut küratör listelerini (ve öğelerini) siler, sonra 
+ 
+ ## 🧪 Sonraki Adımlar (Prod Öncesi Kontrol Listesi)
+ 
+-- [ ] JWT secret'ı ve connection string'i ortam değişkenlerine / user-secrets'a taşıyın
++- [ ] JWT secret'ı ve connection string'i ortam değişkenlerine / user-secrets'a taşıyın (appsettings.json'ı sunucuya elle koymak yerine)
+ - [x] Refresh token rotation + revoke endpoint'i ekleyin
+ - [x] Rate limiting (login/register için IP bazlı, `Microsoft.AspNetCore.RateLimiting`) ekleyin — bkz. `UFMDb.API/RateLimiting`
+ - [x] Backend'e test projesi ekleyin (`backend/tests/UFMDb.Tests`, xUnit)
++- [x] Admin kullanıcı yönetimi için `Users` feature'ına liste/rol-değiştir endpoint'leri ekleyin — bkz. `UsersController`
+ - [ ] Email doğrulama (register sonrası hesabın gerçekten o email'e ait olduğunu doğrulama)
+-- [ ] Admin kullanıcı yönetimi için `Users` feature'ına liste/rol-değiştir endpoint'leri ekleyin
+-- [ ] CI/CD pipeline'ında `dotnet ef database update` adımını otomatikleştirin
+-- [ ] Görsel varlıklar (poster/backdrop) için gerçek bir CDN/object storage entegre edin (seed'de placeholder `picsum.photos` kullanılıyor)
++- [ ] CI/CD pipeline'ında `dotnet ef database update` (veya başlangıçtaki otomatik migration) adımını doğrulayın
++- [ ] Görsel varlıklar (poster/backdrop) için gerçek bir CDN/object storage entegre edin (yükleme klasörü şu an sunucu diskinde tutuluyor, bkz. `UploadsController`)
++- [ ] Yapılandırılmış loglama/izleme ekleyin (şu an sadece konsol logging)
+diff --git a/backend/src/UFMDb.API/Controllers/FollowsController.cs b/backend/src/UFMDb.API/Controllers/FollowsController.cs
+index c3ce012..86d7c24 100644
+--- a/backend/src/UFMDb.API/Controllers/FollowsController.cs
++++ b/backend/src/UFMDb.API/Controllers/FollowsController.cs
+@@ -1,10 +1,13 @@
+ ﻿using MediatR;
+ using Microsoft.AspNetCore.Authorization;
+ using Microsoft.AspNetCore.Mvc;
++using UFMDb.Application.Common.Exceptions;
+ using UFMDb.Application.Common.Interfaces;
+ using UFMDb.Application.Features.Follows;
+ using UFMDb.Application.Features.Users;
+ 
++namespace UFMDb.API.Controllers;
++
+ [ApiController]
+ [Route("api/[controller]")]
+ public class FollowsController : ControllerBase
+@@ -18,12 +21,14 @@ public class FollowsController : ControllerBase
+         _currentUser = currentUser;
+     }
+ 
++    private Guid RequireUserId() => _currentUser.UserId ?? throw new UnauthorizedException("Kullanıcı kimliği doğrulanamadı.");
++
+     [HttpPost("users/{targetUserId:guid}/toggle")]
+     [Authorize]
+     public async Task<IActionResult> Toggle(Guid targetUserId, CancellationToken ct)
+     {
+         var result = await _mediator.Send(
+-            new ToggleFollowCommand(_currentUser.UserId!.Value, targetUserId), ct);
++            new ToggleFollowCommand(RequireUserId(), targetUserId), ct);
+         return Ok(result);
+     }
+ 
+diff --git a/backend/src/UFMDb.API/Controllers/ListsController.cs b/backend/src/UFMDb.API/Controllers/ListsController.cs
+index 31387ee..27a5be3 100644
+--- a/backend/src/UFMDb.API/Controllers/ListsController.cs
++++ b/backend/src/UFMDb.API/Controllers/ListsController.cs
+@@ -18,7 +18,7 @@ public class ListsController : ControllerBase
+         _currentUser = currentUser;
+     }
+ 
+-    private Guid RequireUserId() => _currentUser.UserId ?? throw new UnauthorizedException("Kullan�c� kimli�i do�rulanamad�.");
++    private Guid RequireUserId() => _currentUser.UserId ?? throw new UnauthorizedException("Kullanıcı kimliği doğrulanamadı.");
+ 
+     [HttpGet]
+     public async Task<IActionResult> GetLists([FromQuery] ListScope scope = ListScope.Official)
+@@ -32,7 +32,7 @@ public class ListsController : ControllerBase
+     public async Task<ActionResult<Guid>> Create(CreateListRequest request)
+     {
+         var userId = RequireUserId();
+-        // Sadece Admin, isOfficial=true ile liste olu�turabilir; normal kullan�c� ne g�nderirse g�ndersin false'a sabitleniyor.
++        // Sadece Admin, isOfficial=true ile liste oluşturabilir; normal kullanıcı ne gönderirse göndersin false'a sabitleniyor.
+         var isOfficial = _currentUser.IsAdmin && request.IsOfficial;
+         var command = new CreateListCommand(
+             request.Title, request.TitleTr, request.Description, request.CoverImageUrl,
+diff --git a/backend/src/UFMDb.API/Program.cs b/backend/src/UFMDb.API/Program.cs
+index ee0f6a3..a4e00cb 100644
+--- a/backend/src/UFMDb.API/Program.cs
++++ b/backend/src/UFMDb.API/Program.cs
+@@ -6,7 +6,6 @@ using Microsoft.IdentityModel.Tokens;
+ using UFMDb.API.Middleware;
+ using UFMDb.API.RateLimiting;
+ using UFMDb.Application;
+-using UFMDb.Application.Common.Interfaces;
+ using UFMDb.Infrastructure;
+ using UFMDb.Persistence;
+ using UFMDb.Persistence.Seed;
+@@ -121,12 +120,11 @@ app.UseStaticFiles(new StaticFileOptions
+     RequestPath = "/api/uploads"
+ });
+ 
+-// ---------------- Migration + Seed (development kolaylığı) ----------------
++// ---------------- Migration (development kolaylığı) ----------------
+ using (var scope = app.Services.CreateScope())
+ {
+     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+-    var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+-    await DbInitializer.SeedAsync(db, hasher);
++    await DbInitializer.MigrateAsync(db);
+ }
+ 
+ // ---------------- Middleware Pipeline ----------------
+diff --git a/backend/src/UFMDb.Application/Common/Services/MovieRatingRecalculator.cs b/backend/src/UFMDb.Application/Common/Services/MovieRatingRecalculator.cs
+index 9436e6a..7658848 100644
+--- a/backend/src/UFMDb.Application/Common/Services/MovieRatingRecalculator.cs
++++ b/backend/src/UFMDb.Application/Common/Services/MovieRatingRecalculator.cs
+@@ -27,6 +27,22 @@ public static class MovieRatingRecalculator
+         await RecalculateAsync(context, movie, ct);
+     }
+ 
++    /// <summary>Kullanıcının bir filme dair güncel puanını kaldırır (seans defterindeki tek puanlı
++    /// kaydı silince/puanı boşaltınca çağrılır) ve ardından filmin AverageRating'ini yeniden hesaplar.
++    /// MovieRatings satırı kalmasın diye burada merkezi olarak tutulur — aksi halde artık kullanıcı
++    /// tarafından geri çekilmiş bir puan AverageRating'e dahil edilmeye devam eder.</summary>
++    public static async Task RemoveCurrentRatingAsync(IApplicationDbContext context, Movie movie, Guid userId, CancellationToken ct)
++    {
++        var existing = await context.MovieRatings
++            .FirstOrDefaultAsync(r => r.MovieId == movie.Id && r.UserId == userId, ct);
++
++        if (existing is null) return;
++
++        context.MovieRatings.Remove(existing);
++        await context.SaveChangesAsync(ct);
++        await RecalculateAsync(context, movie, ct);
++    }
++
+     /// <summary>Filmin AverageRating/RatingCount alanlarını yeniden hesaplar. TMDB'den içe aktarılan
+     /// orijinal oy sayısı (SeedVoteCount) ve ortalaması (SeedRating) hiç silinmez; sitede verilen
+     /// yeni puanlar bunun üzerine, gerçek oy sayılarıyla ağırlıklandırılarak eklenir. Tek doğru
+diff --git a/backend/src/UFMDb.Application/Features/Users/ProfileFeature.cs b/backend/src/UFMDb.Application/Features/Users/ProfileFeature.cs
+index 68acbea..c491bc5 100644
+--- a/backend/src/UFMDb.Application/Features/Users/ProfileFeature.cs
++++ b/backend/src/UFMDb.Application/Features/Users/ProfileFeature.cs
+@@ -629,7 +629,23 @@ public class UpdateScreeningLogEntryCommandHandler : IRequestHandler<UpdateScree
+         await _context.SaveChangesAsync(ct);
+ 
+         if (request.Rating.HasValue)
++        {
+             await MovieRatingRecalculator.UpsertCurrentRatingAsync(_context, entry.Movie, request.UserId, request.Rating.Value, ct);
++        }
++        else
++        {
++            // Bu kayıttan puan kaldırıldı: kullanıcının aynı filme ait başka puanlı bir seansı
++            // kalmışsa güncel puan onun değerine düşer, kalmadıysa MovieRatings satırı tamamen silinir.
++            var latestRemaining = await _context.WatchHistory
++                .Where(w => w.MovieId == entry.MovieId && w.UserId == request.UserId && w.Id != entry.Id && w.Rating.HasValue)
++                .OrderByDescending(w => w.WatchedAtUtc)
++                .FirstOrDefaultAsync(ct);
++
++            if (latestRemaining is not null)
++                await MovieRatingRecalculator.UpsertCurrentRatingAsync(_context, entry.Movie, request.UserId, latestRemaining.Rating!.Value, ct);
++            else
++                await MovieRatingRecalculator.RemoveCurrentRatingAsync(_context, entry.Movie, request.UserId, ct);
++        }
+     }
+ }
+ 
+@@ -648,9 +664,25 @@ public class DeleteScreeningLogEntryCommandHandler : IRequestHandler<DeleteScree
+             ?? throw new NotFoundException(nameof(WatchHistory), request.EntryId);
+ 
+         var movie = entry.Movie;
++        var hadRating = entry.Rating.HasValue;
+         _context.WatchHistory.Remove(entry);
+         await _context.SaveChangesAsync(ct);
+ 
+-        await MovieRatingRecalculator.RecalculateAsync(_context, movie, ct);
++        if (hadRating)
++        {
++            var latestRemaining = await _context.WatchHistory
++                .Where(w => w.MovieId == movie.Id && w.UserId == request.UserId && w.Rating.HasValue)
++                .OrderByDescending(w => w.WatchedAtUtc)
++                .FirstOrDefaultAsync(ct);
++
++            if (latestRemaining is not null)
++                await MovieRatingRecalculator.UpsertCurrentRatingAsync(_context, movie, request.UserId, latestRemaining.Rating!.Value, ct);
++            else
++                await MovieRatingRecalculator.RemoveCurrentRatingAsync(_context, movie, request.UserId, ct);
++        }
++        else
++        {
++            await MovieRatingRecalculator.RecalculateAsync(_context, movie, ct);
++        }
+     }
+ }
+\ No newline at end of file
+diff --git a/backend/src/UFMDb.Domain/Enums/Enums.cs b/backend/src/UFMDb.Domain/Enums/Enums.cs
+index f6b8647..7217b17 100644
+--- a/backend/src/UFMDb.Domain/Enums/Enums.cs
++++ b/backend/src/UFMDb.Domain/Enums/Enums.cs
+@@ -30,11 +30,11 @@ public enum Gender
+ 
+ public enum MovieLifecycleStatus
+ {
+-    /// <summary>Vizyon tarihi hen�z gelmedi.</summary>
++    /// <summary>Vizyon tarihi henüz gelmedi.</summary>
+     Upcoming = 0,
+-    /// <summary>Vizyona girdi ama vizyon-sonras� ikinci senkronizasyon hen�z yap�lmad� (veriler hen�z "olgunla�mam��" olabilir).</summary>
++    /// <summary>Vizyona girdi ama vizyon-sonrası ikinci senkronizasyon henüz yapılmadı (veriler henüz "olgunlaşmamış" olabilir).</summary>
+     NewlyReleased = 1,
+-    /// <summary>Vizyon �zerinden yeterli s�re ge�ti, veriler oturmu� kabul edilir.</summary>
++    /// <summary>Vizyon üzerinden yeterli süre geçti, veriler oturmuş kabul edilir.</summary>
+     Stable = 2
+ }
+ 
+diff --git a/backend/src/UFMDb.Persistence/DependencyInjection.cs b/backend/src/UFMDb.Persistence/DependencyInjection.cs
+index 28c20c6..97b9722 100644
+--- a/backend/src/UFMDb.Persistence/DependencyInjection.cs
++++ b/backend/src/UFMDb.Persistence/DependencyInjection.cs
+@@ -16,7 +16,7 @@ public static class DependencyInjection
+                 {
+                     b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
+ 
+-                    // Ge�ici DB kesintilerinde (network blip, failover vb.) iste�i
++                    // Geçici DB kesintilerinde (network blip, failover vb.) isteği
+                     // hemen patlatmak yerine otomatik retry yapar.
+                     b.EnableRetryOnFailure(
+                         maxRetryCount: 3,
+@@ -24,8 +24,8 @@ public static class DependencyInjection
+                         errorCodesToAdd: null);
+ 
+                     // Include().ThenInclude() zincirlerinin tek dev JOIN yerine
+-                    // ayr� sorgulara b�l�nmesini global default yapar; Actor/Director/Movie
+-                    // detay sorgular�ndaki cartesian explosion riskini ortadan kald�r�r.
++                    // ayrı sorgulara bölünmesini global default yapar; Actor/Director/Movie
++                    // detay sorgularındaki cartesian explosion riskini ortadan kaldırır.
+                     b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                 }));
+ 
+diff --git a/backend/src/UFMDb.Persistence/Seed/DbInitializer.cs b/backend/src/UFMDb.Persistence/Seed/DbInitializer.cs
+index 23449ad..14058d4 100644
+--- a/backend/src/UFMDb.Persistence/Seed/DbInitializer.cs
++++ b/backend/src/UFMDb.Persistence/Seed/DbInitializer.cs
+@@ -1,21 +1,15 @@
+ using Microsoft.EntityFrameworkCore;
+-using UFMDb.Application.Common.Interfaces;
+-using UFMDb.Domain.Entities;
+ 
+ namespace UFMDb.Persistence.Seed;
+ 
+ /// <summary>
+-/// İlk migration sonrası çalıştırılan seed sınıfı.
+-/// Not: Many-to-many ilişkiler (Movie-Genre, Movie-Actor) HasData yerine burada
+-/// imperative olarak seed edilir; bu, GUID ilişkilerini yönetmeyi kolaylaştırır
+-/// ve migration dosyasını daha okunabilir tutar.
++/// Uygulama başlangıcında bekleyen migration'ları uygular.
++/// Demo veri seed'i kasıtlı olarak kaldırıldı — gerçek veri UFMDb.Tools.TmdbImporter ile içe aktarılır.
+ /// </summary>
+ public static class DbInitializer
+ {
+-    public static async Task SeedAsync(ApplicationDbContext context, IPasswordHasher passwordHasher)
++    public static async Task MigrateAsync(ApplicationDbContext context)
+     {
+         await context.Database.MigrateAsync();
+-
+-        if (await context.Movies.AnyAsync()) return; // zaten seed edilmiş
+     }
+ }

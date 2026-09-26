@@ -18,7 +18,7 @@ public class ListsController : ControllerBase
         _currentUser = currentUser;
     }
 
-    private Guid RequireUserId() => _currentUser.UserId ?? throw new UnauthorizedException("Kullanıcı kimliği doğrulanamadı.");
+    private Guid RequireUserId() => _currentUser.UserId ?? throw new UnauthorizedException("KullanÄ±cÄ± kimliÄŸi doÄŸrulanamadÄ±.");
 
     [HttpGet]
     public async Task<IActionResult> GetLists([FromQuery] ListScope scope = ListScope.Official)
@@ -32,7 +32,7 @@ public class ListsController : ControllerBase
     public async Task<ActionResult<Guid>> Create(CreateListRequest request)
     {
         var userId = RequireUserId();
-        // Sadece Admin, isOfficial=true ile liste oluşturabilir; normal kullanıcı ne gönderirse göndersin false'a sabitleniyor.
+        // Sadece Admin, isOfficial=true ile liste oluÅŸturabilir; normal kullanÄ±cÄ± ne gÃ¶nderirse gÃ¶ndersin false'a sabitleniyor.
         var isOfficial = _currentUser.IsAdmin && request.IsOfficial;
         var command = new CreateListCommand(
             request.Title, request.TitleTr, request.Description, request.CoverImageUrl,

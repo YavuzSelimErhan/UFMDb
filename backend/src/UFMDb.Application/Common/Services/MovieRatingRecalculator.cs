@@ -27,6 +27,22 @@ public static class MovieRatingRecalculator
         await RecalculateAsync(context, movie, ct);
     }
 
+    /// <summary>Kullanıcının bir filme dair güncel puanını kaldırır (seans defterindeki tek puanlı
+    /// kaydı silince/puanı boşaltınca çağrılır) ve ardından filmin AverageRating'ini yeniden hesaplar.
+    /// MovieRatings satırı kalmasın diye burada merkezi olarak tutulur — aksi halde artık kullanıcı
+    /// tarafından geri çekilmiş bir puan AverageRating'e dahil edilmeye devam eder.</summary>
+    public static async Task RemoveCurrentRatingAsync(IApplicationDbContext context, Movie movie, Guid userId, CancellationToken ct)
+    {
+        var existing = await context.MovieRatings
+            .FirstOrDefaultAsync(r => r.MovieId == movie.Id && r.UserId == userId, ct);
+
+        if (existing is null) return;
+
+        context.MovieRatings.Remove(existing);
+        await context.SaveChangesAsync(ct);
+        await RecalculateAsync(context, movie, ct);
+    }
+
     /// <summary>Filmin AverageRating/RatingCount alanlarını yeniden hesaplar. TMDB'den içe aktarılan
     /// orijinal oy sayısı (SeedVoteCount) ve ortalaması (SeedRating) hiç silinmez; sitede verilen
     /// yeni puanlar bunun üzerine, gerçek oy sayılarıyla ağırlıklandırılarak eklenir. Tek doğru

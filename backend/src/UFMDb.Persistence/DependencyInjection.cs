@@ -16,7 +16,7 @@ public static class DependencyInjection
                 {
                     b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
 
-                    // Geçici DB kesintilerinde (network blip, failover vb.) isteði
+                    // GeÃ§ici DB kesintilerinde (network blip, failover vb.) isteÄŸi
                     // hemen patlatmak yerine otomatik retry yapar.
                     b.EnableRetryOnFailure(
                         maxRetryCount: 3,
@@ -24,8 +24,8 @@ public static class DependencyInjection
                         errorCodesToAdd: null);
 
                     // Include().ThenInclude() zincirlerinin tek dev JOIN yerine
-                    // ayrý sorgulara bölünmesini global default yapar; Actor/Director/Movie
-                    // detay sorgularýndaki cartesian explosion riskini ortadan kaldýrýr.
+                    // ayrÄ± sorgulara bÃ¶lÃ¼nmesini global default yapar; Actor/Director/Movie
+                    // detay sorgularÄ±ndaki cartesian explosion riskini ortadan kaldÄ±rÄ±r.
                     b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                 }));
 

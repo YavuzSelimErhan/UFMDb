@@ -629,7 +629,23 @@ public class UpdateScreeningLogEntryCommandHandler : IRequestHandler<UpdateScree
         await _context.SaveChangesAsync(ct);
 
         if (request.Rating.HasValue)
+        {
             await MovieRatingRecalculator.UpsertCurrentRatingAsync(_context, entry.Movie, request.UserId, request.Rating.Value, ct);
+        }
+        else
+        {
+            // Bu kayıttan puan kaldırıldı: kullanıcının aynı filme ait başka puanlı bir seansı
+            // kalmışsa güncel puan onun değerine düşer, kalmadıysa MovieRatings satırı tamamen silinir.
+            var latestRemaining = await _context.WatchHistory
+                .Where(w => w.MovieId == entry.MovieId && w.UserId == request.UserId && w.Id != entry.Id && w.Rating.HasValue)
+                .OrderByDescending(w => w.WatchedAtUtc)
+                .FirstOrDefaultAsync(ct);
+
+            if (latestRemaining is not null)
+                await MovieRatingRecalculator.UpsertCurrentRatingAsync(_context, entry.Movie, request.UserId, latestRemaining.Rating!.Value, ct);
+            else
+                await MovieRatingRecalculator.RemoveCurrentRatingAsync(_context, entry.Movie, request.UserId, ct);
+        }
     }
 }
 
@@ -648,9 +664,25 @@ public class DeleteScreeningLogEntryCommandHandler : IRequestHandler<DeleteScree
             ?? throw new NotFoundException(nameof(WatchHistory), request.EntryId);
 
         var movie = entry.Movie;
+        var hadRating = entry.Rating.HasValue;
         _context.WatchHistory.Remove(entry);
         await _context.SaveChangesAsync(ct);
 
-        await MovieRatingRecalculator.RecalculateAsync(_context, movie, ct);
+        if (hadRating)
+        {
+            var latestRemaining = await _context.WatchHistory
+                .Where(w => w.MovieId == movie.Id && w.UserId == request.UserId && w.Rating.HasValue)
+                .OrderByDescending(w => w.WatchedAtUtc)
+                .FirstOrDefaultAsync(ct);
+
+            if (latestRemaining is not null)
+                await MovieRatingRecalculator.UpsertCurrentRatingAsync(_context, movie, request.UserId, latestRemaining.Rating!.Value, ct);
+            else
+                await MovieRatingRecalculator.RemoveCurrentRatingAsync(_context, movie, request.UserId, ct);
+        }
+        else
+        {
+            await MovieRatingRecalculator.RecalculateAsync(_context, movie, ct);
+        }
     }
 }

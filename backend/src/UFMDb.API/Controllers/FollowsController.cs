@@ -1,9 +1,12 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.Features.Follows;
 using UFMDb.Application.Features.Users;
+
+namespace UFMDb.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -18,12 +21,14 @@ public class FollowsController : ControllerBase
         _currentUser = currentUser;
     }
 
+    private Guid RequireUserId() => _currentUser.UserId ?? throw new UnauthorizedException("Kullanıcı kimliği doğrulanamadı.");
+
     [HttpPost("users/{targetUserId:guid}/toggle")]
     [Authorize]
     public async Task<IActionResult> Toggle(Guid targetUserId, CancellationToken ct)
     {
         var result = await _mediator.Send(
-            new ToggleFollowCommand(_currentUser.UserId!.Value, targetUserId), ct);
+            new ToggleFollowCommand(RequireUserId(), targetUserId), ct);
         return Ok(result);
     }
 
