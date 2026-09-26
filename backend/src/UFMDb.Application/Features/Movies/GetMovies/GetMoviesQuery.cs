@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UFMDb.Application.Common;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.DTOs;
 namespace UFMDb.Application.Features.Movies.GetMovies;
@@ -10,12 +11,6 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
 {
     private readonly IApplicationDbContext _context;
     public GetMoviesQueryHandler(IApplicationDbContext context) => _context = context;
-
-    /// <summary>"En yüksek puanlı" sıralamasına girebilmek için gereken minimum gerçek oy sayısı.
-    /// Bunun altındaki filmler (ör. 1 oyla 5 yıldız alan yeni bir film) AverageRating'i ne olursa
-    /// olsun listenin altına düşer; MovieRatingRecalculator'daki Bayesian ortalamayı bastırmaz,
-    /// sadece "az veriyle öne çıkma" sıralama hilesini engeller.</summary>
-    private const int MinVotesForRatingRank = 10;
 
     public async Task<PagedResult<MovieListItemDto>> Handle(GetMoviesQuery request, CancellationToken ct)
     {
@@ -79,11 +74,11 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
         query = (f.SortBy, isDescending) switch
         {
             ("rating", true) => query
-                .OrderByDescending(m => m.RatingCount >= MinVotesForRatingRank)
+                .OrderByDescending(m => m.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
                 .ThenByDescending(m => m.AverageRating)
                 .ThenByDescending(m => m.RatingCount),
             ("rating", false) => query
-                .OrderByDescending(m => m.RatingCount >= MinVotesForRatingRank)
+                .OrderByDescending(m => m.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
                 .ThenBy(m => m.AverageRating)
                 .ThenBy(m => m.RatingCount),
             ("year", true) => query.OrderByDescending(m => m.ReleaseYear),

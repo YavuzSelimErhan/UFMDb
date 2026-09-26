@@ -1,0 +1,106 @@
+diff --git a/backend/src/UFMDb.Application/Common/RatingRankPolicy.cs b/backend/src/UFMDb.Application/Common/RatingRankPolicy.cs
+new file mode 100644
+index 0000000..0fa5541
+--- /dev/null
++++ b/backend/src/UFMDb.Application/Common/RatingRankPolicy.cs
+@@ -0,0 +1,18 @@
++namespace UFMDb.Application.Common;
++
++/// <summary>
++/// Site genelinde "en yüksek puanlı" sıralamalarının (film arama sayfası, ana sayfa hero
++/// carousel + Top Rated bölümü, profildeki "en yüksek puanlı" film sıralaması vb.) ortak
++/// kuralı: bir filmin bu sıralamalarda üste çıkabilmesi için en az bu kadar gerçek kullanıcı
++/// oyu olması gerekir. Eşiğin altındaki filmler (ör. 1 oyla 5 yıldız alan yeni bir film)
++/// AverageRating'i ne olursa olsun listenin altına düşer.
++///
++/// Bu, MovieRatingRecalculator'daki Bayesian ortalamayı (MinVotesForFullWeight = 50)
++/// değiştirmez/bastırmaz — o film detayında gösterilen puanı yumuşatır. Buradaki eşik ise
++/// sadece "az veriyle öne çıkma" sıralama hilesini engelleyen ayrı bir kapı; ikisi birlikte
++/// çalışır.
++/// </summary>
++public static class RatingRankPolicy
++{
++    public const int MinVotesForRatingRank = 10;
++}
+diff --git a/backend/src/UFMDb.Application/Features/Movies/GetMovies/GetMoviesQuery.cs b/backend/src/UFMDb.Application/Features/Movies/GetMovies/GetMoviesQuery.cs
+index 01e0dc9..0233aaa 100644
+--- a/backend/src/UFMDb.Application/Features/Movies/GetMovies/GetMoviesQuery.cs
++++ b/backend/src/UFMDb.Application/Features/Movies/GetMovies/GetMoviesQuery.cs
+@@ -1,5 +1,6 @@
+ using MediatR;
+ using Microsoft.EntityFrameworkCore;
++using UFMDb.Application.Common;
+ using UFMDb.Application.Common.Interfaces;
+ using UFMDb.Application.DTOs;
+ namespace UFMDb.Application.Features.Movies.GetMovies;
+@@ -72,8 +73,14 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
+         var isDescending = !string.Equals(f.SortDirection, "asc", StringComparison.OrdinalIgnoreCase);
+         query = (f.SortBy, isDescending) switch
+         {
+-            ("rating", true) => query.OrderByDescending(m => m.AverageRating),
+-            ("rating", false) => query.OrderBy(m => m.AverageRating),
++            ("rating", true) => query
++                .OrderByDescending(m => m.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
++                .ThenByDescending(m => m.AverageRating)
++                .ThenByDescending(m => m.RatingCount),
++            ("rating", false) => query
++                .OrderByDescending(m => m.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
++                .ThenBy(m => m.AverageRating)
++                .ThenBy(m => m.RatingCount),
+             ("year", true) => query.OrderByDescending(m => m.ReleaseYear),
+             ("year", false) => query.OrderBy(m => m.ReleaseYear),
+             ("popularity", true) => query.OrderByDescending(m => m.RatingCount).ThenByDescending(m => m.AverageRating),
+diff --git a/backend/src/UFMDb.Application/Features/Movies/HomeFeed/GetHomeFeedQuery.cs b/backend/src/UFMDb.Application/Features/Movies/HomeFeed/GetHomeFeedQuery.cs
+index 75676ef..617e86e 100644
+--- a/backend/src/UFMDb.Application/Features/Movies/HomeFeed/GetHomeFeedQuery.cs
++++ b/backend/src/UFMDb.Application/Features/Movies/HomeFeed/GetHomeFeedQuery.cs
+@@ -1,5 +1,6 @@
+ using MediatR;
+ using Microsoft.EntityFrameworkCore;
++using UFMDb.Application.Common;
+ using UFMDb.Application.Common.Interfaces;
+ using UFMDb.Application.DTOs;
+ namespace UFMDb.Application.Features.Movies.HomeFeed;
+@@ -32,11 +33,11 @@ public class GetHomeFeedQueryHandler : IRequestHandler<GetHomeFeedQuery, HomeFee
+             : new HashSet<Guid>();
+         var baseQuery = _context.Movies.AsNoTracking().Where(m => !m.IsDeleted);
+         var featured = await baseQuery
+-            .Where(m => m.RatingCount > 0)
++            .Where(m => m.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
+             .OrderByDescending(m => m.AverageRating * 1000 + m.LikeCount)
+             .Take(6).Select(MapToListItemProjection()).ToListAsync(ct);
+         var popular = await baseQuery.OrderByDescending(m => m.LikeCount).Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
+-        var topRated = await baseQuery.Where(m => m.RatingCount > 0)
++        var topRated = await baseQuery.Where(m => m.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
+             .OrderByDescending(m => m.AverageRating).Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
+         var trending = await baseQuery
+             .OrderByDescending(m => m.ViewCount * 0.6 + m.LikeCount * 0.4)
+diff --git a/backend/src/UFMDb.Application/Features/Users/ProfileFeature.cs b/backend/src/UFMDb.Application/Features/Users/ProfileFeature.cs
+index 68acbea..edacaf3 100644
+--- a/backend/src/UFMDb.Application/Features/Users/ProfileFeature.cs
++++ b/backend/src/UFMDb.Application/Features/Users/ProfileFeature.cs
+@@ -2,6 +2,7 @@ using FluentValidation;
+ using MediatR;
+ using Microsoft.EntityFrameworkCore;
+ using System.Linq;
++using UFMDb.Application.Common;
+ using UFMDb.Application.Common.Exceptions;
+ using UFMDb.Application.Common.Interfaces;
+ using UFMDb.Application.Common.Services;
+@@ -456,8 +457,14 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
+             "release-asc" => all.OrderBy(w => w.Movie.ReleaseDate),
+             "rating-desc" => all.OrderByDescending(w => w.UserRating ?? -1),
+             "rating-asc" => all.OrderBy(w => w.UserRating ?? -1),
+-            "movie-rating-desc" => all.OrderByDescending(w => w.Movie.AverageRating),
+-            "movie-rating-asc" => all.OrderBy(w => w.Movie.AverageRating),
++            "movie-rating-desc" => all
++                .OrderByDescending(w => w.Movie.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
++                .ThenByDescending(w => w.Movie.AverageRating)
++                .ThenByDescending(w => w.Movie.RatingCount),
++            "movie-rating-asc" => all
++                .OrderByDescending(w => w.Movie.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
++                .ThenBy(w => w.Movie.AverageRating)
++                .ThenBy(w => w.Movie.RatingCount),
+             "title-asc" => all.OrderBy(w => w.Movie.Title),
+             _ => all.OrderByDescending(w => w.WatchedAtUtc)
+         };

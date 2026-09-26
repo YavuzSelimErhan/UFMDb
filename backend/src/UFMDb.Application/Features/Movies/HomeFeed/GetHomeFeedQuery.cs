@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UFMDb.Application.Common;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.DTOs;
 namespace UFMDb.Application.Features.Movies.HomeFeed;
@@ -32,11 +33,11 @@ public class GetHomeFeedQueryHandler : IRequestHandler<GetHomeFeedQuery, HomeFee
             : new HashSet<Guid>();
         var baseQuery = _context.Movies.AsNoTracking().Where(m => !m.IsDeleted);
         var featured = await baseQuery
-            .Where(m => m.RatingCount > 0)
+            .Where(m => m.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
             .OrderByDescending(m => m.AverageRating * 1000 + m.LikeCount)
             .Take(6).Select(MapToListItemProjection()).ToListAsync(ct);
         var popular = await baseQuery.OrderByDescending(m => m.LikeCount).Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
-        var topRated = await baseQuery.Where(m => m.RatingCount > 0)
+        var topRated = await baseQuery.Where(m => m.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
             .OrderByDescending(m => m.AverageRating).Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
         var trending = await baseQuery
             .OrderByDescending(m => m.ViewCount * 0.6 + m.LikeCount * 0.4)

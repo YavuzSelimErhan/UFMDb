@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using UFMDb.Application.Common;
 using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.Common.Services;
@@ -456,8 +457,14 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
             "release-asc" => all.OrderBy(w => w.Movie.ReleaseDate),
             "rating-desc" => all.OrderByDescending(w => w.UserRating ?? -1),
             "rating-asc" => all.OrderBy(w => w.UserRating ?? -1),
-            "movie-rating-desc" => all.OrderByDescending(w => w.Movie.AverageRating),
-            "movie-rating-asc" => all.OrderBy(w => w.Movie.AverageRating),
+            "movie-rating-desc" => all
+                .OrderByDescending(w => w.Movie.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
+                .ThenByDescending(w => w.Movie.AverageRating)
+                .ThenByDescending(w => w.Movie.RatingCount),
+            "movie-rating-asc" => all
+                .OrderByDescending(w => w.Movie.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
+                .ThenBy(w => w.Movie.AverageRating)
+                .ThenBy(w => w.Movie.RatingCount),
             "title-asc" => all.OrderBy(w => w.Movie.Title),
             _ => all.OrderByDescending(w => w.WatchedAtUtc)
         };
