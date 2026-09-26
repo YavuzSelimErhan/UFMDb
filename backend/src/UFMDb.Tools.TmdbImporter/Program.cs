@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using UFMDb.Application.Common.Services;
 using UFMDb.Domain.Entities;
 using UFMDb.Domain.Enums;
 using UFMDb.Persistence;
@@ -327,20 +328,14 @@ if (args.Contains("backfill-vote-counts"))
 
 async Task BackfillVoteCountsAsync(DbContextOptions<ApplicationDbContext> options)
 {
-    Console.WriteLine("Filmlerin orijinal TMDB oy sayıları (SeedVoteCount) geri dolduruluyor...\n");
+    Console.WriteLine("Filmlerin orijinal TMDB oy sayısı (SeedVoteCount) ve puanı (SeedRating) geri dolduruluyor...\n");
 
     List<(Guid Id, int TmdbId)> movies;
-    Dictionary<Guid, int> localReviewCounts;
 
     await using (var db = new ApplicationDbContext(options))
     {
         movies = await db.Movies.Where(m => m.TmdbId != null)
             .Select(m => new ValueTuple<Guid, int>(m.Id, m.TmdbId!.Value)).ToListAsync();
-
-        localReviewCounts = await db.Reviews.Where(r => !r.IsDeleted)
-            .GroupBy(r => r.MovieId)
-            .Select(g => new { g.Key, Count = g.Count() })
-            .ToDictionaryAsync(g => g.Key, g => g.Count);
     }
 
     Console.WriteLine($"{movies.Count} film bulundu.\n");
@@ -361,9 +356,12 @@ async Task BackfillVoteCountsAsync(DbContextOptions<ApplicationDbContext> option
             if (movie is null) continue;
 
             movie.SeedVoteCount = detail.VoteCount;
-            movie.RatingCount = detail.VoteCount + localReviewCounts.GetValueOrDefault(m.Id, 0);
+            movie.SeedRating = Math.Round(detail.VoteAverage / 2.0, 2);
 
-            await db.SaveChangesAsync(cts.Token);
+            // RatingCount/AverageRating'i elle hesaplamak yerine tek doğru kaynağa (MovieRatingRecalculator)
+            // devrediyoruz — bu sayede sitede o ana kadar verilmiş gerçek MovieRatings kayıtları da
+            // (yorum sayısı değil, asıl puan tablosu) SeedVoteCount'un üzerine doğru şekilde eklenir.
+            await MovieRatingRecalculator.RecalculateAsync(db, movie, cts.Token);
             updated++;
 
             if (processed % 100 == 0 || processed == movies.Count)
@@ -601,13 +599,12 @@ async Task ImportMoviesAsync(List<int> movieIds, Dictionary<int, Guid> genreMapp
             movie.BackdropUrl = TmdbClient.BuildImageUrl(detail.BackdropPath, "w1280") ?? string.Empty;
             movie.Country = detail.ProductionCountries.FirstOrDefault()?.Name ?? string.Empty;
 
-            // NOT: AverageRating/RatingCount başlangıçta TMDB'nin izleyici puanından baseline olarak dolduruluyor.
-            // TMDB'nin puan skalası 0-10 iken bizim skalamız (Letterboxd tarzı, yarım yıldız dahil) 0-5 olduğu
-            // için burada TMDB puanı 2'ye bölünerek bizim skalamıza çevriliyor. Gerçek kullanıcılar UFMDb
-            // üzerinden review yazdıkça bu değerler normal review-recalculation mantığıyla güncellenmeye devam eder.
-            movie.AverageRating = Math.Round(detail.VoteAverage / 2.0, 2);
+            // NOT: SeedRating/SeedVoteCount, TMDB'nin izleyici puanını hiç değişmeyen bir "çapa" olarak
+            // saklar. AverageRating/RatingCount ise MovieRatingRecalculator.RecalculateAsync ile
+            // hesaplanır — bu sayede bu import/refresh akışı zaten sitede birikmiş yerel puanları
+            // (MovieRatings) asla ezmez, sadece TMDB tarafını güncelleyip yeniden karıştırır.
+            movie.SeedRating = Math.Round(detail.VoteAverage / 2.0, 2);
             movie.SeedVoteCount = detail.VoteCount;
-            movie.RatingCount = detail.VoteCount;
             movie.ViewCount = detail.VoteCount;
 
             // Sadece yeni filmlerde lifecycle durumunu ReleaseDate'e göre otomatik ata.
@@ -621,6 +618,8 @@ async Task ImportMoviesAsync(List<int> movieIds, Dictionary<int, Guid> genreMapp
             }
 
             if (isNew) db.Movies.Add(movie);
+
+            await MovieRatingRecalculator.RecalculateAsync(db, movie, cts.Token);
 
             // ---- Türler (temizle + yeniden kur) ----
             movie.MovieGenres.Clear();

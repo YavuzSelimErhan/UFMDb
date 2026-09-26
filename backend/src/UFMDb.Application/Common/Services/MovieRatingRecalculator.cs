@@ -6,8 +6,6 @@ namespace UFMDb.Application.Common.Services;
 
 public static class MovieRatingRecalculator
 {
-    private const int MinVotesForFullWeight = 50;
-
     /// <summary>Kullanıcının bir filme dair güncel puanını set eder (hızlı puan veya seans defteri
     /// kaydından çağrılır) ve ardından filmin AverageRating'ini yeniden hesaplar.</summary>
     public static async Task UpsertCurrentRatingAsync(IApplicationDbContext context, Movie movie, Guid userId, decimal value, CancellationToken ct)
@@ -29,26 +27,28 @@ public static class MovieRatingRecalculator
         await RecalculateAsync(context, movie, ct);
     }
 
-    /// <summary>Filmin AverageRating/RatingCount alanlarını, MovieRatings tablosundaki
-    /// (SeedRating'e göre ağırlıklandırılmış) puanlarla yeniden hesaplar. Tek doğru kaynak burasıdır.</summary>
+    /// <summary>Filmin AverageRating/RatingCount alanlarını yeniden hesaplar. TMDB'den içe aktarılan
+    /// orijinal oy sayısı (SeedVoteCount) ve ortalaması (SeedRating) hiç silinmez; sitede verilen
+    /// yeni puanlar bunun üzerine, gerçek oy sayılarıyla ağırlıklandırılarak eklenir. Tek doğru
+    /// kaynak burasıdır — TmdbImporter'daki tek seferlik backfill de aynı mantığı izler.</summary>
     public static async Task RecalculateAsync(IApplicationDbContext context, Movie movie, CancellationToken ct)
     {
         var stats = await context.MovieRatings
             .Where(r => r.MovieId == movie.Id)
             .GroupBy(r => r.MovieId)
-            .Select(g => new { Avg = g.Average(r => (double)r.Value), Count = g.Count() })
+            .Select(g => new { Sum = g.Sum(r => (double)r.Value), Count = g.Count() })
             .FirstOrDefaultAsync(ct);
 
-        var voteCount = stats?.Count ?? 0;
+        var localCount = stats?.Count ?? 0;
+        var localSum = stats?.Sum ?? 0;
 
-        movie.AverageRating = voteCount == 0
+        var totalVotes = movie.SeedVoteCount + localCount;
+
+        movie.AverageRating = totalVotes == 0
             ? movie.SeedRating
-            : Math.Round(
-                ((double)voteCount / (voteCount + MinVotesForFullWeight)) * stats!.Avg
-                + ((double)MinVotesForFullWeight / (voteCount + MinVotesForFullWeight)) * movie.SeedRating,
-                2);
+            : Math.Round((movie.SeedRating * movie.SeedVoteCount + localSum) / totalVotes, 2);
 
-        movie.RatingCount = voteCount;
+        movie.RatingCount = totalVotes;
 
         await context.SaveChangesAsync(ct);
     }

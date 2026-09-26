@@ -5,7 +5,6 @@
     "cancel": "Cancel",
     "save": "Save",
     "edit": "Edit",
-
     "delete": "Delete",
     "add": "Add",
     "genericError": "Something went wrong. Please try again.",
@@ -17,7 +16,6 @@
   },
   "errors": {
     "profileFailed": "Couldn't load profile details.",
-
     "homeFeedFailed": "Couldn't load the home page. Make sure the backend is running.",
     "listsFailed": "Couldn't load lists.",
     "listDetailFailed": "Couldn't load this list.",
@@ -103,7 +101,6 @@
   },
   "search": {
     "noResults": "No results found",
-
     "title": "Discover",
     "subtitle": "Get lost in the world of movies, actors and directors",
     "moviesTab": "Movies",
@@ -208,7 +205,6 @@
     "favoriteMoviesTab": "Favorite Movies",
     "favoriteActorsTab": "Favorite Actors",
     "favoriteDirectorsTab": "Favorite Directors",
-
     "recentlyWatched": "Recently Watched",
     "liked": "Liked Content",
     "watchlist": "My Watchlist",
@@ -292,7 +288,9 @@
     "liked": "Liked",
     "noBiography": "No biography available."
   },
-  "director": { "filmography": "Filmography" },
+  "director": {
+    "filmography": "Filmography"
+  },
   "footer": {
     "tagline": "Discover cinema, rate movies, build your collection.",
     "discover": "Discover",
@@ -313,7 +311,10 @@
       "lists": "Lists",
       "users": "Users"
     },
-    "people": { "actorsTab": "Actors", "directorsTab": "Directors" },
+    "people": {
+      "actorsTab": "Actors",
+      "directorsTab": "Directors"
+    },
     "movies": {
       "listTitle": "Existing Movies",
       "searchPlaceholder": "Search by movie title...",
@@ -460,5 +461,10 @@
     "followingLabel": "Following",
     "noFollowers": "No followers yet",
     "noFollowing": "Not following anyone yet"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "You don't have any notifications yet.",
+    "startedFollowingYou": "started following you"
   }
 }

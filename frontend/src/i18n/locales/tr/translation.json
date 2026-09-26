@@ -5,7 +5,6 @@
     "back": "Geri",
     "save": "Kaydet",
     "edit": "Düzenle",
-
     "delete": "Sil",
     "add": "Ekle",
     "genericError": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
@@ -17,7 +16,6 @@
   },
   "errors": {
     "profileFailed": "Profil bilgileri yüklenemedi.",
-
     "homeFeedFailed": "Ana sayfa verileri yüklenemedi. Backend'in çalıştığından emin ol.",
     "listsFailed": "Listeler yüklenemedi.",
     "listDetailFailed": "Liste yüklenemedi.",
@@ -103,7 +101,6 @@
   },
   "search": {
     "noResults": "Sonuç bulunamadı",
-
     "title": "Keşfet",
     "subtitle": "Film, oyuncu ve yönetmen dünyasında kaybol",
     "moviesTab": "Filmler",
@@ -208,7 +205,6 @@
     "favoriteMoviesTab": "Favori Filmler",
     "favoriteActorsTab": "Favori Oyuncular",
     "favoriteDirectorsTab": "Favori Yönetmenler",
-
     "recentlyWatched": "Son İzlenenler",
     "liked": "Beğenilenler",
     "watchlist": "İzleme Listesi",
@@ -322,7 +318,10 @@
       "lists": "Listeler",
       "users": "Kullanıcılar"
     },
-    "people": { "actorsTab": "Aktörler", "directorsTab": "Yönetmenler" },
+    "people": {
+      "actorsTab": "Aktörler",
+      "directorsTab": "Yönetmenler"
+    },
     "movies": {
       "listTitle": "Mevcut Filmler",
       "searchPlaceholder": "Film adına göre ara...",
@@ -469,5 +468,10 @@
     "followingLabel": "Takip Edilen",
     "noFollowers": "Henüz takipçisi yok",
     "noFollowing": "Henüz kimseyi takip etmiyor"
+  },
+  "notifications": {
+    "title": "Bildirimler",
+    "empty": "Henüz bildirimin yok.",
+    "startedFollowingYou": "seni takip etmeye başladı"
   }
 }
