@@ -32,8 +32,8 @@ interface FilmsToolbarProps {
 }
 
 /**
- * ProfileFilmsTab ve (istenirse) UserFilmsTab arasında paylaşılan filtre /
- * sıralama / görünüm araç çubuğu. Önceden ProfileFilmsTab içinde satır içi
+ * FilmsTab (kendi profil + başka kullanıcı profili) tarafından paylaşılan
+ * filtre / sıralama / görünüm araç çubuğu. Önceden ProfileFilmsTab içinde satır içi
  * tanımlıydı; davranış bire bir aynı, sadece prop'lar üzerinden kontrol
  * ediliyor.
  */

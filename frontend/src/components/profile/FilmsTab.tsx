@@ -6,7 +6,7 @@ import {
   useQueryClient,
   keepPreviousData,
 } from "@tanstack/react-query";
-import { profileService, movieService } from "@/services";
+import { profileService, followService, movieService } from "@/services";
 import MovieCard from "@/components/movie/MovieCard";
 import FilmsToolbar, {
   type FilterType,
@@ -16,7 +16,7 @@ import FilmsGrid from "@/components/profile/FilmsGrid";
 import { useWatchedFilmsCounts } from "@/hooks/useWatchedFilmsCounts";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import type { WatchedMovie } from "@/types";
-import "./ProfileFilmsTab.css";
+import "./FilmsTab.css";
 
 const PAGE_SIZE = 24;
 const DEFAULT_SORT = "release-desc";
@@ -24,16 +24,17 @@ const DEFAULT_SORT = "release-desc";
 type FilmsPage = { items: WatchedMovie[]; page: number; totalPages: number };
 type FilmsCache = { pages: FilmsPage[]; pageParams: unknown[] };
 
-// "fp" (kaçıncı sayfaya kadar yüklendiği) sadece "sayfadan ayrılıp geri
-// dönünce kaldığı yerden devam etsin" için URL'de tutuluyor. Bunu
-// setSearchParams (React Router navigasyonu) yerine doğrudan
-// history.replaceState ile güncelliyoruz. Neden: bir "Daha fazla yükle"
-// tıklamasını router navigasyonu olarak işaretlemek, uygulamada varsa
-// global bir scroll-restorasyon/`ScrollToTop` davranışını tetikleyip
-// sayfayı en üste zıplatabiliyor — preventScrollReset her kurulumda bunu
-// engellemeyebiliyor. history.replaceState hiçbir navigasyon event'i
-// tetiklemediği için bu sorunu kökten çözüyor; filtre/sıralama/görünüm
-// değişiklikleri hâlâ normal setSearchParams ile, router üzerinden gider.
+interface FilmsTabProps {
+  /** Verilirse: başka bir kullanıcının filmleri, salt okunur mod
+   *  (puanlama ve izleme kaydı kapalı). Verilmezse: giriş yapmış
+   *  kullanıcının kendi profili, tüm etkileşimler açık.
+   *
+   *  Backend tarafı zaten tek bir GetUserWatchedMoviesQuery ile her iki
+   *  durumu da (Profile/Follows controller) aynı şekilde işliyor —
+   *  buradaki tek fark hangi servisin çağrıldığı. */
+  userId?: string;
+}
+
 function readFpFromUrl(): number {
   return Number(new URLSearchParams(window.location.search).get("fp")) || 1;
 }
@@ -46,7 +47,8 @@ function writeFpToUrl(page: number) {
   window.history.replaceState(window.history.state, "", url);
 }
 
-export default function ProfileFilmsTab() {
+export default function FilmsTab({ userId }: FilmsTabProps) {
+  const isOwnProfile = !userId;
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
@@ -55,16 +57,15 @@ export default function ProfileFilmsTab() {
   const sortBy = searchParams.get("fs") || DEFAULT_SORT;
   const viewMode = (searchParams.get("fv") as ViewMode) || "grid";
 
-  // Sadece ilk mount'ta okunur; sonrasında pagination bookkeeping'i
-  // router'dan bağımsız olarak writeFpToUrl ile yürütülür.
   const [restorePageParam] = useState(readFpFromUrl);
-
-  const [savingMovieId, setSavingMovieId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const { openLog, logModal } = useScreeningLogModal();
   const topRef = useRef<HTMLDivElement | null>(null);
 
   const hasRatingParam = filter === "all" ? undefined : filter === "rated";
+  // userId query key'e dahil: aynı sekmede kendi profilinizden başka
+  // birinin profiline geçtiğinizde cache karışmasın.
+  const queryKey = ["watched-films", userId ?? "me", filter, sortBy] as const;
 
   const setFilter = (v: FilterType) => {
     const n = new URLSearchParams(window.location.search);
@@ -82,13 +83,12 @@ export default function ProfileFilmsTab() {
 
   const setViewMode = (v: ViewMode) => {
     const n = new URLSearchParams(window.location.search);
-    // fp bilerek dokunulmuyor: görünüm değişse de kaldığı sayfa korunur.
     v === "grid" ? n.delete("fv") : n.set("fv", v);
     setSearchParams(n, { replace: true });
   };
 
   const { data: counts = { all: 0, rated: 0, unrated: 0 } } =
-    useWatchedFilmsCounts();
+    useWatchedFilmsCounts(userId);
 
   const {
     data,
@@ -99,14 +99,21 @@ export default function ProfileFilmsTab() {
     fetchNextPage,
     error: loadError,
   } = useInfiniteQuery({
-    queryKey: ["watched-films", filter, sortBy],
+    queryKey,
     queryFn: ({ pageParam }) =>
-      profileService.getWatchedFilms({
-        page: pageParam,
-        pageSize: PAGE_SIZE,
-        sortBy,
-        hasRating: hasRatingParam,
-      }),
+      isOwnProfile
+        ? profileService.getWatchedFilms({
+            page: pageParam,
+            pageSize: PAGE_SIZE,
+            sortBy,
+            hasRating: hasRatingParam,
+          })
+        : followService.getWatchedFilms(userId, {
+            page: pageParam,
+            pageSize: PAGE_SIZE,
+            sortBy,
+            hasRating: hasRatingParam,
+          }),
     initialPageParam: 1,
     getNextPageParam: (last: FilmsPage) =>
       last.page < last.totalPages ? last.page + 1 : undefined,
@@ -157,11 +164,9 @@ export default function ProfileFilmsTab() {
     }
   };
 
-  // Açılmış sayfaları tek sayfaya kırpar ve toolbar'a geri kaydırır —
-  // "sürekli genişleyip hiç küçülmüyor" sorununu çözer.
   const showLess = () => {
     queryClient.setQueryData(
-      ["watched-films", filter, sortBy],
+      queryKey,
       (prev: FilmsCache | undefined) =>
         prev && {
           pages: prev.pages.slice(0, 1),
@@ -172,29 +177,31 @@ export default function ProfileFilmsTab() {
     topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const handleRate = async (movieId: string, value: number) => {
-    setSavingMovieId(movieId);
-    try {
-      await movieService.upsertRating(movieId, value);
-      queryClient.setQueryData(
-        ["watched-films", filter, sortBy],
-        (prev: FilmsCache | undefined) =>
-          prev && {
-            ...prev,
-            pages: prev.pages.map((p) => ({
-              ...p,
-              items: p.items.map((e) =>
-                e.movieId === movieId ? { ...e, userRating: value } : e,
-              ),
-            })),
-          },
-      );
-    } catch {
-      setActionError(t("profile.ratingSaveError"));
-    } finally {
-      setSavingMovieId(null);
-    }
-  };
+  // Salt okunur moddayken hiç tanımlanmıyor; MovieCard'a interactive={false}
+  // ile birlikte onRate/onLogClick geçilmiyor.
+  const handleRate = !isOwnProfile
+    ? undefined
+    : async (movieId: string, value: number) => {
+        setActionError(null);
+        try {
+          await movieService.upsertRating(movieId, value);
+          queryClient.setQueryData(
+            queryKey,
+            (prev: FilmsCache | undefined) =>
+              prev && {
+                ...prev,
+                pages: prev.pages.map((p) => ({
+                  ...p,
+                  items: p.items.map((e) =>
+                    e.movieId === movieId ? { ...e, userRating: value } : e,
+                  ),
+                })),
+              },
+          );
+        } catch {
+          setActionError(t("profile.ratingSaveError"));
+        }
+      };
 
   const error = actionError ?? (loadError ? t("profile.filmsLoadError") : null);
 
@@ -221,9 +228,13 @@ export default function ProfileFilmsTab() {
           <MovieCard
             movie={entry.movie}
             userRating={entry.userRating}
-            onRate={(value) => handleRate(entry.movieId, value)}
-            isRatingSaving={savingMovieId === entry.movieId}
-            onLogClick={() => openLog(entry.movie)}
+            interactive={isOwnProfile}
+            onRate={
+              handleRate
+                ? (value) => handleRate(entry.movieId, value)
+                : undefined
+            }
+            onLogClick={isOwnProfile ? () => openLog(entry.movie) : undefined}
           />
         )}
         isLoading={isLoading}
@@ -236,7 +247,7 @@ export default function ProfileFilmsTab() {
         dimmed={isFetching && !isFetchingNextPage && !isLoading}
       />
 
-      {logModal}
+      {isOwnProfile && logModal}
     </div>
   );
 }

@@ -17,7 +17,7 @@ import ListCard from "../Lists/ListCard";
 import Favorites from "@/components/profile/Favorites";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileContentTabs from "@/components/profile/ProfileContentTabs";
-import UserFilmsTab from "@/components/profile/UserFilmsTab";
+import FilmsTab from "@/components/profile/FilmsTab";
 import {
   PageSpinner,
   PageError,
@@ -205,7 +205,7 @@ export default function UserProfilePage() {
           </>
         )}
 
-        {tab === "films" && <UserFilmsTab userId={profile.id} />}
+        {tab === "films" && <FilmsTab userId={profile.id} />}
 
         {(tab === "watchlist" || tab === "liked" || tab === "reviews") && (
           <ProfileContentTabs

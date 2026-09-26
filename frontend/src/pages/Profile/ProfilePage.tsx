@@ -25,7 +25,7 @@ import MovieCard from "@/components/movie/MovieCard";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import ListCard from "./../Lists/ListCard";
 import Favorites from "@/components/profile/Favorites";
-import ProfileFilmsTab from "@/components/profile/ProfileFilmsTab";
+import FilmsTab from "@/components/profile/FilmsTab";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileContentTabs from "@/components/profile/ProfileContentTabs";
 import { useWatchedFilmsCounts } from "@/hooks/useWatchedFilmsCounts";
@@ -233,7 +233,7 @@ export default function ProfilePage() {
           </>
         )}
 
-        {tab === "films" && <ProfileFilmsTab />}
+        {tab === "films" && <FilmsTab />}
 
         {(tab === "watchlist" || tab === "liked" || tab === "reviews") && (
           <ProfileContentTabs

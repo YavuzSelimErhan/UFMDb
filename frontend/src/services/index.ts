@@ -382,7 +382,12 @@ export const followService = {
   },
   getWatchedFilms: async (
     userId: string,
-    params: { page: number; pageSize: number },
+    params: {
+      page: number;
+      pageSize: number;
+      sortBy?: string;
+      hasRating?: boolean;
+    },
   ): Promise<PagedResult<WatchedMovie>> => {
     const { data } = await api.get(`/users/${userId}/watched-films`, {
       params,

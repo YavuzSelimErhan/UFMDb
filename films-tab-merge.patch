@@ -1,0 +1,443 @@
+diff --git a/frontend/src/components/profile/FilmsGrid.tsx b/frontend/src/components/profile/FilmsGrid.tsx
+index 21608cf..36c6fbc 100644
+--- a/frontend/src/components/profile/FilmsGrid.tsx
++++ b/frontend/src/components/profile/FilmsGrid.tsx
+@@ -2,7 +2,7 @@ import { useEffect, useRef, type ReactNode } from "react";
+ import { useTranslation } from "react-i18next";
+ import { Film } from "lucide-react";
+ import { EmptyState } from "@/components/common/PageState";
+-import "./ProfileFilmsTab.css";
++import "./FilmsTab.css";
+ 
+ export type ViewMode = "grid" | "masonry";
+ 
+@@ -30,7 +30,7 @@ interface FilmsGridProps<T> {
+ }
+ 
+ /**
+- * ProfileFilmsTab ve UserFilmsTab arasında paylaşılan izlenen-filmler
++ * FilmsTab (kendi profil + başka kullanıcı profili) tarafından paylaşılan izlenen-filmler
+  * grid'i: yükleme iskeleti, kart listesi, "Daha fazla yükle" / "Daha az
+  * göster" ile isteğe bağlı sayfalama ve boş durum. Bilinçli olarak
+  * otomatik (IntersectionObserver ile kaydırınca kendi kendine yükleyen)
+diff --git a/frontend/src/components/profile/ProfileFilmsTab.css b/frontend/src/components/profile/FilmsTab.css
+similarity index 100%
+rename from frontend/src/components/profile/ProfileFilmsTab.css
+rename to frontend/src/components/profile/FilmsTab.css
+diff --git a/frontend/src/components/profile/ProfileFilmsTab.tsx b/frontend/src/components/profile/FilmsTab.tsx
+similarity index 68%
+rename from frontend/src/components/profile/ProfileFilmsTab.tsx
+rename to frontend/src/components/profile/FilmsTab.tsx
+index 9588edf..1aab62b 100644
+--- a/frontend/src/components/profile/ProfileFilmsTab.tsx
++++ b/frontend/src/components/profile/FilmsTab.tsx
+@@ -6,7 +6,7 @@ import {
+   useQueryClient,
+   keepPreviousData,
+ } from "@tanstack/react-query";
+-import { profileService, movieService } from "@/services";
++import { profileService, followService, movieService } from "@/services";
+ import MovieCard from "@/components/movie/MovieCard";
+ import FilmsToolbar, {
+   type FilterType,
+@@ -16,7 +16,7 @@ import FilmsGrid from "@/components/profile/FilmsGrid";
+ import { useWatchedFilmsCounts } from "@/hooks/useWatchedFilmsCounts";
+ import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
+ import type { WatchedMovie } from "@/types";
+-import "./ProfileFilmsTab.css";
++import "./FilmsTab.css";
+ 
+ const PAGE_SIZE = 24;
+ const DEFAULT_SORT = "release-desc";
+@@ -24,16 +24,17 @@ const DEFAULT_SORT = "release-desc";
+ type FilmsPage = { items: WatchedMovie[]; page: number; totalPages: number };
+ type FilmsCache = { pages: FilmsPage[]; pageParams: unknown[] };
+ 
+-// "fp" (kaçıncı sayfaya kadar yüklendiği) sadece "sayfadan ayrılıp geri
+-// dönünce kaldığı yerden devam etsin" için URL'de tutuluyor. Bunu
+-// setSearchParams (React Router navigasyonu) yerine doğrudan
+-// history.replaceState ile güncelliyoruz. Neden: bir "Daha fazla yükle"
+-// tıklamasını router navigasyonu olarak işaretlemek, uygulamada varsa
+-// global bir scroll-restorasyon/`ScrollToTop` davranışını tetikleyip
+-// sayfayı en üste zıplatabiliyor — preventScrollReset her kurulumda bunu
+-// engellemeyebiliyor. history.replaceState hiçbir navigasyon event'i
+-// tetiklemediği için bu sorunu kökten çözüyor; filtre/sıralama/görünüm
+-// değişiklikleri hâlâ normal setSearchParams ile, router üzerinden gider.
++interface FilmsTabProps {
++  /** Verilirse: başka bir kullanıcının filmleri, salt okunur mod
++   *  (puanlama ve izleme kaydı kapalı). Verilmezse: giriş yapmış
++   *  kullanıcının kendi profili, tüm etkileşimler açık.
++   *
++   *  Backend tarafı zaten tek bir GetUserWatchedMoviesQuery ile her iki
++   *  durumu da (Profile/Follows controller) aynı şekilde işliyor —
++   *  buradaki tek fark hangi servisin çağrıldığı. */
++  userId?: string;
++}
++
+ function readFpFromUrl(): number {
+   return Number(new URLSearchParams(window.location.search).get("fp")) || 1;
+ }
+@@ -46,7 +47,8 @@ function writeFpToUrl(page: number) {
+   window.history.replaceState(window.history.state, "", url);
+ }
+ 
+-export default function ProfileFilmsTab() {
++export default function FilmsTab({ userId }: FilmsTabProps) {
++  const isOwnProfile = !userId;
+   const { t } = useTranslation();
+   const [searchParams, setSearchParams] = useSearchParams();
+   const queryClient = useQueryClient();
+@@ -55,16 +57,15 @@ export default function ProfileFilmsTab() {
+   const sortBy = searchParams.get("fs") || DEFAULT_SORT;
+   const viewMode = (searchParams.get("fv") as ViewMode) || "grid";
+ 
+-  // Sadece ilk mount'ta okunur; sonrasında pagination bookkeeping'i
+-  // router'dan bağımsız olarak writeFpToUrl ile yürütülür.
+   const [restorePageParam] = useState(readFpFromUrl);
+-
+-  const [savingMovieId, setSavingMovieId] = useState<string | null>(null);
+   const [actionError, setActionError] = useState<string | null>(null);
+   const { openLog, logModal } = useScreeningLogModal();
+   const topRef = useRef<HTMLDivElement | null>(null);
+ 
+   const hasRatingParam = filter === "all" ? undefined : filter === "rated";
++  // userId query key'e dahil: aynı sekmede kendi profilinizden başka
++  // birinin profiline geçtiğinizde cache karışmasın.
++  const queryKey = ["watched-films", userId ?? "me", filter, sortBy] as const;
+ 
+   const setFilter = (v: FilterType) => {
+     const n = new URLSearchParams(window.location.search);
+@@ -82,13 +83,12 @@ export default function ProfileFilmsTab() {
+ 
+   const setViewMode = (v: ViewMode) => {
+     const n = new URLSearchParams(window.location.search);
+-    // fp bilerek dokunulmuyor: görünüm değişse de kaldığı sayfa korunur.
+     v === "grid" ? n.delete("fv") : n.set("fv", v);
+     setSearchParams(n, { replace: true });
+   };
+ 
+   const { data: counts = { all: 0, rated: 0, unrated: 0 } } =
+-    useWatchedFilmsCounts();
++    useWatchedFilmsCounts(userId);
+ 
+   const {
+     data,
+@@ -99,14 +99,21 @@ export default function ProfileFilmsTab() {
+     fetchNextPage,
+     error: loadError,
+   } = useInfiniteQuery({
+-    queryKey: ["watched-films", filter, sortBy],
++    queryKey,
+     queryFn: ({ pageParam }) =>
+-      profileService.getWatchedFilms({
+-        page: pageParam,
+-        pageSize: PAGE_SIZE,
+-        sortBy,
+-        hasRating: hasRatingParam,
+-      }),
++      isOwnProfile
++        ? profileService.getWatchedFilms({
++            page: pageParam,
++            pageSize: PAGE_SIZE,
++            sortBy,
++            hasRating: hasRatingParam,
++          })
++        : followService.getWatchedFilms(userId, {
++            page: pageParam,
++            pageSize: PAGE_SIZE,
++            sortBy,
++            hasRating: hasRatingParam,
++          }),
+     initialPageParam: 1,
+     getNextPageParam: (last: FilmsPage) =>
+       last.page < last.totalPages ? last.page + 1 : undefined,
+@@ -157,11 +164,9 @@ export default function ProfileFilmsTab() {
+     }
+   };
+ 
+-  // Açılmış sayfaları tek sayfaya kırpar ve toolbar'a geri kaydırır —
+-  // "sürekli genişleyip hiç küçülmüyor" sorununu çözer.
+   const showLess = () => {
+     queryClient.setQueryData(
+-      ["watched-films", filter, sortBy],
++      queryKey,
+       (prev: FilmsCache | undefined) =>
+         prev && {
+           pages: prev.pages.slice(0, 1),
+@@ -172,29 +177,31 @@ export default function ProfileFilmsTab() {
+     topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+   };
+ 
+-  const handleRate = async (movieId: string, value: number) => {
+-    setSavingMovieId(movieId);
+-    try {
+-      await movieService.upsertRating(movieId, value);
+-      queryClient.setQueryData(
+-        ["watched-films", filter, sortBy],
+-        (prev: FilmsCache | undefined) =>
+-          prev && {
+-            ...prev,
+-            pages: prev.pages.map((p) => ({
+-              ...p,
+-              items: p.items.map((e) =>
+-                e.movieId === movieId ? { ...e, userRating: value } : e,
+-              ),
+-            })),
+-          },
+-      );
+-    } catch {
+-      setActionError(t("profile.ratingSaveError"));
+-    } finally {
+-      setSavingMovieId(null);
+-    }
+-  };
++  // Salt okunur moddayken hiç tanımlanmıyor; MovieCard'a interactive={false}
++  // ile birlikte onRate/onLogClick geçilmiyor.
++  const handleRate = !isOwnProfile
++    ? undefined
++    : async (movieId: string, value: number) => {
++        setActionError(null);
++        try {
++          await movieService.upsertRating(movieId, value);
++          queryClient.setQueryData(
++            queryKey,
++            (prev: FilmsCache | undefined) =>
++              prev && {
++                ...prev,
++                pages: prev.pages.map((p) => ({
++                  ...p,
++                  items: p.items.map((e) =>
++                    e.movieId === movieId ? { ...e, userRating: value } : e,
++                  ),
++                })),
++              },
++          );
++        } catch {
++          setActionError(t("profile.ratingSaveError"));
++        }
++      };
+ 
+   const error = actionError ?? (loadError ? t("profile.filmsLoadError") : null);
+ 
+@@ -221,9 +228,13 @@ export default function ProfileFilmsTab() {
+           <MovieCard
+             movie={entry.movie}
+             userRating={entry.userRating}
+-            onRate={(value) => handleRate(entry.movieId, value)}
+-            isRatingSaving={savingMovieId === entry.movieId}
+-            onLogClick={() => openLog(entry.movie)}
++            interactive={isOwnProfile}
++            onRate={
++              handleRate
++                ? (value) => handleRate(entry.movieId, value)
++                : undefined
++            }
++            onLogClick={isOwnProfile ? () => openLog(entry.movie) : undefined}
+           />
+         )}
+         isLoading={isLoading}
+@@ -236,7 +247,7 @@ export default function ProfileFilmsTab() {
+         dimmed={isFetching && !isFetchingNextPage && !isLoading}
+       />
+ 
+-      {logModal}
++      {isOwnProfile && logModal}
+     </div>
+   );
+ }
+diff --git a/frontend/src/components/profile/FilmsToolbar.tsx b/frontend/src/components/profile/FilmsToolbar.tsx
+index fee3087..e30ce07 100644
+--- a/frontend/src/components/profile/FilmsToolbar.tsx
++++ b/frontend/src/components/profile/FilmsToolbar.tsx
+@@ -32,8 +32,8 @@ interface FilmsToolbarProps {
+ }
+ 
+ /**
+- * ProfileFilmsTab ve (istenirse) UserFilmsTab arasında paylaşılan filtre /
+- * sıralama / görünüm araç çubuğu. Önceden ProfileFilmsTab içinde satır içi
++ * FilmsTab (kendi profil + başka kullanıcı profili) tarafından paylaşılan
++ * filtre / sıralama / görünüm araç çubuğu. Önceden ProfileFilmsTab içinde satır içi
+  * tanımlıydı; davranış bire bir aynı, sadece prop'lar üzerinden kontrol
+  * ediliyor.
+  */
+diff --git a/frontend/src/components/profile/UserFilmsTab.tsx b/frontend/src/components/profile/UserFilmsTab.tsx
+deleted file mode 100644
+index f01cf97..0000000
+--- a/frontend/src/components/profile/UserFilmsTab.tsx
++++ /dev/null
+@@ -1,82 +0,0 @@
+-import { useMemo } from "react";
+-import { useTranslation } from "react-i18next";
+-import { useInfiniteQuery } from "@tanstack/react-query";
+-import { followService } from "@/services";
+-import MovieCard from "@/components/movie/MovieCard";
+-import FilmsGrid from "@/components/profile/FilmsGrid";
+-import { PageError } from "@/components/common/PageState";
+-import type { WatchedMovie } from "@/types";
+-import "./ProfileFilmsTab.css";
+-
+-const PAGE_SIZE = 24;
+-
+-type FilmsPage = { items: WatchedMovie[]; page: number; totalPages: number };
+-
+-/**
+- * Başka bir kullanıcının izlediği filmler listesi. ProfileFilmsTab'daki
+- * filtre/sıralama araç çubuğu yok (bu bir başkasının profili), ama
+- * sayfalama, iskelet yükleme, boş durum ve artık hata yönetimi de dahil
+- * olmak üzere aynı FilmsGrid altyapısını paylaşıyor.
+- */
+-export default function UserFilmsTab({ userId }: { userId: string }) {
+-  const { t } = useTranslation();
+-
+-  const {
+-    data,
+-    isLoading,
+-    isFetchingNextPage,
+-    hasNextPage,
+-    fetchNextPage,
+-    isError,
+-    refetch,
+-  } = useInfiniteQuery({
+-    queryKey: ["user-watched-films", userId],
+-    queryFn: ({ pageParam }) =>
+-      followService.getWatchedFilms(userId, {
+-        page: pageParam,
+-        pageSize: PAGE_SIZE,
+-      }),
+-    initialPageParam: 1,
+-    getNextPageParam: (last: FilmsPage) =>
+-      last.page < last.totalPages ? last.page + 1 : undefined,
+-    staleTime: 30_000,
+-  });
+-
+-  const entries = useMemo(
+-    () => data?.pages.flatMap((p) => p.items) ?? [],
+-    [data],
+-  );
+-
+-  // Önceki sürümde hata yönetimi hiç yoktu (fetch başarısız olursa sessizce
+-  // takılı kalıyordu). Artık diğer sekmelerle tutarlı bir hata + yeniden
+-  // deneme ekranı gösteriyor.
+-  if (isError) {
+-    return (
+-      <PageError
+-        message={t("errors.userFilmsFailed")}
+-        onRetry={() => refetch()}
+-      />
+-    );
+-  }
+-
+-  return (
+-    <div className="films-tab">
+-      <FilmsGrid
+-        entries={entries}
+-        getKey={(entry) => entry.movieId}
+-        renderCard={(entry) => (
+-          <MovieCard
+-            movie={entry.movie}
+-            userRating={entry.userRating}
+-            interactive={false}
+-          />
+-        )}
+-        isLoading={isLoading}
+-        isFetchingNextPage={isFetchingNextPage}
+-        hasNextPage={!!hasNextPage}
+-        onLoadMore={() => fetchNextPage()}
+-        emptyTitle={t("profile.emptyContent")}
+-      />
+-    </div>
+-  );
+-}
+diff --git a/frontend/src/hooks/useWatchedFilmsCounts.ts b/frontend/src/hooks/useWatchedFilmsCounts.ts
+index c1dbbdf..54855fe 100644
+--- a/frontend/src/hooks/useWatchedFilmsCounts.ts
++++ b/frontend/src/hooks/useWatchedFilmsCounts.ts
+@@ -1,22 +1,30 @@
+ import { useQuery } from "@tanstack/react-query";
+-import { profileService } from "@/services";
++import { profileService, followService } from "@/services";
+ 
+-export function useWatchedFilmsCounts() {
++/**
++ * userId verilmezse: giriş yapmış kullanıcının kendi sayıları
++ * (profileService). Verilirse: o kullanıcının sayıları (followService) —
++ * backend'deki GetUserWatchedMoviesQuery handler'ı zaten userId
++ * parametreli ve iki controller'da da (Profile/Follows) aynı şekilde
++ * çalışıyor, bu yüzden burada da tek bir mantık yeterli.
++ */
++export function useWatchedFilmsCounts(userId?: string) {
+   return useQuery({
+-    queryKey: ["watched-films-counts"],
++    queryKey: ["watched-films-counts", userId ?? "me"],
+     queryFn: async () => {
++      const fetchPage = (hasRating?: boolean) =>
++        userId
++          ? followService.getWatchedFilms(userId, {
++              page: 1,
++              pageSize: 1,
++              hasRating,
++            })
++          : profileService.getWatchedFilms({ page: 1, pageSize: 1, hasRating });
++
+       const [all, rated, unrated] = await Promise.all([
+-        profileService.getWatchedFilms({ page: 1, pageSize: 1 }),
+-        profileService.getWatchedFilms({
+-          page: 1,
+-          pageSize: 1,
+-          hasRating: true,
+-        }),
+-        profileService.getWatchedFilms({
+-          page: 1,
+-          pageSize: 1,
+-          hasRating: false,
+-        }),
++        fetchPage(undefined),
++        fetchPage(true),
++        fetchPage(false),
+       ]);
+       return {
+         all: all.totalCount,
+diff --git a/frontend/src/pages/Profile/ProfilePage.tsx b/frontend/src/pages/Profile/ProfilePage.tsx
+index 8ca5195..eecb7df 100644
+--- a/frontend/src/pages/Profile/ProfilePage.tsx
++++ b/frontend/src/pages/Profile/ProfilePage.tsx
+@@ -25,7 +25,7 @@ import MovieCard from "@/components/movie/MovieCard";
+ import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
+ import ListCard from "./../Lists/ListCard";
+ import Favorites from "@/components/profile/Favorites";
+-import ProfileFilmsTab from "@/components/profile/ProfileFilmsTab";
++import FilmsTab from "@/components/profile/FilmsTab";
+ import ProfileHeader from "@/components/profile/ProfileHeader";
+ import ProfileContentTabs from "@/components/profile/ProfileContentTabs";
+ import { useWatchedFilmsCounts } from "@/hooks/useWatchedFilmsCounts";
+@@ -233,7 +233,7 @@ export default function ProfilePage() {
+           </>
+         )}
+ 
+-        {tab === "films" && <ProfileFilmsTab />}
++        {tab === "films" && <FilmsTab />}
+ 
+         {(tab === "watchlist" || tab === "liked" || tab === "reviews") && (
+           <ProfileContentTabs
+diff --git a/frontend/src/pages/Users/UserProfilePage.tsx b/frontend/src/pages/Users/UserProfilePage.tsx
+index 13577ed..75bcb16 100644
+--- a/frontend/src/pages/Users/UserProfilePage.tsx
++++ b/frontend/src/pages/Users/UserProfilePage.tsx
+@@ -17,7 +17,7 @@ import ListCard from "../Lists/ListCard";
+ import Favorites from "@/components/profile/Favorites";
+ import ProfileHeader from "@/components/profile/ProfileHeader";
+ import ProfileContentTabs from "@/components/profile/ProfileContentTabs";
+-import UserFilmsTab from "@/components/profile/UserFilmsTab";
++import FilmsTab from "@/components/profile/FilmsTab";
+ import {
+   PageSpinner,
+   PageError,
+@@ -205,7 +205,7 @@ export default function UserProfilePage() {
+           </>
+         )}
+ 
+-        {tab === "films" && <UserFilmsTab userId={profile.id} />}
++        {tab === "films" && <FilmsTab userId={profile.id} />}
+ 
+         {(tab === "watchlist" || tab === "liked" || tab === "reviews") && (
+           <ProfileContentTabs

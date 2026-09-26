@@ -2,7 +2,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Film } from "lucide-react";
 import { EmptyState } from "@/components/common/PageState";
-import "./ProfileFilmsTab.css";
+import "./FilmsTab.css";
 
 export type ViewMode = "grid" | "masonry";
 
@@ -30,7 +30,7 @@ interface FilmsGridProps<T> {
 }
 
 /**
- * ProfileFilmsTab ve UserFilmsTab arasında paylaşılan izlenen-filmler
+ * FilmsTab (kendi profil + başka kullanıcı profili) tarafından paylaşılan izlenen-filmler
  * grid'i: yükleme iskeleti, kart listesi, "Daha fazla yükle" / "Daha az
  * göster" ile isteğe bağlı sayfalama ve boş durum. Bilinçli olarak
  * otomatik (IntersectionObserver ile kaydırınca kendi kendine yükleyen)
