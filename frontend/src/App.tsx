@@ -64,7 +64,10 @@ function AppShell() {
 
 export default function App() {
   return (
-    <BrowserRouter basename="/UFMDb">
+    // NOT: basename kaldırıldı — "/UFMDb" GitHub Pages'in proje sayfası path'iydi.
+    // Cloudflare'de domain kökünde ("/") çalıştığımız için basename olmadan
+    // varsayılan "/" kullanılır; aksi halde hiçbir route eşleşmiyor ve sayfa boş kalıyordu.
+    <BrowserRouter>
       <SessionManager />
       <AppShell />
     </BrowserRouter>
