@@ -1,0 +1,35 @@
+diff --git a/frontend/vite.config.ts b/frontend/vite.config.ts
+index 034ceb5..808aefd 100644
+--- a/frontend/vite.config.ts
++++ b/frontend/vite.config.ts
+@@ -5,7 +5,9 @@ import { fileURLToPath, URL } from "url";
+ // https://vitejs.dev/config/
+ export default defineConfig({
+   plugins: [react()],
+-  base: "/UFMDb/",
++  // NOT: base'i kaldırdık — bu, GitHub Pages'te proje sayfası olarak
++  // (.../UFMDb/ altında) yayınlandığımız için gerekliydi. Cloudflare Workers'ta
++  // domain kökünde ("/") yayınlanıyoruz, base olmadan varsayılan "/" kullanılır.
+   resolve: {
+     alias: {
+       "@": fileURLToPath(new URL("./src", import.meta.url)),
+diff --git a/frontend/wrangler.jsonc b/frontend/wrangler.jsonc
+new file mode 100644
+index 0000000..e9b9b41
+--- /dev/null
++++ b/frontend/wrangler.jsonc
+@@ -0,0 +1,14 @@
++{
++  "$schema": "./node_modules/wrangler/config-schema.json",
++  "name": "ufmdb",
++  // Bugünün tarihi olarak güncel tutulmalı; Cloudflare her deploy'da
++  // runtime davranışını bu tarihe göre sabitler.
++  "compatibility_date": "2026-09-27",
++  "assets": {
++    "directory": "./dist",
++    // react-router-dom client-side routing kullanıyor (bkz. src/), bu yüzden
++    // eşleşmeyen her path index.html'e düşmeli — aksi halde /movies/123 gibi
++    // bir adrese direkt gidildiğinde ya da sayfa yenilendiğinde 404 alınır.
++    "not_found_handling": "single-page-application"
++  }
++}

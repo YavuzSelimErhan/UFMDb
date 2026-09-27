@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "ufmdb",
+  // Bugünün tarihi olarak güncel tutulmalı; Cloudflare her deploy'da
+  // runtime davranışını bu tarihe göre sabitler.
+  "compatibility_date": "2026-09-27",
+  "assets": {
+    "directory": "./dist",
+    // react-router-dom client-side routing kullanıyor (bkz. src/), bu yüzden
+    // eşleşmeyen her path index.html'e düşmeli — aksi halde /movies/123 gibi
+    // bir adrese direkt gidildiğinde ya da sayfa yenilendiğinde 404 alınır.
+    "not_found_handling": "single-page-application"
+  }
+}

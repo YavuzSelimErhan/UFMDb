@@ -5,7 +5,9 @@ import { fileURLToPath, URL } from "url";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: "/UFMDb/",
+  // NOT: base'i kaldırdık — bu, GitHub Pages'te proje sayfası olarak
+  // (.../UFMDb/ altında) yayınlandığımız için gerekliydi. Cloudflare Workers'ta
+  // domain kökünde ("/") yayınlanıyoruz, base olmadan varsayılan "/" kullanılır.
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
