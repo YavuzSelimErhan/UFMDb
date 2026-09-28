@@ -248,6 +248,7 @@
     "ratingSaveError": "Couldn't save the rating, please try again.",
     "loadingMore": "Loading…",
     "loadMore": "Load more",
+    "showLess": "Show less",
     "noFilmsForFilter": "No films match this filter.",
     "giveStarRating": "Rate {{value}} stars",
     "editReview": "Edit Review",

@@ -248,6 +248,7 @@
     "ratingSaveError": "Puan kaydedilemedi, tekrar dene.",
     "loadingMore": "Yükleniyor…",
     "loadMore": "Daha fazla göster",
+    "showLess": "Daha az göster",
     "noFilmsForFilter": "Bu filtreye uyan film yok.",
     "giveStarRating": "{{value}} yıldız ver",
     "editReview": "Yorumu Düzenle",
