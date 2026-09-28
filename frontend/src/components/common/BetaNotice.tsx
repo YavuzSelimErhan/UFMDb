@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { X, Mail, Github, FlaskConical } from "lucide-react";
+import { X, Mail, Github, FlaskConical, Copy, Check } from "lucide-react";
 import { CONTACT } from "@/config/contact";
 import { getBetaNoticeText } from "./betaNoticeText";
 import "./BetaNotice.css";
@@ -15,6 +15,8 @@ export default function BetaNotice() {
   const { i18n } = useTranslation();
   const text = getBetaNoticeText(i18n.language);
   const [open, setOpen] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const copyTimer = useRef<number | undefined>(undefined);
   const dialogRef = useRef<HTMLDivElement>(null);
   const confirmRef = useRef<HTMLButtonElement>(null);
 
@@ -54,6 +56,34 @@ export default function BetaNotice() {
       document.body.style.overflow = previousOverflow;
     };
   }, [open]);
+
+  useEffect(() => () => window.clearTimeout(copyTimer.current), []);
+
+  // mailto: linki, cihazda varsayılan bir mail uygulaması yoksa çalışmaz (tarayıcı boş
+  // sekme açar ya da hiçbir şey yapmaz). Bu yüzden adresi panoya kopyalama seçeneği de var.
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(CONTACT.email);
+    } catch {
+      // Eski tarayıcı / izin yok: geçici bir textarea ile kopyalamayı dene
+      const ta = document.createElement("textarea");
+      ta.value = CONTACT.email;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+      } catch {
+        return;
+      } finally {
+        document.body.removeChild(ta);
+      }
+    }
+    setCopied(true);
+    window.clearTimeout(copyTimer.current);
+    copyTimer.current = window.setTimeout(() => setCopied(false), 2000);
+  };
 
   if (!open) return null;
 
@@ -96,14 +126,27 @@ export default function BetaNotice() {
         <p className="bn-contact-intro">{text.contactIntro}</p>
         <ul className="bn-contacts">
           {CONTACT.email && (
-            <li>
+            <li className="bn-contact-row">
               <a className="bn-contact" href={`mailto:${CONTACT.email}`}>
                 <Mail size={16} aria-hidden="true" />
-                <span className="bn-contact__label">
-                  {text.emailLabel}
-                </span>
+                <span className="bn-contact__label">{text.emailLabel}</span>
                 <span className="bn-contact__value">{CONTACT.email}</span>
               </a>
+              <button
+                type="button"
+                className="bn-copy"
+                onClick={copyEmail}
+                aria-label={text.copyAria}
+              >
+                {copied ? (
+                  <Check size={15} aria-hidden="true" />
+                ) : (
+                  <Copy size={15} aria-hidden="true" />
+                )}
+                <span aria-live="polite">
+                  {copied ? text.copied : text.copy}
+                </span>
+              </button>
             </li>
           )}
           {CONTACT.githubIssuesUrl && (
@@ -115,9 +158,7 @@ export default function BetaNotice() {
                 rel="noopener noreferrer"
               >
                 <Github size={16} aria-hidden="true" />
-                <span className="bn-contact__label">
-                  {text.githubLabel}
-                </span>
+                <span className="bn-contact__label">{text.githubLabel}</span>
               </a>
             </li>
           )}

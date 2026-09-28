@@ -10,6 +10,9 @@ export interface BetaNoticeText {
   thanks: string;
   confirm: string;
   closeAria: string;
+  copy: string;
+  copied: string;
+  copyAria: string;
 }
 
 const tr: BetaNoticeText = {
@@ -24,6 +27,9 @@ const tr: BetaNoticeText = {
   thanks: "Geri bildirimlerin UFMDb'yi daha iyi yapıyor, teşekkürler!",
   confirm: "Anladım",
   closeAria: "Kapat",
+  copy: "Kopyala",
+  copied: "Kopyalandı",
+  copyAria: "E-posta adresini kopyala",
 };
 
 const en: BetaNoticeText = {
@@ -38,11 +44,16 @@ const en: BetaNoticeText = {
   thanks: "Your feedback makes UFMDb better, thank you!",
   confirm: "Got it",
   closeAria: "Close",
+  copy: "Copy",
+  copied: "Copied",
+  copyAria: "Copy email address",
 };
 
 const texts: Record<string, BetaNoticeText> = { tr, en };
 
-export function getBetaNoticeText(language: string | undefined): BetaNoticeText {
+export function getBetaNoticeText(
+  language: string | undefined,
+): BetaNoticeText {
   const code = (language ?? "tr").toLowerCase().split("-")[0];
   return texts[code] ?? tr;
 }

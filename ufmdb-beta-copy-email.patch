@@ -1,0 +1,166 @@
+diff --git a/frontend/src/components/common/BetaNotice.css b/frontend/src/components/common/BetaNotice.css
+index 9806541..f9ebf05 100644
+--- a/frontend/src/components/common/BetaNotice.css
++++ b/frontend/src/components/common/BetaNotice.css
+@@ -123,6 +123,40 @@
+   overflow-wrap: anywhere;
+ }
+ 
++.bn-contact-row {
++  display: flex;
++  flex-wrap: wrap;
++  gap: 8px;
++}
++.bn-contact-row .bn-contact {
++  flex: 1 1 200px;
++  min-width: 0;
++}
++
++.bn-copy {
++  display: inline-flex;
++  align-items: center;
++  justify-content: center;
++  gap: 6px;
++  padding: 0 14px;
++  min-height: 42px;
++  border: 1px solid var(--color-border);
++  border-radius: var(--radius-sm);
++  background: transparent;
++  color: var(--color-text-primary);
++  font-size: 0.85rem;
++  font-weight: 600;
++  transition:
++    border-color var(--transition-fast),
++    background-color var(--transition-fast),
++    color var(--transition-fast);
++}
++.bn-copy:hover {
++  border-color: var(--color-accent);
++  color: var(--color-accent);
++  background: var(--color-accent-muted);
++}
++
+ .bn-thanks {
+   margin-top: 18px;
+   font-size: 0.84rem;
+diff --git a/frontend/src/components/common/BetaNotice.tsx b/frontend/src/components/common/BetaNotice.tsx
+index fa95e2f..6e49338 100644
+--- a/frontend/src/components/common/BetaNotice.tsx
++++ b/frontend/src/components/common/BetaNotice.tsx
+@@ -1,6 +1,6 @@
+ import { useEffect, useRef, useState } from "react";
+ import { useTranslation } from "react-i18next";
+-import { X, Mail, Github, FlaskConical } from "lucide-react";
++import { X, Mail, Github, FlaskConical, Copy, Check } from "lucide-react";
+ import { CONTACT } from "@/config/contact";
+ import { getBetaNoticeText } from "./betaNoticeText";
+ import "./BetaNotice.css";
+@@ -15,6 +15,8 @@ export default function BetaNotice() {
+   const { i18n } = useTranslation();
+   const text = getBetaNoticeText(i18n.language);
+   const [open, setOpen] = useState(true);
++  const [copied, setCopied] = useState(false);
++  const copyTimer = useRef<number | undefined>(undefined);
+   const dialogRef = useRef<HTMLDivElement>(null);
+   const confirmRef = useRef<HTMLButtonElement>(null);
+ 
+@@ -55,6 +57,34 @@ export default function BetaNotice() {
+     };
+   }, [open]);
+ 
++  useEffect(() => () => window.clearTimeout(copyTimer.current), []);
++
++  // mailto: linki, cihazda varsayılan bir mail uygulaması yoksa çalışmaz (tarayıcı boş
++  // sekme açar ya da hiçbir şey yapmaz). Bu yüzden adresi panoya kopyalama seçeneği de var.
++  const copyEmail = async () => {
++    try {
++      await navigator.clipboard.writeText(CONTACT.email);
++    } catch {
++      // Eski tarayıcı / izin yok: geçici bir textarea ile kopyalamayı dene
++      const ta = document.createElement("textarea");
++      ta.value = CONTACT.email;
++      ta.style.position = "fixed";
++      ta.style.opacity = "0";
++      document.body.appendChild(ta);
++      ta.select();
++      try {
++        document.execCommand("copy");
++      } catch {
++        return;
++      } finally {
++        document.body.removeChild(ta);
++      }
++    }
++    setCopied(true);
++    window.clearTimeout(copyTimer.current);
++    copyTimer.current = window.setTimeout(() => setCopied(false), 2000);
++  };
++
+   if (!open) return null;
+ 
+   return (
+@@ -96,7 +126,7 @@ export default function BetaNotice() {
+         <p className="bn-contact-intro">{text.contactIntro}</p>
+         <ul className="bn-contacts">
+           {CONTACT.email && (
+-            <li>
++            <li className="bn-contact-row">
+               <a className="bn-contact" href={`mailto:${CONTACT.email}`}>
+                 <Mail size={16} aria-hidden="true" />
+                 <span className="bn-contact__label">
+@@ -104,6 +134,21 @@ export default function BetaNotice() {
+                 </span>
+                 <span className="bn-contact__value">{CONTACT.email}</span>
+               </a>
++              <button
++                type="button"
++                className="bn-copy"
++                onClick={copyEmail}
++                aria-label={text.copyAria}
++              >
++                {copied ? (
++                  <Check size={15} aria-hidden="true" />
++                ) : (
++                  <Copy size={15} aria-hidden="true" />
++                )}
++                <span aria-live="polite">
++                  {copied ? text.copied : text.copy}
++                </span>
++              </button>
+             </li>
+           )}
+           {CONTACT.githubIssuesUrl && (
+diff --git a/frontend/src/components/common/betaNoticeText.ts b/frontend/src/components/common/betaNoticeText.ts
+index 6822487..db4a502 100644
+--- a/frontend/src/components/common/betaNoticeText.ts
++++ b/frontend/src/components/common/betaNoticeText.ts
+@@ -10,6 +10,9 @@ export interface BetaNoticeText {
+   thanks: string;
+   confirm: string;
+   closeAria: string;
++  copy: string;
++  copied: string;
++  copyAria: string;
+ }
+ 
+ const tr: BetaNoticeText = {
+@@ -24,6 +27,9 @@ const tr: BetaNoticeText = {
+   thanks: "Geri bildirimlerin UFMDb'yi daha iyi yapıyor, teşekkürler!",
+   confirm: "Anladım",
+   closeAria: "Kapat",
++  copy: "Kopyala",
++  copied: "Kopyalandı",
++  copyAria: "E-posta adresini kopyala",
+ };
+ 
+ const en: BetaNoticeText = {
+@@ -38,6 +44,9 @@ const en: BetaNoticeText = {
+   thanks: "Your feedback makes UFMDb better, thank you!",
+   confirm: "Got it",
+   closeAria: "Close",
++  copy: "Copy",
++  copied: "Copied",
++  copyAria: "Copy email address",
+ };
+ 
+ const texts: Record<string, BetaNoticeText> = { tr, en };
