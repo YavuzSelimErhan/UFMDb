@@ -1,0 +1,401 @@
+diff --git a/frontend/src/App.tsx b/frontend/src/App.tsx
+index ce7f126..89fec16 100644
+--- a/frontend/src/App.tsx
++++ b/frontend/src/App.tsx
+@@ -16,6 +16,7 @@ import ProfilePage from "@/pages/Profile/ProfilePage";
+ import AdminPage from "@/pages/Admin/AdminPage";
+ import ScreeningLogPage from "@/pages/ScreeningLog/ScreeningLogPage";
+ import SessionManager from "@/components/common/SessionManager";
++import BetaNotice from "@/components/common/BetaNotice";
+ import EditProfilePage from "@/pages/Profile/EditProfilePage";
+ import CreateListPage from "@/pages/Lists/CreateListPage";
+ import { useScrollRestoration } from "@/hooks/useScrollRestoration";
+@@ -70,6 +71,7 @@ export default function App() {
+     <BrowserRouter>
+       <SessionManager />
+       <AppShell />
++      <BetaNotice />
+     </BrowserRouter>
+   );
+ }
+diff --git a/frontend/src/components/common/BetaNotice.css b/frontend/src/components/common/BetaNotice.css
+new file mode 100644
+index 0000000..9806541
+--- /dev/null
++++ b/frontend/src/components/common/BetaNotice.css
+@@ -0,0 +1,161 @@
++/* Navbar z-index'i 50-60 arasında; pop-up hepsinin üstünde olmalı */
++.bn-overlay {
++  position: fixed;
++  inset: 0;
++  z-index: 1000;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  padding: 20px;
++  background: rgba(5, 7, 10, 0.62);
++  backdrop-filter: blur(6px);
++  -webkit-backdrop-filter: blur(6px);
++  animation: bn-fade var(--transition-base) both;
++}
++
++.bn-card {
++  position: relative;
++  width: 100%;
++  max-width: 480px;
++  max-height: calc(100vh - 40px);
++  overflow-y: auto;
++  padding: 32px 28px 26px;
++  background: var(--color-bg-elevated);
++  border: 1px solid var(--color-border);
++  border-radius: var(--radius-lg);
++  box-shadow: 0 24px 60px var(--color-shadow);
++  animation: bn-pop var(--transition-slow) both;
++}
++
++.bn-close {
++  position: absolute;
++  top: 14px;
++  right: 14px;
++  display: inline-flex;
++  align-items: center;
++  justify-content: center;
++  width: 32px;
++  height: 32px;
++  border-radius: var(--radius-pill);
++  color: var(--color-text-secondary);
++  transition:
++    background-color var(--transition-fast),
++    color var(--transition-fast);
++}
++.bn-close:hover {
++  background-color: var(--color-accent-muted);
++  color: var(--color-text-primary);
++}
++
++.bn-badge {
++  display: inline-flex;
++  align-items: center;
++  gap: 6px;
++  padding: 4px 12px;
++  border-radius: var(--radius-pill);
++  background: var(--color-accent-muted);
++  color: var(--color-accent);
++  font-size: 0.72rem;
++  font-weight: 700;
++  letter-spacing: 0.08em;
++}
++
++.bn-title {
++  margin-top: 14px;
++  font-family: var(--font-display);
++  font-size: 1.4rem;
++  font-weight: 800;
++  line-height: 1.25;
++  color: var(--color-text-primary);
++}
++
++.bn-desc {
++  margin-top: 10px;
++  font-size: 0.94rem;
++  line-height: 1.55;
++  color: var(--color-text-secondary);
++}
++
++.bn-contact-intro {
++  margin-top: 20px;
++  font-size: 0.88rem;
++  font-weight: 600;
++  color: var(--color-text-primary);
++}
++
++.bn-contacts {
++  list-style: none;
++  display: flex;
++  flex-direction: column;
++  gap: 8px;
++  margin-top: 10px;
++}
++
++.bn-contact {
++  display: flex;
++  align-items: center;
++  gap: 10px;
++  padding: 10px 14px;
++  border: 1px solid var(--color-border);
++  border-radius: var(--radius-sm);
++  background: var(--color-bg-card);
++  color: var(--color-text-primary);
++  font-size: 0.9rem;
++  text-decoration: none;
++  transition:
++    border-color var(--transition-fast),
++    background-color var(--transition-fast);
++}
++.bn-contact:hover {
++  border-color: var(--color-accent);
++  background: var(--color-bg-card-hover);
++}
++.bn-contact svg {
++  flex-shrink: 0;
++  color: var(--color-accent);
++}
++.bn-contact__label {
++  font-weight: 600;
++}
++.bn-contact__value {
++  margin-left: auto;
++  color: var(--color-text-secondary);
++  overflow-wrap: anywhere;
++}
++
++.bn-thanks {
++  margin-top: 18px;
++  font-size: 0.84rem;
++  color: var(--color-text-muted);
++}
++
++.bn-confirm {
++  width: 100%;
++  margin-top: 20px;
++}
++
++@keyframes bn-fade {
++  from {
++    opacity: 0;
++  }
++  to {
++    opacity: 1;
++  }
++}
++@keyframes bn-pop {
++  from {
++    opacity: 0;
++    transform: translateY(14px) scale(0.97);
++  }
++  to {
++    opacity: 1;
++    transform: none;
++  }
++}
++
++@media (prefers-reduced-motion: reduce) {
++  .bn-overlay,
++  .bn-card {
++    animation: none;
++  }
++}
+diff --git a/frontend/src/components/common/BetaNotice.tsx b/frontend/src/components/common/BetaNotice.tsx
+new file mode 100644
+index 0000000..fa95e2f
+--- /dev/null
++++ b/frontend/src/components/common/BetaNotice.tsx
+@@ -0,0 +1,139 @@
++import { useEffect, useRef, useState } from "react";
++import { useTranslation } from "react-i18next";
++import { X, Mail, Github, FlaskConical } from "lucide-react";
++import { CONTACT } from "@/config/contact";
++import { getBetaNoticeText } from "./betaNoticeText";
++import "./BetaNotice.css";
++
++/**
++ * Site her açıldığında (tam sayfa yüklemesinde) gösterilen beta bilgilendirmesi.
++ * Bilerek localStorage/sessionStorage'a "görüldü" bilgisi yazılmıyor: istek, uyarının
++ * her girişte görünmesi. Site içi (client-side) gezinmede tekrar açılmaz.
++ */
++export default function BetaNotice() {
++  // Dil değişince (i18n.language) bileşen yeniden render olur.
++  const { i18n } = useTranslation();
++  const text = getBetaNoticeText(i18n.language);
++  const [open, setOpen] = useState(true);
++  const dialogRef = useRef<HTMLDivElement>(null);
++  const confirmRef = useRef<HTMLButtonElement>(null);
++
++  useEffect(() => {
++    if (!open) return;
++
++    const previousOverflow = document.body.style.overflow;
++    document.body.style.overflow = "hidden";
++    confirmRef.current?.focus();
++
++    const onKeyDown = (e: KeyboardEvent) => {
++      if (e.key === "Escape") {
++        setOpen(false);
++        return;
++      }
++      if (e.key !== "Tab" || !dialogRef.current) return;
++
++      // Odak, pop-up'ın dışına kaçmasın (basit focus trap)
++      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
++        "a[href], button:not([disabled])",
++      );
++      if (focusable.length === 0) return;
++      const first = focusable[0];
++      const last = focusable[focusable.length - 1];
++      if (e.shiftKey && document.activeElement === first) {
++        e.preventDefault();
++        last.focus();
++      } else if (!e.shiftKey && document.activeElement === last) {
++        e.preventDefault();
++        first.focus();
++      }
++    };
++
++    document.addEventListener("keydown", onKeyDown);
++    return () => {
++      document.removeEventListener("keydown", onKeyDown);
++      document.body.style.overflow = previousOverflow;
++    };
++  }, [open]);
++
++  if (!open) return null;
++
++  return (
++    <div
++      className="bn-overlay"
++      onMouseDown={(e) => {
++        if (e.target === e.currentTarget) setOpen(false);
++      }}
++    >
++      <div
++        ref={dialogRef}
++        className="bn-card"
++        role="dialog"
++        aria-modal="true"
++        aria-labelledby="bn-title"
++        aria-describedby="bn-desc"
++      >
++        <button
++          type="button"
++          className="bn-close"
++          onClick={() => setOpen(false)}
++          aria-label={text.closeAria}
++        >
++          <X size={18} />
++        </button>
++
++        <span className="bn-badge">
++          <FlaskConical size={14} aria-hidden="true" />
++          {text.badge}
++        </span>
++
++        <h2 id="bn-title" className="bn-title">
++          {text.title}
++        </h2>
++        <p id="bn-desc" className="bn-desc">
++          {text.description}
++        </p>
++
++        <p className="bn-contact-intro">{text.contactIntro}</p>
++        <ul className="bn-contacts">
++          {CONTACT.email && (
++            <li>
++              <a className="bn-contact" href={`mailto:${CONTACT.email}`}>
++                <Mail size={16} aria-hidden="true" />
++                <span className="bn-contact__label">
++                  {text.emailLabel}
++                </span>
++                <span className="bn-contact__value">{CONTACT.email}</span>
++              </a>
++            </li>
++          )}
++          {CONTACT.githubIssuesUrl && (
++            <li>
++              <a
++                className="bn-contact"
++                href={CONTACT.githubIssuesUrl}
++                target="_blank"
++                rel="noopener noreferrer"
++              >
++                <Github size={16} aria-hidden="true" />
++                <span className="bn-contact__label">
++                  {text.githubLabel}
++                </span>
++              </a>
++            </li>
++          )}
++        </ul>
++
++        <p className="bn-thanks">{text.thanks}</p>
++
++        <button
++          ref={confirmRef}
++          type="button"
++          className="btn-primary bn-confirm"
++          onClick={() => setOpen(false)}
++        >
++          {text.confirm}
++        </button>
++      </div>
++    </div>
++  );
++}
+diff --git a/frontend/src/components/common/betaNoticeText.ts b/frontend/src/components/common/betaNoticeText.ts
+new file mode 100644
+index 0000000..6822487
+--- /dev/null
++++ b/frontend/src/components/common/betaNoticeText.ts
+@@ -0,0 +1,48 @@
++// BetaNotice metinleri. translation.json'a dokunmadan, bileşenin yanında tutuluyor.
++// Yeni bir dil eklendiğinde buraya da o dilin karşılığını ekle; bulunamazsa Türkçe gösterilir.
++export interface BetaNoticeText {
++  badge: string;
++  title: string;
++  description: string;
++  contactIntro: string;
++  emailLabel: string;
++  githubLabel: string;
++  thanks: string;
++  confirm: string;
++  closeAria: string;
++}
++
++const tr: BetaNoticeText = {
++  badge: "BETA",
++  title: "UFMDb şu an beta aşamasında",
++  description:
++    "Siteyi geliştirmeye devam ediyoruz; bu sırada hatalarla veya eksik özelliklerle karşılaşabilirsin.",
++  contactIntro:
++    "Bir hata bulursan ya da bir önerin varsa bize şu adreslerden ulaşabilirsin:",
++  emailLabel: "E-posta",
++  githubLabel: "GitHub (hata / öneri bildir)",
++  thanks: "Geri bildirimlerin UFMDb'yi daha iyi yapıyor, teşekkürler!",
++  confirm: "Anladım",
++  closeAria: "Kapat",
++};
++
++const en: BetaNoticeText = {
++  badge: "BETA",
++  title: "UFMDb is currently in beta",
++  description:
++    "We're still improving the site, so you may run into bugs or missing features along the way.",
++  contactIntro:
++    "If you find a bug or have a suggestion, you can reach us here:",
++  emailLabel: "Email",
++  githubLabel: "GitHub (report bugs / suggestions)",
++  thanks: "Your feedback makes UFMDb better, thank you!",
++  confirm: "Got it",
++  closeAria: "Close",
++};
++
++const texts: Record<string, BetaNoticeText> = { tr, en };
++
++export function getBetaNoticeText(language: string | undefined): BetaNoticeText {
++  const code = (language ?? "tr").toLowerCase().split("-")[0];
++  return texts[code] ?? tr;
++}
+diff --git a/frontend/src/config/contact.ts b/frontend/src/config/contact.ts
+new file mode 100644
+index 0000000..d00a5e2
+--- /dev/null
++++ b/frontend/src/config/contact.ts
+@@ -0,0 +1,9 @@
++// Beta uyarısında (BetaNotice) gösterilen geri bildirim kanalları.
++// Boş bırakılan alanlar arayüzde hiç gösterilmez; yeni bir adres eklemek için
++// sadece burayı doldurman yeterli.
++export const CONTACT = {
++  // Örn: "iletisim@ufmdb.com" — domain e-postası hazır olunca doldur.
++  email: "",
++  // Hata / öneri bildirimi için GitHub Issues sayfası.
++  githubIssuesUrl: "https://github.com/YavuzSelimErhan/UFMDb/issues",
++} as const;

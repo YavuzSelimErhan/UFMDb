@@ -16,6 +16,7 @@ import ProfilePage from "@/pages/Profile/ProfilePage";
 import AdminPage from "@/pages/Admin/AdminPage";
 import ScreeningLogPage from "@/pages/ScreeningLog/ScreeningLogPage";
 import SessionManager from "@/components/common/SessionManager";
+import BetaNotice from "@/components/common/BetaNotice";
 import EditProfilePage from "@/pages/Profile/EditProfilePage";
 import CreateListPage from "@/pages/Lists/CreateListPage";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
@@ -70,6 +71,7 @@ export default function App() {
     <BrowserRouter>
       <SessionManager />
       <AppShell />
+      <BetaNotice />
     </BrowserRouter>
   );
 }
