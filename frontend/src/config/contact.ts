@@ -3,7 +3,7 @@
 // sadece burayı doldurman yeterli.
 export const CONTACT = {
   // Örn: "iletisim@ufmdb.com" — domain e-postası hazır olunca doldur.
-  email: "",
+  email: "iletisim@ufmdb.com",
   // Hata / öneri bildirimi için GitHub Issues sayfası.
   githubIssuesUrl: "https://github.com/YavuzSelimErhan/UFMDb/issues",
 } as const;
