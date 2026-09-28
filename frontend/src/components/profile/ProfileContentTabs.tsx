@@ -24,7 +24,6 @@ import {
 import MovieCard from "@/components/movie/MovieCard";
 import ListCard from "@/pages/Lists/ListCard";
 import EditReviewModal from "@/components/profile/EditReviewModal";
-import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import {
   EmptyState,
   PageSpinner,
@@ -69,7 +68,6 @@ export default function ProfileContentTabs({
     null,
   );
   const [likedSubTab, setLikedSubTab] = useState<LikedSubTab>("films");
-  const { openLog, logModal } = useScreeningLogModal();
 
   const unlikeActorMutation = useMutation({
     mutationFn: (id: string) => actorService.toggleLike(id),
@@ -126,7 +124,7 @@ export default function ProfileContentTabs({
   }[] = [
     {
       key: "films",
-      label: t("profile.likedFilms", "Filmler"),
+      label: t("profile.likedFilms"),
       icon: Film,
       count: likedMovies.length,
     },
@@ -150,7 +148,7 @@ export default function ProfileContentTabs({
     },
     {
       key: "lists",
-      label: t("profile.likedLists", "Listeler"),
+      label: t("profile.likedLists"),
       icon: ListVideo,
       count: likedLists?.length ?? 0,
     },
@@ -162,12 +160,7 @@ export default function ProfileContentTabs({
         (watchlist.length > 0 ? (
           <div className="movie-grid movie-grid--compact">
             {watchlist.map((m) => (
-              <MovieCard
-                key={m.id}
-                movie={m}
-                interactive={isOwnProfile}
-                onLogClick={isOwnProfile ? () => openLog(m) : undefined}
-              />
+              <MovieCard key={m.id} movie={m} interactive={isOwnProfile} />
             ))}
           </div>
         ) : (
@@ -205,7 +198,6 @@ export default function ProfileContentTabs({
                       movie={m}
                       interactive={isOwnProfile}
                       onUnlike={isOwnProfile ? () => {} : undefined}
-                      onLogClick={isOwnProfile ? () => openLog(m) : undefined}
                     />
                   ))}
                 </div>
@@ -538,7 +530,6 @@ export default function ProfileContentTabs({
           onClose={() => setEditingReview(null)}
         />
       )}
-      {logModal}
     </div>
   );
 }

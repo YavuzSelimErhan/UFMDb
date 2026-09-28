@@ -68,7 +68,7 @@ export default function UsersPage() {
 
       {isError && !isLoading && (
         <PageError
-          message={t("errors.genericError")}
+          message={t("common.genericError")}
           onRetry={() => refetch()}
         />
       )}

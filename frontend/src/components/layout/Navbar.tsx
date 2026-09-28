@@ -141,11 +141,7 @@ export default function Navbar() {
           <button
             className="navbar__hamburger"
             onClick={() => setMenuOpen((v) => !v)}
-            aria-label={
-              menuOpen
-                ? t("nav.closeMenu", "Menüyü kapat")
-                : t("nav.openMenu", "Menüyü aç")
-            }
+            aria-label={menuOpen ? t("nav.closeMenu") : t("nav.openMenu")}
             aria-expanded={menuOpen}
           >
             {menuOpen ? <X size={22} /> : <Menu size={22} />}

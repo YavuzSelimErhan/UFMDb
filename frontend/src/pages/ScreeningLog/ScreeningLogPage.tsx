@@ -253,7 +253,7 @@ export default function ScreeningLogPage() {
   if (isLoading) return <PageSpinner label={t("common.loading")} />;
   if (isError || !data)
     return (
-      <PageError message={t("errors.genericError")} onRetry={() => refetch()} />
+      <PageError message={t("common.genericError")} onRetry={() => refetch()} />
     );
 
   const locale = i18n.language === "tr" ? "tr-TR" : "en-US";

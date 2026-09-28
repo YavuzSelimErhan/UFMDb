@@ -207,11 +207,11 @@ export default function ProfileHeader({
               >
                 {isFollowedByCurrentUser ? (
                   <>
-                    <UserCheck size={14} /> {t("profile.following")}
+                    <UserCheck size={14} /> {t("users.following")}
                   </>
                 ) : (
                   <>
-                    <UserPlus size={14} /> {t("profile.follow")}
+                    <UserPlus size={14} /> {t("users.follow")}
                   </>
                 )}
               </button>
