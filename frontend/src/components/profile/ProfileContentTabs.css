@@ -83,6 +83,49 @@
   margin-bottom: 12px;
 }
 
+/* ---------- Watchlist / Beğenilen filmler: "Daha fazla yükle / Daha az göster"
+   (Films sekmesindeki load-more stilleriyle aynı görünüm; o dosyaya bağımlı
+   olmamak için burada kendi sınıflarıyla tanımlı) ---------- */
+.paged-grid__actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.paged-grid__more {
+  border-radius: var(--radius-pill);
+}
+
+.paged-grid__less {
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+.paged-grid__less:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+.paged-grid__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ---------- Listeler: konteyner genişliğine göre otomatik sütun (viewport
    breakpoint'lerine bağlı değil, bu yüzden yan menülü panelde de bozulmaz) ---------- */
 .profile-tabs__lists-grid {
@@ -196,6 +239,7 @@
   }
 }
 
+/* ---------- Yorum günlüğü (kendi yorumların + beğenilen yorumlar) ---------- */
 .review-journal {
   display: flex;
   flex-direction: column;
@@ -214,7 +258,8 @@
 .review-entry:hover {
   border-color: var(--color-accent-dim);
 }
-.review-entry:hover .review-entry__actions {
+.review-entry:hover .review-entry__actions,
+.review-entry:focus-within .review-entry__actions {
   opacity: 1;
 }
 
@@ -257,10 +302,12 @@
   flex-shrink: 0;
 }
 .review-entry__poster {
+  display: block;
   width: 48px;
   height: 70px;
   object-fit: cover;
   border-radius: 6px;
+  background-color: var(--color-bg-elevated);
 }
 
 .review-entry__body {
@@ -269,14 +316,16 @@
 }
 .review-entry__header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 6px 10px;
   margin-bottom: 6px;
 }
 .review-entry__title {
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--color-text-primary);
+  overflow-wrap: anywhere;
   transition: color 150ms;
 }
 .review-entry__title:hover {
@@ -300,6 +349,9 @@
   font-size: 0.85rem;
   color: var(--color-text-secondary);
   line-height: 1.5;
+  /* Uzun kelime/URL kutuyu taşırmasın; yazarın satır sonları korunsun. */
+  overflow-wrap: anywhere;
+  white-space: pre-line;
 }
 
 .review-entry__actions {
@@ -308,6 +360,12 @@
   flex-shrink: 0;
   opacity: 0;
   transition: opacity 150ms;
+}
+/* Dokunmatik cihazda hover olmadığı için düzenle/sil butonları hep görünür. */
+@media (hover: none) {
+  .review-entry__actions {
+    opacity: 1;
+  }
 }
 .review-entry__action-btn {
   width: 30px;
@@ -363,6 +421,86 @@
   font-weight: 700;
 }
 
+/* ---------- Beğenilen yorumlar: başka kullanıcının yorumu ---------- */
+.review-entry--liked {
+  align-items: flex-start;
+}
+
+.review-entry__reviewer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-bottom: 8px;
+}
+
+/* Avatar boyutu sabit: kaynak görsel ne kadar büyük olursa olsun sayfayı kaplamaz. */
+.review-entry__reviewer-avatar {
+  display: block;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: var(--color-bg-elevated);
+}
+.review-entry__reviewer-avatar--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+.review-entry__reviewer-name {
+  min-width: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Başkasının uzun yorumu kartı şişirmesin; tamamı film sayfasında okunur. */
+.review-entry--liked .review-entry__content {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.review-entry__like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  align-self: center;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+.review-entry__like-btn.active {
+  color: #e84393;
+  border-color: rgba(232, 67, 147, 0.4);
+  background-color: rgba(232, 67, 147, 0.1);
+}
+.review-entry__like-btn:hover:not(:disabled) {
+  background-color: rgba(232, 67, 147, 0.18);
+}
+.review-entry__like-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 @media (max-width: 560px) {
   .review-entry {
     flex-wrap: wrap;
@@ -377,6 +515,14 @@
     align-items: flex-start;
     padding: 14px;
     gap: 10px;
+  }
+  /* Beğenilen yorum: poster + metin ilk satırda, beğeni butonu altında. */
+  .review-entry--liked .review-entry__body {
+    flex: 1 1 calc(100% - 64px);
+  }
+  .review-entry__like-btn {
+    margin-left: auto;
+    align-self: flex-end;
   }
 }
 

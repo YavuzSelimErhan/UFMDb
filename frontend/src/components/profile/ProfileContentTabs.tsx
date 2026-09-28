@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -24,6 +24,7 @@ import {
 import MovieCard from "@/components/movie/MovieCard";
 import ListCard from "@/pages/Lists/ListCard";
 import EditReviewModal from "@/components/profile/EditReviewModal";
+import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import {
   EmptyState,
   PageSpinner,
@@ -39,6 +40,83 @@ import "./ProfileContentTabs.css";
 
 export type ContentTab = "watchlist" | "liked" | "reviews";
 type LikedSubTab = "films" | "actors" | "directors" | "lists" | "reviews";
+
+/** Films sekmesindeki PAGE_SIZE ile aynı: iki yerde aynı ritim. */
+const MOVIES_PAGE_SIZE = 24;
+
+interface PagedMovieGridProps {
+  movies: MovieListItem[];
+  renderCard: (movie: MovieListItem) => ReactNode;
+}
+
+/**
+ * Watchlist ve beğenilen filmler için "Daha fazla yükle / Daha az göster"
+ * sayfalaması (Films sekmesiyle aynı davranış). Bu iki liste profil
+ * yanıtıyla tek seferde geldiği için sayfalama istemci tarafında yapılır:
+ * ilk seferde sadece MOVIES_PAGE_SIZE kart (ve poster görseli) render edilir.
+ * State bu bileşende tutulduğu için her bölümün sayacı ayrıdır ve sekme
+ * değişince kendiliğinden sıfırlanır.
+ */
+function PagedMovieGrid({ movies, renderCard }: PagedMovieGridProps) {
+  const { t } = useTranslation();
+  const [visibleCount, setVisibleCount] = useState(MOVIES_PAGE_SIZE);
+  const [announcement, setAnnouncement] = useState("");
+  const topRef = useRef<HTMLDivElement | null>(null);
+
+  const visible = movies.slice(0, visibleCount);
+  const hasMore = visibleCount < movies.length;
+  // Liste (ör. beğeni kaldırınca) kısalırsa gereksiz "Daha az göster" çıkmasın.
+  const canShowLess = visible.length > MOVIES_PAGE_SIZE;
+
+  const loadMore = () => {
+    const next = Math.min(visibleCount + MOVIES_PAGE_SIZE, movies.length);
+    setVisibleCount(visibleCount + MOVIES_PAGE_SIZE);
+    setAnnouncement(t("profile.filmsLoadedCount", { count: next }));
+  };
+
+  const showLess = () => {
+    setVisibleCount(MOVIES_PAGE_SIZE);
+    setAnnouncement("");
+    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  return (
+    <div ref={topRef} className="paged-grid">
+      <div className="movie-grid movie-grid--compact">
+        {visible.map((m) => (
+          <Fragment key={m.id}>{renderCard(m)}</Fragment>
+        ))}
+      </div>
+
+      <div className="paged-grid__sr" aria-live="polite">
+        {announcement}
+      </div>
+
+      {(hasMore || canShowLess) && (
+        <div className="paged-grid__actions">
+          {hasMore && (
+            <button
+              type="button"
+              className="paged-grid__more btn-secondary"
+              onClick={loadMore}
+            >
+              {t("profile.loadMore")}
+            </button>
+          )}
+          {canShowLess && (
+            <button
+              type="button"
+              className="paged-grid__less"
+              onClick={showLess}
+            >
+              {t("profile.showLess")}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface Props {
   tab: ContentTab;
@@ -61,6 +139,7 @@ export default function ProfileContentTabs({
 }: Props) {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
+  const { openLog, logModal } = useScreeningLogModal();
   const [editingReview, setEditingReview] = useState<ReviewSummary | null>(
     null,
   );
@@ -158,11 +237,16 @@ export default function ProfileContentTabs({
     <div className="profile-tabs__panel">
       {tab === "watchlist" &&
         (watchlist.length > 0 ? (
-          <div className="movie-grid movie-grid--compact">
-            {watchlist.map((m) => (
-              <MovieCard key={m.id} movie={m} interactive={isOwnProfile} />
-            ))}
-          </div>
+          <PagedMovieGrid
+            movies={watchlist}
+            renderCard={(m) => (
+              <MovieCard
+                movie={m}
+                interactive={isOwnProfile}
+                onLogClick={isOwnProfile ? () => openLog(m) : undefined}
+              />
+            )}
+          />
         ) : (
           <EmptyState
             icon={<Bookmark size={26} />}
@@ -177,7 +261,9 @@ export default function ProfileContentTabs({
             {likedSubTabs.map(({ key, label, icon: Icon, count }) => (
               <button
                 key={key}
+                type="button"
                 className={`profile-tabs__nav-item ${likedSubTab === key ? "is-active" : ""}`}
+                aria-current={likedSubTab === key ? "page" : undefined}
                 onClick={() => setLikedSubTab(key)}
               >
                 <span className="profile-tabs__nav-label">
@@ -191,16 +277,17 @@ export default function ProfileContentTabs({
           <div className="profile-tabs__panel">
             {likedSubTab === "films" &&
               (likedMovies.length > 0 ? (
-                <div className="movie-grid movie-grid--compact">
-                  {likedMovies.map((m) => (
+                <PagedMovieGrid
+                  movies={likedMovies}
+                  renderCard={(m) => (
                     <MovieCard
-                      key={m.id}
                       movie={m}
                       interactive={isOwnProfile}
                       onUnlike={isOwnProfile ? () => {} : undefined}
+                      onLogClick={isOwnProfile ? () => openLog(m) : undefined}
                     />
-                  ))}
-                </div>
+                  )}
+                />
               ) : (
                 <EmptyState
                   icon={<Heart size={26} />}
@@ -222,12 +309,18 @@ export default function ProfileContentTabs({
                         to={`/actors/${a.id}`}
                         className="person-card__media"
                       >
-                        <img src={a.photoUrl} alt={a.fullName} />
+                        <img
+                          src={a.photoUrl}
+                          alt={a.fullName}
+                          loading="lazy"
+                          decoding="async"
+                        />
                         <div className="person-card__scrim" />
                         <span className="person-card__name">{a.fullName}</span>
                       </Link>
                       {isOwnProfile && (
                         <button
+                          type="button"
                           className="person-card__unlike"
                           disabled={unlikeActorMutation.isPending}
                           aria-label={t("movie.unlike")}
@@ -260,12 +353,18 @@ export default function ProfileContentTabs({
                         to={`/directors/${d.id}`}
                         className="person-card__media"
                       >
-                        <img src={d.photoUrl} alt={d.fullName} />
+                        <img
+                          src={d.photoUrl}
+                          alt={d.fullName}
+                          loading="lazy"
+                          decoding="async"
+                        />
                         <div className="person-card__scrim" />
                         <span className="person-card__name">{d.fullName}</span>
                       </Link>
                       {isOwnProfile && (
                         <button
+                          type="button"
                           className="person-card__unlike"
                           disabled={unlikeDirectorMutation.isPending}
                           aria-label={t("movie.unlike")}
@@ -317,6 +416,8 @@ export default function ProfileContentTabs({
                           src={r.posterUrl}
                           alt={r.movieTitle}
                           className="review-entry__poster"
+                          loading="lazy"
+                          decoding="async"
                         />
                       </Link>
 
@@ -340,6 +441,10 @@ export default function ProfileContentTabs({
                             <img
                               src={r.userAvatarUrl}
                               alt=""
+                              width={22}
+                              height={22}
+                              loading="lazy"
+                              decoding="async"
                               className="review-entry__reviewer-avatar"
                             />
                           ) : (
@@ -359,6 +464,7 @@ export default function ProfileContentTabs({
 
                       {isOwnProfile && (
                         <button
+                          type="button"
                           className="review-entry__like-btn active"
                           disabled={unlikeReviewMutation.isPending}
                           aria-label={t("movie.unlike")}
@@ -450,6 +556,8 @@ export default function ProfileContentTabs({
                       src={r.posterUrl}
                       alt={r.movieTitle}
                       className="review-entry__poster"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </Link>
 
@@ -475,6 +583,7 @@ export default function ProfileContentTabs({
                   {isOwnProfile && (
                     <div className="review-entry__actions">
                       <button
+                        type="button"
                         className="review-entry__action-btn"
                         onClick={() => setEditingReview(r)}
                         aria-label={t("common.edit")}
@@ -482,6 +591,7 @@ export default function ProfileContentTabs({
                         <Pencil size={14} />
                       </button>
                       <button
+                        type="button"
                         className="review-entry__action-btn review-entry__action-btn--danger"
                         onClick={() => setConfirmingDeleteId(r.movieId)}
                         aria-label={t("common.delete")}
@@ -496,12 +606,14 @@ export default function ProfileContentTabs({
                       <p>{t("profile.confirmDeleteReview")}</p>
                       <div className="review-entry__confirm-actions">
                         <button
+                          type="button"
                           className="btn-secondary"
                           onClick={() => setConfirmingDeleteId(null)}
                         >
                           {t("common.cancel")}
                         </button>
                         <button
+                          type="button"
                           className="review-entry__confirm-delete"
                           disabled={deleteReviewMutation.isPending}
                           onClick={() => deleteReviewMutation.mutate(r.movieId)}
@@ -530,6 +642,8 @@ export default function ProfileContentTabs({
           onClose={() => setEditingReview(null)}
         />
       )}
+
+      {isOwnProfile && logModal}
     </div>
   );
 }
