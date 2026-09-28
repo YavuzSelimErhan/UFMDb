@@ -1,0 +1,58 @@
+diff --git a/frontend/index.html b/frontend/index.html
+index 857e7af..ac61477 100644
+--- a/frontend/index.html
++++ b/frontend/index.html
+@@ -4,6 +4,19 @@
+     <meta charset="UTF-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <title>UFMDb — Ultimate Film Database</title>
++    <meta name="description" content="UFMDb (Ultimate Film Database), film keşfetmek, puanlamak, izleme listesi oluşturmak ve yorum yazmak için Türkçe bir film veritabanı sitesi." />
++    <link rel="canonical" href="https://ufmdb.com/" />
++
++    <meta property="og:type" content="website" />
++    <meta property="og:site_name" content="UFMDb" />
++    <meta property="og:title" content="UFMDb — Ultimate Film Database" />
++    <meta property="og:description" content="Film keşfetmek, puanlamak, izleme listesi oluşturmak ve yorum yazmak için Türkçe bir film veritabanı sitesi." />
++    <meta property="og:url" content="https://ufmdb.com/" />
++
++    <meta name="twitter:card" content="summary" />
++    <meta name="twitter:title" content="UFMDb — Ultimate Film Database" />
++    <meta name="twitter:description" content="Film keşfetmek, puanlamak, izleme listesi oluşturmak ve yorum yazmak için Türkçe bir film veritabanı sitesi." />
++
+     <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+     <link
+       rel="stylesheet"
+diff --git a/frontend/public/robots.txt b/frontend/public/robots.txt
+new file mode 100644
+index 0000000..a9122f0
+--- /dev/null
++++ b/frontend/public/robots.txt
+@@ -0,0 +1,4 @@
++User-agent: *
++Allow: /
++
++Sitemap: https://ufmdb.com/sitemap.xml
+diff --git a/frontend/public/sitemap.xml b/frontend/public/sitemap.xml
+new file mode 100644
+index 0000000..636e28c
+--- /dev/null
++++ b/frontend/public/sitemap.xml
+@@ -0,0 +1,18 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
++  <url>
++    <loc>https://ufmdb.com/</loc>
++    <changefreq>daily</changefreq>
++    <priority>1.0</priority>
++  </url>
++  <url>
++    <loc>https://ufmdb.com/search</loc>
++    <changefreq>daily</changefreq>
++    <priority>0.8</priority>
++  </url>
++  <url>
++    <loc>https://ufmdb.com/lists</loc>
++    <changefreq>daily</changefreq>
++    <priority>0.6</priority>
++  </url>
++</urlset>
