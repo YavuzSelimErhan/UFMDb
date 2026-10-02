@@ -11,7 +11,7 @@ import {
   isPasswordValid,
   getFailingPasswordMessages,
 } from "@/utils/passwordRules";
-import PasswordChecklist from "@/components/auth/passwordChecklist";
+import PasswordChecklist from "@/components/auth/PasswordChecklist";
 import "../Login/AuthPages.css";
 
 export default function RegisterPage() {
