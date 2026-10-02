@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Bell } from "lucide-react";
+import { Bell, Check } from "lucide-react";
 import { notificationService } from "@/services";
 import PersonAvatar from "@/components/common/PersonAvatar";
 import "./NotificationBell.css";
+
+const MOBILE_BREAKPOINT = 560;
 
 /** Basit, bağımlılıksız göreli zaman biçimlendirme (ör. "3 saat önce"). */
 function timeAgo(iso: string, locale: string): string {
@@ -31,6 +33,13 @@ export default function NotificationBell() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Panel navbar'ın overflow'u tarafından kırpılmasın diye, dar ekranlarda trigger'ın gerçek
+  // ekran konumunu ölçüp paneli position:fixed ile o konuma göre yerleştiriyoruz. Geniş ekranda
+  // bu null kalır ve CSS'teki normal absolute konumlandırma geçerli olur.
+  const [mobilePanelStyle, setMobilePanelStyle] =
+    useState<React.CSSProperties | null>(null);
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["notifications-unread-count"],
@@ -49,17 +58,33 @@ export default function NotificationBell() {
     mutationFn: notificationService.markAllRead,
     onSuccess: () => {
       queryClient.setQueryData(["notifications-unread-count"], 0);
+      queryClient.setQueryData<typeof notifications>(
+        ["notifications"],
+        (prev) => prev?.map((n) => ({ ...n, isRead: true })),
+      );
     },
   });
 
-  // Panel açıldığında (okunmamışı varsa) hepsini okundu say.
-  // Panel bu render'da zaten çekilmiş listeyi gösterdiği için
-  // "yeni" görünümü bu oturum boyunca korunur, sadece rozet sıfırlanır.
+  // Panel açıldığında mobilde konumu hesapla.
   useEffect(() => {
-    if (open && unreadCount > 0) {
-      markAllReadMutation.mutate();
+    if (!open) return;
+
+    const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+    if (!isMobile || !triggerRef.current) {
+      setMobilePanelStyle(null);
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    const rect = triggerRef.current.getBoundingClientRect();
+    const margin = 12;
+    setMobilePanelStyle({
+      position: "fixed",
+      top: rect.bottom + 8,
+      left: margin,
+      right: margin,
+      width: "auto",
+      maxWidth: "none",
+    });
   }, [open]);
 
   // Dışarı tıklanınca paneli kapat
@@ -76,6 +101,7 @@ export default function NotificationBell() {
   return (
     <div className="notification-bell" ref={wrapRef}>
       <button
+        ref={triggerRef}
         type="button"
         className="navbar__icon-btn notification-bell__trigger"
         onClick={() => setOpen((v) => !v)}
@@ -91,9 +117,23 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="notification-bell__panel">
+        <div
+          className="notification-bell__panel"
+          style={mobilePanelStyle ?? undefined}
+        >
           <div className="notification-bell__header">
-            {t("notifications.title")}
+            <span>{t("notifications.title")}</span>
+            {unreadCount > 0 && (
+              <button
+                type="button"
+                className="notification-bell__mark-all"
+                onClick={() => markAllReadMutation.mutate()}
+                disabled={markAllReadMutation.isPending}
+              >
+                <Check size={13} />
+                {t("notifications.markAllRead")}
+              </button>
+            )}
           </div>
 
           <div className="notification-bell__body">

@@ -455,6 +455,7 @@
   "notifications": {
     "title": "Bildirimler",
     "empty": "Henüz bildirimin yok.",
-    "startedFollowingYou": "seni takip etmeye başladı"
+    "startedFollowingYou": "seni takip etmeye başladı",
+    "markAllRead": "Tümünü okundu işaretle"
   }
 }

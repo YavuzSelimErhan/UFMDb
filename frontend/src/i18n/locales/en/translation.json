@@ -455,6 +455,7 @@
   "notifications": {
     "title": "Notifications",
     "empty": "You don't have any notifications yet.",
-    "startedFollowingYou": "started following you"
+    "startedFollowingYou": "started following you",
+    "markAllRead": "Mark all as read"
   }
 }
