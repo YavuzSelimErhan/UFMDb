@@ -6,6 +6,12 @@ import { Clapperboard, Eye, EyeOff } from "lucide-react";
 import { authService } from "@/services";
 import { useAppDispatch } from "@/store";
 import { setCredentials } from "@/store/authSlice";
+import { parseApiError } from "@/utils/apiError";
+import {
+  isPasswordValid,
+  getFailingPasswordMessages,
+} from "@/utils/passwordRules";
+import PasswordChecklist from "@/components/auth/passwordChecklist";
 import "../Login/AuthPages.css";
 
 export default function RegisterPage() {
@@ -17,7 +23,11 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  // Tek bir "error" yerine bir liste: backend birden fazla alan için
+  // (ör. hem Password hem Email) birden fazla mesaj dönebiliyor; hepsini
+  // gösteriyoruz, sadece genel "title"ı değil.
+  const [formErrors, setFormErrors] = useState<string[]>([]);
 
   const registerMutation = useMutation({
     mutationFn: () => authService.register(userName, email, password),
@@ -26,17 +36,30 @@ export default function RegisterPage() {
       navigate("/");
     },
     onError: (err: unknown) => {
-      const message = (err as { response?: { data?: { title?: string } } })
-        ?.response?.data?.title;
-      setError(message ?? t("auth.registerError"));
+      const parsed = parseApiError(err, t("auth.registerError"));
+      const messages = Object.values(parsed.fieldErrors).flat();
+      // Backend errors objesi doluysa (çoğu durumda) gerçek mesajları,
+      // boşsa (ör. ağ hatası, 500) genel başlığı göster.
+      setFormErrors(messages.length > 0 ? messages : [parsed.title]);
     },
   });
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setFormErrors([]);
+
+    // İstemci tarafı ön-doğrulama: sunucuya hiç gitmeden, checklist'teki
+    // aynı kuralları burada da kontrol ediyoruz. Kurallar eşleşmiyorsa
+    // (ör. backend'de ekstra bir kural varsa) kullanıcı yine de submit
+    // edebilir ve gerçek hatayı backend'den (onError) görür — bu yüzden
+    // bu kontrol bir optimizasyon, tek doğrulama katmanı değil.
+    if (!isPasswordValid(password)) {
+      setPasswordTouched(true);
+      setFormErrors(getFailingPasswordMessages(password, t));
+      return;
+    }
     if (password !== confirmPassword) {
-      setError(t("auth.passwordMismatch"));
+      setFormErrors([t("auth.passwordMismatch")]);
       return;
     }
     registerMutation.mutate();
@@ -87,7 +110,19 @@ export default function RegisterPage() {
               {t("auth.registerEyebrow")}
             </span>
             <h1>{t("auth.registerTitle")}</h1>
-            {error && <p className="auth-error">{error}</p>}
+
+            {formErrors.length > 0 && (
+              <ul
+                className="auth-error-list"
+                style={{ listStyle: "none", margin: "0 0 14px", padding: 0 }}
+              >
+                {formErrors.map((msg) => (
+                  <li key={msg} className="auth-error">
+                    {msg}
+                  </li>
+                ))}
+              </ul>
+            )}
 
             <label htmlFor="register-username">{t("auth.username")}</label>
             <input
@@ -117,9 +152,14 @@ export default function RegisterPage() {
                 id="register-password"
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setPasswordTouched(true);
+                }}
+                onBlur={() => setPasswordTouched(true)}
                 autoComplete="new-password"
                 minLength={8}
+                aria-describedby="register-password-rules"
                 required
               />
               <button
@@ -132,6 +172,12 @@ export default function RegisterPage() {
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
+            </div>
+            <div id="register-password-rules">
+              <PasswordChecklist
+                password={password}
+                touched={passwordTouched}
+              />
             </div>
 
             <label htmlFor="register-confirm-password">

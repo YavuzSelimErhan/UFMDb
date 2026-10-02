@@ -153,7 +153,11 @@
     "forgotPasswordSent": "Bu e-postaya kayıtlı bir hesap varsa, sıfırlama bağlantısı gönderildi.",
     "backToLogin": "Girişe dön",
     "confirmPassword": "Şifreyi Onayla",
-    "passwordMismatch": "Şifreler eşleşmiyor."
+    "passwordMismatch": "Şifreler eşleşmiyor.",
+    "passwordRuleLength": "En az 8 karakter",
+    "passwordRuleUppercase": "En az 1 büyük harf",
+    "passwordRuleLowercase": "En az 1 küçük harf",
+    "passwordRuleDigit": "En az 1 rakam"
   },
   "profile": {
     "member": "UFMDb üyesi",

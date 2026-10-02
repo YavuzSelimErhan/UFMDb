@@ -454,3 +454,28 @@
     font-size: 0.75rem;
   }
 }
+
+.password-checklist__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.password-checklist__item.is-met {
+  color: var(--color-accent);
+}
+
+.password-checklist__item.is-unmet {
+  color: var(--color-text-secondary);
+}
+
+.password-checklist__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--color-text-muted);
+  flex-shrink: 0;
+}

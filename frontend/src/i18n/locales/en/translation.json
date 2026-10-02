@@ -153,7 +153,11 @@
     "forgotPasswordSent": "If an account exists for this email, a reset link is on its way.",
     "backToLogin": "Back to log in",
     "confirmPassword": "Confirm Password",
-    "passwordMismatch": "Passwords don't match."
+    "passwordMismatch": "Passwords don't match.",
+    "passwordRuleLength": "At least 8 characters",
+    "passwordRuleUppercase": "At least 1 uppercase letter",
+    "passwordRuleLowercase": "At least 1 lowercase letter",
+    "passwordRuleDigit": "At least 1 number"
   },
   "profile": {
     "member": "UFMDb member",
