@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Film, Github, Twitter, Instagram, Play } from "lucide-react";
+import { Film, Github, Mail, Instagram, Play } from "lucide-react";
 import "./Footer.css";
 
 export default function Footer() {
@@ -46,16 +46,28 @@ export default function Footer() {
             </Link>
             <p className="ft-brand__desc">{t("footer.brandDescription")}</p>
             <div className="ft-socials">
-              <a href="#" className="ft-social" aria-label="Twitter / X">
-                <Twitter size={15} />
+              <a
+                href="mailto:iletisim@ufmdb.com"
+                className="ft-social"
+                aria-label="Gmail"
+              >
+                <Mail size={15} />
               </a>
-              <a href="#" className="ft-social" aria-label="Instagram">
+              <a
+                href="https://www.instagram.com/ufm.db/"
+                className="ft-social"
+                aria-label="Instagram"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Instagram size={15} />
               </a>
               <a
                 href="https://github.com/YavuzSelimErhan"
                 className="ft-social"
                 aria-label="GitHub"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Github size={15} />
               </a>
