@@ -268,7 +268,15 @@
     "confirmDeleteReview": "Bu yorumu silmek istediğine emin misin?",
     "settings": "Ayarlar",
     "theme": "Tema",
-    "language": "Dil"
+    "language": "Dil",
+    "dangerZone": "Tehlikeli Alan",
+    "deleteAccount": "Hesabı Sil",
+    "deleteAccountWarning": "Bu işlem geri alınamaz. Hesabın kalıcı olarak kapatılır, tekrar giriş yapamazsın.",
+    "deleteAccountConfirmPrompt": "Devam etmek için şifreni gir.",
+    "deleteAccountConfirm": "Hesabımı Sil",
+    "deleteAccountCancel": "Vazgeç",
+    "deleteAccountError": "Hesap silinirken bir sorun oluştu.",
+    "deleteAccountWrongPassword": "Şifre hatalı."
   },
   "lists": {
     "title": "Listeler",

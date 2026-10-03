@@ -187,6 +187,75 @@
   color: #fff;
 }
 
+.profile-page__danger-zone {
+  margin-top: 16px;
+  border: 1px solid rgba(211, 85, 79, 0.35);
+}
+.profile-page__danger-zone h2 svg {
+  color: #e2504a;
+}
+
+.profile-page__setting-row--danger {
+  align-items: flex-start;
+  gap: 16px;
+}
+.profile-page__setting-row--danger strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+}
+
+.profile-page__danger-hint {
+  margin: 0;
+  max-width: 340px;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.btn-danger {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: #d3554f;
+  border: 1px solid #d3554f;
+  transition: background-color var(--transition-fast);
+}
+.btn-danger:hover:not(:disabled) {
+  background-color: #c2443e;
+}
+.btn-danger:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.profile-page__delete-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.profile-page__delete-confirm label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.profile-page__delete-confirm input {
+  max-width: 320px;
+}
+
+.profile-page__delete-confirm-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.profile-page__delete-error {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #d3554f;
+}
+
 .favorites-tabs__nav {
   display: inline-flex;
   gap: 4px;

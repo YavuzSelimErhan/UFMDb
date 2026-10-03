@@ -242,6 +242,8 @@ export const profileService = {
     (await api.delete(`/profile/favorite-directors/${slot}`)).data,
   updateSettings: async (language: string, theme: string) =>
     (await api.put("/profile/settings", { language, theme })).data,
+  deleteAccount: async (password: string) =>
+    (await api.delete("/profile", { data: { password } })).data,
   getWatchedFilms: async (params: {
     page: number;
     pageSize: number;

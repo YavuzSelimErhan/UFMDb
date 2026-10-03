@@ -145,6 +145,13 @@ public class ProfileController : ControllerBase
         return NoContent();
     }
 
+    [HttpDelete]
+    public async Task<IActionResult> DeleteAccount(DeleteAccountRequest request)
+    {
+        await _mediator.Send(new DeleteAccountCommand(RequireUserId(), request.Password));
+        return NoContent();
+    }
+
     [HttpGet("watched-films")]
     public async Task<IActionResult> GetWatchedFilms([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? sortBy = null, [FromQuery] bool? hasRating = null)
     => Ok(await _mediator.Send(new GetUserWatchedMoviesQuery(RequireUserId(), page, pageSize, sortBy, hasRating)));
@@ -191,6 +198,7 @@ public class ProfileController : ControllerBase
     }
 }
 
+public record DeleteAccountRequest(string Password);
 public record UpdateUserSettingsRequest(string Language, string Theme);
 public record UpdateProfileRequest(
     string UserName, string? AvatarUrl,

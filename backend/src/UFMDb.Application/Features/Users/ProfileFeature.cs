@@ -264,6 +264,56 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand>
     }
 }
 
+// ---------- Hesabı sil ----------
+// Gerçek (hard) silme yapmıyoruz: review/rating/liste gibi ilişkili kayıtların
+// bütünlüğünü bozmamak için ToggleUserActiveCommand (admin) ile aynı IsActive
+// mantığına ek olarak IsDeleted = true işaretliyoruz. IsActive = false zaten
+// login/profil arama/takip sorgularının kullanıcıyı görmezden gelmesini sağlıyor;
+// IsDeleted = true de admin kullanıcı listesinden (GetUsersQuery) düşürüyor.
+public record DeleteAccountCommand(Guid UserId, string Password) : IRequest;
+
+public class DeleteAccountCommandValidator : AbstractValidator<DeleteAccountCommand>
+{
+    public DeleteAccountCommandValidator()
+    {
+        RuleFor(x => x.Password).NotEmpty().WithMessage("Hesabını silmek için şifreni girmelisin.");
+    }
+}
+
+public class DeleteAccountCommandHandler : IRequestHandler<DeleteAccountCommand>
+{
+    private readonly IApplicationDbContext _context;
+    private readonly IPasswordHasher _passwordHasher;
+
+    public DeleteAccountCommandHandler(IApplicationDbContext context, IPasswordHasher passwordHasher)
+    {
+        _context = context;
+        _passwordHasher = passwordHasher;
+    }
+
+    public async Task Handle(DeleteAccountCommand request, CancellationToken ct)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == request.UserId && u.IsActive, ct)
+            ?? throw new NotFoundException(nameof(User), request.UserId);
+
+        if (!_passwordHasher.VerifyPassword(request.Password, user.PasswordHash, user.PasswordSalt))
+            throw new UnauthorizedException("Şifre hatalı.");
+
+        user.IsActive = false;
+        user.IsDeleted = true;
+        user.UpdatedAtUtc = DateTime.UtcNow;
+
+        // Tüm aktif refresh token'ları iptal et — kullanıcı tüm cihazlarda çıkış yapmış olur.
+        var activeTokens = await _context.RefreshTokens
+            .Where(rt => rt.UserId == user.Id && !rt.IsRevoked)
+            .ToListAsync(ct);
+        foreach (var token in activeTokens)
+            token.IsRevoked = true;
+
+        await _context.SaveChangesAsync(ct);
+    }
+}
+
 // ---------- Favori film slotunu boşalt ----------
 public record RemoveFavoriteMovieCommand(Guid UserId, int Slot) : IRequest;
 

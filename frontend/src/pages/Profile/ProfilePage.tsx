@@ -1,3 +1,4 @@
+import { useState, type FormEvent } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -15,10 +16,12 @@ import {
   Languages,
   ListVideo,
   Plus,
+  Trash2,
 } from "lucide-react";
-import { profileService, listService } from "@/services";
+import { profileService, listService, authService } from "@/services";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { setTheme } from "@/store/uiSlice";
+import { logout } from "@/store/authSlice";
 import { SUPPORTED_LANGUAGES, languageLabel } from "@/i18n/languages";
 import Dropdown from "@/components/search/Dropdown";
 import MovieCard from "@/components/movie/MovieCard";
@@ -96,6 +99,36 @@ export default function ProfilePage() {
     mutationFn: ({ language, theme }: { language: string; theme: string }) =>
       profileService.updateSettings(language, theme),
   });
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: (password: string) => profileService.deleteAccount(password),
+    onSuccess: async () => {
+      // Backend zaten tüm refresh token'ları iptal etti; /auth/logout
+      // çağrısı sadece httpOnly refresh cookie'sini temizlemek için.
+      await authService.logout().catch(() => {});
+      dispatch(logout());
+      navigate("/");
+    },
+    onError: (err: unknown) => {
+      const status = (err as { response?: { status?: number } })?.response
+        ?.status;
+      setDeleteError(
+        status === 401
+          ? t("profile.deleteAccountWrongPassword")
+          : t("profile.deleteAccountError"),
+      );
+    },
+  });
+
+  const handleDeleteAccount = (e: FormEvent) => {
+    e.preventDefault();
+    setDeleteError(null);
+    deleteAccountMutation.mutate(deletePassword);
+  };
 
   const handleThemeChange = (value: "dark" | "light") => {
     dispatch(setTheme(value));
@@ -323,6 +356,82 @@ export default function ProfilePage() {
                 onChange={handleLangChange}
               />
             </div>
+          </section>
+        )}
+
+        {tab === "settings" && (
+          <section className="profile-page__settings profile-page__danger-zone card">
+            <h2>
+              <Trash2 size={17} />
+              {t("profile.dangerZone")}
+            </h2>
+
+            {!deleteOpen ? (
+              <div className="profile-page__setting-row profile-page__setting-row--danger">
+                <div>
+                  <strong>{t("profile.deleteAccount")}</strong>
+                  <p className="profile-page__danger-hint">
+                    {t("profile.deleteAccountWarning")}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="btn-danger"
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  {t("profile.deleteAccount")}
+                </button>
+              </div>
+            ) : (
+              <form
+                className="profile-page__delete-confirm"
+                onSubmit={handleDeleteAccount}
+              >
+                <p className="profile-page__danger-hint">
+                  {t("profile.deleteAccountWarning")}
+                </p>
+                <label htmlFor="delete-account-password">
+                  {t("profile.deleteAccountConfirmPrompt")}
+                </label>
+                <input
+                  id="delete-account-password"
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  autoComplete="current-password"
+                  autoFocus
+                  required
+                />
+                {deleteError && (
+                  <p className="profile-page__delete-error">{deleteError}</p>
+                )}
+                <div className="profile-page__delete-confirm-actions">
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    disabled={deleteAccountMutation.isPending}
+                    onClick={() => {
+                      setDeleteOpen(false);
+                      setDeletePassword("");
+                      setDeleteError(null);
+                    }}
+                  >
+                    {t("profile.deleteAccountCancel")}
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-danger"
+                    disabled={
+                      deleteAccountMutation.isPending || !deletePassword
+                    }
+                  >
+                    {deleteAccountMutation.isPending
+                      ? t("common.loading")
+                      : t("profile.deleteAccountConfirm")}
+                  </button>
+                </div>
+              </form>
+            )}
           </section>
         )}
       </div>
