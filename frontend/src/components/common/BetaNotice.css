@@ -27,6 +27,31 @@
   animation: bn-pop var(--transition-slow) both;
 }
 
+.bn-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Geniş ekranda sol tarafta ana içerik, sağda "Yakında" paneli yan yana durur. */
+@media (min-width: 640px) {
+  .bn-card {
+    max-width: 700px;
+  }
+  .bn-layout {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .bn-main {
+    flex: 1 1 58%;
+    min-width: 0;
+  }
+  .bn-soon {
+    flex: 1 1 42%;
+    min-width: 0;
+  }
+}
+
 .bn-close {
   position: absolute;
   top: 14px;
@@ -155,6 +180,74 @@
   border-color: var(--color-accent);
   color: var(--color-accent);
   background: var(--color-accent-muted);
+}
+
+.bn-soon {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-accent) 14%, transparent) 0%,
+    transparent 75%
+  );
+  border: 1px dashed
+    color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+}
+
+.bn-soon__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.bn-soon__list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bn-soon__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.bn-soon__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-accent);
+}
+
+.bn-soon__item-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-text-primary);
+}
+
+.bn-soon__item-desc {
+  margin-top: 3px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
 }
 
 .bn-thanks {

@@ -1,8 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { X, Mail, Github, FlaskConical, Copy, Check } from "lucide-react";
+import {
+  X,
+  Mail,
+  Github,
+  FlaskConical,
+  Copy,
+  Check,
+  Sparkles,
+  Shuffle,
+} from "lucide-react";
 import { CONTACT } from "@/config/contact";
-import { getBetaNoticeText } from "./betaNoticeText";
 import "./BetaNotice.css";
 
 /**
@@ -11,9 +19,7 @@ import "./BetaNotice.css";
  * her girişte görünmesi. Site içi (client-side) gezinmede tekrar açılmaz.
  */
 export default function BetaNotice() {
-  // Dil değişince (i18n.language) bileşen yeniden render olur.
-  const { i18n } = useTranslation();
-  const text = getBetaNoticeText(i18n.language);
+  const { t } = useTranslation();
   const [open, setOpen] = useState(true);
   const [copied, setCopied] = useState(false);
   const copyTimer = useRef<number | undefined>(undefined);
@@ -106,65 +112,107 @@ export default function BetaNotice() {
           type="button"
           className="bn-close"
           onClick={() => setOpen(false)}
-          aria-label={text.closeAria}
+          aria-label={t("betaNotice.closeAria")}
         >
           <X size={18} />
         </button>
 
-        <span className="bn-badge">
-          <FlaskConical size={14} aria-hidden="true" />
-          {text.badge}
-        </span>
+        <div className="bn-layout">
+          <div className="bn-main">
+            <span className="bn-badge">
+              <FlaskConical size={14} aria-hidden="true" />
+              {t("betaNotice.badge")}
+            </span>
 
-        <h2 id="bn-title" className="bn-title">
-          {text.title}
-        </h2>
-        <p id="bn-desc" className="bn-desc">
-          {text.description}
-        </p>
+            <h2 id="bn-title" className="bn-title">
+              {t("betaNotice.title")}
+            </h2>
+            <p id="bn-desc" className="bn-desc">
+              {t("betaNotice.description")}
+            </p>
 
-        <p className="bn-contact-intro">{text.contactIntro}</p>
-        <ul className="bn-contacts">
-          {CONTACT.email && (
-            <li className="bn-contact-row">
-              <a className="bn-contact" href={`mailto:${CONTACT.email}`}>
-                <Mail size={16} aria-hidden="true" />
-                <span className="bn-contact__label">{text.emailLabel}</span>
-                <span className="bn-contact__value">{CONTACT.email}</span>
-              </a>
-              <button
-                type="button"
-                className="bn-copy"
-                onClick={copyEmail}
-                aria-label={text.copyAria}
-              >
-                {copied ? (
-                  <Check size={15} aria-hidden="true" />
-                ) : (
-                  <Copy size={15} aria-hidden="true" />
-                )}
-                <span aria-live="polite">
-                  {copied ? text.copied : text.copy}
+            <p className="bn-contact-intro">{t("betaNotice.contactIntro")}</p>
+            <ul className="bn-contacts">
+              {CONTACT.email && (
+                <li className="bn-contact-row">
+                  <a className="bn-contact" href={`mailto:${CONTACT.email}`}>
+                    <Mail size={16} aria-hidden="true" />
+                    <span className="bn-contact__label">
+                      {t("betaNotice.emailLabel")}
+                    </span>
+                    <span className="bn-contact__value">{CONTACT.email}</span>
+                  </a>
+                  <button
+                    type="button"
+                    className="bn-copy"
+                    onClick={copyEmail}
+                    aria-label={t("betaNotice.copyAria")}
+                  >
+                    {copied ? (
+                      <Check size={15} aria-hidden="true" />
+                    ) : (
+                      <Copy size={15} aria-hidden="true" />
+                    )}
+                    <span aria-live="polite">
+                      {copied ? t("betaNotice.copied") : t("betaNotice.copy")}
+                    </span>
+                  </button>
+                </li>
+              )}
+              {CONTACT.githubIssuesUrl && (
+                <li>
+                  <a
+                    className="bn-contact"
+                    href={CONTACT.githubIssuesUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Github size={16} aria-hidden="true" />
+                    <span className="bn-contact__label">
+                      {t("betaNotice.githubLabel")}
+                    </span>
+                  </a>
+                </li>
+              )}
+            </ul>
+
+            <p className="bn-thanks">{t("betaNotice.thanks")}</p>
+          </div>
+
+          <aside className="bn-soon" aria-label={t("betaNotice.soonEyebrow")}>
+            <span className="bn-soon__eyebrow">
+              {t("betaNotice.soonEyebrow")}
+            </span>
+            <div className="bn-soon__list">
+              <div className="bn-soon__item">
+                <span className="bn-soon__icon">
+                  <Sparkles size={16} aria-hidden="true" />
                 </span>
-              </button>
-            </li>
-          )}
-          {CONTACT.githubIssuesUrl && (
-            <li>
-              <a
-                className="bn-contact"
-                href={CONTACT.githubIssuesUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Github size={16} aria-hidden="true" />
-                <span className="bn-contact__label">{text.githubLabel}</span>
-              </a>
-            </li>
-          )}
-        </ul>
-
-        <p className="bn-thanks">{text.thanks}</p>
+                <div className="bn-soon__text">
+                  <h4 className="bn-soon__item-title">
+                    {t("betaNotice.soonRecommendTitle")}
+                  </h4>
+                  <p className="bn-soon__item-desc">
+                    {t("betaNotice.soonRecommendDesc")}
+                  </p>
+                </div>
+              </div>
+              <div className="bn-soon__item">
+                <span className="bn-soon__icon">
+                  <Shuffle size={16} aria-hidden="true" />
+                </span>
+                <div className="bn-soon__text">
+                  <h4 className="bn-soon__item-title">
+                    {t("betaNotice.soonRandomTitle")}
+                  </h4>
+                  <p className="bn-soon__item-desc">
+                    {t("betaNotice.soonRandomDesc")}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
 
         <button
           ref={confirmRef}
@@ -172,7 +220,7 @@ export default function BetaNotice() {
           className="btn-primary bn-confirm"
           onClick={() => setOpen(false)}
         >
-          {text.confirm}
+          {t("betaNotice.confirm")}
         </button>
       </div>
     </div>

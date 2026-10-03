@@ -470,5 +470,24 @@
     "empty": "You don't have any notifications yet.",
     "startedFollowingYou": "started following you",
     "markAllRead": "Mark all as read"
+  },
+  "betaNotice": {
+    "badge": "BETA",
+    "title": "UFMDb is currently in beta",
+    "description": "We're still improving the site, so you may run into bugs or missing features along the way.",
+    "contactIntro": "If you find a bug or have a suggestion, you can reach us here:",
+    "emailLabel": "Email",
+    "githubLabel": "GitHub (report bugs / suggestions)",
+    "thanks": "Your feedback makes UFMDb better, thank you!",
+    "confirm": "Got it",
+    "closeAria": "Close",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyAria": "Copy email address",
+    "soonEyebrow": "Coming Soon",
+    "soonRecommendTitle": "Movie Recommendations",
+    "soonRecommendDesc": "Personalized picks, tailored to your taste.",
+    "soonRandomTitle": "Random Movie Picker",
+    "soonRandomDesc": "Can't decide? One click and it's settled."
   }
 }

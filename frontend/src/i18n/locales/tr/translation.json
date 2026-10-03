@@ -470,5 +470,24 @@
     "empty": "Henüz bildirimin yok.",
     "startedFollowingYou": "seni takip etmeye başladı",
     "markAllRead": "Tümünü okundu işaretle"
+  },
+  "betaNotice": {
+    "badge": "BETA",
+    "title": "UFMDb şu an beta aşamasında",
+    "description": "Siteyi geliştirmeye devam ediyoruz; bu sırada hatalarla veya eksik özelliklerle karşılaşabilirsin.",
+    "contactIntro": "Bir hata bulursan ya da bir önerin varsa bize şu adreslerden ulaşabilirsin:",
+    "emailLabel": "E-posta",
+    "githubLabel": "GitHub (hata / öneri bildir)",
+    "thanks": "Geri bildirimlerin UFMDb'yi daha iyi yapıyor, teşekkürler!",
+    "confirm": "Anladım",
+    "closeAria": "Kapat",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı",
+    "copyAria": "E-posta adresini kopyala",
+    "soonEyebrow": "Yakında",
+    "soonRecommendTitle": "Film Önerme Sistemi",
+    "soonRecommendDesc": "Zevkine göre, sana özel film önerileri.",
+    "soonRandomTitle": "Rastgele Film Seç",
+    "soonRandomDesc": "Karar veremiyorsan, bir tıkla seçelim."
   }
 }
