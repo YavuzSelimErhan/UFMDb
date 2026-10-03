@@ -48,6 +48,19 @@ public class RefreshToken : BaseEntity
     public bool IsRevoked { get; set; } = false;
 }
 
+/// <summary>
+/// "Şifremi unuttum" akışı için tek kullanımlık token. Mail ile giden ham token değil,
+/// bu ham tokenin SHA-256 hash'i saklanır — DB bir şekilde sızsa bile linkler geçerli olmaz.
+/// </summary>
+public class PasswordResetToken : BaseEntity
+{
+    public Guid UserId { get; set; }
+    public User User { get; set; } = default!;
+    public string TokenHash { get; set; } = default!;
+    public DateTime ExpiresAtUtc { get; set; }
+    public bool IsUsed { get; set; } = false;
+}
+
 /// <summary>Profil sayfasındaki "Favori 4 film" özelliği için sıralı ilişki</summary>
 public class FavoriteMovie
 {

@@ -151,13 +151,22 @@
     "forgotPasswordDesc": "Hesabına kayıtlı e-postayı gir, sana şifre sıfırlama bağlantısı gönderelim.",
     "forgotPasswordSubmit": "Sıfırlama Bağlantısı Gönder",
     "forgotPasswordSent": "Bu e-postaya kayıtlı bir hesap varsa, sıfırlama bağlantısı gönderildi.",
+    "forgotPasswordError": "Bir şeyler ters gitti, lütfen tekrar dene.",
     "backToLogin": "Girişe dön",
     "confirmPassword": "Şifreyi Onayla",
     "passwordMismatch": "Şifreler eşleşmiyor.",
     "passwordRuleLength": "En az 8 karakter",
     "passwordRuleUppercase": "En az 1 büyük harf",
     "passwordRuleLowercase": "En az 1 küçük harf",
-    "passwordRuleDigit": "En az 1 rakam"
+    "passwordRuleDigit": "En az 1 rakam",
+    "newPassword": "Yeni Şifre",
+    "resetPasswordEyebrow": "ŞİFRE SIFIRLAMA",
+    "resetPasswordTitle": "Yeni Şifre Belirle",
+    "resetPasswordDesc": "Hesabın için yeni bir şifre belirle.",
+    "resetPasswordSubmit": "Şifreyi Güncelle",
+    "resetPasswordSuccess": "Şifren güncellendi. Artık yeni şifrenle giriş yapabilirsin.",
+    "resetPasswordError": "Bir şeyler ters gitti, lütfen tekrar dene.",
+    "resetPasswordInvalidLink": "Bu bağlantı geçersiz veya süresi dolmuş. Yeni bir sıfırlama bağlantısı iste."
   },
   "profile": {
     "member": "UFMDb üyesi",

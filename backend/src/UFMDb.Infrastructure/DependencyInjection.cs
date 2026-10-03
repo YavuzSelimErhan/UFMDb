@@ -13,6 +13,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IDateTimeProvider, DateTimeProvider>();
+        services.AddScoped<IEmailSender, SmtpEmailSender>();
         return services;
     }
 }

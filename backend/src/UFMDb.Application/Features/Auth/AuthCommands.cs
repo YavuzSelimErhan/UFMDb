@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -168,6 +170,107 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
         await _context.SaveChangesAsync(ct);
 
         return new AuthResultDto(user.Id, user.UserName, user.Email, user.Role.ToString(), access, refresh);
+    }
+}
+
+// ---------- Forgot Password ----------
+public record ForgotPasswordCommand(string Email) : IRequest;
+
+public class ForgotPasswordCommandValidator : AbstractValidator<ForgotPasswordCommand>
+{
+    public ForgotPasswordCommandValidator()
+    {
+        RuleFor(x => x.Email).NotEmpty().EmailAddress();
+    }
+}
+
+public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordCommand>
+{
+    private readonly IApplicationDbContext _context;
+    private readonly IEmailSender _emailSender;
+
+    public ForgotPasswordCommandHandler(IApplicationDbContext context, IEmailSender emailSender)
+    {
+        _context = context;
+        _emailSender = emailSender;
+    }
+
+    public async Task Handle(ForgotPasswordCommand request, CancellationToken ct)
+    {
+        // Güvenlik: bu e-postanın sistemde kayıtlı olup olmadığı dışarıya hiçbir zaman belli
+        // edilmez (e-posta enumeration saldırısını engeller) — bu yüzden kullanıcı bulunamasa
+        // bile metot sessizce, hatasız döner; controller her koşulda aynı cevabı verir.
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Email == request.Email && u.IsActive, ct);
+        if (user is null) return;
+
+        var rawToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+        var tokenHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(rawToken)));
+
+        _context.PasswordResetTokens.Add(new PasswordResetToken
+        {
+            UserId = user.Id,
+            TokenHash = tokenHash,
+            ExpiresAtUtc = DateTime.UtcNow.AddHours(1),
+        });
+        await _context.SaveChangesAsync(ct);
+
+        await _emailSender.SendPasswordResetEmailAsync(user.Email, user.UserName, rawToken, ct);
+    }
+}
+
+// ---------- Reset Password ----------
+public record ResetPasswordCommand(string Token, string NewPassword) : IRequest;
+
+public class ResetPasswordCommandValidator : AbstractValidator<ResetPasswordCommand>
+{
+    public ResetPasswordCommandValidator()
+    {
+        RuleFor(x => x.Token).NotEmpty();
+        RuleFor(x => x.NewPassword).NotEmpty().MinimumLength(8)
+            .Matches("[A-Z]").WithMessage("Şifre en az bir büyük harf içermeli.")
+            .Matches("[0-9]").WithMessage("Şifre en az bir rakam içermeli.");
+    }
+}
+
+public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand>
+{
+    private readonly IApplicationDbContext _context;
+    private readonly IPasswordHasher _passwordHasher;
+
+    public ResetPasswordCommandHandler(IApplicationDbContext context, IPasswordHasher passwordHasher)
+    {
+        _context = context;
+        _passwordHasher = passwordHasher;
+    }
+
+    public async Task Handle(ResetPasswordCommand request, CancellationToken ct)
+    {
+        var tokenHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(request.Token)));
+
+        var resetToken = await _context.PasswordResetTokens
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.TokenHash == tokenHash, ct)
+            ?? throw new UnauthorizedException("Bu bağlantı geçersiz veya süresi dolmuş.");
+
+        if (resetToken.IsUsed || resetToken.ExpiresAtUtc < DateTime.UtcNow)
+            throw new UnauthorizedException("Bu bağlantı geçersiz veya süresi dolmuş.");
+
+        var (hash, salt) = _passwordHasher.HashPassword(request.NewPassword);
+        resetToken.User.PasswordHash = hash;
+        resetToken.User.PasswordSalt = salt;
+        resetToken.IsUsed = true;
+
+        // Güvenlik: şifre değiştiğinde o kullanıcının başka her yerdeki oturumları
+        // (refresh token'ları) iptal edilir — biri şifreyi sıfırladıysa eski cihazlardaki
+        // oturumların geçerliliğini sürdürmesi istenmez.
+        var activeRefreshTokens = await _context.RefreshTokens
+            .Where(rt => rt.UserId == resetToken.UserId && !rt.IsRevoked)
+            .ToListAsync(ct);
+        foreach (var rt in activeRefreshTokens)
+            rt.IsRevoked = true;
+
+        await _context.SaveChangesAsync(ct);
     }
 }
 

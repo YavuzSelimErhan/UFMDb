@@ -231,6 +231,16 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         b.HasOne(r => r.User).WithMany(u => u.RefreshTokens).HasForeignKey(r => r.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 }
+public class PasswordResetTokenConfiguration : IEntityTypeConfiguration<PasswordResetToken>
+{
+    public void Configure(EntityTypeBuilder<PasswordResetToken> b)
+    {
+        b.ToTable("PasswordResetTokens");
+        b.Property(r => r.TokenHash).IsRequired().HasMaxLength(100);
+        b.HasIndex(r => r.TokenHash).IsUnique();
+        b.HasOne(r => r.User).WithMany().HasForeignKey(r => r.UserId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
 
 public class ActorLikeConfiguration : IEntityTypeConfiguration<ActorLike>
 {

@@ -29,6 +29,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<CuratedList> CuratedLists => Set<CuratedList>();
     public DbSet<CuratedListLike> CuratedListLikes => Set<CuratedListLike>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<ActorLike> ActorLikes => Set<ActorLike>();
     public DbSet<FavoriteActor> FavoriteActors => Set<FavoriteActor>();
     public DbSet<DirectorLike> DirectorLikes => Set<DirectorLike>();

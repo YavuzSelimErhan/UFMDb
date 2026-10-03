@@ -11,6 +11,7 @@ import ListsPage from "@/pages/Lists/ListsPage";
 import ListDetailPage from "@/pages/Lists/ListDetailPage";
 import LoginPage from "@/pages/Login/LoginPage";
 import ForgotPasswordPage from "@/pages/Login/ForgotPasswordPage";
+import ResetPasswordPage from "@/pages/Login/ResetPasswordPage";
 import RegisterPage from "@/pages/Register/RegisterPage";
 import ProfilePage from "@/pages/Profile/ProfilePage";
 import AdminPage from "@/pages/Admin/AdminPage";
@@ -42,6 +43,7 @@ function AppShell() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/profile" element={<ProfilePage />} />

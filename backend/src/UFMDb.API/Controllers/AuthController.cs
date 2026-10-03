@@ -1,7 +1,5 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
-using UFMDb.API.RateLimiting;
 using UFMDb.Application.Features.Auth;
 
 namespace UFMDb.API.Controllers;
@@ -36,7 +34,6 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    [EnableRateLimiting(AuthRateLimitingExtensions.PolicyName)]
     public async Task<ActionResult<AuthResponseDto>> Register(RegisterCommand command)
     {
         var result = await _mediator.Send(command);
@@ -45,7 +42,6 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    [EnableRateLimiting(AuthRateLimitingExtensions.PolicyName)]
     public async Task<ActionResult<AuthResponseDto>> Login(LoginCommand command)
     {
         var result = await _mediator.Send(command);
@@ -63,6 +59,20 @@ public class AuthController : ControllerBase
         var result = await _mediator.Send(new RefreshTokenCommand(cookieToken));
         SetRefreshCookie(result.RefreshToken); // rotasyon: yeni refresh token cookie'ye yazılır
         return Ok(new AuthResponseDto(result.UserId, result.UserName, result.Email, result.Role, result.AccessToken));
+    }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordCommand command)
+    {
+        await _mediator.Send(command);
+        return Ok(); // e-posta sistemde var mı yok mu her koşulda aynı cevap — bkz. handler
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordCommand command)
+    {
+        await _mediator.Send(command);
+        return NoContent();
     }
 
     [HttpPost("logout")]

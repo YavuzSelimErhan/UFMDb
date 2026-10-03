@@ -28,6 +28,7 @@ public interface IApplicationDbContext
     DbSet<CuratedList> CuratedLists { get; }
     DbSet<CuratedListLike> CuratedListLikes { get; }
     DbSet<RefreshToken> RefreshTokens { get; }
+    DbSet<PasswordResetToken> PasswordResetTokens { get; }
     DbSet<ActorLike> ActorLikes { get; }
     DbSet<FavoriteActor> FavoriteActors { get; }
     DbSet<DirectorLike> DirectorLikes { get; }

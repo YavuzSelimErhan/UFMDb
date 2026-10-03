@@ -69,6 +69,9 @@ export default function ForgotPasswordPage() {
               <p className="auth-success">{t("auth.forgotPasswordSent")}</p>
             ) : (
               <>
+                {mutation.isError && (
+                  <p className="auth-error">{t("auth.forgotPasswordError")}</p>
+                )}
                 <p className="auth-card__desc">
                   {t("auth.forgotPasswordDesc")}
                 </p>

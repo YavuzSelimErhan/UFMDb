@@ -151,13 +151,22 @@
     "forgotPasswordDesc": "Enter the email on your account and we'll send you a link to reset your password.",
     "forgotPasswordSubmit": "Send Reset Link",
     "forgotPasswordSent": "If an account exists for this email, a reset link is on its way.",
+    "forgotPasswordError": "Something went wrong, please try again.",
     "backToLogin": "Back to log in",
     "confirmPassword": "Confirm Password",
     "passwordMismatch": "Passwords don't match.",
     "passwordRuleLength": "At least 8 characters",
     "passwordRuleUppercase": "At least 1 uppercase letter",
     "passwordRuleLowercase": "At least 1 lowercase letter",
-    "passwordRuleDigit": "At least 1 number"
+    "passwordRuleDigit": "At least 1 number",
+    "newPassword": "New Password",
+    "resetPasswordEyebrow": "PASSWORD RESET",
+    "resetPasswordTitle": "Set a New Password",
+    "resetPasswordDesc": "Choose a new password for your account.",
+    "resetPasswordSubmit": "Update Password",
+    "resetPasswordSuccess": "Your password has been updated. You can now log in with your new password.",
+    "resetPasswordError": "Something went wrong, please try again.",
+    "resetPasswordInvalidLink": "This link is invalid or has expired. Request a new reset link."
   },
   "profile": {
     "member": "UFMDb member",
