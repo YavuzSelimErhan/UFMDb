@@ -497,5 +497,62 @@
     "soonRecommendDesc": "Zevkine göre, sana özel film önerileri.",
     "soonRandomTitle": "Rastgele Film Seç",
     "soonRandomDesc": "Karar veremiyorsan, bir tıkla seçelim."
+  },
+  "terms": {
+    "updatedAt": "Son güncelleme: Ekim 2026",
+    "intro": "UFMDb'yi kullanarak aşağıdaki koşulları kabul etmiş olursun. UFMDb, film keşfi ve koleksiyon takibi sunan bir platformdur ve UFMDb ekibi tarafından geliştirilip işletilmektedir.",
+    "sections": {
+      "account": {
+        "heading": "Hesabın",
+        "body": "Hesap bilgilerinin (e-posta, şifre) gizliliğinden sen sorumlusun. Hesabın üzerinden yapılan tüm işlemlerden hesap sahibi sorumlu tutulur. Hesabını istediğin zaman Ayarlar sayfasından silebilirsin."
+      },
+      "content": {
+        "heading": "Paylaştığın içerik",
+        "body": "Yazdığın review'lar, oluşturduğun listeler ve yüklediğin görseller sana aittir; bunları yayınlayarak platformda diğer kullanıcılara görünür olmasına izin vermiş olursun. Başkasına ait telif hakkıyla korunan içerik, nefret söylemi veya taciz içeren içerik paylaşmaman beklenir — bu tür içerikler bildirimsiz kaldırılabilir."
+      },
+      "movieData": {
+        "heading": "Film verileri",
+        "body": "Platformdaki film/oyuncu/yönetmen bilgileri TMDB'den alınır ve yalnızca gösterim amaçlıdır; doğruluğu ya da güncelliği için bir garanti verilmez."
+      },
+      "serviceStatus": {
+        "heading": "Hizmetin durumu",
+        "body": "Platform aktif olarak geliştirilmeye devam etmektedir; özellikler önceden haber verilmeden değişebilir, eklenebilir veya kaldırılabilir. Planlı bakım veya beklenmeyen teknik sorunlar nedeniyle hizmette zaman zaman kesinti yaşanabilir."
+      }
+    },
+    "contactHeading": "İletişim",
+    "contactBody": "Bu koşullarla ilgili sorularını <email>{{emailAddress}}</email> adresine iletebilirsin."
+  },
+  "privacy": {
+    "updatedAt": "Son güncelleme: Ekim 2026",
+    "intro": "UFMDb, film keşfi ve koleksiyon takibi sunan bir platformdur ve UFMDb ekibi tarafından işletilmektedir. Bu sayfa, hesap oluşturduğunda hangi kişisel verilerin toplandığını ve nasıl kullanıldığını açıklar.",
+    "sections": {
+      "collect": {
+        "heading": "Topladığımız veriler",
+        "items": [
+          "Hesap oluştururken verdiğin e-posta adresi ve şifren (şifre asla düz metin olarak saklanmaz, geri döndürülemez şekilde hash'lenir).",
+          "Profilinde isteğe bağlı olarak eklediğin görünen ad ve profil fotoğrafı.",
+          "Platformda ürettiğin içerik: puanlar, review'lar, listeler, izleme/seans kayıtları, takip ettiğin kullanıcılar.",
+          "Oturum açık kalsın diye bir erişim token'ı ve bir yenileme (refresh) çerezi."
+        ]
+      },
+      "use": {
+        "heading": "Verileri nasıl kullanıyoruz",
+        "body": "Topladığımız veriler yalnızca hesabını çalıştırmak, profilini ve etkileşimlerini (puan, review, liste, takip) diğer kullanıcılara göstermek için kullanılır. Verilerini satmıyoruz, reklam amaçlı üçüncü taraflarla paylaşmıyoruz."
+      },
+      "cookies": {
+        "heading": "Çerezler",
+        "body": "Yalnızca oturumunu açık tutmak için gerekli olan bir yenileme token'ı çerez olarak saklanır. Takip/analitik/reklam amaçlı çerez kullanılmaz."
+      },
+      "movieData": {
+        "heading": "Film verileri",
+        "body": "Film, oyuncu ve yönetmen bilgileri <tmdb>The Movie Database (TMDB)</tmdb> API'sinden alınır. Bu ürün TMDB API kullanır ancak TMDB tarafından onaylanmış veya sertifikalandırılmış değildir."
+      },
+      "deletion": {
+        "heading": "Verilerinin silinmesi",
+        "body": "Hesabını Ayarlar sayfasından istediğin zaman silebilirsin; bu durumda hesabın devre dışı bırakılır ve giriş bilgilerin artık kullanılamaz hale gelir. Profilinle ilişkili içeriklerin (review, puan, liste) nasıl işlendiği hakkında bilgi almak istersen <email>{{emailAddress}}</email> adresinden bize ulaşabilirsin."
+      }
+    },
+    "contactHeading": "İletişim",
+    "contactBody": "Bu politikayla ilgili sorularını <email>{{emailAddress}}</email> adresine iletebilirsin."
   }
 }

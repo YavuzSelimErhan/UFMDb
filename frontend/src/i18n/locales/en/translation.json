@@ -497,5 +497,62 @@
     "soonRecommendDesc": "Personalized picks, tailored to your taste.",
     "soonRandomTitle": "Random Movie Picker",
     "soonRandomDesc": "Can't decide? One click and it's settled."
+  },
+  "terms": {
+    "updatedAt": "Last updated: October 2026",
+    "intro": "By using UFMDb you agree to the terms below. UFMDb is a platform for discovering and tracking films, built and operated by the UFMDb team.",
+    "sections": {
+      "account": {
+        "heading": "Your account",
+        "body": "You're responsible for keeping your account credentials (email, password) confidential. The account holder is responsible for all activity under that account. You can delete your account at any time from the Settings page."
+      },
+      "content": {
+        "heading": "Content you share",
+        "body": "Reviews you write, lists you create, and images you upload remain yours; by posting them you allow them to be visible to other users on the platform. You're expected not to post content that infringes someone else's copyright or contains hate speech or harassment — such content may be removed without notice."
+      },
+      "movieData": {
+        "heading": "Movie data",
+        "body": "Movie, cast, and crew information on the platform is sourced from TMDB and provided for display purposes only; no guarantee of its accuracy or currency is made."
+      },
+      "serviceStatus": {
+        "heading": "Status of the service",
+        "body": "The platform is under active development; features may change, be added, or removed without prior notice. The service may occasionally be unavailable due to planned maintenance or unexpected technical issues."
+      }
+    },
+    "contactHeading": "Contact",
+    "contactBody": "Questions about these terms can be sent to <email>{{emailAddress}}</email>."
+  },
+  "privacy": {
+    "updatedAt": "Last updated: October 2026",
+    "intro": "UFMDb is a platform for discovering and tracking films, operated by the UFMDb team. This page explains what personal data is collected when you create an account and how it's used.",
+    "sections": {
+      "collect": {
+        "heading": "What we collect",
+        "items": [
+          "The email address and password you provide when registering (passwords are never stored in plain text — they are irreversibly hashed).",
+          "Any display name and profile photo you optionally add.",
+          "Content you create on the platform: ratings, reviews, lists, screening logs, and the users you follow.",
+          "An access token and a refresh-token cookie used to keep you signed in."
+        ]
+      },
+      "use": {
+        "heading": "How we use it",
+        "body": "Your data is used solely to run your account and to show your profile and activity (ratings, reviews, lists, follows) to other users. We do not sell your data or share it with third parties for advertising."
+      },
+      "cookies": {
+        "heading": "Cookies",
+        "body": "Only a refresh-token cookie required to keep you signed in is stored. No tracking, analytics, or advertising cookies are used."
+      },
+      "movieData": {
+        "heading": "Movie data",
+        "body": "Movie, cast, and crew information is sourced from the <tmdb>The Movie Database (TMDB)</tmdb> API. This product uses the TMDB API but is not endorsed or certified by TMDB."
+      },
+      "deletion": {
+        "heading": "Deleting your data",
+        "body": "You can delete your account at any time from the Settings page; doing so deactivates your account and your login credentials can no longer be used. If you'd like more detail on how content tied to your profile (reviews, ratings, lists) is handled, email us at <email>{{emailAddress}}</email>."
+      }
+    },
+    "contactHeading": "Contact",
+    "contactBody": "Questions about this policy can be sent to <email>{{emailAddress}}</email>."
   }
 }
