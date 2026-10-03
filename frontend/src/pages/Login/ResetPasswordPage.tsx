@@ -4,6 +4,12 @@ import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
 import { Clapperboard, ChevronLeft, Eye, EyeOff } from "lucide-react";
 import { authService } from "@/services";
+import { parseApiError } from "@/utils/apiError";
+import {
+  isPasswordValid,
+  getFailingPasswordMessages,
+} from "@/utils/passwordRules";
+import PasswordChecklist from "@/components/auth/PasswordChecklist";
 import "./AuthPages.css";
 
 export default function ResetPasswordPage() {
@@ -14,22 +20,35 @@ export default function ResetPasswordPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  // RegisterPage ile aynı desen: tek bir "error" yerine liste — backend
+  // birden fazla alan için mesaj dönebiliyor, hepsini gösteriyoruz.
+  const [formErrors, setFormErrors] = useState<string[]>([]);
 
   const mutation = useMutation({
     mutationFn: () => authService.resetPassword(token!, newPassword),
     onError: (err: unknown) => {
-      const message = (err as { response?: { data?: { title?: string } } })
-        ?.response?.data?.title;
-      setError(message ?? t("auth.resetPasswordError"));
+      const parsed = parseApiError(err, t("auth.resetPasswordError"));
+      const messages = Object.values(parsed.fieldErrors).flat();
+      setFormErrors(messages.length > 0 ? messages : [parsed.title]);
     },
   });
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setFormErrors([]);
+
+    // İstemci tarafı ön-doğrulama: checklist'teki aynı kurallar burada da
+    // kontrol ediliyor. Eşleşmezse kullanıcı yine submit edip gerçek
+    // hatayı backend'den (onError) görebilir — bu bir optimizasyon,
+    // tek doğrulama katmanı değil.
+    if (!isPasswordValid(newPassword)) {
+      setPasswordTouched(true);
+      setFormErrors(getFailingPasswordMessages(newPassword, t));
+      return;
+    }
     if (newPassword !== confirmPassword) {
-      setError(t("auth.passwordMismatch"));
+      setFormErrors([t("auth.passwordMismatch")]);
       return;
     }
     mutation.mutate();
@@ -67,9 +86,9 @@ export default function ResetPasswordPage() {
     </div>
   );
 
-  // Token URL'de hiç yoksa (link bozuk kopyalanmış, eski bir sayfa bookmark'lanmış vb.)
-  // formu hiç göstermiyoruz — zaten gönderildiğinde backend reddedecek, bunu baştan söylemek
-  // daha net bir deneyim.
+  // Token URL'de hiç yoksa (link bozuk kopyalanmış, eski bir sayfa
+  // bookmark'lanmış vb.) formu hiç göstermiyoruz — zaten gönderildiğinde
+  // backend reddedecek, bunu baştan söylemek daha net bir deneyim.
   if (!token) {
     return (
       <div className="auth-page">
@@ -87,7 +106,10 @@ export default function ResetPasswordPage() {
               </span>
               <h1>{t("auth.resetPasswordTitle")}</h1>
               <p className="auth-error">{t("auth.resetPasswordInvalidLink")}</p>
-              <Link to="/forgot-password" className="btn-primary auth-card__link-btn">
+              <Link
+                to="/forgot-password"
+                className="btn-primary auth-card__link-btn"
+              >
                 {t("auth.forgotPassword")}
               </Link>
             </div>
@@ -124,7 +146,23 @@ export default function ResetPasswordPage() {
               </>
             ) : (
               <>
-                {error && <p className="auth-error">{error}</p>}
+                {formErrors.length > 0 && (
+                  <ul
+                    className="auth-error-list"
+                    style={{
+                      listStyle: "none",
+                      margin: "0 0 14px",
+                      padding: 0,
+                    }}
+                  >
+                    {formErrors.map((msg) => (
+                      <li key={msg} className="auth-error">
+                        {msg}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
                 <p className="auth-card__desc">{t("auth.resetPasswordDesc")}</p>
 
                 <label htmlFor="reset-new-password">
@@ -135,9 +173,14 @@ export default function ResetPasswordPage() {
                     id="reset-new-password"
                     type={showPassword ? "text" : "password"}
                     value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      setPasswordTouched(true);
+                    }}
+                    onBlur={() => setPasswordTouched(true)}
                     autoComplete="new-password"
                     minLength={8}
+                    aria-describedby="reset-password-rules"
                     required
                   />
                   <button
@@ -152,6 +195,12 @@ export default function ResetPasswordPage() {
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
+                </div>
+                <div id="reset-password-rules">
+                  <PasswordChecklist
+                    password={newPassword}
+                    touched={passwordTouched}
+                  />
                 </div>
 
                 <label htmlFor="reset-confirm-password">
