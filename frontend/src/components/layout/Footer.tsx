@@ -125,17 +125,17 @@ export default function Footer() {
             <nav>
               <ul className="ft-links">
                 <li>
-                  <a href="#" className="ft-link">
+                  <Link to="/privacy" className="ft-link">
                     {t("footer.privacy")}
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="ft-link">
+                  <Link to="/terms" className="ft-link">
                     {t("footer.terms")}
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="ft-link">
+                  <a href="mailto:iletisim@ufmdb.com" className="ft-link">
                     {t("footer.contact")}
                   </a>
                 </li>
