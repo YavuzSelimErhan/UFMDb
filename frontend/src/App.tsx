@@ -24,6 +24,8 @@ import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import EditListPage from "@/pages/Lists/EditListPage";
 import UsersPage from "@/pages/Users/UsersPage";
 import UserProfilePage from "@/pages/Users/UserProfilePage";
+import PrivacyPolicyPage from "@/pages/Legal/PrivacyPolicyPage";
+import TermsPage from "@/pages/Legal/TermsPage";
 
 function AppShell() {
   useScrollRestoration();
@@ -44,6 +46,8 @@ function AppShell() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/profile" element={<ProfilePage />} />
