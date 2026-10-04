@@ -263,7 +263,8 @@
   /* MovieCard'daki .movie-card__info'ya yakın bir ölçü: yatayda ciddi bir
      inset yok (metin, görselle aynı genişlikte — "panel içinde" değil
      doğrudan zeminde duruyor hissi), sadece dikeyde nefes payı var. */
-  padding: 10px 2px 16px;
+  padding: 14px 16px 18px;
+  text-align: center;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -386,8 +387,8 @@
 .list-card__meta-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: center;
+  gap: 14px;
   margin-top: auto;
   padding-top: 4px;
 }
@@ -408,6 +409,7 @@
 .list-card__creator {
   font-size: 0.74rem;
   margin-top: 2px;
+  text-align: center;
 }
 
 .lists-page__header {
