@@ -103,6 +103,14 @@
   }
 }
 
+/* MovieCard ile aynı dil: kart varsayılanda tamamen transparan (kutu
+   hissi yok), kapak görseli ve metin doğrudan sayfa zemininde durur;
+   kenarlık/gölge sadece hover'da, o da listenin kendi aksan rengiyle. */
+.list-card.card {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
 .list-card:hover {
   transform: translateY(-6px);
   box-shadow:
@@ -118,7 +126,12 @@
 /* ---------- Sahne: kapak görseli / poster yelpazesi ---------- */
 .list-card__stage {
   position: relative;
-  height: 190px;
+  /* Sabit px yükseklik yerine oran: kart genişliği sütun sayısına göre
+     değiştikçe (5/4/3/2/1 kolon) görsel her zaman aynı en-boy oranını
+     korur — önceki sabit yükseklik breakpoint'ler arasında görseli
+     esnetip sıkıştırıyordu. */
+  aspect-ratio: 3 / 2;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
   background:
     radial-gradient(
       circle at 25% 15%,
@@ -247,14 +260,18 @@
 
 /* ---------- Bilgi bloğu ---------- */
 .list-card__body {
-  padding: 16px 20px 20px;
+  padding: 18px 20px 20px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 }
 .list-card__body h3 {
   font-size: 1.05rem;
   line-height: 1.3;
+  /* h3'ün global margin-bottom'u burada sıfırlanır — aradaki boşluk
+     artık yalnızca .list-card__body'nin gap'inden geliyor, bu yüzden
+     tek bir yerden kontrol edilip öngörülebilir kalıyor. */
+  margin-bottom: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -264,14 +281,14 @@
 }
 .list-card__desc {
   font-size: 0.85rem;
-  line-height: 1.4;
+  line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: 2.4em;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 .list-card__ticket {
   position: relative;
@@ -308,18 +325,6 @@
   }
   .list-card:hover {
     transform: none;
-  }
-}
-
-@media (max-width: 1000px) {
-  .list-card__stage {
-    height: 170px;
-  }
-}
-
-@media (max-width: 700px) {
-  .list-card__stage {
-    height: 150px;
   }
 }
 
