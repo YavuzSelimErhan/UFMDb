@@ -279,7 +279,11 @@
   font-weight: 800;
   font-size: 0.95rem;
   line-height: 1.28;
-  letter-spacing: -0.01em;
+  /* Negatif letter-spacing bu boyutta sadece karakterleri değil, kelime
+     aralarındaki boşluğu da sıkıştırıp bitişik görünmesine yol açıyordu —
+     büyük başlıklarda (GenresSection vb.) işe yarayan -0.01em, burada
+     küçük font-size'da okunurluğu düşürüyordu. */
+  letter-spacing: normal;
   margin-bottom: 0;
   color: var(--color-text-primary);
   display: -webkit-box;
@@ -391,8 +395,9 @@
 .list-card__like-count {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.78rem;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 600;
   color: var(--color-text-muted);
   flex-shrink: 0;
 }

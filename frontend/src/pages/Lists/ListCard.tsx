@@ -187,7 +187,7 @@ export default function ListCard({ list, displayTitle }: Props) {
             {list.movieCount} {t("lists.moviesCount")}
           </span>
           <span className="list-card__like-count">
-            <Heart size={11} fill={likeCount > 0 ? "currentColor" : "none"} />{" "}
+            <Heart size={13} fill={likeCount > 0 ? "currentColor" : "none"} />{" "}
             {likeCount}
           </span>
         </div>

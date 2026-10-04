@@ -21,13 +21,18 @@ const TABS: { key: ListScope; labelKey: string }[] = [
 
 export default function ListsPage() {
   const { t, i18n } = useTranslation();
-  const { isAuthenticated } = useAppSelector((s) => s.auth);
+  const { isAuthenticated, isSessionChecked } = useAppSelector((s) => s.auth);
   const [scope, setScope] = useState<ListScope>("Official");
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["lists", scope],
     queryFn: () => listService.getAll(scope),
     retry: 1,
+    // SessionManager'ın sayfa açılışındaki sessiz refresh'i bitmeden bu sorgu ateşlenirse
+    // istek henüz token'sız (anonim) gider ve isLikedByCurrentUser hep false döner — kullanıcı
+    // aslında giriş yapmış ve o listeyi beğenmiş olsa bile kalp ikonu pembe görünmez. Oturum
+    // kontrolü bitene kadar bekletiyoruz.
+    enabled: isSessionChecked,
   });
 
   return (
@@ -56,7 +61,9 @@ export default function ListsPage() {
         ))}
       </div>
 
-      {isLoading && <PageSpinner label={t("common.loading")} />}
+      {(!isSessionChecked || isLoading) && (
+        <PageSpinner label={t("common.loading")} />
+      )}
 
       {isError && !isLoading && (
         <PageError

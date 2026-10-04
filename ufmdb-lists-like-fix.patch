@@ -1,0 +1,64 @@
+diff --git a/frontend/src/pages/Lists/ListCard.tsx b/frontend/src/pages/Lists/ListCard.tsx
+index 3ccb1c1..43d18f7 100644
+--- a/frontend/src/pages/Lists/ListCard.tsx
++++ b/frontend/src/pages/Lists/ListCard.tsx
+@@ -187,7 +187,7 @@ export default function ListCard({ list, displayTitle }: Props) {
+             {list.movieCount} {t("lists.moviesCount")}
+           </span>
+           <span className="list-card__like-count">
+-            <Heart size={11} fill={likeCount > 0 ? "currentColor" : "none"} />{" "}
++            <Heart size={13} fill={likeCount > 0 ? "currentColor" : "none"} />{" "}
+             {likeCount}
+           </span>
+         </div>
+diff --git a/frontend/src/pages/Lists/ListsPage.css b/frontend/src/pages/Lists/ListsPage.css
+index e8ea194..de79948 100644
+--- a/frontend/src/pages/Lists/ListsPage.css
++++ b/frontend/src/pages/Lists/ListsPage.css
+@@ -370,8 +370,9 @@
+ .list-card__like-count {
+   display: flex;
+   align-items: center;
+-  gap: 4px;
+-  font-size: 0.78rem;
++  gap: 5px;
++  font-size: 0.82rem;
++  font-weight: 600;
+   color: var(--color-text-muted);
+   flex-shrink: 0;
+ }
+diff --git a/frontend/src/pages/Lists/ListsPage.tsx b/frontend/src/pages/Lists/ListsPage.tsx
+index 09fe073..947ab38 100644
+--- a/frontend/src/pages/Lists/ListsPage.tsx
++++ b/frontend/src/pages/Lists/ListsPage.tsx
+@@ -21,13 +21,18 @@ const TABS: { key: ListScope; labelKey: string }[] = [
+ 
+ export default function ListsPage() {
+   const { t, i18n } = useTranslation();
+-  const { isAuthenticated } = useAppSelector((s) => s.auth);
++  const { isAuthenticated, isSessionChecked } = useAppSelector((s) => s.auth);
+   const [scope, setScope] = useState<ListScope>("Official");
+ 
+   const { data, isLoading, isError, refetch } = useQuery({
+     queryKey: ["lists", scope],
+     queryFn: () => listService.getAll(scope),
+     retry: 1,
++    // SessionManager'ın sayfa açılışındaki sessiz refresh'i bitmeden bu sorgu ateşlenirse
++    // istek henüz token'sız (anonim) gider ve isLikedByCurrentUser hep false döner — kullanıcı
++    // aslında giriş yapmış ve o listeyi beğenmiş olsa bile kalp ikonu pembe görünmez. Oturum
++    // kontrolü bitene kadar bekletiyoruz.
++    enabled: isSessionChecked,
+   });
+ 
+   return (
+@@ -56,7 +61,9 @@ export default function ListsPage() {
+         ))}
+       </div>
+ 
+-      {isLoading && <PageSpinner label={t("common.loading")} />}
++      {(!isSessionChecked || isLoading) && (
++        <PageSpinner label={t("common.loading")} />
++      )}
+ 
+       {isError && !isLoading && (
+         <PageError
