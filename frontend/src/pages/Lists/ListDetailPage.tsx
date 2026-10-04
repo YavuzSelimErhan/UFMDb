@@ -19,6 +19,7 @@ export default function ListDetailPage() {
 
   const {
     isAuthenticated,
+    isSessionChecked,
     userId: currentUserId,
     role,
   } = useAppSelector((s) => s.auth);
@@ -35,7 +36,7 @@ export default function ListDetailPage() {
   } = useQuery({
     queryKey: ["list", id],
     queryFn: () => listService.getById(id!),
-    enabled: !!id,
+    enabled: !!id && isSessionChecked,
     retry: 1,
   });
 
@@ -76,7 +77,8 @@ export default function ListDetailPage() {
     },
   });
 
-  if (isLoading) return <PageSpinner label={t("common.loading")} />;
+  if (isLoading || !isSessionChecked)
+    return <PageSpinner label={t("common.loading")} />;
   if (isError || !list)
     return (
       <PageError
