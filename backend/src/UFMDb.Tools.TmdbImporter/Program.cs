@@ -35,6 +35,16 @@ var postReleaseRefreshDays = int.Parse(configuration["Tmdb:PostReleaseRefreshDay
 var turkishMovieCount = int.Parse(configuration["Tmdb:TurkishMovieCount"] ?? "200");
 var castLimit = 12; // her filmden alınacak maksimum oyuncu sayısı
 
+// Ana akıştaki (madde 2) yıl filtresi: appsettings.json'da "Tmdb:YearFrom" / "Tmdb:YearTo" olarak
+// SADECE YIL yazılır (ör. "2015"). Biri veya ikisi de boş/yoksa o taraf sınırsız kalır.
+// Sadece diğer modları (fetch-upcoming, fetch-turkish vb.) etkilemez, onlar kendi tarih mantığını kullanır.
+var yearFromRaw = configuration["Tmdb:YearFrom"];
+var yearToRaw = configuration["Tmdb:YearTo"];
+int? yearFrom = string.IsNullOrWhiteSpace(yearFromRaw) ? null : int.Parse(yearFromRaw);
+int? yearTo = string.IsNullOrWhiteSpace(yearToRaw) ? null : int.Parse(yearToRaw);
+var releaseDateGte = yearFrom is null ? null : $"{yearFrom}-01-01";
+var releaseDateLte = yearTo is null ? null : $"{yearTo}-12-31";
+
 if (string.IsNullOrWhiteSpace(apiKey) || apiKey == "REPLACE_WITH_YOUR_TMDB_API_KEY")
 {
     Console.WriteLine("HATA: appsettings.json içindeki Tmdb:ApiKey alanını gerçek TMDB API anahtarınla değiştir.");
@@ -580,14 +590,28 @@ async Task ImportMoviesAsync(List<int> movieIds, Dictionary<int, Guid> genreMapp
 
             await using var db = new ApplicationDbContext(dbOptions);
 
+            // NOT: IgnoreQueryFilters() şart — "IX_Movies_TmdbId" unique index'i IsDeleted'a göre
+            // partial değil (sadece "TmdbId IS NOT NULL" filtreli), yani admin panelinden
+            // soft-delete edilmiş bir film bile o TmdbId'yi işgal etmeye devam eder. Normal
+            // sorgu (global query filter yüzünden) böyle bir satırı görmez, isNew=true sanılır
+            // ve INSERT "duplicate key value violates unique constraint IX_Movies_TmdbId" ile patlar.
+            // IgnoreQueryFilters ile soft-delete edilmiş satırı da buluyoruz; TMDB'de hâlâ varsa
+            // (importer'ın amacı zaten bu) IsDeleted'ı geri açıp üzerine güncelliyoruz.
             var movie = await db.Movies
+                .IgnoreQueryFilters()
                 .Include(m => m.MovieGenres)
                 .Include(m => m.MovieActors)
                 .Include(m => m.MovieDirectors)
                 .FirstOrDefaultAsync(m => m.TmdbId == tmdbId, cts.Token);
 
             var isNew = movie is null;
+            var wasSoftDeleted = movie?.IsDeleted ?? false;
             movie ??= new Movie { TmdbId = tmdbId };
+            if (wasSoftDeleted)
+            {
+                movie.IsDeleted = false;
+                Console.WriteLine($"[BİLGİ] TMDB ID {tmdbId} daha önce silinmişti (soft-delete), TMDB'de hâlâ bulunduğu için yeniden aktif ediliyor.");
+            }
 
             movie.Title = detail.Title;
             movie.OriginalTitle = string.IsNullOrWhiteSpace(detail.OriginalTitle) ? detail.Title : detail.OriginalTitle;
@@ -906,12 +930,17 @@ Console.WriteLine("Mevcut filmler kontrol ediliyor...");
 var existingIds = await GetExistingTmdbIdsAsync(dbOptions);
 Console.WriteLine($"Veritabanında {existingIds.Count} film zaten mevcut.\n");
 
-Console.WriteLine($"TMDB'den oy sayısına göre (yüksekten aza) yıl filtresi olmadan {targetMovieCount} benzersiz film ID'si toplanıyor (min. oy sayısı: {minVoteCount})...");
+var yearRangeLabel = yearFrom is null && yearTo is null
+    ? "yıl filtresi olmadan"
+    : $"yıl filtresiyle ({yearFrom?.ToString() ?? "-∞"} - {yearTo?.ToString() ?? "∞"})";
+Console.WriteLine($"TMDB'den oy sayısına göre (yüksekten aza) {yearRangeLabel} {targetMovieCount} benzersiz film ID'si toplanıyor (min. oy sayısı: {minVoteCount})...");
 var movieIds = await DiscoverUniqueMovieIdsAsync(
     targetCount: targetMovieCount,
     existingTmdbIds: existingIds,
     sortBy: "vote_count.desc",
-    minVoteCountFilter: minVoteCount);
+    minVoteCountFilter: minVoteCount,
+    releaseDateGte: releaseDateGte,
+    releaseDateLte: releaseDateLte);
 
 Console.WriteLine($"Toplam {movieIds.Count} yeni film ID'si toplandı.\n");
 
