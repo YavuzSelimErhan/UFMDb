@@ -1,6 +1,5 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using UFMDb.Application.Common;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.DTOs;
 namespace UFMDb.Application.Features.Movies.GetMovies;
@@ -71,33 +70,61 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             query = query.Where(m => m.AverageRating >= f.MinRating.Value);
 
         var isDescending = !string.Equals(f.SortDirection, "asc", StringComparison.OrdinalIgnoreCase);
-        query = (f.SortBy, isDescending) switch
+        var hasTitleSearch = !string.IsNullOrWhiteSpace(f.Title);
+
+        if (hasTitleSearch)
         {
-            ("rating", true) => query
-                .OrderByDescending(m => m.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
-                .ThenByDescending(m => m.AverageRating)
-                .ThenByDescending(m => m.RatingCount),
-            ("rating", false) => query
-                .OrderByDescending(m => m.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
-                .ThenBy(m => m.AverageRating)
-                .ThenBy(m => m.RatingCount),
-            ("year", true) => query.OrderByDescending(m => m.ReleaseYear),
-            ("year", false) => query.OrderBy(m => m.ReleaseYear),
-            ("popularity", true) => query.OrderByDescending(m => m.RatingCount).ThenByDescending(m => m.AverageRating),
-            ("popularity", false) => query.OrderBy(m => m.RatingCount).ThenBy(m => m.AverageRating),
-            ("newest", true) => query.OrderByDescending(m => m.CreatedAtUtc),
-            ("newest", false) => query.OrderBy(m => m.CreatedAtUtc),
-            ("releaseDate", true) => query.OrderByDescending(m => m.ReleaseDate),
-            ("releaseDate", false) => query.OrderBy(m => m.ReleaseDate),
-            (_, true) => query.OrderByDescending(m => m.Title),
-            _ => query.OrderBy(m => m.Title)
-        };
+            // Baþlýkla arama yapýlýrken alaka düzeyi popülerlikten önce gelir: "ran" aratýldýðýnda
+            // "Ran" filmi, içinde "ran" geçen daha çok oy almýþ baþka filmlerin (ör. "Strangers")
+            // gerisinde kalýp listeden düþmesin. Katman içinde kullanýcýnýn seçtiði sýralama
+            // (popülerlik/puan/yýl/vb.) aþaðýda ThenBy olarak uygulanmaya devam ediyor.
+            var term = f.Title!.Trim();
+            var startsPattern = $"{term}%";
+
+            var ordered = query.OrderBy(m =>
+                (EF.Functions.ILike(m.Title, term) || EF.Functions.ILike(m.OriginalTitle, term)) ? 0 :
+                (EF.Functions.ILike(m.Title, startsPattern) || EF.Functions.ILike(m.OriginalTitle, startsPattern)) ? 1 :
+                2);
+
+            query = (f.SortBy, isDescending) switch
+            {
+                ("rating", true) => ordered.ThenByDescending(m => m.AverageRating),
+                ("rating", false) => ordered.ThenBy(m => m.AverageRating),
+                ("year", true) => ordered.ThenByDescending(m => m.ReleaseYear),
+                ("year", false) => ordered.ThenBy(m => m.ReleaseYear),
+                ("popularity", true) => ordered.ThenByDescending(m => m.RatingCount).ThenByDescending(m => m.AverageRating),
+                ("popularity", false) => ordered.ThenBy(m => m.RatingCount).ThenBy(m => m.AverageRating),
+                ("newest", true) => ordered.ThenByDescending(m => m.CreatedAtUtc),
+                ("newest", false) => ordered.ThenBy(m => m.CreatedAtUtc),
+                ("releaseDate", true) => ordered.ThenByDescending(m => m.ReleaseDate),
+                ("releaseDate", false) => ordered.ThenBy(m => m.ReleaseDate),
+                (_, true) => ordered.ThenByDescending(m => m.Title),
+                _ => ordered.ThenBy(m => m.Title)
+            };
+        }
+        else
+        {
+            query = (f.SortBy, isDescending) switch
+            {
+                ("rating", true) => query.OrderByDescending(m => m.AverageRating),
+                ("rating", false) => query.OrderBy(m => m.AverageRating),
+                ("year", true) => query.OrderByDescending(m => m.ReleaseYear),
+                ("year", false) => query.OrderBy(m => m.ReleaseYear),
+                ("popularity", true) => query.OrderByDescending(m => m.RatingCount).ThenByDescending(m => m.AverageRating),
+                ("popularity", false) => query.OrderBy(m => m.RatingCount).ThenBy(m => m.AverageRating),
+                ("newest", true) => query.OrderByDescending(m => m.CreatedAtUtc),
+                ("newest", false) => query.OrderBy(m => m.CreatedAtUtc),
+                ("releaseDate", true) => query.OrderByDescending(m => m.ReleaseDate),
+                ("releaseDate", false) => query.OrderBy(m => m.ReleaseDate),
+                (_, true) => query.OrderByDescending(m => m.Title),
+                _ => query.OrderBy(m => m.Title)
+            };
+        }
 
         var totalCount = await query.CountAsync(ct);
-        var pageSize = f.PageSize is < 1 or > 100 ? 20 : f.PageSize;
         var items = await query
-            .Skip((f.Page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((f.Page - 1) * f.PageSize)
+            .Take(f.PageSize)
             .Select(m => new MovieListItemDto(
                 m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
                 m.MovieGenres.Select(mg => mg.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
@@ -129,6 +156,6 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             }
         }
 
-        return new PagedResult<MovieListItemDto>(items, totalCount, f.Page, pageSize);
+        return new PagedResult<MovieListItemDto>(items, totalCount, f.Page, f.PageSize);
     }
 }
