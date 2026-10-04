@@ -1,5 +1,5 @@
 diff --git a/frontend/src/pages/Lists/ListsPage.css b/frontend/src/pages/Lists/ListsPage.css
-index e8ea194..0a12db3 100644
+index e8ea194..4a70002 100644
 --- a/frontend/src/pages/Lists/ListsPage.css
 +++ b/frontend/src/pages/Lists/ListsPage.css
 @@ -103,6 +103,14 @@
@@ -22,54 +22,76 @@ index e8ea194..0a12db3 100644
  .list-card__stage {
    position: relative;
 -  height: 190px;
-+  /* Sabit px yükseklik yerine oran: kart genişliği sütun sayısına göre
-+     değiştikçe (5/4/3/2/1 kolon) görsel her zaman aynı en-boy oranını
-+     korur — önceki sabit yükseklik breakpoint'ler arasında görseli
-+     esnetip sıkıştırıyordu. */
-+  aspect-ratio: 3 / 2;
++  /* MovieCard'daki .movie-card__poster-wrap ile birebir aynı oran (2/3,
++     dikey poster) — sabit px yükseklik yerine bu sayede kart genişliği
++     sütun sayısına göre değiştikçe (5/4/3/2/1 kolon) görsel hiçbir
++     breakpoint'te kesilip sıkıştırılmadan doğru oranda kalıyor. */
++  aspect-ratio: 2 / 3;
 +  border-radius: var(--radius-md) var(--radius-md) 0 0;
    background:
      radial-gradient(
        circle at 25% 15%,
-@@ -247,14 +260,18 @@
+@@ -247,31 +260,51 @@
  
  /* ---------- Bilgi bloğu ---------- */
  .list-card__body {
 -  padding: 16px 20px 20px;
-+  padding: 18px 20px 20px;
++  /* MovieCard'daki .movie-card__info'ya yakın bir ölçü: yatayda ciddi bir
++     inset yok (metin, görselle aynı genişlikte — "panel içinde" değil
++     doğrudan zeminde duruyor hissi), sadece dikeyde nefes payı var. */
++  padding: 10px 2px 16px;
    display: flex;
    flex-direction: column;
--  gap: 6px;
-+  gap: 10px;
+   gap: 6px;
  }
++
++/* Başlık: sitenin imza tipografisi — italik display font + 800 ağırlık +
++   sıkı harf aralığı (GenresSection, MovieCard başlıkları ile aynı dil).
++   Önceki hali düz h3 varsayılanıydı (italik değil, 1.05rem, sıkıştırılmamış
++   harf aralığı) — bu yüzden sitenin geri kalanından kopuk duruyordu. */
  .list-card__body h3 {
-   font-size: 1.05rem;
-   line-height: 1.3;
-+  /* h3'ün global margin-bottom'u burada sıfırlanır — aradaki boşluk
-+     artık yalnızca .list-card__body'nin gap'inden geliyor, bu yüzden
-+     tek bir yerden kontrol edilip öngörülebilir kalıyor. */
+-  font-size: 1.05rem;
+-  line-height: 1.3;
++  font-family: var(--font-display);
++  font-style: italic;
++  font-weight: 800;
++  font-size: 0.95rem;
++  line-height: 1.28;
++  letter-spacing: -0.01em;
 +  margin-bottom: 0;
-   display: -webkit-box;
-   -webkit-line-clamp: 2;
-   line-clamp: 2;
-@@ -264,14 +281,14 @@
- }
- .list-card__desc {
-   font-size: 0.85rem;
--  line-height: 1.4;
-+  line-height: 1.5;
++  color: var(--color-text-primary);
    display: -webkit-box;
    -webkit-line-clamp: 2;
    line-clamp: 2;
    -webkit-box-orient: vertical;
    overflow: hidden;
-   min-height: 2.4em;
+-  min-height: 2.6em;
++  min-height: calc(1.28em * 2);
++  transition: color var(--transition-fast);
+ }
++.list-card:hover .list-card__body h3 {
++  color: var(--list-accent);
++}
++
+ .list-card__desc {
+-  font-size: 0.85rem;
+-  line-height: 1.4;
++  font-size: 0.8rem;
++  line-height: 1.5;
++  letter-spacing: 0;
++  color: var(--color-text-secondary);
+   display: -webkit-box;
+   -webkit-line-clamp: 2;
+   line-clamp: 2;
+   -webkit-box-orient: vertical;
+   overflow: hidden;
+-  min-height: 2.4em;
 -  margin-bottom: 2px;
-+  margin-bottom: 4px;
++  min-height: calc(1.5em * 2);
  }
  .list-card__ticket {
    position: relative;
-@@ -311,18 +328,6 @@
+@@ -311,18 +344,6 @@
    }
  }
  
