@@ -498,7 +498,8 @@
     "soonRandomTitle": "Random Movie Picker",
     "soonRandomDesc": "Can't decide? One click and it's settled.",
     "soonTop100Title": "All-Time Top 100",
-    "soonTop100Desc": "A constantly updated ranking shaped by the UFMDb community's ratings."
+    "soonTop100Desc": "A constantly updated ranking shaped by the UFMDb community's ratings.",
+    "addedEyebrow": "Added"
   },
   "terms": {
     "updatedAt": "Last updated: October 2026",

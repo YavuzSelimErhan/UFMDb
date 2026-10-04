@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, Pencil, Trash2, Check, X } from "lucide-react";
+import { ChevronLeft, Pencil, Trash2, Check, X, Heart } from "lucide-react";
 import { listService } from "@/services";
 import { useAppSelector } from "@/store";
 import MovieCard from "@/components/movie/MovieCard";
@@ -17,9 +17,11 @@ export default function ListDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // NOT: auth slice'ının gerçek alan adları farklıysa (örn. userId yerine id,
-  // role yerine roles gibi) burayı kendi store yapına göre düzelt.
-  const { userId: currentUserId, role } = useAppSelector((s) => s.auth);
+  const {
+    isAuthenticated,
+    userId: currentUserId,
+    role,
+  } = useAppSelector((s) => s.auth);
   const isAdmin = role === "Admin";
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -46,6 +48,34 @@ export default function ListDetailPage() {
     },
   });
 
+  // ListCard.tsx'teki beğenme mantığının aynısı — ızgaradan beğendiğin bir listenin
+  // beğenisini artık detay sayfasından da kaldırabiliyorsun, tekrar ızgaraya dönmene gerek yok.
+  const likeMutation = useMutation({
+    mutationFn: () => listService.toggleLike(id!),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["list", id] });
+      const previous = queryClient.getQueryData<typeof list>(["list", id]);
+      if (previous) {
+        queryClient.setQueryData(["list", id], {
+          ...previous,
+          isLikedByCurrentUser: !previous.isLikedByCurrentUser,
+          likeCount: previous.isLikedByCurrentUser
+            ? previous.likeCount - 1
+            : previous.likeCount + 1,
+        });
+      }
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["list", id], context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["lists"] });
+    },
+  });
+
   if (isLoading) return <PageSpinner label={t("common.loading")} />;
   if (isError || !list)
     return (
@@ -64,8 +94,6 @@ export default function ListDetailPage() {
     "--card-accent": theme.accent,
   } as React.CSSProperties;
 
-  // Admin kapak görseli girmemişse listedeki ilk filmin backdrop/poster'ına düşüyoruz,
-  // böylece hero neredeyse hiç boş kalmıyor.
   const heroImg =
     list.coverImageUrl ||
     list.movies[0]?.backdropUrl ||
@@ -134,9 +162,29 @@ export default function ListDetailPage() {
       <div className="list-detail-page__perf" aria-hidden="true" />
 
       <div className="list-detail-page__header">
-        <span className="list-detail-page__ticket">
-          {list.movies.length} {t("lists.moviesCount")}
-        </span>
+        <div className="list-detail-page__meta-row">
+          <span className="list-detail-page__ticket">
+            {list.movies.length} {t("lists.moviesCount")}
+          </span>
+
+          {isAuthenticated && (
+            <button
+              type="button"
+              className={`list-detail-page__like ${list.isLikedByCurrentUser ? "is-active" : ""}`}
+              disabled={likeMutation.isPending}
+              aria-label={
+                list.isLikedByCurrentUser ? t("movie.unlike") : t("movie.like")
+              }
+              onClick={() => likeMutation.mutate()}
+            >
+              <Heart
+                size={14}
+                fill={list.isLikedByCurrentUser ? "currentColor" : "none"}
+              />
+              <span>{list.likeCount}</span>
+            </button>
+          )}
+        </div>
         <h1>{displayTitle}</h1>
         {list.description && (
           <p className="text-secondary">{list.description}</p>

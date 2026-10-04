@@ -196,7 +196,45 @@
 .list-detail-page__delete-confirm-no:hover {
   color: var(--color-text-primary);
 }
+.list-detail-page__header h1 {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  font-size: 1.9rem;
+  margin: 10px 0 8px;
+}
 
+.list-detail-page__meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.list-detail-page__like {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding: 4px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+.list-detail-page__like:hover {
+  color: #e84393;
+  border-color: #e84393;
+}
+.list-detail-page__like.is-active {
+  color: #e84393;
+  border-color: #e84393;
+  background-color: rgba(232, 67, 147, 0.12);
+}
 @media (max-width: 480px) {
   .list-detail-page__owner-actions {
     flex-wrap: wrap;

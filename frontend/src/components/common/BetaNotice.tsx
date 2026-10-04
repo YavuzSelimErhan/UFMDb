@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   X,
@@ -180,7 +181,7 @@ export default function BetaNotice() {
             <p className="bn-thanks">{t("betaNotice.thanks")}</p>
           </div>
 
-          <aside className="bn-soon" aria-label={t("betaNotice.soonEyebrow")}>
+          <aside className="bn-soon">
             <span className="bn-soon__eyebrow">
               {t("betaNotice.soonEyebrow")}
             </span>
@@ -211,7 +212,17 @@ export default function BetaNotice() {
                   </p>
                 </div>
               </div>
-              <div className="bn-soon__item bn-soon__item--featured">
+            </div>
+
+            <span className="bn-soon__eyebrow bn-soon__eyebrow--added">
+              {t("betaNotice.addedEyebrow")}
+            </span>
+            <div className="bn-soon__list">
+              <Link
+                to="/lists"
+                className="bn-soon__item bn-soon__item--featured"
+                onClick={() => setOpen(false)}
+              >
                 <span className="bn-soon__icon bn-soon__icon--featured">
                   <Trophy size={16} aria-hidden="true" />
                 </span>
@@ -223,7 +234,7 @@ export default function BetaNotice() {
                     {t("betaNotice.soonTop100Desc")}
                   </p>
                 </div>
-              </div>
+              </Link>
             </div>
           </aside>
         </div>

@@ -262,12 +262,24 @@
   margin-top: 20px;
 }
 
+.bn-soon__eyebrow--added {
+  margin-top: 16px;
+  background: color-mix(in srgb, #2ecc71 18%, transparent);
+  color: #2ecc71;
+}
+
 .bn-soon__item--featured {
-  padding: 8px;
-  margin: -8px;
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+  display: flex;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+.bn-soon__item--featured:hover {
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  border-color: var(--color-accent);
 }
 
 .bn-soon__icon--featured {
