@@ -262,6 +262,23 @@
   margin-top: 20px;
 }
 
+.bn-soon__item--featured {
+  padding: 8px;
+  margin: -8px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+
+.bn-soon__icon--featured {
+  background: var(--color-accent-muted);
+  border-color: color-mix(
+    in srgb,
+    var(--color-accent) 50%,
+    var(--color-border)
+  );
+}
+
 @keyframes bn-fade {
   from {
     opacity: 0;

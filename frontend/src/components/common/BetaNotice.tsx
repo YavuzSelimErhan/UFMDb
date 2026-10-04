@@ -9,6 +9,7 @@ import {
   Check,
   Sparkles,
   Shuffle,
+  Trophy,
 } from "lucide-react";
 import { CONTACT } from "@/config/contact";
 import "./BetaNotice.css";
@@ -207,6 +208,19 @@ export default function BetaNotice() {
                   </h4>
                   <p className="bn-soon__item-desc">
                     {t("betaNotice.soonRandomDesc")}
+                  </p>
+                </div>
+              </div>
+              <div className="bn-soon__item bn-soon__item--featured">
+                <span className="bn-soon__icon bn-soon__icon--featured">
+                  <Trophy size={16} aria-hidden="true" />
+                </span>
+                <div className="bn-soon__text">
+                  <h4 className="bn-soon__item-title">
+                    {t("betaNotice.soonTop100Title")}
+                  </h4>
+                  <p className="bn-soon__item-desc">
+                    {t("betaNotice.soonTop100Desc")}
                   </p>
                 </div>
               </div>

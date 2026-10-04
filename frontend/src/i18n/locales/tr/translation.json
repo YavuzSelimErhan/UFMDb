@@ -496,7 +496,9 @@
     "soonRecommendTitle": "Film Önerme Sistemi",
     "soonRecommendDesc": "Zevkine göre, sana özel film önerileri.",
     "soonRandomTitle": "Rastgele Film Seç",
-    "soonRandomDesc": "Karar veremiyorsan, bir tıkla seçelim."
+    "soonRandomDesc": "Karar veremiyorsan, bir tıkla seçelim.",
+    "soonTop100Title": "Tüm Zamanların En İyi 100 Filmi",
+    "soonTop100Desc": "UFMDb topluluğunun puanlarıyla şekillenen, sürekli güncellenen bir zirve listesi."
   },
   "terms": {
     "updatedAt": "Son güncelleme: Ekim 2026",
