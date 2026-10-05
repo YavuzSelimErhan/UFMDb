@@ -266,11 +266,15 @@ public class ToggleWatchedCommandHandler : IRequestHandler<ToggleWatchedCommand,
         {
             _context.WatchHistory.Add(new WatchHistory { MovieId = request.MovieId, UserId = request.UserId, WatchedAtUtc = DateTime.UtcNow });
             nowWatched = true;
+
+            // LogScreeningCommand ve UpsertReviewCommand'daki aynı davranış: izlendi işaretlenince
+            // watchlist'te duruyor olması mantıksız, otomatik kaldırıyoruz.
+            var watchlistEntry = await _context.WatchlistItems
+                .FirstOrDefaultAsync(w => w.MovieId == request.MovieId && w.UserId == request.UserId, ct);
+            if (watchlistEntry is not null) _context.WatchlistItems.Remove(watchlistEntry);
         }
         else
         {
-            // Hem log kaydının kendi Rating'ine hem de hızlı puanlamadan gelen (WatchHistory'den
-            // bağımsız olabilen) MovieRatings satırına bakıyoruz.
             var hasRatedEntry = existingEntries.Any(w => w.Rating.HasValue);
             var hasQuickRating = await _context.MovieRatings
                 .AnyAsync(r => r.MovieId == request.MovieId && r.UserId == request.UserId, ct);
