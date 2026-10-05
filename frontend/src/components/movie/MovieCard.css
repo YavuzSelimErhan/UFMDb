@@ -11,7 +11,9 @@
 
 .movie-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 16px 32px var(--color-shadow-accent);
+  box-shadow:
+    0 18px 34px var(--color-shadow-accent),
+    0 14px 28px var(--color-shadow);
   border-color: var(--color-accent);
 }
 
@@ -61,6 +63,7 @@
 
 .movie-card__info {
   padding: 10px 0 12px;
+  text-align: center;
 }
 
 /* ---------- Film adı: poster altında, her zaman görünür (mobilde hover yok) ---------- */
@@ -87,6 +90,7 @@
 .movie-card__meta {
   display: flex;
   align-items: center;
+  justify-content: center;
   margin-top: 5px;
   font-size: 0.74rem;
   font-weight: 500;
@@ -289,7 +293,9 @@
 }
 .movie-card.card:hover {
   border-color: var(--color-accent);
-  box-shadow: 0 16px 32px var(--color-shadow-accent);
+  box-shadow:
+    0 18px 34px var(--color-shadow-accent),
+    0 14px 28px var(--color-shadow);
 }
 .movie-card__info {
   background: transparent;
