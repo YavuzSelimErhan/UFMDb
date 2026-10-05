@@ -10,6 +10,7 @@ export interface MovieListItem {
   overview: string;
   isInWatchlistByCurrentUser: boolean;
   isLikedByCurrentUser: boolean;
+  isWatchedByCurrentUser: boolean;
   releaseDate: string;
 }
 

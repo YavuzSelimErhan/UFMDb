@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Star, Bookmark, Heart, Ticket } from "lucide-react";
+import { Star, Bookmark, Heart, Ticket, Eye } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { movieService } from "@/services";
@@ -161,6 +161,12 @@ export default function MovieCard({
         {rank && (
           <div className="movie-card__rank">
             <span>{rank}</span>
+          </div>
+        )}
+
+        {isAuthenticated && movie.isWatchedByCurrentUser && (
+          <div className="movie-card__watched-badge" title={t("movie.watched")}>
+            <Eye size={12} />
           </div>
         )}
 

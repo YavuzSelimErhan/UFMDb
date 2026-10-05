@@ -96,7 +96,7 @@ public class GetListDetailQueryHandler : IRequestHandler<GetListDetailQuery, Lis
             (decimal)i.Movie.AverageRating, i.Movie.RatingCount,
             i.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
             i.Movie.BackdropUrl, i.Movie.Overview,
-            false, false, i.Movie.ReleaseDate
+            false, false, false, i.Movie.ReleaseDate
         )).ToList();
 
         bool isLikedByCurrentUser = false;
@@ -117,12 +117,18 @@ public class GetListDetailQueryHandler : IRequestHandler<GetListDetailQuery, Lis
                     .Select(l => l.MovieId)
                     .ToListAsync(ct)).ToHashSet();
 
+                var watchedIds = (await _context.WatchHistory.AsNoTracking()
+                    .Where(w => w.UserId == request.UserId.Value && movieIds.Contains(w.MovieId))
+                    .Select(w => w.MovieId)
+                    .ToListAsync(ct)).ToHashSet();
+
                 for (int i = 0; i < movies.Count; i++)
                 {
                     movies[i] = movies[i] with
                     {
                         IsInWatchlistByCurrentUser = watchlistIds.Contains(movies[i].Id),
-                        IsLikedByCurrentUser = likedIds.Contains(movies[i].Id)
+                        IsLikedByCurrentUser = likedIds.Contains(movies[i].Id),
+                        IsWatchedByCurrentUser = watchedIds.Contains(movies[i].Id)
                     };
                 }
             }

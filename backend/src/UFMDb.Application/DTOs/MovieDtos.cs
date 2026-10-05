@@ -4,7 +4,7 @@ public record MovieListItemDto(
     Guid Id, string Title, int ReleaseYear, string PosterUrl,
     decimal AverageRating, int RatingCount, List<string> Genres,
     string BackdropUrl, string Overview,
-    bool IsInWatchlistByCurrentUser, bool IsLikedByCurrentUser,
+    bool IsInWatchlistByCurrentUser, bool IsLikedByCurrentUser, bool IsWatchedByCurrentUser,
     DateTime ReleaseDate
 );
 

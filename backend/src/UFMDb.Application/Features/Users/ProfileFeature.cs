@@ -88,12 +88,17 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
         var likedMovieIds = liked.Select(l => l.MovieId).ToHashSet();
         var watchlistMovieIds = watchlist.Select(w => w.MovieId).ToHashSet();
 
+        var watchedMovieIds = (await _context.WatchHistory.AsNoTracking()
+            .Where(w => w.UserId == request.UserId)
+            .Select(w => w.MovieId)
+            .ToListAsync(ct)).ToHashSet();
+
         // Her zaman 4 sabit slot döndürülür (1-4); dolu olmayan slotlar Movie=null olarak gelir.
         var favorites = Enumerable.Range(1, 4)
             .Select(slot =>
             {
                 var match = favoriteEntities.FirstOrDefault(f => f.Slot == slot);
-                return new FavoriteSlotDto(slot, match is null ? null : ToListItem(match.Movie, likedMovieIds, watchlistMovieIds));
+                return new FavoriteSlotDto(slot, match is null ? null : ToListItem(match.Movie, likedMovieIds, watchlistMovieIds, watchedMovieIds));
             })
             .ToList();
 
@@ -106,7 +111,7 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
         var ratingsCount = userRatings.Count;
 
         var recentlyWatched = recent.Select(w => new RecentlyWatchedItemDto(
-            ToListItem(w.Movie, likedMovieIds, watchlistMovieIds), w.Rating
+            ToListItem(w.Movie, likedMovieIds, watchlistMovieIds, watchedMovieIds), w.Rating
         )).ToList();
 
         var reviewEntities = await _context.Reviews.AsNoTracking()
@@ -164,8 +169,8 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             user.FullName, user.Country, user.BirthDate, user.Gender.ToString(), user.Biography,
             favorites,
             recentlyWatched,
-            liked.Select(l => ToListItem(l.Movie, likedMovieIds, watchlistMovieIds)).ToList(),
-            watchlist.Select(w => ToListItem(w.Movie, likedMovieIds, watchlistMovieIds)).ToList(),
+            liked.Select(l => ToListItem(l.Movie, likedMovieIds, watchlistMovieIds, watchedMovieIds)).ToList(),
+            watchlist.Select(w => ToListItem(w.Movie, likedMovieIds, watchlistMovieIds, watchedMovieIds)).ToList(),
             reviews,
             favoriteActors,
             likedActors,
@@ -180,10 +185,10 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
         );
     }
 
-    private static MovieListItemDto ToListItem(Movie m, HashSet<Guid> likedIds, HashSet<Guid> watchlistIds) => new(
+    private static MovieListItemDto ToListItem(Movie m, HashSet<Guid> likedIds, HashSet<Guid> watchlistIds, HashSet<Guid> watchedIds) => new(
     m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
     m.MovieGenres.Select(g => g.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
-    watchlistIds.Contains(m.Id), likedIds.Contains(m.Id), m.ReleaseDate);
+    watchlistIds.Contains(m.Id), likedIds.Contains(m.Id), watchedIds.Contains(m.Id), m.ReleaseDate);
 }
 
 // ---------- Favori film slotunu güncelle (1-4) ----------
@@ -491,10 +496,9 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
         IEnumerable<WatchedMovieDto> all = movies.Select(m =>
         {
             var hasWatch = lastWatchedByMovie.TryGetValue(m.Id, out var lastWatched);
-            // Tarih önceliği: gerçekten izlenmişse izleme tarihi, sadece puanlanmışsa puanın verildiği tarih
             var date = hasWatch ? lastWatched : ratingDateByMovie[m.Id];
             var rating = ratingValueByMovie.TryGetValue(m.Id, out var r) ? r : (decimal?)null;
-            return new WatchedMovieDto(m.Id, ToListItem(m, likedSet, watchlistSet), date, rating);
+            return new WatchedMovieDto(m.Id, ToListItem(m, likedSet, watchlistSet, hasWatch), date, rating);
         });
 
         if (request.HasRating is true) all = all.Where(w => w.UserRating.HasValue);
@@ -527,10 +531,10 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
         return new PagedResult<WatchedMovieDto>(page, totalCount, request.Page, pageSize);
     }
 
-    private static MovieListItemDto ToListItem(Movie m, HashSet<Guid> likedIds, HashSet<Guid> watchlistIds) => new(
+    private static MovieListItemDto ToListItem(Movie m, HashSet<Guid> likedIds, HashSet<Guid> watchlistIds, bool isWatched) => new(
         m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
         m.MovieGenres.Select(g => g.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
-        watchlistIds.Contains(m.Id), likedIds.Contains(m.Id), m.ReleaseDate);
+        watchlistIds.Contains(m.Id), likedIds.Contains(m.Id), isWatched, m.ReleaseDate);
 }
 
 public record RemoveWatchedMovieCommand(Guid UserId, Guid MovieId) : IRequest;
