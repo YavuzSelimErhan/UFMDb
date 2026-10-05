@@ -80,6 +80,12 @@ public class UpsertRatingCommandHandler : IRequestHandler<UpsertRatingCommand>
         if (!alreadyWatched)
             _context.WatchHistory.Add(new WatchHistory { MovieId = request.MovieId, UserId = request.UserId, WatchedAtUtc = DateTime.UtcNow });
 
+        // ToggleWatchedCommand ve UpsertReviewCommand'daki aynı davranış: puan verilince
+        // film artık "izlenmiş" sayılır, watchlist'te duruyor olması mantıksız.
+        var watchlistEntry = await _context.WatchlistItems
+            .FirstOrDefaultAsync(w => w.MovieId == request.MovieId && w.UserId == request.UserId, ct);
+        if (watchlistEntry is not null) _context.WatchlistItems.Remove(watchlistEntry);
+
         await MovieRatingRecalculator.UpsertCurrentRatingAsync(_context, movie, request.UserId, request.Value, ct);
     }
 }

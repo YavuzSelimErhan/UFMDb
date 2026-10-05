@@ -14,5 +14,5 @@ namespace UFMDb.Application.Common;
 /// </summary>
 public static class RatingRankPolicy
 {
-    public const int MinVotesForRatingRank = 10;
+    public const int MinVotesForRatingRank = 1000;
 }
