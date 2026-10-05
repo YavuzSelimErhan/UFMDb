@@ -26,6 +26,7 @@ import UsersPage from "@/pages/Users/UsersPage";
 import UserProfilePage from "@/pages/Users/UserProfilePage";
 import PrivacyPolicyPage from "@/pages/Legal/PrivacyPolicyPage";
 import TermsPage from "@/pages/Legal/TermsPage";
+import { ToastProvider } from "@/components/common/Toast";
 
 function AppShell() {
   useScrollRestoration();
@@ -71,13 +72,12 @@ function AppShell() {
 
 export default function App() {
   return (
-    // NOT: basename kaldırıldı — "/UFMDb" GitHub Pages'in proje sayfası path'iydi.
-    // Cloudflare'de domain kökünde ("/") çalıştığımız için basename olmadan
-    // varsayılan "/" kullanılır; aksi halde hiçbir route eşleşmiyor ve sayfa boş kalıyordu.
-    <BrowserRouter>
-      <SessionManager />
-      <AppShell />
-      <BetaNotice />
-    </BrowserRouter>
+    <ToastProvider>
+      <BrowserRouter>
+        <SessionManager />
+        <AppShell />
+        <BetaNotice />
+      </BrowserRouter>
+    </ToastProvider>
   );
 }

@@ -136,6 +136,7 @@
 }
 
 .movie-card__bookmark,
+.movie-card__watched,
 .movie-card__log,
 .movie-card__like,
 .movie-card__unlike {
@@ -155,6 +156,7 @@
     transform 150ms;
 }
 .movie-card__bookmark:hover,
+.movie-card__watched:hover,
 .movie-card__log:hover,
 .movie-card__like:hover,
 .movie-card__unlike:hover {
@@ -164,6 +166,12 @@
 .movie-card__bookmark.is-active {
   background: var(--card-accent, var(--color-accent));
   border-color: var(--card-accent, var(--color-accent));
+  color: #fff;
+}
+
+.movie-card__watched.is-active {
+  background: #2ecc71;
+  border-color: #2ecc71;
   color: #fff;
 }
 

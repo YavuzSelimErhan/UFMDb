@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { movieService } from "@/services";
 import { useAppSelector } from "@/store";
 import { getEntityTheme } from "@/utils/listTheme";
+import { useToast } from "@/components/common/Toast";
 import type { MovieListItem } from "@/types";
 import "./MovieCard.css";
 
@@ -32,6 +33,7 @@ export default function MovieCard({
   rank,
   compact,
 }: Props) {
+  const { showToast } = useToast();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAppSelector((s) => s.auth);
@@ -39,6 +41,7 @@ export default function MovieCard({
     movie.isInWatchlistByCurrentUser,
   );
   const [isLiked, setIsLiked] = useState(movie.isLikedByCurrentUser);
+  const [isWatched, setIsWatched] = useState(movie.isWatchedByCurrentUser);
   const [hoverValue, setHoverValue] = useState<number | null>(null);
   const [posterFailed, setPosterFailed] = useState(false);
 
@@ -54,6 +57,10 @@ export default function MovieCard({
   useEffect(() => {
     setIsLiked(movie.isLikedByCurrentUser);
   }, [movie.isLikedByCurrentUser]);
+
+  useEffect(() => {
+    setIsWatched(movie.isWatchedByCurrentUser);
+  }, [movie.isWatchedByCurrentUser]);
 
   // Farklı bir film için aynı kart instance'ı yeniden kullanılırsa
   // (liste kaydırma/sayfalama gibi durumlarda), önceki filmin poster
@@ -111,6 +118,29 @@ export default function MovieCard({
       queryClient.invalidateQueries({ queryKey: ["home-feed"] });
       queryClient.invalidateQueries({ queryKey: ["movie", movie.id] });
       onUnlike?.();
+    },
+  });
+
+  const watchedMutation = useMutation({
+    mutationFn: () => movieService.toggleWatched(movie.id),
+    onMutate: () => {
+      const previous = isWatched;
+      setIsWatched(!previous);
+      return { previous };
+    },
+    onSuccess: (newState) => {
+      setIsWatched(newState);
+      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["list"] });
+      queryClient.invalidateQueries({ queryKey: ["movies"] });
+      queryClient.invalidateQueries({ queryKey: ["home-feed"] });
+      queryClient.invalidateQueries({ queryKey: ["movie", movie.id] });
+    },
+    onError: (err: unknown, _vars, context) => {
+      if (context) setIsWatched(context.previous);
+      const message = (err as { response?: { data?: { title?: string } } })
+        ?.response?.data?.title;
+      showToast(message ?? t("movie.watchedToggleError"), "error");
     },
   });
 
@@ -188,6 +218,23 @@ export default function MovieCard({
                 size={13}
                 fill={inWatchlist ? "currentColor" : "none"}
               />
+            </button>
+          )}
+
+          {interactive && isAuthenticated && (
+            <button
+              className={`movie-card__watched ${isWatched ? "is-active" : ""}`}
+              disabled={watchedMutation.isPending}
+              title={isWatched ? t("movie.watched") : t("movie.markWatched")}
+              aria-label={
+                isWatched ? t("movie.watched") : t("movie.markWatched")
+              }
+              onClick={(e) => {
+                stop(e);
+                watchedMutation.mutate();
+              }}
+            >
+              <Eye size={13} fill={isWatched ? "currentColor" : "none"} />
             </button>
           )}
 
