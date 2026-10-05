@@ -72,11 +72,19 @@ export default function MovieDetailPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["movie", id] }),
   });
 
+  const [watchedError, setWatchedError] = useState<string | null>(null);
+
   const watchedMutation = useMutation({
     mutationFn: () => movieService.toggleWatched(id!),
     onSuccess: () => {
+      setWatchedError(null);
       queryClient.invalidateQueries({ queryKey: ["movie", id] });
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+    },
+    onError: (err: unknown) => {
+      const message = (err as { response?: { data?: { title?: string } } })
+        ?.response?.data?.title;
+      setWatchedError(message ?? t("movie.watchedToggleError"));
     },
   });
 
@@ -303,6 +311,10 @@ export default function MovieDetailPage() {
                 {t("movie.logScreening")}
               </button>
             </div>
+          )}
+
+          {watchedError && (
+            <p className="movie-detail__watched-error">{watchedError}</p>
           )}
 
           {isLogging && (

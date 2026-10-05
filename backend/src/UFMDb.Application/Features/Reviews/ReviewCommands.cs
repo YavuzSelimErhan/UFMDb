@@ -50,7 +50,8 @@ public class UpsertRatingCommandValidator : AbstractValidator<UpsertRatingComman
 {
     public UpsertRatingCommandValidator()
     {
-        RuleFor(x => x.Value).InclusiveBetween(0.5m, 5.0m);
+        // 0 = puanı kaldır (StarRating'te aynı değere tekrar tıklayınca gönderiliyor)
+        RuleFor(x => x.Value).InclusiveBetween(0m, 5.0m);
     }
 }
 
@@ -66,6 +67,18 @@ public class UpsertRatingCommandHandler : IRequestHandler<UpsertRatingCommand>
 
         if (movie.ReleaseDate > DateTime.UtcNow)
             throw new ConflictException("Henüz vizyona girmemiş bir filme puan verilemez.");
+
+        if (request.Value == 0)
+        {
+            // Puanı kaldır — izlendi durumuna dokunmuyoruz, film puansız izlenmiş kalabilir.
+            await MovieRatingRecalculator.RemoveCurrentRatingAsync(_context, movie, request.UserId, ct);
+            return;
+        }
+
+        var alreadyWatched = await _context.WatchHistory
+            .AnyAsync(w => w.MovieId == request.MovieId && w.UserId == request.UserId, ct);
+        if (!alreadyWatched)
+            _context.WatchHistory.Add(new WatchHistory { MovieId = request.MovieId, UserId = request.UserId, WatchedAtUtc = DateTime.UtcNow });
 
         await MovieRatingRecalculator.UpsertCurrentRatingAsync(_context, movie, request.UserId, request.Value, ct);
     }
@@ -231,7 +244,7 @@ public class GetLikedReviewsQueryHandler : IRequestHandler<GetLikedReviewsQuery,
     }
 }
 
-// ---------- İzlendi toggle: kapatınca o filme ait TÜM seansları (ve puanlarını) siler ----------
+// ---------- İzlendi toggle: puan varken kapatılamaz (önce puan kaldırılmalı) ----------
 public record ToggleWatchedCommand(Guid MovieId, Guid UserId) : IRequest<bool>;
 
 public class ToggleWatchedCommandHandler : IRequestHandler<ToggleWatchedCommand, bool>
@@ -256,6 +269,15 @@ public class ToggleWatchedCommandHandler : IRequestHandler<ToggleWatchedCommand,
         }
         else
         {
+            // Hem log kaydının kendi Rating'ine hem de hızlı puanlamadan gelen (WatchHistory'den
+            // bağımsız olabilen) MovieRatings satırına bakıyoruz.
+            var hasRatedEntry = existingEntries.Any(w => w.Rating.HasValue);
+            var hasQuickRating = await _context.MovieRatings
+                .AnyAsync(r => r.MovieId == request.MovieId && r.UserId == request.UserId, ct);
+
+            if (hasRatedEntry || hasQuickRating)
+                throw new ConflictException("Bu filme puan verdiğin için izlenmedi olarak işaretleyemezsin. Önce puanını kaldır.");
+
             _context.WatchHistory.RemoveRange(existingEntries);
             nowWatched = false;
         }

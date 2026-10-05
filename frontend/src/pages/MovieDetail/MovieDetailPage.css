@@ -521,3 +521,8 @@
 .movie-detail__review-delete:hover {
   background-color: rgba(224, 82, 82, 0.08);
 }
+.movie-detail__watched-error {
+  font-size: 0.82rem;
+  color: #e74c3c;
+  margin-top: 8px;
+}

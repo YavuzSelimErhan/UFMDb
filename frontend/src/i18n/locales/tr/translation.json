@@ -97,7 +97,8 @@
     "containsSpoiler": "Spoiler içeriyor",
     "spoiler": "Spoiler",
     "logScreening": "Seans Ekle",
-    "notYetReleased": "Bu film henüz vizyona girmedi."
+    "notYetReleased": "Bu film henüz vizyona girmedi.",
+    "watchedToggleError": "Bu filme puan verdiğin için izlenmedi işaretlenemiyor. Önce puanını kaldır."
   },
   "search": {
     "noResults": "Sonuç bulunamadı",

@@ -97,7 +97,8 @@
     "containsSpoiler": "Contains spoiler",
     "spoiler": "Spoiler",
     "logScreening": "Log Screening",
-    "notYetReleased": "This movie hasn't been released yet."
+    "notYetReleased": "This movie hasn't been released yet.",
+    "watchedToggleError": "You can't mark this unwatched while it has a rating. Remove your rating first."
   },
   "search": {
     "noResults": "No results found",
