@@ -42,7 +42,10 @@
   transition: transform var(--transition-slow);
 }
 .movie-card:hover .movie-card__poster {
-  transform: scale(1.06);
+  /* ListCard'daki .list-card:hover .list-card__stage-img ile birebir
+     aynı değer — öncesinde 1.06'ydı, ListCard'a göre fark edilir
+     derecede daha güçlü bir zoom'du. */
+  transform: scale(1.04);
 }
 
 .movie-card__poster-wrap::after {
@@ -243,7 +246,11 @@
   justify-content: flex-start;
   gap: 1px;
   margin-top: 9px;
-  margin-left: 2px;
+  /* .movie-card__info'nun yatay padding'i 0 (başlık/meta ortalanmış
+     olduğu için simetri bozulmasın diye) — ama bu satır sola yaslı
+     olduğundan, o 0 padding'i doğrudan miras alıp kartın/posterin
+     kenarına neredeyse bitişik duruyordu. Kendi girintisini veriyoruz. */
+  margin-left: 8px;
   color: #d4af37;
 }
 
