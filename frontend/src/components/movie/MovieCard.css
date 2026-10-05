@@ -170,8 +170,8 @@
 }
 
 .movie-card__watched.is-active {
-  background: #2ecc71;
-  border-color: #2ecc71;
+  background: #00b894;
+  border-color: #00b894;
   color: #fff;
 }
 

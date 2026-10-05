@@ -194,12 +194,6 @@ export default function MovieCard({
           </div>
         )}
 
-        {isAuthenticated && movie.isWatchedByCurrentUser && (
-          <div className="movie-card__watched-badge" title={t("movie.watched")}>
-            <Eye size={12} />
-          </div>
-        )}
-
         <div className="movie-card__actions">
           {interactive && isAuthenticated && (
             <button
@@ -234,7 +228,7 @@ export default function MovieCard({
                 watchedMutation.mutate();
               }}
             >
-              <Eye size={13} fill={isWatched ? "currentColor" : "none"} />
+              <Eye size={13} />
             </button>
           )}
 
