@@ -281,30 +281,46 @@ export default function MovieDetailPage() {
 
           {isAuthenticated && (
             <div className="movie-detail__actions">
-              <button
-                className={`btn-secondary movie-detail__action-btn ${movie.currentUserReaction === "Like" ? "active" : ""}`}
-                disabled={reactMutation.isPending}
-                onClick={() => reactMutation.mutate("Like")}
+              <div
+                className="movie-detail__reaction"
+                role="group"
+                aria-label={t("movie.reactionGroup")}
               >
-                <Heart
-                  size={16}
-                  fill={
-                    movie.currentUserReaction === "Like" ? "#4a90e2" : "none"
-                  }
-                />
-                {movie.currentUserReaction === "Like"
-                  ? t("movie.liked")
-                  : t("movie.like")}
-              </button>
-              <button
-                className={`btn-secondary movie-detail__action-btn movie-detail__action-btn--dislike ${movie.currentUserReaction === "Dislike" ? "active" : ""}`}
-                disabled={reactMutation.isPending}
-                title={t("movie.notForMeHint")}
-                onClick={() => reactMutation.mutate("Dislike")}
-              >
-                <HeartCrack size={16} />
-                {t("movie.notForMe")}
-              </button>
+                <button
+                  type="button"
+                  className={`movie-detail__reaction-btn movie-detail__reaction-btn--like ${
+                    movie.currentUserReaction === "Like" ? "active" : ""
+                  }`}
+                  aria-pressed={movie.currentUserReaction === "Like"}
+                  disabled={reactMutation.isPending}
+                  onClick={() => reactMutation.mutate("Like")}
+                >
+                  <Heart
+                    size={16}
+                    fill={
+                      movie.currentUserReaction === "Like"
+                        ? "currentColor"
+                        : "none"
+                    }
+                  />
+                  {movie.currentUserReaction === "Like"
+                    ? t("movie.liked")
+                    : t("movie.like")}
+                </button>
+                <button
+                  type="button"
+                  className={`movie-detail__reaction-btn movie-detail__reaction-btn--dislike ${
+                    movie.currentUserReaction === "Dislike" ? "active" : ""
+                  }`}
+                  aria-pressed={movie.currentUserReaction === "Dislike"}
+                  disabled={reactMutation.isPending}
+                  title={t("movie.notForMeHint")}
+                  onClick={() => reactMutation.mutate("Dislike")}
+                >
+                  <HeartCrack size={16} />
+                  {t("movie.notForMe")}
+                </button>
+              </div>
               <button
                 className={`btn-secondary movie-detail__action-btn ${movie.isInWatchlistByCurrentUser ? "active" : ""}`}
                 onClick={() => watchlistMutation.mutate()}

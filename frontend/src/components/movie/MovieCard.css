@@ -139,7 +139,6 @@
 .movie-card__watched,
 .movie-card__log,
 .movie-card__like,
-.movie-card__dislike,
 .movie-card__unlike {
   width: 28px;
   height: 28px;
@@ -160,7 +159,6 @@
 .movie-card__watched:hover,
 .movie-card__log:hover,
 .movie-card__like:hover,
-.movie-card__dislike:hover,
 .movie-card__unlike:hover {
   transform: scale(1.08);
 }
@@ -185,12 +183,6 @@
 .movie-card__like.is-active {
   background: #e0245e;
   border-color: #e0245e;
-  color: #fff;
-}
-
-.movie-card__dislike.is-active {
-  background: #273c75;
-  border-color: #273c75;
   color: #fff;
 }
 
@@ -352,7 +344,7 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.movie-card__watched-badge {
+.movie-card__dislike-badge {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -363,10 +355,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(10, 12, 16, 0.78);
-  backdrop-filter: blur(6px);
+  background: #273c75;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: var(--card-accent, var(--color-accent));
+  color: #fff;
+  pointer-events: none;
 }
 
 /* ---------- Hareket azaltma tercihi ---------- */

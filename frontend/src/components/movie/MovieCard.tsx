@@ -204,6 +204,16 @@ export default function MovieCard({
           </div>
         )}
 
+        {isDisliked && (
+          <span
+            className="movie-card__dislike-badge"
+            title={t("movie.notForMe")}
+            aria-label={t("movie.notForMe")}
+          >
+            <HeartCrack size={12} />
+          </span>
+        )}
+
         <div className="movie-card__actions">
           {interactive && isAuthenticated && (
             <button
@@ -258,36 +268,18 @@ export default function MovieCard({
           )}
 
           {interactive && isAuthenticated && !onUnlike && (
-            <>
-              <button
-                className={`movie-card__like ${isLiked ? "is-active" : ""}`}
-                disabled={reactMutation.isPending}
-                title={isLiked ? t("movie.unlike") : t("movie.like")}
-                aria-label={isLiked ? t("movie.unlike") : t("movie.like")}
-                onClick={(e) => {
-                  stop(e);
-                  reactMutation.mutate("Like");
-                }}
-              >
-                <Heart size={13} fill={isLiked ? "currentColor" : "none"} />
-              </button>
-              <button
-                className={`movie-card__dislike ${isDisliked ? "is-active" : ""}`}
-                disabled={reactMutation.isPending}
-                title={
-                  isDisliked
-                    ? t("movie.removeReaction")
-                    : t("movie.notForMeHint")
-                }
-                aria-label={t("movie.notForMe")}
-                onClick={(e) => {
-                  stop(e);
-                  reactMutation.mutate("Dislike");
-                }}
-              >
-                <HeartCrack size={13} />
-              </button>
-            </>
+            <button
+              className={`movie-card__like ${isLiked ? "is-active" : ""}`}
+              disabled={reactMutation.isPending}
+              title={isLiked ? t("movie.unlike") : t("movie.like")}
+              aria-label={isLiked ? t("movie.unlike") : t("movie.like")}
+              onClick={(e) => {
+                stop(e);
+                reactMutation.mutate("Like");
+              }}
+            >
+              <Heart size={13} fill={isLiked ? "currentColor" : "none"} />
+            </button>
           )}
 
           {onUnlike && (

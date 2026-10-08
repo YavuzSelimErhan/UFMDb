@@ -526,7 +526,36 @@
   color: #e74c3c;
   margin-top: 8px;
 }
-.movie-detail__action-btn--dislike.active {
-  color: #e5534b;
-  border-color: #e5534b;
+.movie-detail__reaction {
+  display: inline-flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+.movie-detail__reaction-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: 0.86rem;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+.movie-detail__reaction-btn + .movie-detail__reaction-btn {
+  border-left: 1px solid var(--color-border);
+}
+.movie-detail__reaction-btn:hover:not(:disabled) {
+  background: var(--color-bg-elevated);
+}
+.movie-detail__reaction-btn--like.active {
+  background: #e0245e;
+  color: #fff;
+}
+.movie-detail__reaction-btn--dislike.active {
+  background: #273c75;
+  color: #fff;
 }
