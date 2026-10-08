@@ -11,6 +11,7 @@ import {
   Sparkles,
   Shuffle,
   Trophy,
+  HeartCrack,
 } from "lucide-react";
 import { CONTACT } from "@/config/contact";
 import "./BetaNotice.css";
@@ -220,7 +221,7 @@ export default function BetaNotice() {
             <div className="bn-soon__list">
               <Link
                 to="/lists"
-                className="bn-soon__item bn-soon__item--featured"
+                className="bn-soon__item bn-soon__item--added bn-soon__item--featured"
                 onClick={() => setOpen(false)}
               >
                 <span className="bn-soon__icon bn-soon__icon--featured">
@@ -235,6 +236,20 @@ export default function BetaNotice() {
                   </p>
                 </div>
               </Link>
+
+              <div className="bn-soon__item bn-soon__item--added">
+                <span className="bn-soon__icon bn-soon__icon--featured">
+                  <HeartCrack size={16} aria-hidden="true" />
+                </span>
+                <div className="bn-soon__text">
+                  <h4 className="bn-soon__item-title">
+                    {t("betaNotice.addedNotForMeTitle")}
+                  </h4>
+                  <p className="bn-soon__item-desc">
+                    {t("betaNotice.addedNotForMeDesc")}
+                  </p>
+                </div>
+              </div>
             </div>
           </aside>
         </div>

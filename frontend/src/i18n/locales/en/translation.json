@@ -503,7 +503,9 @@
     "soonRandomDesc": "Can't decide? One click and it's settled.",
     "soonTop100Title": "All-Time Top 100",
     "soonTop100Desc": "A carefully hand-picked editorial selection.",
-    "addedEyebrow": "Added"
+    "addedEyebrow": "Added",
+    "addedNotForMeTitle": "Not for me",
+    "addedNotForMeDesc": "Mark films you didn't enjoy, and they'll show a small badge on cards."
   },
   "terms": {
     "updatedAt": "Last updated: October 2026",

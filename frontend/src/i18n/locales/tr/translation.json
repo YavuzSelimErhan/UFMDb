@@ -503,7 +503,9 @@
     "soonRandomDesc": "Karar veremiyorsan, bir tıkla seçelim.",
     "soonTop100Title": "Tüm Zamanların En İyi 100 Filmi",
     "soonTop100Desc": "Özenle derlenmiş editöryel bir seçki.",
-    "addedEyebrow": "Eklendi"
+    "addedEyebrow": "Eklendi",
+    "addedNotForMeTitle": "Bana göre değil",
+    "addedNotForMeDesc": "Beğenmediğin filmleri işaretle, kartlarda küçük bir rozetle görünsün."
   },
   "terms": {
     "updatedAt": "Son güncelleme: Ekim 2026",

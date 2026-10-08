@@ -268,8 +268,16 @@
   color: #2ecc71;
 }
 
+/* Eklenenler listesindeki öğeler: hover'da arka plan metne yapışmasın diye
+   iç boşluk veriyoruz, negatif margin ile hizayı koruyoruz. */
+.bn-soon__item--added {
+  padding: 8px;
+  margin: -8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+}
+
 .bn-soon__item--featured {
-  display: flex;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
@@ -279,6 +287,10 @@
 }
 .bn-soon__item--featured:hover {
   background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent) 50%, transparent);
+}
+.bn-soon__item--featured:focus-visible {
+  outline: none;
   border-color: var(--color-accent);
 }
 
