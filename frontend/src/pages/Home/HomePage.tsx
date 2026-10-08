@@ -20,7 +20,10 @@ const CURRENT_YEAR = new Date().getFullYear();
 // Trend rail'i için geriye dönük kaç yıl taransın.
 const TRENDING_YEARS_BACK = 1;
 // "Yakında vizyonda" filtresi için bugünün tarihi (YYYY-MM-DD).
-const TODAY_ISO = new Date().toISOString().split("T")[0];
+// Yarın (UTC) — "çıkmış" filmleri değil, henüz çıkmamış olanları listelemek için
+const TOMORROW_ISO = new Date(Date.now() + 24 * 60 * 60 * 1000)
+  .toISOString()
+  .split("T")[0];
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -83,7 +86,7 @@ export default function HomePage() {
         pageSize: RAIL_SIZE,
         sortBy: "releaseDate",
         sortDirection: "asc",
-        releaseDateFrom: TODAY_ISO,
+        releaseDateFrom: TOMORROW_ISO,
       }),
   });
 
@@ -162,7 +165,7 @@ export default function HomePage() {
                 title={t("home.upcoming")}
                 movies={upcomingMovies.items}
                 theme="neon"
-                seeAllHref={`/search?sortBy=releaseDate&sortDirection=asc&releaseDateFrom=${TODAY_ISO}`}
+                seeAllHref={`/search?sortBy=releaseDate&sortDirection=asc&releaseDateFrom=${TOMORROW_ISO}`}
               />
             )}
 

@@ -80,7 +80,7 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
         //       belgesellerin ortalamasý — yani her baðlamda adil bir referans).
         // Böylece 2 oyla 5.0 alan bir film, binlerce oyla 4.6 alan filmin önüne geçemez; ama
         // listeden de gizlenmez, sadece doðal olarak aþaðýda kalýr.
-        var minVotes = (double)RatingRankPolicy.MinVotesForRatingRank;
+        var minVotes = Math.Max(1.0, (double)RatingRankPolicy.MinVotesForRatingRank); // payda asla 0 olmasýn
         var globalMean = 0.0;
         if (f.SortBy == "rating")
         {
@@ -106,11 +106,9 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             query = (f.SortBy, isDescending) switch
             {
                 ("rating", true) => ordered.ThenByDescending(wm =>
-                    (wm.RatingCount / (wm.RatingCount + minVotes)) * wm.AverageRating
-                    + (minVotes / (wm.RatingCount + minVotes)) * globalMean),
+                    ((double)wm.RatingCount * wm.AverageRating + minVotes * globalMean) / ((double)wm.RatingCount + minVotes)),
                 ("rating", false) => ordered.ThenBy(wm =>
-                    (wm.RatingCount / (wm.RatingCount + minVotes)) * wm.AverageRating
-                    + (minVotes / (wm.RatingCount + minVotes)) * globalMean),
+                    ((double)wm.RatingCount * wm.AverageRating + minVotes * globalMean) / ((double)wm.RatingCount + minVotes)),
                 ("year", true) => ordered.ThenByDescending(m => m.ReleaseYear),
                 ("year", false) => ordered.ThenBy(m => m.ReleaseYear),
                 ("popularity", true) => ordered.ThenByDescending(m => m.RatingCount).ThenByDescending(m => m.AverageRating),
@@ -128,11 +126,9 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             query = (f.SortBy, isDescending) switch
             {
                 ("rating", true) => query.OrderByDescending(wm =>
-                    (wm.RatingCount / (wm.RatingCount + minVotes)) * wm.AverageRating
-                    + (minVotes / (wm.RatingCount + minVotes)) * globalMean),
+                    ((double)wm.RatingCount * wm.AverageRating + minVotes * globalMean) / ((double)wm.RatingCount + minVotes)),
                 ("rating", false) => query.OrderBy(wm =>
-                    (wm.RatingCount / (wm.RatingCount + minVotes)) * wm.AverageRating
-                    + (minVotes / (wm.RatingCount + minVotes)) * globalMean),
+                    ((double)wm.RatingCount * wm.AverageRating + minVotes * globalMean) / ((double)wm.RatingCount + minVotes)),
                 ("year", true) => query.OrderByDescending(m => m.ReleaseYear),
                 ("year", false) => query.OrderBy(m => m.ReleaseYear),
                 ("popularity", true) => query.OrderByDescending(m => m.RatingCount).ThenByDescending(m => m.AverageRating),

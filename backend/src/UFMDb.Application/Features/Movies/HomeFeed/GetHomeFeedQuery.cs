@@ -57,15 +57,14 @@ public class GetHomeFeedQueryHandler : IRequestHandler<GetHomeFeedQuery, HomeFee
         //   C = tüm katalogun ortalama puanı (aşağıda sorgulanıyor)
         // Az oylu bir film artık tamamen kaybolmuyor; sadece "ortalama bir film" varsayılan
         // C'ye doğru çekilip doğal şekilde aşağı sıralanıyor.
-        var minVotes = (double)RatingRankPolicy.MinVotesForRatingRank;
+        var minVotes = Math.Max(1.0, (double)RatingRankPolicy.MinVotesForRatingRank); // payda asla 0 olmasın
         var globalMean = await baseQuery
             .Select(m => (double?)m.AverageRating)
             .AverageAsync(ct) ?? 0;
 
         var topRated = await baseQuery
             .OrderByDescending(mv =>
-                (mv.RatingCount / (mv.RatingCount + minVotes)) * mv.AverageRating
-                + (minVotes / (mv.RatingCount + minVotes)) * globalMean)
+                ((double)mv.RatingCount * mv.AverageRating + minVotes * globalMean) / ((double)mv.RatingCount + minVotes))
             .Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
 
         var trending = await baseQuery
