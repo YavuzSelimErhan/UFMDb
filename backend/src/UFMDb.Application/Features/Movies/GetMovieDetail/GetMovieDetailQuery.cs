@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.DTOs;
+using UFMDb.Domain.Enums;
 namespace UFMDb.Application.Features.Movies.GetMovieDetail;
 public record GetMovieDetailQuery(Guid MovieId, Guid? CurrentUserId) : IRequest<MovieDetailDto>;
 public class GetMovieDetailQueryHandler : IRequestHandler<GetMovieDetailQuery, MovieDetailDto>
@@ -18,12 +19,16 @@ public class GetMovieDetailQueryHandler : IRequestHandler<GetMovieDetailQuery, M
             .Include(m => m.MovieDirectors).ThenInclude(md => md.Director)
             .FirstOrDefaultAsync(m => m.Id == request.MovieId && !m.IsDeleted, ct);
         if (movie is null) throw new NotFoundException(nameof(Domain.Entities.Movie), request.MovieId);
-        bool isLiked = false, isInWatchlist = false, isWatched = false;
+        bool isInWatchlist = false, isWatched = false;
+        ReactionType? myReaction = null;
         decimal? myRating = null;
         MyReviewDto? myReview = null;
         if (request.CurrentUserId is Guid uid)
         {
-            isLiked = await _context.Likes.AsNoTracking().AnyAsync(l => l.MovieId == movie.Id && l.UserId == uid, ct);
+            myReaction = await _context.Likes.AsNoTracking()
+                .Where(l => l.MovieId == movie.Id && l.UserId == uid)
+                .Select(l => (ReactionType?)l.Reaction)
+                .FirstOrDefaultAsync(ct);
             isInWatchlist = await _context.WatchlistItems.AsNoTracking().AnyAsync(w => w.MovieId == movie.Id && w.UserId == uid, ct);
             isWatched = await _context.WatchHistory.AsNoTracking().AnyAsync(w => w.MovieId == movie.Id && w.UserId == uid, ct);
 
@@ -50,7 +55,8 @@ public class GetMovieDetailQueryHandler : IRequestHandler<GetMovieDetailQuery, M
             movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
             movie.MovieGenres.Select(mg => mg.GenreId).ToList(),
             movie.MovieActors.Select(ma => new MovieCastDto(ma.ActorId, ma.Actor.FullName, ma.Actor.PhotoUrl, ma.CharacterName, ma.Order)).ToList(),
-            isLiked, isInWatchlist, isWatched, myRating, myReview
+            myReaction == ReactionType.Like, isInWatchlist, isWatched, myRating, myReview,
+            movie.DislikeCount, myReaction
         );
     }
 }

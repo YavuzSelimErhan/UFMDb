@@ -30,6 +30,7 @@ public class Like : BaseEntity
     public Movie Movie { get; set; } = default!;
     public Guid UserId { get; set; }
     public User User { get; set; } = default!;
+    public ReactionType Reaction { get; set; } = ReactionType.Like;
 }
 
 public class WatchlistItem : BaseEntity

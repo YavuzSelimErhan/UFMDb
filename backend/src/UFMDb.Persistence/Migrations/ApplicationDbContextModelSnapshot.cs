@@ -461,6 +461,13 @@ namespace UFMDb.Persistence.Migrations
                     b.Property<Guid>("MovieId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Reaction")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Like");
+
                     b.Property<DateTime?>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -470,6 +477,8 @@ namespace UFMDb.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("MovieId", "Reaction");
 
                     b.HasIndex("MovieId", "UserId")
                         .IsUnique();
@@ -497,6 +506,9 @@ namespace UFMDb.Persistence.Migrations
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DislikeCount")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");

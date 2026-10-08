@@ -9,6 +9,7 @@ using UFMDb.Application.Common.Services;
 using UFMDb.Application.DTOs;
 using UFMDb.Application.Features.Actors;
 using UFMDb.Domain.Entities;
+using ReactionType = UFMDb.Domain.Enums.ReactionType;
 
 
 namespace UFMDb.Application.Features.Users;
@@ -70,9 +71,10 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
         var totalWatchedCount = await _context.WatchHistory.AsNoTracking()
             .CountAsync(w => w.UserId == request.UserId, ct);
 
+        // Profildeki "Beğenilen filmler" listesi yalnızca "Beğendi" tepkilerini içerir.
         var liked = await _context.Likes.AsNoTracking()
             .Include(l => l.Movie).ThenInclude(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
-            .Where(l => l.UserId == request.UserId)
+            .Where(l => l.UserId == request.UserId && l.Reaction == ReactionType.Like)
             .OrderByDescending(l => l.CreatedAtUtc)
             .ToListAsync(ct);
 
@@ -82,10 +84,11 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             .OrderByDescending(w => w.CreatedAtUtc)
             .ToListAsync(ct);
 
-        // Like/watchlist bayraklarını bu handler içindeki TÜM MovieListItemDto dönüşümlerinde
-        // tutarlı kullanmak için, zaten çekmiş olduğumuz 'liked'/'watchlist' listelerinden
-        // (ekstra sorguya gerek kalmadan) iki HashSet çıkarıyoruz.
-        var likedMovieIds = liked.Select(l => l.MovieId).ToHashSet();
+        // Kullanıcının TÜM tepkileri (Beğendi + Beğenmedi): bu handler içindeki her
+        // MovieListItemDto dönüşümünde tutarlı bayrak/tepki üretmek için tek sorguyla çekiyoruz.
+        var reactions = await _context.Likes.AsNoTracking()
+            .Where(l => l.UserId == request.UserId)
+            .ToDictionaryAsync(l => l.MovieId, l => l.Reaction, ct);
         var watchlistMovieIds = watchlist.Select(w => w.MovieId).ToHashSet();
 
         var watchedMovieIds = (await _context.WatchHistory.AsNoTracking()
@@ -98,7 +101,7 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             .Select(slot =>
             {
                 var match = favoriteEntities.FirstOrDefault(f => f.Slot == slot);
-                return new FavoriteSlotDto(slot, match is null ? null : ToListItem(match.Movie, likedMovieIds, watchlistMovieIds, watchedMovieIds));
+                return new FavoriteSlotDto(slot, match is null ? null : ToListItem(match.Movie, reactions, watchlistMovieIds, watchedMovieIds));
             })
             .ToList();
 
@@ -111,7 +114,7 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
         var ratingsCount = userRatings.Count;
 
         var recentlyWatched = recent.Select(w => new RecentlyWatchedItemDto(
-            ToListItem(w.Movie, likedMovieIds, watchlistMovieIds, watchedMovieIds), w.Rating
+            ToListItem(w.Movie, reactions, watchlistMovieIds, watchedMovieIds), w.Rating
         )).ToList();
 
         var reviewEntities = await _context.Reviews.AsNoTracking()
@@ -169,8 +172,8 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             user.FullName, user.Country, user.BirthDate, user.Gender.ToString(), user.Biography,
             favorites,
             recentlyWatched,
-            liked.Select(l => ToListItem(l.Movie, likedMovieIds, watchlistMovieIds, watchedMovieIds)).ToList(),
-            watchlist.Select(w => ToListItem(w.Movie, likedMovieIds, watchlistMovieIds, watchedMovieIds)).ToList(),
+            liked.Select(l => ToListItem(l.Movie, reactions, watchlistMovieIds, watchedMovieIds)).ToList(),
+            watchlist.Select(w => ToListItem(w.Movie, reactions, watchlistMovieIds, watchedMovieIds)).ToList(),
             reviews,
             favoriteActors,
             likedActors,
@@ -180,15 +183,20 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             averageGivenRating,
             ratingsCount,
             user.CreatedAtUtc,
-            followerCount, 
+            followerCount,
             followingCount
         );
     }
 
-    private static MovieListItemDto ToListItem(Movie m, HashSet<Guid> likedIds, HashSet<Guid> watchlistIds, HashSet<Guid> watchedIds) => new(
-    m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
-    m.MovieGenres.Select(g => g.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
-    watchlistIds.Contains(m.Id), likedIds.Contains(m.Id), watchedIds.Contains(m.Id), m.ReleaseDate);
+    private static MovieListItemDto ToListItem(Movie m, IReadOnlyDictionary<Guid, ReactionType> reactions, HashSet<Guid> watchlistIds, HashSet<Guid> watchedIds)
+    {
+        ReactionType? reaction = reactions.TryGetValue(m.Id, out var r) ? r : null;
+        return new MovieListItemDto(
+            m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
+            m.MovieGenres.Select(g => g.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
+            watchlistIds.Contains(m.Id), reaction == ReactionType.Like, watchedIds.Contains(m.Id),
+            m.ReleaseDate, reaction);
+    }
 }
 
 // ---------- Favori film slotunu güncelle (1-4) ----------
@@ -486,11 +494,12 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
             .Where(m => movieIds.Contains(m.Id))
             .ToListAsync(ct);
 
-        var likedMovieIds = await _context.Likes.AsNoTracking()
-            .Where(l => l.UserId == request.UserId).Select(l => l.MovieId).ToListAsync(ct);
+        // Kullanıcının tepkileri (Beğendi / Beğenmedi)
+        var reactions = await _context.Likes.AsNoTracking()
+            .Where(l => l.UserId == request.UserId)
+            .ToDictionaryAsync(l => l.MovieId, l => l.Reaction, ct);
         var watchlistMovieIds = await _context.WatchlistItems.AsNoTracking()
             .Where(w => w.UserId == request.UserId).Select(w => w.MovieId).ToListAsync(ct);
-        var likedSet = likedMovieIds.ToHashSet();
         var watchlistSet = watchlistMovieIds.ToHashSet();
 
         IEnumerable<WatchedMovieDto> all = movies.Select(m =>
@@ -498,7 +507,7 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
             var hasWatch = lastWatchedByMovie.TryGetValue(m.Id, out var lastWatched);
             var date = hasWatch ? lastWatched : ratingDateByMovie[m.Id];
             var rating = ratingValueByMovie.TryGetValue(m.Id, out var r) ? r : (decimal?)null;
-            return new WatchedMovieDto(m.Id, ToListItem(m, likedSet, watchlistSet, hasWatch), date, rating);
+            return new WatchedMovieDto(m.Id, ToListItem(m, reactions, watchlistSet, hasWatch), date, rating);
         });
 
         if (request.HasRating is true) all = all.Where(w => w.UserRating.HasValue);
@@ -531,10 +540,14 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
         return new PagedResult<WatchedMovieDto>(page, totalCount, request.Page, pageSize);
     }
 
-    private static MovieListItemDto ToListItem(Movie m, HashSet<Guid> likedIds, HashSet<Guid> watchlistIds, bool isWatched) => new(
-        m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
-        m.MovieGenres.Select(g => g.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
-        watchlistIds.Contains(m.Id), likedIds.Contains(m.Id), isWatched, m.ReleaseDate);
+    private static MovieListItemDto ToListItem(Movie m, IReadOnlyDictionary<Guid, ReactionType> reactions, HashSet<Guid> watchlistIds, bool isWatched)
+    {
+        ReactionType? reaction = reactions.TryGetValue(m.Id, out var r) ? r : null;
+        return new MovieListItemDto(
+            m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
+            m.MovieGenres.Select(g => g.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
+            watchlistIds.Contains(m.Id), reaction == ReactionType.Like, isWatched, m.ReleaseDate, reaction);
+    }
 }
 
 public record RemoveWatchedMovieCommand(Guid UserId, Guid MovieId) : IRequest;

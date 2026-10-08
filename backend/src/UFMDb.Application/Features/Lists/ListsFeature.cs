@@ -96,7 +96,7 @@ public class GetListDetailQueryHandler : IRequestHandler<GetListDetailQuery, Lis
             (decimal)i.Movie.AverageRating, i.Movie.RatingCount,
             i.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
             i.Movie.BackdropUrl, i.Movie.Overview,
-            false, false, false, i.Movie.ReleaseDate
+            false, false, false, i.Movie.ReleaseDate, null
         )).ToList();
 
         bool isLikedByCurrentUser = false;
@@ -112,10 +112,10 @@ public class GetListDetailQueryHandler : IRequestHandler<GetListDetailQuery, Lis
                     .Select(w => w.MovieId)
                     .ToListAsync(ct)).ToHashSet();
 
-                var likedIds = (await _context.Likes.AsNoTracking()
+                // Kullanıcının bu listedeki filmlere verdiği tepkiler (Beğendi / Beğenmedi)
+                var reactions = await _context.Likes.AsNoTracking()
                     .Where(l => l.UserId == request.UserId.Value && movieIds.Contains(l.MovieId))
-                    .Select(l => l.MovieId)
-                    .ToListAsync(ct)).ToHashSet();
+                    .ToDictionaryAsync(l => l.MovieId, l => l.Reaction, ct);
 
                 var watchedIds = (await _context.WatchHistory.AsNoTracking()
                     .Where(w => w.UserId == request.UserId.Value && movieIds.Contains(w.MovieId))
@@ -124,12 +124,11 @@ public class GetListDetailQueryHandler : IRequestHandler<GetListDetailQuery, Lis
 
                 for (int i = 0; i < movies.Count; i++)
                 {
-                    movies[i] = movies[i] with
+                    movies[i] = (movies[i] with
                     {
                         IsInWatchlistByCurrentUser = watchlistIds.Contains(movies[i].Id),
-                        IsLikedByCurrentUser = likedIds.Contains(movies[i].Id),
                         IsWatchedByCurrentUser = watchedIds.Contains(movies[i].Id)
-                    };
+                    }).WithReaction(reactions);
                 }
             }
 

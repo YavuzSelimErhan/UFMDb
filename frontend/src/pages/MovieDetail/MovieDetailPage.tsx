@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
   Heart,
+  HeartCrack,
   Bookmark,
   CheckCircle2,
   Ticket,
@@ -12,6 +13,7 @@ import {
   PenLine,
   AlertTriangle,
 } from "lucide-react";
+import type { MovieDetail, ReactionType } from "@/types";
 import ReviewsSection from "@/components/movie/ReviewsSection";
 import { movieService, screeningLogService } from "@/services";
 import { useAppSelector } from "@/store";
@@ -62,9 +64,26 @@ export default function MovieDetailPage() {
     setContainsSpoiler(movie?.myReview?.containsSpoiler ?? false);
   }, [movie?.myReview]);
 
-  const likeMutation = useMutation({
-    mutationFn: () => movieService.toggleLike(id!),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["movie", id] }),
+  const reactMutation = useMutation({
+    mutationFn: (r: ReactionType) =>
+      r === "Like" ? movieService.like(id!) : movieService.dislike(id!),
+    onSuccess: (result) => {
+      queryClient.setQueryData<MovieDetail>(
+        ["movie", id],
+        (old) =>
+          old && {
+            ...old,
+            currentUserReaction: result.currentUserReaction,
+            isLikedByCurrentUser: result.currentUserReaction === "Like",
+            likeCount: result.likeCount,
+            dislikeCount: result.dislikeCount,
+          },
+      );
+      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["movies"] });
+      queryClient.invalidateQueries({ queryKey: ["home-feed"] });
+      queryClient.invalidateQueries({ queryKey: ["list"] });
+    },
   });
 
   const watchlistMutation = useMutation({
@@ -263,16 +282,28 @@ export default function MovieDetailPage() {
           {isAuthenticated && (
             <div className="movie-detail__actions">
               <button
-                className={`btn-secondary movie-detail__action-btn ${movie.isLikedByCurrentUser ? "active" : ""}`}
-                onClick={() => likeMutation.mutate()}
+                className={`btn-secondary movie-detail__action-btn ${movie.currentUserReaction === "Like" ? "active" : ""}`}
+                disabled={reactMutation.isPending}
+                onClick={() => reactMutation.mutate("Like")}
               >
                 <Heart
                   size={16}
-                  fill={movie.isLikedByCurrentUser ? "#4a90e2" : "none"}
+                  fill={
+                    movie.currentUserReaction === "Like" ? "#4a90e2" : "none"
+                  }
                 />
-                {movie.isLikedByCurrentUser
+                {movie.currentUserReaction === "Like"
                   ? t("movie.liked")
                   : t("movie.like")}
+              </button>
+              <button
+                className={`btn-secondary movie-detail__action-btn movie-detail__action-btn--dislike ${movie.currentUserReaction === "Dislike" ? "active" : ""}`}
+                disabled={reactMutation.isPending}
+                title={t("movie.notForMeHint")}
+                onClick={() => reactMutation.mutate("Dislike")}
+              >
+                <HeartCrack size={16} />
+                {t("movie.notForMe")}
               </button>
               <button
                 className={`btn-secondary movie-detail__action-btn ${movie.isInWatchlistByCurrentUser ? "active" : ""}`}

@@ -121,7 +121,7 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
                 .Select(m => new MovieListItemDto(
                     m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
                     m.MovieGenres.Select(mg => mg.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
-                    false, false, false, m.ReleaseDate))
+                    false, false, false, m.ReleaseDate, null))
                 .ToListAsync(ct);
             var loadedById = loaded.ToDictionary(x => x.Id);
             items = pageIds.Where(loadedById.ContainsKey).Select(id => loadedById[id]).ToList();
@@ -180,7 +180,7 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
                 .Select(m => new MovieListItemDto(
                     m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
                     m.MovieGenres.Select(mg => mg.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
-                    false, false, false, m.ReleaseDate
+                    false, false, false, m.ReleaseDate, null
                 ))
                 .ToListAsync(ct);
         }
@@ -194,10 +194,10 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
                 .Select(w => w.MovieId)
                 .ToListAsync(ct)).ToHashSet();
 
-            var likedIds = (await _context.Likes.AsNoTracking()
+            // Kullanýcýnýn bu sayfadaki filmlere verdiði tepkiler (Beðendi / Beðenmedi)
+            var reactions = await _context.Likes.AsNoTracking()
                 .Where(l => l.UserId == request.UserId.Value && movieIds.Contains(l.MovieId))
-                .Select(l => l.MovieId)
-                .ToListAsync(ct)).ToHashSet();
+                .ToDictionaryAsync(l => l.MovieId, l => l.Reaction, ct);
 
             var watchedIds = (await _context.WatchHistory.AsNoTracking()
                 .Where(w => w.UserId == request.UserId.Value && movieIds.Contains(w.MovieId))
@@ -206,12 +206,11 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
 
             for (int i = 0; i < items.Count; i++)
             {
-                items[i] = items[i] with
+                items[i] = (items[i] with
                 {
                     IsInWatchlistByCurrentUser = watchlistIds.Contains(items[i].Id),
-                    IsLikedByCurrentUser = likedIds.Contains(items[i].Id),
                     IsWatchedByCurrentUser = watchedIds.Contains(items[i].Id)
-                };
+                }).WithReaction(reactions);
             }
         }
 

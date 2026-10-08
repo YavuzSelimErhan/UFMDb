@@ -98,7 +98,10 @@
     "spoiler": "Spoiler",
     "logScreening": "Log Screening",
     "notYetReleased": "This movie hasn't been released yet.",
-    "watchedToggleError": "You can't mark this unwatched while it has a rating. Remove your rating first."
+    "watchedToggleError": "You can't mark this unwatched while it has a rating. Remove your rating first.",
+    "notForMe": "Not for me",
+    "notForMeHint": "Good film, just not for me",
+    "removeReaction": "Remove reaction"
   },
   "search": {
     "noResults": "No results found",

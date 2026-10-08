@@ -43,3 +43,10 @@ public enum NotificationType
 {
     Follow = 0
 }
+
+/// <summary>Bir filme verilen tepki. Mevcut tüm beğeni kayıtları Like (0) olarak kalır.</summary>
+public enum ReactionType
+{
+    Like = 0,     // Beğendi
+    Dislike = 1   // Beğenmedi (kırık kalp: "iyi film ama bana göre değil")
+}

@@ -1,3 +1,5 @@
+using UFMDb.Domain.Enums;
+
 namespace UFMDb.Application.DTOs;
 
 public record MovieListItemDto(
@@ -5,7 +7,8 @@ public record MovieListItemDto(
     decimal AverageRating, int RatingCount, List<string> Genres,
     string BackdropUrl, string Overview,
     bool IsInWatchlistByCurrentUser, bool IsLikedByCurrentUser, bool IsWatchedByCurrentUser,
-    DateTime ReleaseDate
+    DateTime ReleaseDate,
+    ReactionType? CurrentUserReaction = null
 );
 
 public record MovieDirectorDto(Guid Id, string FullName, string PhotoUrl);
@@ -17,7 +20,8 @@ public record MovieDetailDto(
     int RuntimeMinutes, string PosterUrl, string BackdropUrl, List<MovieDirectorDto> Directors, string Country,
     double AverageRating, int RatingCount, int LikeCount, List<string> Genres, List<Guid> GenreIds,
     List<MovieCastDto> Cast, bool IsLikedByCurrentUser, bool IsInWatchlistByCurrentUser, bool IsWatchedByCurrentUser,
-    decimal? MyRating, MyReviewDto? MyReview
+    decimal? MyRating, MyReviewDto? MyReview,
+    int DislikeCount = 0, ReactionType? CurrentUserReaction = null
 );
 
 public record MovieCastDto(Guid ActorId, string FullName, string PhotoUrl, string CharacterName, int Order);

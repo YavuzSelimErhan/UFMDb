@@ -98,7 +98,10 @@
     "spoiler": "Spoiler",
     "logScreening": "Seans Ekle",
     "notYetReleased": "Bu film henüz vizyona girmedi.",
-    "watchedToggleError": "Bu filme puan verdiğin için izlenmedi işaretlenemiyor. Önce puanını kaldır."
+    "watchedToggleError": "Bu filme puan verdiğin için izlenmedi işaretlenemiyor. Önce puanını kaldır.",
+    "notForMe": "Bana göre değil",
+    "notForMeHint": "İyi film ama bana göre değil",
+    "removeReaction": "Tepkiyi kaldır"
   },
   "search": {
     "noResults": "Sonuç bulunamadı",

@@ -9,14 +9,17 @@ using UFMDb.Domain.Enums;
 
 namespace UFMDb.Application.Features.Reviews;
 
-public record ToggleLikeCommand(Guid MovieId, Guid UserId) : IRequest<bool>;
+public record ReactToMovieCommand(Guid MovieId, Guid UserId, ReactionType Reaction)
+    : IRequest<MovieReactionResultDto>;
 
-public class ToggleLikeCommandHandler : IRequestHandler<ToggleLikeCommand, bool>
+public record MovieReactionResultDto(ReactionType? CurrentUserReaction, int LikeCount, int DislikeCount);
+
+public class ReactToMovieCommandHandler : IRequestHandler<ReactToMovieCommand, MovieReactionResultDto>
 {
     private readonly IApplicationDbContext _context;
-    public ToggleLikeCommandHandler(IApplicationDbContext context) => _context = context;
+    public ReactToMovieCommandHandler(IApplicationDbContext context) => _context = context;
 
-    public async Task<bool> Handle(ToggleLikeCommand request, CancellationToken ct)
+    public async Task<MovieReactionResultDto> Handle(ReactToMovieCommand request, CancellationToken ct)
     {
         var movie = await _context.Movies.FirstOrDefaultAsync(m => m.Id == request.MovieId, ct)
             ?? throw new NotFoundException(nameof(Movie), request.MovieId);
@@ -24,22 +27,41 @@ public class ToggleLikeCommandHandler : IRequestHandler<ToggleLikeCommand, bool>
         var existing = await _context.Likes
             .FirstOrDefaultAsync(l => l.MovieId == request.MovieId && l.UserId == request.UserId, ct);
 
-        bool nowLiked;
+        ReactionType? current;
         if (existing is null)
         {
-            _context.Likes.Add(new Like { MovieId = request.MovieId, UserId = request.UserId });
-            movie.LikeCount++;
-            nowLiked = true;
+            // Reaksiyon yok -> ekle
+            _context.Likes.Add(new Like { MovieId = request.MovieId, UserId = request.UserId, Reaction = request.Reaction });
+            Adjust(movie, request.Reaction, +1);
+            current = request.Reaction;
+        }
+        else if (existing.Reaction == request.Reaction)
+        {
+            // Aynı reaksiyona tekrar basıldı -> geri al
+            _context.Likes.Remove(existing);
+            Adjust(movie, existing.Reaction, -1);
+            current = null;
         }
         else
         {
-            _context.Likes.Remove(existing);
-            movie.LikeCount = Math.Max(0, movie.LikeCount - 1);
-            nowLiked = false;
+            // Like <-> Dislike geçişi
+            Adjust(movie, existing.Reaction, -1);
+            existing.Reaction = request.Reaction;
+            Adjust(movie, request.Reaction, +1);
+            current = request.Reaction;
+            existing.UpdatedAtUtc = DateTime.UtcNow;
         }
 
         await _context.SaveChangesAsync(ct);
-        return nowLiked;
+        return new MovieReactionResultDto(current, movie.LikeCount, movie.DislikeCount);
+    }
+
+    private static void Adjust(Movie movie, ReactionType type, int delta)
+    {
+        if (type == ReactionType.Like)
+            movie.LikeCount = Math.Max(0, movie.LikeCount + delta);
+        else
+            movie.DislikeCount = Math.Max(0, movie.DislikeCount + delta);
     }
 }
 

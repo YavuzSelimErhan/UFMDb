@@ -4,6 +4,7 @@ using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.DTOs;
 using UFMDb.Domain.Entities;
+using ReactionType = UFMDb.Domain.Enums.ReactionType;
 
 namespace UFMDb.Application.Features.Directors;
 
@@ -52,11 +53,11 @@ public class GetDirectorDetailQueryHandler : IRequestHandler<GetDirectorDetailQu
 
         var movieIds = director.MovieDirectors.Select(md => md.Movie.Id).ToHashSet();
 
-        var likedIds = request.CurrentUserId is Guid likeUid
-            ? (await _context.Likes.AsNoTracking()
+        var reactions = request.CurrentUserId is Guid likeUid
+            ? await _context.Likes.AsNoTracking()
                 .Where(l => l.UserId == likeUid && movieIds.Contains(l.MovieId))
-                .Select(l => l.MovieId).ToListAsync(ct)).ToHashSet()
-            : new HashSet<Guid>();
+                .ToDictionaryAsync(l => l.MovieId, l => l.Reaction, ct)
+            : new Dictionary<Guid, ReactionType>();
 
         var watchlistIds = request.CurrentUserId is Guid watchUid
             ? (await _context.WatchlistItems.AsNoTracking()
@@ -77,8 +78,8 @@ public class GetDirectorDetailQueryHandler : IRequestHandler<GetDirectorDetailQu
                 (decimal)md.Movie.AverageRating, md.Movie.RatingCount,
                 md.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
                 md.Movie.BackdropUrl, md.Movie.Overview,
-                watchlistIds.Contains(md.Movie.Id), likedIds.Contains(md.Movie.Id), watchedIds.Contains(md.Movie.Id),
-                md.Movie.ReleaseDate))
+                watchlistIds.Contains(md.Movie.Id), false, watchedIds.Contains(md.Movie.Id),
+                md.Movie.ReleaseDate).WithReaction(reactions))
             .ToList();
 
         var isLiked = request.CurrentUserId is Guid uid &&

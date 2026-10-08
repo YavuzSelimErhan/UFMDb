@@ -139,6 +139,7 @@
 .movie-card__watched,
 .movie-card__log,
 .movie-card__like,
+.movie-card__dislike,
 .movie-card__unlike {
   width: 28px;
   height: 28px;
@@ -159,6 +160,7 @@
 .movie-card__watched:hover,
 .movie-card__log:hover,
 .movie-card__like:hover,
+.movie-card__dislike:hover,
 .movie-card__unlike:hover {
   transform: scale(1.08);
 }
@@ -183,6 +185,12 @@
 .movie-card__like.is-active {
   background: #e0245e;
   border-color: #e0245e;
+  color: #fff;
+}
+
+.movie-card__dislike.is-active {
+  background: #273c75;
+  border-color: #273c75;
   color: #fff;
 }
 

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UFMDb.Domain.Entities;
+using UFMDb.Domain.Enums;
 
 namespace UFMDb.Persistence.Configurations;
 
@@ -130,7 +131,16 @@ public class LikeConfiguration : IEntityTypeConfiguration<Like>
     public void Configure(EntityTypeBuilder<Like> b)
     {
         b.ToTable("Likes");
-        b.HasIndex(l => new { l.MovieId, l.UserId }).IsUnique();
+
+        // Projedeki diğer enum'larla (LifecycleStatus) aynı yaklaşım: DB'de okunabilir string.
+        b.Property(l => l.Reaction)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .HasDefaultValue(ReactionType.Like);
+
+        b.HasIndex(l => new { l.MovieId, l.UserId }).IsUnique();   // kullanıcı başına film başına tek tepki
+        b.HasIndex(l => new { l.MovieId, l.Reaction });            // film bazlı sayım sorguları için
+
         b.HasOne(l => l.Movie).WithMany(m => m.Likes).HasForeignKey(l => l.MovieId).OnDelete(DeleteBehavior.Cascade);
         b.HasOne(l => l.User).WithMany(u => u.Likes).HasForeignKey(l => l.UserId).OnDelete(DeleteBehavior.Restrict);
     }

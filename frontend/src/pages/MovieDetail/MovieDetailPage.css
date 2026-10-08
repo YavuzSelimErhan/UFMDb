@@ -526,3 +526,7 @@
   color: #e74c3c;
   margin-top: 8px;
 }
+.movie-detail__action-btn--dislike.active {
+  color: #e5534b;
+  border-color: #e5534b;
+}

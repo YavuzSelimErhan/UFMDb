@@ -1,3 +1,11 @@
+export type ReactionType = "Like" | "Dislike";
+
+export interface MovieReactionResult {
+  currentUserReaction: ReactionType | null;
+  likeCount: number;
+  dislikeCount: number;
+}
+
 export interface MovieListItem {
   id: string;
   title: string;
@@ -12,6 +20,7 @@ export interface MovieListItem {
   isLikedByCurrentUser: boolean;
   isWatchedByCurrentUser: boolean;
   releaseDate: string;
+  currentUserReaction?: ReactionType | null;
 }
 
 export interface MovieCast {
@@ -68,6 +77,7 @@ export interface MovieDetail {
   averageRating: number;
   ratingCount: number;
   likeCount: number;
+  dislikeCount: number;
   genres: string[];
   genreIds: string[];
   cast: MovieCast[];
@@ -76,6 +86,7 @@ export interface MovieDetail {
   isWatchedByCurrentUser: boolean;
   myReview: MyReview | null;
   myRating: number | null;
+  currentUserReaction: ReactionType | null;
 }
 
 export interface CastMemberInput {

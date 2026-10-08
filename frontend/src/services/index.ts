@@ -31,6 +31,7 @@ import type {
   PublicProfileDto,
   PublicFullProfileDto,
   NotificationItem,
+  MovieReactionResult,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -49,8 +50,12 @@ export const movieService = {
     const { data } = await api.get("/movies/home-feed");
     return data;
   },
-  toggleLike: async (id: string): Promise<boolean> => {
+  like: async (id: string): Promise<MovieReactionResult> => {
     const { data } = await api.post(`/movies/${id}/like`);
+    return data;
+  },
+  dislike: async (id: string): Promise<MovieReactionResult> => {
+    const { data } = await api.post(`/movies/${id}/dislike`);
     return data;
   },
   toggleWatchlist: async (id: string): Promise<boolean> => {

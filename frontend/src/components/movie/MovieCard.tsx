@@ -1,14 +1,17 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Star, Bookmark, Heart, Ticket, Eye } from "lucide-react";
+import { Star, Bookmark, Heart, HeartCrack, Ticket, Eye } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { movieService } from "@/services";
 import { useAppSelector } from "@/store";
 import { getEntityTheme } from "@/utils/listTheme";
 import { useToast } from "@/components/common/Toast";
-import type { MovieListItem } from "@/types";
+import type { MovieListItem, ReactionType } from "@/types";
 import "./MovieCard.css";
+
+const getReaction = (m: MovieListItem): ReactionType | null =>
+  m.currentUserReaction ?? (m.isLikedByCurrentUser ? "Like" : null);
 
 interface Props {
   movie: MovieListItem;
@@ -40,7 +43,10 @@ export default function MovieCard({
   const [inWatchlist, setInWatchlist] = useState(
     movie.isInWatchlistByCurrentUser,
   );
-  const [isLiked, setIsLiked] = useState(movie.isLikedByCurrentUser);
+  const serverReaction = getReaction(movie);
+  const [reaction, setReaction] = useState<ReactionType | null>(serverReaction);
+  const isLiked = reaction === "Like";
+  const isDisliked = reaction === "Dislike";
   const [isWatched, setIsWatched] = useState(movie.isWatchedByCurrentUser);
   const [hoverValue, setHoverValue] = useState<number | null>(null);
   const [posterFailed, setPosterFailed] = useState(false);
@@ -55,8 +61,8 @@ export default function MovieCard({
   }, [movie.isInWatchlistByCurrentUser]);
 
   useEffect(() => {
-    setIsLiked(movie.isLikedByCurrentUser);
-  }, [movie.isLikedByCurrentUser]);
+    setReaction(serverReaction);
+  }, [serverReaction]);
 
   useEffect(() => {
     setIsWatched(movie.isWatchedByCurrentUser);
@@ -89,34 +95,38 @@ export default function MovieCard({
     },
   });
 
-  const likeMutation = useMutation({
-    mutationFn: () => movieService.toggleLike(movie.id),
-    onMutate: () => {
-      const previous = isLiked;
-      setIsLiked(!previous);
+  const invalidateMovieQueries = () => {
+    queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+    queryClient.invalidateQueries({ queryKey: ["list"] });
+    queryClient.invalidateQueries({ queryKey: ["movies"] });
+    queryClient.invalidateQueries({ queryKey: ["home-feed"] });
+    queryClient.invalidateQueries({ queryKey: ["movie", movie.id] });
+  };
+
+  const reactMutation = useMutation({
+    mutationFn: (r: ReactionType) =>
+      r === "Like"
+        ? movieService.like(movie.id)
+        : movieService.dislike(movie.id),
+    onMutate: (r) => {
+      const previous = reaction;
+      setReaction(previous === r ? null : r); // aynı butona tekrar basınca geri al
       return { previous };
     },
-    onSuccess: (newState) => {
-      setIsLiked(newState);
-      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
-      queryClient.invalidateQueries({ queryKey: ["list"] });
-      queryClient.invalidateQueries({ queryKey: ["movies"] });
-      queryClient.invalidateQueries({ queryKey: ["home-feed"] });
-      queryClient.invalidateQueries({ queryKey: ["movie", movie.id] });
+    onSuccess: (result) => {
+      setReaction(result.currentUserReaction);
+      invalidateMovieQueries();
     },
     onError: (_err, _vars, context) => {
-      if (context) setIsLiked(context.previous);
+      if (context) setReaction(context.previous);
     },
   });
 
+  // Profildeki "beğenilenler" listesinde kalp: beğeniyi geri alır.
   const unlikeMutation = useMutation({
-    mutationFn: () => movieService.toggleLike(movie.id),
+    mutationFn: () => movieService.like(movie.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
-      queryClient.invalidateQueries({ queryKey: ["list"] });
-      queryClient.invalidateQueries({ queryKey: ["movies"] });
-      queryClient.invalidateQueries({ queryKey: ["home-feed"] });
-      queryClient.invalidateQueries({ queryKey: ["movie", movie.id] });
+      invalidateMovieQueries();
       onUnlike?.();
     },
   });
@@ -248,18 +258,36 @@ export default function MovieCard({
           )}
 
           {interactive && isAuthenticated && !onUnlike && (
-            <button
-              className={`movie-card__like ${isLiked ? "is-active" : ""}`}
-              disabled={likeMutation.isPending}
-              title={isLiked ? t("movie.unlike") : t("movie.like")}
-              aria-label={isLiked ? t("movie.unlike") : t("movie.like")}
-              onClick={(e) => {
-                stop(e);
-                likeMutation.mutate();
-              }}
-            >
-              <Heart size={13} fill={isLiked ? "currentColor" : "none"} />
-            </button>
+            <>
+              <button
+                className={`movie-card__like ${isLiked ? "is-active" : ""}`}
+                disabled={reactMutation.isPending}
+                title={isLiked ? t("movie.unlike") : t("movie.like")}
+                aria-label={isLiked ? t("movie.unlike") : t("movie.like")}
+                onClick={(e) => {
+                  stop(e);
+                  reactMutation.mutate("Like");
+                }}
+              >
+                <Heart size={13} fill={isLiked ? "currentColor" : "none"} />
+              </button>
+              <button
+                className={`movie-card__dislike ${isDisliked ? "is-active" : ""}`}
+                disabled={reactMutation.isPending}
+                title={
+                  isDisliked
+                    ? t("movie.removeReaction")
+                    : t("movie.notForMeHint")
+                }
+                aria-label={t("movie.notForMe")}
+                onClick={(e) => {
+                  stop(e);
+                  reactMutation.mutate("Dislike");
+                }}
+              >
+                <HeartCrack size={13} />
+              </button>
+            </>
           )}
 
           {onUnlike && (

@@ -10,6 +10,7 @@ using UFMDb.Application.Features.Movies.HomeFeed;
 using UFMDb.Application.Features.Movies.ManageMovie;
 using UFMDb.Application.Features.Reviews;
 using UFMDb.Domain.Entities;
+using UFMDb.Domain.Enums;
 
 namespace UFMDb.API.Controllers;
 
@@ -52,8 +53,13 @@ public class MoviesController : ControllerBase
 
     [Authorize]
     [HttpPost("{id:guid}/like")]
-    public async Task<ActionResult<bool>> ToggleLike(Guid id)
-        => Ok(await _mediator.Send(new ToggleLikeCommand(id, RequireUserId())));
+    public async Task<ActionResult<MovieReactionResultDto>> Like(Guid id)
+    => Ok(await _mediator.Send(new ReactToMovieCommand(id, RequireUserId(), ReactionType.Like)));
+
+    [Authorize]
+    [HttpPost("{id:guid}/dislike")]
+    public async Task<ActionResult<MovieReactionResultDto>> Dislike(Guid id)
+        => Ok(await _mediator.Send(new ReactToMovieCommand(id, RequireUserId(), ReactionType.Dislike)));
 
     [Authorize]
     [HttpPost("{id:guid}/watchlist")]

@@ -29,12 +29,10 @@ var apiKey = configuration["Tmdb:ApiKey"];
 var connectionString = configuration.GetConnectionString("DefaultConnection");
 var targetMovieCount = int.Parse(configuration["Tmdb:TargetMovieCount"] ?? "200");
 var minVoteCount = int.Parse(configuration["Tmdb:MinVoteCount"] ?? "1000");
-var upcomingMovieCount = int.Parse(configuration["Tmdb:UpcomingMovieCount"] ?? "50");
+var upcomingMovieCount = int.Parse(configuration["Tmdb:UpcomingMovieCount"] ?? "20");
 var upcomingWindowDays = int.Parse(configuration["Tmdb:UpcomingWindowDays"] ?? "180");
 var postReleaseRefreshDays = int.Parse(configuration["Tmdb:PostReleaseRefreshDays"] ?? "30");
-// Vizyondan sonra, 30 günlük "Stable" geçişinden ÖNCE yapılacak ara senkronizasyon günleri.
-// appsettings.json: "Tmdb": { "RefreshCheckpointDays": "3,10" }  (virgülle ayrılmış, boşsa 3,10)
-var refreshCheckpointDays = (configuration["Tmdb:RefreshCheckpointDays"] ?? "3,10")
+var refreshCheckpointDays = (configuration["Tmdb:RefreshCheckpointDays"] ?? "2, 3, 5, 10, 20")
     .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
     .Select(int.Parse)
     .Where(d => d > 0)

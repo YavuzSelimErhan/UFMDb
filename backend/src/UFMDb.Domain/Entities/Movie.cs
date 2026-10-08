@@ -23,6 +23,7 @@ public class Movie : BaseEntity
     public double AverageRating { get; set; } = 0;
     public int RatingCount { get; set; } = 0;
     public int LikeCount { get; set; } = 0;
+    public int DislikeCount { get; set; } = 0;
     public int ViewCount { get; set; } = 0; // trend hesaplamada kullanılır
 
     /// <summary>MovieDB'den gelen orijinal puan. Kullanıcı review'ları geldikçe AverageRating
