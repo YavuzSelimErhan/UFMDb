@@ -57,4 +57,13 @@ jobs:
             exit 1
           fi
           echo "Proje: $PROJECT"
+
+          # appsettings.json gizli bilgi içerdiği için repoda yok (.gitignore). Derleme ve Program.cs
+          # dosyayı zorunlu istiyor; gerçek değerler zaten aşağıdaki env değişkenlerinden geliyor.
+          PROJECT_DIR=$(dirname "$PROJECT")
+          if [ ! -f "$PROJECT_DIR/appsettings.json" ]; then
+            echo '{}' > "$PROJECT_DIR/appsettings.json"
+            echo "appsettings.json repoda yoktu, boş bir dosya oluşturuldu."
+          fi
+
           dotnet run --project "$PROJECT" -c Release -- ${{ steps.mode.outputs.mode }}
