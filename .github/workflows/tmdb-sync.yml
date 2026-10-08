@@ -1,0 +1,53 @@
+# Bu dosyayı repoda şu yola koyun: .github/workflows/tmdb-sync.yml
+name: TMDB Sync
+
+on:
+  schedule:
+    - cron: "0 3 * * *"    # her gün 03:00 UTC (06:00 TR)  -> daily-sync
+    - cron: "30 3 * * 1"   # her pazartesi 03:30 UTC       -> fetch-upcoming (yeni "yakında çıkacak" filmler)
+  workflow_dispatch:        # Actions sekmesinden elle de çalıştırabilmek için
+    inputs:
+      mode:
+        description: "Çalıştırılacak mod"
+        type: choice
+        options:
+          - daily-sync
+          - fetch-upcoming
+        default: daily-sync
+
+# Üst üste binen iki çalışma aynı filmleri aynı anda yazmasın
+concurrency:
+  group: tmdb-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"   # projenizin hedef sürümüne göre değiştirin
+
+      - name: Modu belirle
+        id: mode
+        run: |
+          MODE="${{ github.event.inputs.mode }}"
+          if [ -z "$MODE" ]; then
+            if [ "${{ github.event.schedule }}" = "30 3 * * 1" ]; then
+              MODE="fetch-upcoming"
+            else
+              MODE="daily-sync"
+            fi
+          fi
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+
+      - name: TMDB importer çalıştır
+        env:
+          # "__" appsettings'teki ":" karşılığıdır (Tmdb:ApiKey, ConnectionStrings:DefaultConnection)
+          Tmdb__ApiKey: ${{ secrets.TMDB__API_KEY }}
+          ConnectionStrings__DefaultConnection: ${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}
+        run: |
+          dotnet run --project src/UFMDb.Tools.TmdbImporter -c Release -- ${{ steps.mode.outputs.mode }}

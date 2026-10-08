@@ -32,6 +32,14 @@ var minVoteCount = int.Parse(configuration["Tmdb:MinVoteCount"] ?? "1000");
 var upcomingMovieCount = int.Parse(configuration["Tmdb:UpcomingMovieCount"] ?? "50");
 var upcomingWindowDays = int.Parse(configuration["Tmdb:UpcomingWindowDays"] ?? "180");
 var postReleaseRefreshDays = int.Parse(configuration["Tmdb:PostReleaseRefreshDays"] ?? "30");
+// Vizyondan sonra, 30 günlük "Stable" geçişinden ÖNCE yapılacak ara senkronizasyon günleri.
+// appsettings.json: "Tmdb": { "RefreshCheckpointDays": "3,10" }  (virgülle ayrılmış, boşsa 3,10)
+var refreshCheckpointDays = (configuration["Tmdb:RefreshCheckpointDays"] ?? "3,10")
+    .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+    .Select(int.Parse)
+    .Where(d => d > 0)
+    .OrderBy(d => d)
+    .ToArray();
 var turkishMovieCount = int.Parse(configuration["Tmdb:TurkishMovieCount"] ?? "200");
 var castLimit = 12; // her filmden alınacak maksimum oyuncu sayısı
 
@@ -844,6 +852,78 @@ if (args.Contains("refresh-post-release"))
 {
     await RefreshPostReleaseMoviesAsync(dbOptions);
     return;
+}
+
+// Kullanım: dotnet run --project src/UFMDb.Tools.TmdbImporter -- refresh-checkpoints
+if (args.Contains("refresh-checkpoints"))
+{
+    await RefreshCheckpointMoviesAsync(dbOptions);
+    return;
+}
+
+// Günlük tek komut: üç aşamayı doğru sırayla çalıştırır.
+// Kullanım: dotnet run --project src/UFMDb.Tools.TmdbImporter -- daily-sync
+if (args.Contains("daily-sync"))
+{
+    await RefreshNewlyReleasedMoviesAsync(dbOptions);   // Upcoming -> NewlyReleased (gün 0)
+    await RefreshCheckpointMoviesAsync(dbOptions);      // gün 3, gün 10, ... (ayarlanabilir)
+    await RefreshPostReleaseMoviesAsync(dbOptions);     // gün 30+ -> Stable
+    return;
+}
+
+async Task RefreshCheckpointMoviesAsync(DbContextOptions<ApplicationDbContext> options)
+{
+    var now = DateTime.UtcNow;
+    var stableCutoff = now.Date.AddDays(-postReleaseRefreshDays);
+
+    List<int> dueTmdbIds;
+    await using (var db = new ApplicationDbContext(options))
+    {
+        var candidates = await db.Movies
+            .Where(m => m.TmdbId != null && m.LifecycleStatus == MovieLifecycleStatus.NewlyReleased)
+            .Select(m => new { TmdbId = m.TmdbId!.Value, m.ReleaseDate, m.LastTmdbSyncAt })
+            .ToListAsync(cts.Token);
+
+        // Bir film, vizyon tarihi + d gününe ulaştıysa VE son senkronu o noktadan öncesiyse "vadesi gelmiş" sayılır.
+        // Son senkron o noktadan sonraysa (ör. refresh-released geç çalıştıysa) aynı veriyi tekrar çekmeyiz.
+        // 30 gün geçmiş filmleri refresh-post-release üstleniyor, burada çift çağrı olmasın diye dışarıda bırakıyoruz.
+        dueTmdbIds = candidates
+            .Where(c => c.ReleaseDate.Date > stableCutoff)
+            .Where(c =>
+            {
+                var last = c.LastTmdbSyncAt ?? DateTime.MinValue;
+                return refreshCheckpointDays.Any(d =>
+                {
+                    var checkpoint = c.ReleaseDate.Date.AddDays(d);
+                    return checkpoint <= now && last < checkpoint;
+                });
+            })
+            .Select(c => c.TmdbId)
+            .ToList();
+    }
+
+    Console.WriteLine($"Kontrol noktası ({string.Join(", ", refreshCheckpointDays)}. gün) vadesi gelmiş {dueTmdbIds.Count} film bulundu.\n");
+
+    if (dueTmdbIds.Count == 0)
+    {
+        Console.WriteLine("Güncellenecek film yok, çıkılıyor.");
+        return;
+    }
+
+    await ImportMoviesAsync(dueTmdbIds, genreMap);
+
+    // Durum (NewlyReleased) değişmiyor; sadece son senkron zamanı güncelleniyor.
+    await using var db2 = new ApplicationDbContext(options);
+    var movies = await db2.Movies
+        .Where(m => m.TmdbId != null && dueTmdbIds.Contains(m.TmdbId!.Value))
+        .ToListAsync(cts.Token);
+
+    var syncedAt = DateTime.UtcNow;
+    foreach (var m in movies)
+        m.LastTmdbSyncAt = syncedAt;
+    await db2.SaveChangesAsync(cts.Token);
+
+    Console.WriteLine($"{movies.Count} filmin son senkron zamanı güncellendi.");
 }
 
 async Task RefreshPostReleaseMoviesAsync(DbContextOptions<ApplicationDbContext> options)
