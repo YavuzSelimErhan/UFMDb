@@ -50,4 +50,11 @@ jobs:
           Tmdb__ApiKey: ${{ secrets.TMDB__API_KEY }}
           ConnectionStrings__DefaultConnection: ${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}
         run: |
-          dotnet run --project src/UFMDb.Tools.TmdbImporter -c Release -- ${{ steps.mode.outputs.mode }}
+          PROJECT=$(find . -name "UFMDb.Tools.TmdbImporter.csproj" -not -path "*/node_modules/*" | head -n 1)
+          if [ -z "$PROJECT" ]; then
+            echo "TmdbImporter projesi bulunamadı. Repodaki csproj dosyaları:"
+            find . -name "*.csproj" -not -path "*/node_modules/*"
+            exit 1
+          fi
+          echo "Proje: $PROJECT"
+          dotnet run --project "$PROJECT" -c Release -- ${{ steps.mode.outputs.mode }}
