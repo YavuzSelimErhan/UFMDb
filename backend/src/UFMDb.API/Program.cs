@@ -10,6 +10,7 @@ using UFMDb.Infrastructure;
 using UFMDb.Persistence;
 using UFMDb.Persistence.Seed;
 using Microsoft.Extensions.FileProviders;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,9 @@ builder.Services.AddInfrastructure();
 builder.Services.AddPersistence(builder.Configuration);
 
 // ---------------- Controllers & Swagger ----------------
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o =>
+        o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -142,7 +145,7 @@ app.UseCors(CorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
-app.MapControllers();
 app.UseOutputCache();
+app.MapControllers();
 
 app.Run();
