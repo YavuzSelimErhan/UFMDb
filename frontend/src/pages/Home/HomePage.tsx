@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
@@ -24,7 +23,7 @@ const TRENDING_YEARS_BACK = 1;
 const TODAY_ISO = new Date().toISOString().split("T")[0];
 
 export default function HomePage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { isAuthenticated } = useAppSelector((s) => s.auth);
 
   const { data, isLoading, isError, refetch } = useQuery({
@@ -48,30 +47,6 @@ export default function HomePage() {
     queryFn: profileService.getMyProfile,
     enabled: isAuthenticated,
   });
-
-  // Kullanıcının son izlediği filmlerdeki türleri sayıp en sık geçeni buluyoruz.
-  // Ayrı bir backend endpoint'i gerekmiyor; recentlyWatched zaten profile ile geliyor.
-  const topGenre = useMemo(() => {
-    if (!profile?.recentlyWatched?.length) return null;
-    const counts = new Map<string, number>();
-    profile.recentlyWatched.forEach(({ movie }) => {
-      movie.genres.forEach((g) => counts.set(g, (counts.get(g) ?? 0) + 1));
-    });
-    let top: string | null = null;
-    let max = 0;
-    counts.forEach((count, genre) => {
-      if (count > max) {
-        max = count;
-        top = genre;
-      }
-    });
-    return top;
-  }, [profile?.recentlyWatched]);
-
-  const genreLabel = (name: string) => {
-    const match = genres?.find((g) => g.name === name || g.nameTr === name);
-    return match ? (i18n.language === "tr" ? match.nameTr : match.name) : name;
-  };
 
   // Popüler: tüm zamanlar, oy sayısına göre (backend'de RatingCount bazlı sıralıyor).
   const { data: popularMovies, isLoading: isPopularLoading } = useQuery({
@@ -98,17 +73,6 @@ export default function HomePage() {
       }),
   });
 
-  const { data: newestMovies, isLoading: isNewestLoading } = useQuery({
-    queryKey: ["home-newest"],
-    queryFn: () =>
-      movieService.search({
-        page: 1,
-        pageSize: RAIL_SIZE,
-        sortBy: "newest",
-        sortDirection: "desc",
-      }),
-  });
-
   // Yakında vizyonda: gerçek vizyon tarihi bugünden sonra olan filmler.
   // Backend'de MovieSearchQueryDto.ReleaseDateFrom + "releaseDate" sortBy case'i eklendikten sonra çalışır.
   const { data: upcomingMovies, isLoading: isUpcomingLoading } = useQuery({
@@ -121,19 +85,6 @@ export default function HomePage() {
         sortDirection: "asc",
         releaseDateFrom: TODAY_ISO,
       }),
-  });
-
-  const { data: genreMovies, isLoading: isGenreLoading } = useQuery({
-    queryKey: ["home-genre", topGenre],
-    queryFn: () =>
-      movieService.search({
-        page: 1,
-        pageSize: RAIL_SIZE,
-        sortBy: "rating",
-        sortDirection: "desc",
-        genre: topGenre!,
-      }),
-    enabled: !!topGenre,
   });
 
   return (
@@ -201,28 +152,6 @@ export default function HomePage() {
                 theme="frost"
                 showRank
                 seeAllHref="/search?sortBy=popularity&sortDirection=desc"
-              />
-            )}
-
-            {isGenreLoading && <RailSkeleton />}
-            {genreMovies && genreMovies.items.length > 0 && topGenre && (
-              <ThemedMovieRail
-                eyebrow={t("home.genreEyebrow")}
-                title={genreLabel(topGenre)}
-                movies={genreMovies.items}
-                theme="crimson"
-                seeAllHref={`/search?genre=${encodeURIComponent(topGenre)}&sortBy=rating&sortDirection=desc`}
-              />
-            )}
-
-            {isNewestLoading && <RailSkeleton />}
-            {newestMovies && newestMovies.items.length > 0 && (
-              <ThemedMovieRail
-                eyebrow={t("home.newestEyebrow")}
-                title={t("home.newest")}
-                movies={newestMovies.items}
-                theme="frost"
-                seeAllHref="/search?sortBy=newest&sortDirection=desc"
               />
             )}
 

@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UFMDb.Application.Common;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.DTOs;
 namespace UFMDb.Application.Features.Movies.GetMovies;
@@ -72,6 +73,22 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
         var isDescending = !string.Equals(f.SortDirection, "asc", StringComparison.OrdinalIgnoreCase);
         var hasTitleSearch = !string.IsNullOrWhiteSpace(f.Title);
 
+        // "rating" sýralamasý için IMDb tipi Bayesian aðýrlýklý puan:
+        //   WR = (v / (v+m)) * R + (m / (v+m)) * C
+        //   v = RatingCount, R = AverageRating, m = RatingRankPolicy.MinVotesForRatingRank,
+        //   C = mevcut filtrelenmiþ listenin ortalama puaný (ör. sadece "Belgesel" seçiliyse
+        //       belgesellerin ortalamasý — yani her baðlamda adil bir referans).
+        // Böylece 2 oyla 5.0 alan bir film, binlerce oyla 4.6 alan filmin önüne geçemez; ama
+        // listeden de gizlenmez, sadece doðal olarak aþaðýda kalýr.
+        var minVotes = (double)RatingRankPolicy.MinVotesForRatingRank;
+        var globalMean = 0.0;
+        if (f.SortBy == "rating")
+        {
+            globalMean = await query
+                .Select(x => (double?)x.AverageRating)
+                .AverageAsync(ct) ?? 0;
+        }
+
         if (hasTitleSearch)
         {
             // Baþlýkla arama yapýlýrken alaka düzeyi popülerlikten önce gelir: "ran" aratýldýðýnda
@@ -88,8 +105,12 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
 
             query = (f.SortBy, isDescending) switch
             {
-                ("rating", true) => ordered.ThenByDescending(m => m.AverageRating),
-                ("rating", false) => ordered.ThenBy(m => m.AverageRating),
+                ("rating", true) => ordered.ThenByDescending(wm =>
+                    (wm.RatingCount / (wm.RatingCount + minVotes)) * wm.AverageRating
+                    + (minVotes / (wm.RatingCount + minVotes)) * globalMean),
+                ("rating", false) => ordered.ThenBy(wm =>
+                    (wm.RatingCount / (wm.RatingCount + minVotes)) * wm.AverageRating
+                    + (minVotes / (wm.RatingCount + minVotes)) * globalMean),
                 ("year", true) => ordered.ThenByDescending(m => m.ReleaseYear),
                 ("year", false) => ordered.ThenBy(m => m.ReleaseYear),
                 ("popularity", true) => ordered.ThenByDescending(m => m.RatingCount).ThenByDescending(m => m.AverageRating),
@@ -106,8 +127,12 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
         {
             query = (f.SortBy, isDescending) switch
             {
-                ("rating", true) => query.OrderByDescending(m => m.AverageRating),
-                ("rating", false) => query.OrderBy(m => m.AverageRating),
+                ("rating", true) => query.OrderByDescending(wm =>
+                    (wm.RatingCount / (wm.RatingCount + minVotes)) * wm.AverageRating
+                    + (minVotes / (wm.RatingCount + minVotes)) * globalMean),
+                ("rating", false) => query.OrderBy(wm =>
+                    (wm.RatingCount / (wm.RatingCount + minVotes)) * wm.AverageRating
+                    + (minVotes / (wm.RatingCount + minVotes)) * globalMean),
                 ("year", true) => query.OrderByDescending(m => m.ReleaseYear),
                 ("year", false) => query.OrderBy(m => m.ReleaseYear),
                 ("popularity", true) => query.OrderByDescending(m => m.RatingCount).ThenByDescending(m => m.AverageRating),

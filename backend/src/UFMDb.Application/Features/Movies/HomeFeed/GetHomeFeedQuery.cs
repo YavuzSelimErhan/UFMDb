@@ -38,13 +38,36 @@ public class GetHomeFeedQueryHandler : IRequestHandler<GetHomeFeedQuery, HomeFee
                 .ToListAsync(ct)).ToHashSet()
             : new HashSet<Guid>();
         var baseQuery = _context.Movies.AsNoTracking().Where(m => !m.IsDeleted);
+
+        // Featured (ana sayfa hero carousel'i): KATI eşik korunuyor — az oylu, "şans eseri"
+        // yüksek ortalamalı filmler burada hiç görünmesin. RatingRankPolicy.MinVotesForRatingRank
+        // değerinin 1000 olduğundan emin olun.
         var featured = await baseQuery
             .Where(m => m.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
             .OrderByDescending(m => m.AverageRating * 1000 + m.LikeCount)
             .Take(6).Select(MapToListItemProjection()).ToListAsync(ct);
+
         var popular = await baseQuery.OrderByDescending(m => m.LikeCount).Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
-        var topRated = await baseQuery.Where(m => m.RatingCount >= RatingRankPolicy.MinVotesForRatingRank)
-            .OrderByDescending(m => m.AverageRating).Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
+
+        // Top Rated: artık az oylu filmleri DİREKT GİZLEMİYORUZ; onun yerine IMDb tipi
+        // Bayesian ağırlıklandırma kullanıyoruz:
+        //   WR = (v / (v+m)) * R + (m / (v+m)) * C
+        //   v = filmin oy sayısı (RatingCount), R = filmin kendi ortalaması (AverageRating)
+        //   m = güven eşiği (RatingRankPolicy.MinVotesForRatingRank — carousel'deki ile aynı sabit)
+        //   C = tüm katalogun ortalama puanı (aşağıda sorgulanıyor)
+        // Az oylu bir film artık tamamen kaybolmuyor; sadece "ortalama bir film" varsayılan
+        // C'ye doğru çekilip doğal şekilde aşağı sıralanıyor.
+        var minVotes = (double)RatingRankPolicy.MinVotesForRatingRank;
+        var globalMean = await baseQuery
+            .Select(m => (double?)m.AverageRating)
+            .AverageAsync(ct) ?? 0;
+
+        var topRated = await baseQuery
+            .OrderByDescending(mv =>
+                (mv.RatingCount / (mv.RatingCount + minVotes)) * mv.AverageRating
+                + (minVotes / (mv.RatingCount + minVotes)) * globalMean)
+            .Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
+
         var trending = await baseQuery
             .OrderByDescending(m => m.ViewCount * 0.6 + m.LikeCount * 0.4)
             .Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
