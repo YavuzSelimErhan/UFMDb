@@ -49,23 +49,31 @@ public class GetHomeFeedQueryHandler : IRequestHandler<GetHomeFeedQuery, HomeFee
 
         var popular = await baseQuery.OrderByDescending(m => m.LikeCount).Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
 
-        // Top Rated: artık az oylu filmleri DİREKT GİZLEMİYORUZ; onun yerine IMDb tipi
-        // Bayesian ağırlıklandırma kullanıyoruz:
-        //   WR = (v / (v+m)) * R + (m / (v+m)) * C
-        //   v = filmin oy sayısı (RatingCount), R = filmin kendi ortalaması (AverageRating)
-        //   m = güven eşiği (RatingRankPolicy.MinVotesForRatingRank — carousel'deki ile aynı sabit)
-        //   C = tüm katalogun ortalama puanı (aşağıda sorgulanıyor)
-        // Az oylu bir film artık tamamen kaybolmuyor; sadece "ortalama bir film" varsayılan
-        // C'ye doğru çekilip doğal şekilde aşağı sıralanıyor.
-        var minVotes = Math.Max(1.0, (double)RatingRankPolicy.MinVotesForRatingRank); // payda asla 0 olmasın
-        var globalMean = await baseQuery
-            .Select(m => (double?)m.AverageRating)
-            .AverageAsync(ct) ?? 0;
+        // Top Rated: az oylu filmleri GİZLEMİYORUZ; IMDb tipi Bayesian ağırlıklı puanla sıralıyoruz:
+        //   WR = (v*R + m*C) / (v + m)
+        //   v = RatingCount, R = AverageRating, m = RatingRankPolicy.MinVotesForRatingRank,
+        //   C = tüm katalogun ortalama puanı.
+        // Sıralama SQL'e yazılmıyor (çeviri hatası riski yok): üç düz sütun çekilip puan bellekte
+        // hesaplanıyor, sadece ilk 12 id ile asıl film verisi çekiliyor.
+        var minVotes = Math.Max(1.0, (double)RatingRankPolicy.MinVotesForRatingRank);
+        var rows = await baseQuery
+            .Select(m => new { m.Id, m.RatingCount, m.AverageRating })
+            .ToListAsync(ct);
+        var globalMean = rows.Count > 0 ? rows.Average(r => r.AverageRating) : 0.0;
 
-        var topRated = await baseQuery
-            .OrderByDescending(mv =>
-                ((double)mv.RatingCount * mv.AverageRating + minVotes * globalMean) / ((double)mv.RatingCount + minVotes))
-            .Take(12).Select(MapToListItemProjection()).ToListAsync(ct);
+        var topIds = rows
+            .OrderByDescending(r => (r.RatingCount * r.AverageRating + minVotes * globalMean) / (r.RatingCount + minVotes))
+            .ThenByDescending(r => r.RatingCount)
+            .Take(12)
+            .Select(r => r.Id)
+            .ToList();
+
+        var topRatedUnordered = await baseQuery
+            .Where(m => topIds.Contains(m.Id))
+            .Select(MapToListItemProjection())
+            .ToListAsync(ct);
+        var topRatedById = topRatedUnordered.ToDictionary(x => x.Id);
+        var topRated = topIds.Where(topRatedById.ContainsKey).Select(id => topRatedById[id]).ToList();
 
         var trending = await baseQuery
             .OrderByDescending(m => m.ViewCount * 0.6 + m.LikeCount * 0.4)
