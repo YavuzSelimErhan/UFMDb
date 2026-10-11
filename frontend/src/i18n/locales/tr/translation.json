@@ -433,6 +433,7 @@
   "log": {
     "pageTitle": "Seans Defteri",
     "pageSubtitle": "İzlediğin her film, gün gün.",
+    "eyebrow": "Film günlüğün",
     "addEntry": "Seans ekle",
     "addEntryMovie": "Film",
     "addEntryDate": "İzlenme tarihi",
@@ -449,13 +450,21 @@
     "statUniqueFilms": "Tekil Film",
     "statRated": "Puanlanan",
     "statAvgRating": "Ort. Puan",
+    "statReactions": "Beğeni / Bana göre değil",
     "addEntryRating": "Puan (opsiyonel)",
     "editEntry": "Kaydı düzenle",
     "saveEntry": "Kaydet",
     "reactionLabel": "Tepkin",
     "reactionLike": "Beğendim",
     "reactionSaveError": "Seans kaydedildi ama tepkin kaydedilemedi.",
-    "confirmDeleteEntry": "Bu seans silinsin mi?"
+    "confirmDeleteEntry": "Bu seans silinsin mi?",
+    "filterAll": "Tümü",
+    "filterLiked": "Beğendiklerim",
+    "filterDisliked": "Bana göre değil",
+    "searchPlaceholder": "Defterde ara",
+    "monthCount_other": "{{count}} seans",
+    "noResults": "Eşleşen seans yok",
+    "noResultsHint": "Filtreyi veya aramayı değiştirmeyi dene."
   },
   "reviews": {
     "title": "Yorumlar",

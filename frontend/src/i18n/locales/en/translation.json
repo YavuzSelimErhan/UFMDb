@@ -455,7 +455,17 @@
     "reactionLabel": "Your reaction",
     "reactionLike": "I liked it",
     "reactionSaveError": "Screening saved, but your reaction couldn't be saved.",
-    "confirmDeleteEntry": "Delete this screening?"
+    "confirmDeleteEntry": "Delete this screening?",
+    "eyebrow": "Your film diary",
+    "statReactions": "Liked / Not for me",
+    "filterAll": "All",
+    "filterLiked": "Liked",
+    "filterDisliked": "Not for me",
+    "searchPlaceholder": "Search your log",
+    "monthCount_one": "{{count}} screening",
+    "monthCount_other": "{{count}} screenings",
+    "noResults": "No matching screenings",
+    "noResultsHint": "Try changing the filter or the search."
   },
   "reviews": {
     "title": "Reviews",

@@ -11,6 +11,7 @@ import {
   Pencil,
   Heart,
   HeartCrack,
+  Search,
 } from "lucide-react";
 import { screeningLogService, movieService } from "@/services";
 import { getEntityTheme } from "@/utils/listTheme";
@@ -25,6 +26,8 @@ import {
 } from "@/components/common/PageState";
 import type { ScreeningLogEntry, ScreeningLogDay, ReactionType } from "@/types";
 import "./ScreeningLogPage.css";
+
+type ReactionFilter = "all" | "liked" | "disliked";
 
 function todayLocalDateString(): string {
   const d = new Date();
@@ -93,32 +96,6 @@ function DayLeaf({ dateStr, locale }: { dateStr: string; locale: string }) {
   );
 }
 
-/** Salt okunur 5 yıldız (MovieCard'daki yarım yıldız dolumuyla aynı mantık). */
-function StarsDisplay({ value }: { value: number }) {
-  return (
-    <span
-      className="screening-log__stars"
-      role="img"
-      aria-label={`${value.toFixed(1)} / 5`}
-    >
-      {[1, 2, 3, 4, 5].map((i) => {
-        const fill = Math.max(0, Math.min(1, value - (i - 1)));
-        return (
-          <span key={i} className="screening-log__star">
-            <Star size={13} className="screening-log__star-base" />
-            <span
-              className="screening-log__star-fill"
-              style={{ width: `${fill * 100}%` }}
-            >
-              <Star size={13} fill="currentColor" />
-            </span>
-          </span>
-        );
-      })}
-    </span>
-  );
-}
-
 /** Filmin güncel tepkisi (film başına tek, seansa özel değil). */
 function ReactionMark({
   reaction,
@@ -127,20 +104,18 @@ function ReactionMark({
 }) {
   const { t } = useTranslation();
   if (!reaction) return null;
-  const label =
-    reaction === "Like" ? t("movie.liked", "Beğenildi") : t("movie.notForMe");
+  const isLike = reaction === "Like";
+  const label = isLike ? t("movie.liked", "Beğenildi") : t("movie.notForMe");
   return (
     <span
-      className={`screening-log__reaction ${reaction === "Like" ? "is-like" : "is-dislike"}`}
-      role="img"
-      title={label}
-      aria-label={label}
+      className={`screening-log__reaction ${isLike ? "is-like" : "is-dislike"}`}
     >
-      {reaction === "Like" ? (
-        <Heart size={13} fill="currentColor" />
+      {isLike ? (
+        <Heart size={15} fill="currentColor" aria-hidden="true" />
       ) : (
-        <HeartCrack size={13} />
+        <HeartCrack size={15} aria-hidden="true" />
       )}
+      {label}
     </span>
   );
 }
@@ -153,7 +128,7 @@ function EntryPoster({ src }: { src: string }) {
         className="screening-log__entry-poster screening-log__entry-poster--fallback"
         aria-hidden="true"
       >
-        <Clapperboard size={16} />
+        <Clapperboard size={18} />
       </div>
     );
   }
@@ -162,8 +137,8 @@ function EntryPoster({ src }: { src: string }) {
       src={src}
       alt=""
       className="screening-log__entry-poster"
-      width={52}
-      height={78}
+      width={68}
+      height={98}
       loading="lazy"
       decoding="async"
       onError={() => setFailed(true)}
@@ -278,47 +253,49 @@ function EntryCard({ entry, onDelete, onSave, compact }: EntryCardProps) {
         <EntryPoster src={entry.posterUrl} />
         <div className="screening-log__entry-body">
           <h4>{entry.movieTitle}</h4>
-          <div className="screening-log__entry-meta">
-            {entry.rating != null && (
-              <span className="screening-log__entry-rating">
-                <StarsDisplay value={entry.rating} />
-                <span className="screening-log__entry-rating-num">
-                  {entry.rating.toFixed(1)}
-                </span>
-              </span>
-            )}
-            <ReactionMark reaction={entry.reaction} />
-            {entry.screeningNumber > 1 && (
-              <span className="screening-log__entry-rewatch">
-                {t("log.rewatch", { count: entry.screeningNumber })}
-              </span>
-            )}
-          </div>
+          {entry.screeningNumber > 1 && (
+            <span className="screening-log__entry-rewatch">
+              {t("log.rewatch", { count: entry.screeningNumber })}
+            </span>
+          )}
           {entry.reviewContent && !compact && (
             <p className="screening-log__entry-review">{entry.reviewContent}</p>
           )}
         </div>
       </Link>
 
-      <div className="screening-log__entry-actions">
-        <button
-          type="button"
-          className="screening-log__entry-icon-btn"
-          title={t("log.editEntry")}
-          aria-label={t("log.editEntry")}
-          onClick={startEdit}
-        >
-          <Pencil size={13} />
-        </button>
-        <button
-          type="button"
-          className="screening-log__entry-icon-btn screening-log__entry-icon-btn--danger"
-          title={t("log.deleteEntry")}
-          aria-label={t("log.deleteEntry")}
-          onClick={() => setIsConfirmingDelete(true)}
-        >
-          <X size={13} />
-        </button>
+      <div className="screening-log__entry-side">
+        {entry.rating != null && (
+          <span
+            className="screening-log__score"
+            role="img"
+            aria-label={`${entry.rating.toFixed(1)} / 5`}
+          >
+            <Star size={15} fill="currentColor" aria-hidden="true" />
+            {entry.rating.toFixed(1)}
+          </span>
+        )}
+        <ReactionMark reaction={entry.reaction} />
+        <div className="screening-log__entry-actions">
+          <button
+            type="button"
+            className="screening-log__entry-icon-btn"
+            title={t("log.editEntry")}
+            aria-label={t("log.editEntry")}
+            onClick={startEdit}
+          >
+            <Pencil size={13} />
+          </button>
+          <button
+            type="button"
+            className="screening-log__entry-icon-btn screening-log__entry-icon-btn--danger"
+            title={t("log.deleteEntry")}
+            aria-label={t("log.deleteEntry")}
+            onClick={() => setIsConfirmingDelete(true)}
+          >
+            <X size={13} />
+          </button>
+        </div>
       </div>
 
       {isConfirmingDelete && (
@@ -361,6 +338,8 @@ export default function ScreeningLogPage() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
+  const [filter, setFilter] = useState<ReactionFilter>("all");
+  const [search, setSearch] = useState("");
   const [selectedMovie, setSelectedMovie] = useState<{
     id: string;
     title: string;
@@ -467,7 +446,6 @@ export default function ScreeningLogPage() {
 
   const locale = i18n.language === "tr" ? "tr-TR" : "en-US";
   const allEntries = data.flatMap((d) => d.entries);
-  const monthGroups = groupDaysByMonth(data, locale);
   const uniqueFilmCount = new Set(allEntries.map((e) => e.movieId)).size;
   const ratedEntries = allEntries.filter((e) => e.rating != null);
   const avgRating =
@@ -477,19 +455,45 @@ export default function ScreeningLogPage() {
           ratedEntries.length
         ).toFixed(1)
       : "—";
+  const likeCount = allEntries.filter((e) => e.reaction === "Like").length;
+  const dislikeCount = allEntries.filter(
+    (e) => e.reaction && e.reaction !== "Like",
+  ).length;
+
+  // Filtre + arama: boş kalan günler listeden düşer.
+  const query = search.trim().toLocaleLowerCase(locale);
+  const matches = (e: ScreeningLogEntry) => {
+    if (filter === "liked" && e.reaction !== "Like") return false;
+    if (filter === "disliked" && (!e.reaction || e.reaction === "Like"))
+      return false;
+    return (
+      query === "" || e.movieTitle.toLocaleLowerCase(locale).includes(query)
+    );
+  };
+  const visibleDays = data
+    .map((d) => ({ ...d, entries: d.entries.filter(matches) }))
+    .filter((d) => d.entries.length > 0);
+  const monthGroups = groupDaysByMonth(visibleDays, locale);
+
+  const filterOptions: { value: ReactionFilter; label: string }[] = [
+    { value: "all", label: t("log.filterAll", "Tümü") },
+    { value: "liked", label: t("log.filterLiked", "Beğendiklerim") },
+    { value: "disliked", label: t("log.filterDisliked", "Bana göre değil") },
+  ];
 
   return (
     <div className="container screening-log">
       <div className="screening-log__header">
         <div>
-          <h1>
-            <Ticket size={22} /> {t("log.pageTitle")}
-          </h1>
-          <p className="text-muted">{t("log.pageSubtitle")}</p>
+          <span className="screening-log__eyebrow">
+            {t("log.eyebrow", "Film günlüğün")}
+          </span>
+          <h1>{t("log.pageTitle")}</h1>
+          <p className="text-secondary">{t("log.pageSubtitle")}</p>
         </div>
         <button
           type="button"
-          className={`btn-secondary screening-log__add-btn${isAdding ? " is-open" : ""}`}
+          className={`btn-primary screening-log__add-btn${isAdding ? " is-open" : ""}`}
           aria-expanded={isAdding}
           aria-controls="screening-log-add-form"
           onClick={() => setIsAdding((s) => !s)}
@@ -499,38 +503,43 @@ export default function ScreeningLogPage() {
       </div>
 
       {allEntries.length > 0 && (
-        <div className="screening-log__marquee">
-          <div className="screening-log__marquee-stat">
-            <span className="screening-log__marquee-value">
-              {allEntries.length}
-            </span>
-            <span className="screening-log__marquee-label">
+        <section
+          className="screening-log__stats"
+          aria-label={t("log.pageTitle")}
+        >
+          <div className="card screening-log__stat">
+            <span className="screening-log__stat-label">
               {t("log.statScreenings")}
             </span>
-          </div>
-          <div className="screening-log__marquee-stat">
-            <span className="screening-log__marquee-value">
-              {uniqueFilmCount}
+            <span className="screening-log__stat-value">
+              {allEntries.length}
             </span>
-            <span className="screening-log__marquee-label">
+          </div>
+          <div className="card screening-log__stat">
+            <span className="screening-log__stat-label">
               {t("log.statUniqueFilms")}
             </span>
+            <span className="screening-log__stat-value">{uniqueFilmCount}</span>
           </div>
-          <div className="screening-log__marquee-stat">
-            <span className="screening-log__marquee-value">
-              {ratedEntries.length}
-            </span>
-            <span className="screening-log__marquee-label">
-              {t("log.statRated")}
-            </span>
-          </div>
-          <div className="screening-log__marquee-stat">
-            <span className="screening-log__marquee-value">{avgRating}</span>
-            <span className="screening-log__marquee-label">
+          <div className="card screening-log__stat">
+            <span className="screening-log__stat-label">
               {t("log.statAvgRating")}
             </span>
+            <span className="screening-log__stat-value is-accent">
+              {avgRating}
+            </span>
           </div>
-        </div>
+          <div className="card screening-log__stat">
+            <span className="screening-log__stat-label">
+              {t("log.statReactions", "Beğeni / Bana göre değil")}
+            </span>
+            <span className="screening-log__stat-value">
+              <span className="is-like">{likeCount}</span>
+              <span className="screening-log__stat-sep"> / </span>
+              <span className="is-dislike">{dislikeCount}</span>
+            </span>
+          </div>
+        </section>
       )}
 
       {isAdding && (
@@ -619,65 +628,114 @@ export default function ScreeningLogPage() {
         </div>
       )}
 
+      {allEntries.length > 0 && (
+        <div className="screening-log__toolbar">
+          <div className="screening-log__filters" role="group">
+            {filterOptions.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                className={`screening-log__pill${filter === opt.value ? " is-active" : ""}`}
+                aria-pressed={filter === opt.value}
+                onClick={() => setFilter(opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <label className="screening-log__search">
+            <Search size={15} aria-hidden="true" />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t("log.searchPlaceholder", "Günlükte ara")}
+              aria-label={t("log.searchPlaceholder", "Günlükte ara")}
+            />
+          </label>
+        </div>
+      )}
+
       {data.length === 0 ? (
         <EmptyState
           icon={<Ticket size={26} />}
           title={t("log.empty")}
           hint={t("log.emptyHint")}
         />
+      ) : visibleDays.length === 0 ? (
+        <EmptyState
+          icon={<Search size={26} />}
+          title={t("log.noResults", "Eşleşen seans yok")}
+          hint={t(
+            "log.noResultsHint",
+            "Filtreyi veya aramayı değiştirmeyi dene.",
+          )}
+        />
       ) : (
         <div className="screening-log__timeline">
-          {monthGroups.map((group) => (
-            <div key={group.label} className="screening-log__month-group">
-              <div className="screening-log__month-divider">
-                <span>{group.label}</span>
-              </div>
-              {group.days.map((day) => (
-                <div key={day.date} className="screening-log__day-row">
-                  <DayLeaf dateStr={day.date} locale={locale} />
-
-                  {day.entries.length === 2 ? (
-                    <div className="screening-log__double-feature">
-                      <span className="screening-log__double-feature-label">
-                        <Ticket size={11} /> {t("log.doubleFeature")}
-                      </span>
-                      <div className="screening-log__double-feature-halves">
-                        <EntryCard
-                          entry={day.entries[0]}
-                          onDelete={handleDelete}
-                          onSave={handleSave}
-                          compact
-                        />
-                        <div
-                          className="screening-log__double-feature-divider"
-                          aria-hidden="true"
-                        >
-                          <Clapperboard size={12} />
-                        </div>
-                        <EntryCard
-                          entry={day.entries[1]}
-                          onDelete={handleDelete}
-                          onSave={handleSave}
-                          compact
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="screening-log__day-entries">
-                      {day.entries.map((entry) => (
-                        <EntryCard
-                          key={entry.id}
-                          entry={entry}
-                          onDelete={handleDelete}
-                          onSave={handleSave}
-                        />
-                      ))}
-                    </div>
-                  )}
+          {monthGroups.map((group) => {
+            const count = group.days.reduce(
+              (sum, d) => sum + d.entries.length,
+              0,
+            );
+            return (
+              <section key={group.label} className="screening-log__month-group">
+                <div className="screening-log__month-heading">
+                  <h2>{group.label}</h2>
+                  <span className="text-muted">
+                    {t("log.monthCount", {
+                      count,
+                      defaultValue: "{{count}} seans",
+                    })}
+                  </span>
                 </div>
-              ))}
-            </div>
-          ))}
+                {group.days.map((day) => (
+                  <div key={day.date} className="screening-log__day-row">
+                    <DayLeaf dateStr={day.date} locale={locale} />
+
+                    {day.entries.length === 2 ? (
+                      <div className="screening-log__double-feature">
+                        <span className="screening-log__double-feature-label">
+                          <Ticket size={11} /> {t("log.doubleFeature")}
+                        </span>
+                        <div className="screening-log__double-feature-halves">
+                          <EntryCard
+                            entry={day.entries[0]}
+                            onDelete={handleDelete}
+                            onSave={handleSave}
+                            compact
+                          />
+                          <div
+                            className="screening-log__double-feature-divider"
+                            aria-hidden="true"
+                          >
+                            <Clapperboard size={12} />
+                          </div>
+                          <EntryCard
+                            entry={day.entries[1]}
+                            onDelete={handleDelete}
+                            onSave={handleSave}
+                            compact
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="screening-log__day-entries">
+                        {day.entries.map((entry) => (
+                          <EntryCard
+                            key={entry.id}
+                            entry={entry}
+                            onDelete={handleDelete}
+                            onSave={handleSave}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </section>
+            );
+          })}
         </div>
       )}
     </div>
