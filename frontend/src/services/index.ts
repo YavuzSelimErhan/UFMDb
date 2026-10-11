@@ -35,6 +35,7 @@ import type {
   FriendsActivity,
   ActivityFilter,
   ActivityFeedPage,
+  ReactionType,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -60,6 +61,22 @@ export const movieService = {
   dislike: async (id: string): Promise<MovieReactionResult> => {
     const { data } = await api.post(`/movies/${id}/dislike`);
     return data;
+  },
+  /** like/dislike endpoint'leri toggle çalışır; istenen tepkiye ulaşmak için gereken çağrıyı yapar. */
+  setReaction: async (
+    id: string,
+    desired: ReactionType | null,
+    current: ReactionType | null,
+  ): Promise<MovieReactionResult | null> => {
+    const target = desired ?? current;
+    if (desired === current || target === null) return null;
+    const toggle = (r: ReactionType) =>
+      r === "Like" ? movieService.like(id) : movieService.dislike(id);
+    // Kaldırmak için mevcut tepkinin, ayarlamak/geçmek için hedefin endpoint'ine basılır.
+    let result = await toggle(target);
+    // "current" bayatsa toggle ters etki eder; sonuç hedefe uymuyorsa bir kez düzelt.
+    if (result.currentUserReaction !== desired) result = await toggle(target);
+    return result;
   },
   toggleWatchlist: async (id: string): Promise<boolean> => {
     const { data } = await api.post(`/movies/${id}/watchlist`);

@@ -451,7 +451,10 @@
     "statAvgRating": "Avg Rating",
     "addEntryRating": "Rating (optional)",
     "editEntry": "Edit entry",
-    "saveEntry": "Save"
+    "saveEntry": "Save",
+    "reactionLabel": "Your reaction",
+    "reactionLike": "I liked it",
+    "reactionSaveError": "Screening saved, but your reaction couldn't be saved."
   },
   "reviews": {
     "title": "Reviews",

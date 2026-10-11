@@ -228,6 +228,7 @@ export default function FilmsTab({ userId }: FilmsTabProps) {
           <MovieCard
             movie={entry.movie}
             userRating={entry.userRating}
+            showReaction
             interactive={isOwnProfile}
             onRate={
               handleRate

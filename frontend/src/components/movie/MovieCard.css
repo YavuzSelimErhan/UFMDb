@@ -181,13 +181,13 @@
 }
 
 .movie-card__like.is-active {
-  background: #e0245e;
-  border-color: #e0245e;
+  background: var(--color-like);
+  border-color: var(--color-like);
   color: #fff;
 }
 
 .movie-card__unlike {
-  color: #e0245e;
+  color: var(--color-like);
 }
 
 /* ---------- Grid yerleşimi (kullanım yerinde) ---------- */
@@ -355,10 +355,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #273c75;
+  background: var(--color-dislike);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
   pointer-events: none;
+}
+.movie-card__rate-row-reaction {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+}
+.movie-card__rate-row-reaction.is-like {
+  color: var(--color-like);
+}
+.movie-card__rate-row-reaction.is-dislike {
+  color: var(--color-dislike);
 }
 
 /* ---------- Hareket azaltma tercihi ---------- */

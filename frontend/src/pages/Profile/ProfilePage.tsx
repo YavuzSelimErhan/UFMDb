@@ -247,6 +247,7 @@ export default function ProfilePage() {
                         movie={item.movie}
                         userRating={item.userRating}
                         compact
+                        showReaction
                         onLogClick={() => openLog(item.movie)}
                       />
                     ))}

@@ -507,6 +507,46 @@
   width: 100%;
 }
 
+.movie-detail__log-form-reaction {
+  margin-bottom: 16px;
+}
+.movie-detail__log-reaction-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.movie-detail__log-reaction-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+.movie-detail__log-reaction-btn:hover:not(:disabled) {
+  background-color: var(--color-bg-card-hover);
+  color: var(--color-text-primary);
+}
+.movie-detail__log-reaction-btn.is-like.is-active {
+  background-color: var(--color-like);
+  border-color: var(--color-like);
+  color: #fff;
+}
+.movie-detail__log-reaction-btn.is-dislike.is-active {
+  background-color: var(--color-dislike);
+  border-color: var(--color-dislike);
+  color: #fff;
+}
+
 .movie-detail__review-actions {
   display: flex;
   gap: 10px;

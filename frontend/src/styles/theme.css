@@ -38,7 +38,7 @@
   --color-shadow-accent: rgba(74, 144, 226, 0.25);
 
   --color-like: #e0245e;
-  --color-dislike: #9ba3b4;
+  --color-dislike: #5b78d6;
   --color-danger: #d3554f;
   --color-accent-text: #63a2ec; /* metin olarak kullanılan vurgu (puan, linkler) */
 }
@@ -57,7 +57,7 @@
   --color-shadow-accent: rgba(74, 144, 226, 0.18);
 
   --color-like: #d81b55;
-  --color-dislike: #6b7280;
+  --color-dislike: #273c75;
   --color-danger: #c0392b;
   --color-accent-text: #2f6bb8; /* #4a90e2 / #63a2ec açık zeminde metin olarak 4.5:1'i geçmez */
 }

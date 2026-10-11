@@ -451,7 +451,10 @@
     "statAvgRating": "Ort. Puan",
     "addEntryRating": "Puan (opsiyonel)",
     "editEntry": "Kaydı düzenle",
-    "saveEntry": "Kaydet"
+    "saveEntry": "Kaydet",
+    "reactionLabel": "Tepkin",
+    "reactionLike": "Beğendim",
+    "reactionSaveError": "Seans kaydedildi ama tepkin kaydedilemedi."
   },
   "reviews": {
     "title": "Yorumlar",

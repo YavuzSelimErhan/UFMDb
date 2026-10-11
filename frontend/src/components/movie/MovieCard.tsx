@@ -6,12 +6,10 @@ import { useTranslation } from "react-i18next";
 import { movieService } from "@/services";
 import { useAppSelector } from "@/store";
 import { getEntityTheme } from "@/utils/listTheme";
+import { getReaction } from "@/utils/reaction";
 import { useToast } from "@/components/common/Toast";
 import type { MovieListItem, ReactionType } from "@/types";
 import "./MovieCard.css";
-
-const getReaction = (m: MovieListItem): ReactionType | null =>
-  m.currentUserReaction ?? (m.isLikedByCurrentUser ? "Like" : null);
 
 interface Props {
   movie: MovieListItem;
@@ -23,6 +21,7 @@ interface Props {
   onLogClick?: () => void;
   rank?: number;
   compact?: boolean;
+  showReaction?: boolean;
 }
 
 export default function MovieCard({
@@ -35,6 +34,7 @@ export default function MovieCard({
   onLogClick,
   rank,
   compact,
+  showReaction,
 }: Props) {
   const { showToast } = useToast();
   const { t } = useTranslation();
@@ -165,7 +165,10 @@ export default function MovieCard({
 
   // Puan satırı: onRate verilmişse tıklanabilir/gezinebilir, sadece
   // userRating varsa salt-okunur, ikisi de yoksa hiç render edilmiyor.
-  const showRatingRow = Boolean(onRate) || userRating != null;
+  const showRatingRow =
+    Boolean(onRate) ||
+    userRating != null ||
+    (showReaction && reaction !== null);
 
   return (
     <Link
@@ -373,6 +376,27 @@ export default function MovieCard({
                 </span>
               );
             })}
+            {showReaction && reaction && (
+              <span
+                className={`movie-card__rate-row-reaction ${isDisliked ? "is-dislike" : "is-like"}`}
+                title={
+                  isDisliked
+                    ? t("movie.notForMe")
+                    : t("movie.liked", "Beğenildi")
+                }
+                aria-label={
+                  isDisliked
+                    ? t("movie.notForMe")
+                    : t("movie.liked", "Beğenildi")
+                }
+              >
+                {isDisliked ? (
+                  <HeartCrack size={14} />
+                ) : (
+                  <Heart size={14} fill="currentColor" />
+                )}
+              </span>
+            )}
           </div>
         )}
       </div>

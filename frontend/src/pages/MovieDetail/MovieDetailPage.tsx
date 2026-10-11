@@ -16,6 +16,7 @@ import {
 import type { MovieDetail, ReactionType } from "@/types";
 import ReviewsSection from "@/components/movie/ReviewsSection";
 import { movieService, screeningLogService } from "@/services";
+import { useToast } from "@/components/common/Toast";
 import { useAppSelector } from "@/store";
 import { getEntityTheme } from "@/utils/listTheme";
 import StarRating from "@/components/movie/StarRating";
@@ -39,6 +40,11 @@ export default function MovieDetailPage() {
   const [isLogging, setIsLogging] = useState(false);
   const [logDate, setLogDate] = useState(todayLocalDateString());
   const [logRating, setLogRating] = useState(0);
+  const { showToast } = useToast();
+  // undefined = kullanıcı dokunmadı (güncel tepki geçerli), null = bilerek temizledi
+  const [logReaction, setLogReaction] = useState<
+    ReactionType | null | undefined
+  >(undefined);
   const [containsSpoiler, setContainsSpoiler] = useState(false);
 
   const {
@@ -52,6 +58,17 @@ export default function MovieDetailPage() {
     enabled: !!id,
     retry: 1,
   });
+
+  const currentReaction = movie?.currentUserReaction ?? null;
+  const logReactionValue =
+    logReaction === undefined ? currentReaction : logReaction;
+  const pickLogReaction = (r: ReactionType) =>
+    setLogReaction(logReactionValue === r ? null : r);
+
+  // Form kapanınca seçim sıfırlanır, tekrar açılınca güncel tepkiyle başlar.
+  useEffect(() => {
+    if (!isLogging) setLogReaction(undefined);
+  }, [isLogging]);
 
   // Puan ve yorum artık tamamen ayrı kaynaklardan geliyor — biri değişince diğeri sıfırlanmıyor.
   useEffect(() => {
@@ -83,6 +100,7 @@ export default function MovieDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["movies"] });
       queryClient.invalidateQueries({ queryKey: ["home-feed"] });
       queryClient.invalidateQueries({ queryKey: ["list"] });
+      queryClient.invalidateQueries({ queryKey: ["watched-films"] });
     },
   });
 
@@ -143,16 +161,30 @@ export default function MovieDetailPage() {
   });
 
   const logMutation = useMutation({
-    mutationFn: () =>
-      screeningLogService.log(
+    mutationFn: async () => {
+      await screeningLogService.log(
         id!,
         `${logDate}T12:00:00.000Z`,
         logRating > 0 ? logRating : null,
-      ),
-    onSuccess: () => {
+      );
+      // Seans yazıldıktan sonra tepkiyi uygula; hata olursa seansı geri almıyoruz
+      // (kullanıcı tekrar deneyip çift kayıt oluşturmasın), sadece haber veriyoruz.
+      try {
+        await movieService.setReaction(id!, logReactionValue, currentReaction);
+        return { reactionFailed: false };
+      } catch {
+        return { reactionFailed: true };
+      }
+    },
+    onSuccess: ({ reactionFailed }) => {
       queryClient.invalidateQueries({ queryKey: ["movie", id] });
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["watched-films"] });
       queryClient.invalidateQueries({ queryKey: ["screening-log"] });
+      queryClient.invalidateQueries({ queryKey: ["movies"] });
+      queryClient.invalidateQueries({ queryKey: ["home-feed"] });
+      queryClient.invalidateQueries({ queryKey: ["list"] });
+      if (reactionFailed) showToast(t("log.reactionSaveError"), "error");
       setLogDate(todayLocalDateString());
       setLogRating(0);
       setIsLogging(false);
@@ -391,6 +423,41 @@ export default function MovieDetailPage() {
                 <div className="movie-detail__log-form-field">
                   <label>{t("log.addEntryRating")}</label>
                   <StarRating value={logRating} onChange={setLogRating} />
+                </div>
+              </div>
+
+              <div className="movie-detail__log-form-field movie-detail__log-form-reaction">
+                <label>{t("log.reactionLabel")}</label>
+                <div
+                  className="movie-detail__log-reaction-group"
+                  role="group"
+                  aria-label={t("log.reactionLabel")}
+                >
+                  <button
+                    type="button"
+                    className={`movie-detail__log-reaction-btn is-like${logReactionValue === "Like" ? " is-active" : ""}`}
+                    aria-pressed={logReactionValue === "Like"}
+                    disabled={logMutation.isPending}
+                    onClick={() => pickLogReaction("Like")}
+                  >
+                    <Heart
+                      size={14}
+                      fill={
+                        logReactionValue === "Like" ? "currentColor" : "none"
+                      }
+                    />
+                    {t("log.reactionLike")}
+                  </button>
+                  <button
+                    type="button"
+                    className={`movie-detail__log-reaction-btn is-dislike${logReactionValue === "Dislike" ? " is-active" : ""}`}
+                    aria-pressed={logReactionValue === "Dislike"}
+                    disabled={logMutation.isPending}
+                    onClick={() => pickLogReaction("Dislike")}
+                  >
+                    <HeartCrack size={14} />
+                    {t("movie.notForMe")}
+                  </button>
                 </div>
               </div>
 
