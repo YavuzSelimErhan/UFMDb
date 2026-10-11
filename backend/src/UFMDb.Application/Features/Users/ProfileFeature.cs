@@ -578,7 +578,8 @@ public class RemoveWatchedMovieCommandHandler : IRequestHandler<RemoveWatchedMov
 // ---------- Seans Defteri: gün gün gruplanmış, "double feature" ve rewatch numaralı ----------
 public record ScreeningLogEntryDto(
     Guid Id, Guid MovieId, string MovieTitle, string PosterUrl, DateTime WatchedAtUtc,
-    int ScreeningNumber, decimal? Rating, string? ReviewContent
+    int ScreeningNumber, decimal? Rating, string? ReviewContent,
+    ReactionType? Reaction = null
 );
 public record ScreeningLogDayDto(DateTime Date, List<ScreeningLogEntryDto> Entries);
 
@@ -601,6 +602,10 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
             .Where(r => r.UserId == request.UserId && !r.IsDeleted)
             .ToDictionaryAsync(r => r.MovieId, r => r.Content, ct);
 
+        var reactions = await _context.Likes.AsNoTracking()
+            .Where(l => l.UserId == request.UserId)
+            .ToDictionaryAsync(l => l.MovieId, l => l.Reaction, ct);
+
         var watchCounts = new Dictionary<Guid, int>();
         var decorated = entries.Select(w =>
         {
@@ -610,7 +615,8 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
             return new ScreeningLogEntryDto(
                 w.Id, w.MovieId, w.Movie.Title, w.Movie.PosterUrl, w.WatchedAtUtc, count,
                 w.Rating, // artık doğrudan seans satırından — her rewatch kendi gerçek puanını taşıyor
-                reviews.TryGetValue(w.MovieId, out var content) ? content : null
+                reviews.TryGetValue(w.MovieId, out var content) ? content : null,
+                reactions.TryGetValue(w.MovieId, out var reaction) ? reaction : (ReactionType?)null
             );
         }).ToList();
 

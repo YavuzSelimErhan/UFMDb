@@ -454,7 +454,8 @@
     "saveEntry": "Kaydet",
     "reactionLabel": "Tepkin",
     "reactionLike": "Beğendim",
-    "reactionSaveError": "Seans kaydedildi ama tepkin kaydedilemedi."
+    "reactionSaveError": "Seans kaydedildi ama tepkin kaydedilemedi.",
+    "confirmDeleteEntry": "Bu seans silinsin mi?"
   },
   "reviews": {
     "title": "Yorumlar",

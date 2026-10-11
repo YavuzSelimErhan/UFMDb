@@ -27,6 +27,12 @@
   align-items: center;
   gap: 6px;
 }
+.screening-log__add-btn svg {
+  transition: transform var(--transition-fast);
+}
+.screening-log__add-btn.is-open svg {
+  transform: rotate(45deg);
+}
 
 /* ---------- Gişe panosu: özet istatistikler ---------- */
 .screening-log__marquee {
@@ -53,6 +59,7 @@
     "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
   font-size: 1.55rem;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   color: var(--color-accent);
   text-shadow: 0 0 20px var(--color-accent-muted);
 }
@@ -189,6 +196,27 @@
   height: 38px;
 }
 
+/* ---------- Ekleme formunda puan + tepki satırı ---------- */
+.screening-log__add-rating-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--color-border);
+}
+.screening-log__add-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.screening-log__add-field label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
 /* ---------- Zaman çizelgesi ---------- */
 .screening-log__timeline {
   position: relative;
@@ -295,43 +323,94 @@
 
 .screening-log__entry-link {
   display: flex;
-  gap: 12px;
-  padding: 10px 14px 10px 12px;
+  gap: 14px;
+  padding: 12px 14px 12px 12px;
   min-width: 0;
 }
-.screening-log__entry-poster {
-  width: 46px;
-  height: 66px;
-  object-fit: cover;
-  border-radius: 5px;
-  flex-shrink: 0;
+.screening-log__entry-link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
 }
+
+.screening-log__entry-poster {
+  width: 52px;
+  height: 78px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background-color: var(--color-bg-elevated);
+}
+.screening-log__entry-poster--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  border: 1px dashed var(--color-border);
+}
+
 .screening-log__entry-body {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 5px;
   justify-content: center;
 }
 .screening-log__entry-body h4 {
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .screening-log__entry-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 4px 12px;
 }
 .screening-log__entry-rating {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: var(--entry-accent);
+  gap: 6px;
 }
+.screening-log__stars {
+  display: inline-flex;
+  gap: 1px;
+  color: #d4af37;
+}
+.screening-log__star {
+  position: relative;
+  display: inline-flex;
+  width: 13px;
+  height: 13px;
+}
+.screening-log__star-base {
+  color: var(--color-border);
+}
+.screening-log__star-fill {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: block;
+}
+.screening-log__entry-rating-num {
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+
+.screening-log__reaction {
+  display: inline-flex;
+  align-items: center;
+}
+.screening-log__reaction.is-like {
+  color: var(--color-like);
+}
+.screening-log__reaction.is-dislike {
+  color: var(--color-dislike);
+}
+
 .screening-log__entry-rewatch {
   font-family:
     "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
@@ -340,46 +419,100 @@
 }
 .screening-log__entry-review {
   font-size: 0.78rem;
+  line-height: 1.45;
   color: var(--color-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.screening-log__entry:hover .screening-log__entry-delete {
-  opacity: 1;
 }
 
+/* ---------- Kart aksiyonları: hover VEYA klavye odağında görünür ---------- */
 .screening-log__entry-actions {
   position: absolute;
   top: 8px;
   right: 8px;
   display: flex;
   gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   opacity: 0;
   transition: opacity var(--transition-fast);
 }
-.screening-log__entry:hover .screening-log__entry-actions {
+.screening-log__entry:hover .screening-log__entry-actions,
+.screening-log__entry:focus-within .screening-log__entry-actions {
   opacity: 1;
 }
 
 .screening-log__entry-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--color-text-muted);
-  padding: 4px;
+  padding: 5px;
   border-radius: 50%;
 }
 .screening-log__entry-icon-btn:hover {
   color: var(--color-accent);
-  background-color: var(--color-bg-elevated);
+  background-color: var(--color-bg-card-hover);
 }
 .screening-log__entry-icon-btn--danger:hover {
-  color: #e05c5c;
+  color: var(--color-danger);
+}
+
+/* Dokunmatik cihazlarda hover yok: aksiyonlar hep görünür, başlığı örtmesin diye pay bırakılır */
+@media (hover: none) {
+  .screening-log__entry-actions {
+    opacity: 1;
+  }
+  .screening-log__entry-link {
+    padding-right: 64px;
+  }
+}
+
+/* ---------- Silme onayı (kartın üstünde satır içi) ---------- */
+.screening-log__entry-confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding: 10px 14px;
+  background-color: color-mix(in srgb, var(--color-bg-card) 94%, transparent);
+  backdrop-filter: blur(4px);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+.screening-log__entry-confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+.screening-log__entry-confirm-actions button {
+  padding: 5px 12px;
+  font-size: 0.78rem;
+}
+.screening-log__entry-confirm-delete {
+  border-radius: var(--radius-sm);
+  background-color: var(--color-danger);
+  color: #fff;
+  font-weight: 600;
+}
+.screening-log__entry-confirm-delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ---------- Düzenleme modu ---------- */
 .screening-log__entry--editing {
   display: flex;
-  gap: 12px;
-  padding: 10px 14px 10px 12px;
+  gap: 14px;
+  padding: 12px 14px 12px 12px;
 }
 .screening-log__entry-edit-body {
   flex: 1;
@@ -387,6 +520,12 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+.screening-log__entry-edit-title {
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .screening-log__entry-edit-body input[type="date"] {
   padding: 7px 9px;
@@ -403,21 +542,6 @@
 .screening-log__entry-edit-actions button {
   padding: 5px 12px;
   font-size: 0.78rem;
-}
-
-/* ---------- Ekleme formunda puan satırı ---------- */
-.screening-log__add-rating-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px dashed var(--color-border);
-}
-.screening-log__add-rating-row label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
 }
 
 /* ---------- Çifte Gösterim kartı ---------- */
@@ -545,6 +669,9 @@
   .screening-log__entry-actions {
     opacity: 1;
   }
+  .screening-log__entry-link {
+    padding-right: 64px;
+  }
 
   .screening-log__header h1 {
     font-size: 1.4rem;
@@ -590,4 +717,16 @@
   );
   background-size: 10px 100%;
   background-repeat: repeat-x;
+}
+
+/* ---------- Hareket azaltma tercihi ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .screening-log__entry,
+  .screening-log__entry-actions,
+  .screening-log__add-btn svg {
+    transition: none;
+  }
+  .screening-log__entry:hover {
+    transform: none;
+  }
 }

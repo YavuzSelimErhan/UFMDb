@@ -454,7 +454,8 @@
     "saveEntry": "Save",
     "reactionLabel": "Your reaction",
     "reactionLike": "I liked it",
-    "reactionSaveError": "Screening saved, but your reaction couldn't be saved."
+    "reactionSaveError": "Screening saved, but your reaction couldn't be saved.",
+    "confirmDeleteEntry": "Delete this screening?"
   },
   "reviews": {
     "title": "Reviews",

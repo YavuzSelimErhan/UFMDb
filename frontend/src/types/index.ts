@@ -357,6 +357,7 @@ export interface ScreeningLogEntry {
   screeningNumber: number;
   rating: number | null;
   reviewContent: string | null;
+  reaction?: ReactionType | null;
 }
 
 export interface ScreeningLogDay {
