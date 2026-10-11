@@ -108,22 +108,36 @@
   pointer-events: none;
 }
 
+/* Gün ayırıcı: sitenin film-şeridi/perforasyon motifiyle uyumlu, ama her gün grubunda
+   tekrar ettiği için bilinçli olarak daha sade — düz çizgi yerine küçük, soluk delik
+   dizisi (ProfileHeader/EditProfilePage'deki kalın perforasyon şeridinin "mini" hali). */
 .activity-page__day {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 30px 0 6px;
+  gap: 14px;
+  margin: 34px 0 10px;
   font-family: "SF Mono", "Fira Code", monospace;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   color: var(--color-text-muted);
 }
+.activity-page__day-label {
+  flex-shrink: 0;
+}
 .activity-page__day::after {
   content: "";
   flex: 1;
-  height: 1px;
-  background: var(--color-border);
+  height: 5px;
+  background-image: radial-gradient(
+    circle,
+    var(--color-border) 1.4px,
+    transparent 1.4px
+  );
+  background-size: 9px 5px;
+  background-repeat: repeat-x;
+  background-position: left center;
 }
 section:first-child > .activity-page__day {
   margin-top: 6px;
@@ -351,9 +365,19 @@ section:first-child > .activity-page__day {
   .activity-page__poster {
     width: 52px;
   }
-  .activity-page__time {
-    display: none;
+
+  /* Saat artık kaybolmuyor: satırın altına, avatarla aynı girintiye (avatar genişliği +
+     boşluk) hizalanarak iniyor — bilgi kaybı yok, sadece düzen değişiyor. */
+  .activity-page__line-wrap {
+    flex-wrap: wrap;
   }
+  .activity-page__time {
+    flex-shrink: 0;
+    width: 100%;
+    margin-left: calc(28px + 10px);
+    padding-top: 2px;
+  }
+
   .activity-page__nudge {
     flex-direction: column;
     align-items: flex-start;

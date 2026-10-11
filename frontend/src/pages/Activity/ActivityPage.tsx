@@ -18,6 +18,7 @@ import {
   PageError,
   PageSpinner,
 } from "@/components/common/PageState";
+import { getActivityVerb } from "@/utils/activityVerb";
 import type { ActivityFeedItem, ActivityFilter } from "@/types";
 import "./ActivityPage.css";
 
@@ -37,42 +38,8 @@ const FILTER_LABEL_KEYS: Record<ActivityFilter, string> = {
   reactions: "activityPage.filters.reactions",
 };
 
-type VerbKind =
-  | "rated"
-  | "watched"
-  | "watchedAndRated"
-  | "liked"
-  | "disliked"
-  | "reviewed"
-  | "ratedAndReviewed";
-
-/** [başkası, sen] — "Elif puanladı" / "Sen puanladın" (Türkçede fiil çekimi değişiyor). */
-const VERB_KEYS: Record<VerbKind, readonly [string, string]> = {
-  rated: ["activityPage.verbs.rated", "activityPage.verbsYou.rated"],
-  watched: ["activityPage.verbs.watched", "activityPage.verbsYou.watched"],
-  watchedAndRated: [
-    "activityPage.verbs.watchedAndRated",
-    "activityPage.verbsYou.watchedAndRated",
-  ],
-  liked: ["activityPage.verbs.liked", "activityPage.verbsYou.liked"],
-  disliked: ["activityPage.verbs.disliked", "activityPage.verbsYou.disliked"],
-  reviewed: ["activityPage.verbs.reviewed", "activityPage.verbsYou.reviewed"],
-  ratedAndReviewed: [
-    "activityPage.verbs.ratedAndReviewed",
-    "activityPage.verbsYou.ratedAndReviewed",
-  ],
-};
-
 function parseFilter(v: string | null): ActivityFilter {
   return FILTERS.includes(v as ActivityFilter) ? (v as ActivityFilter) : "all";
-}
-
-function getVerbKind(a: ActivityFeedItem): VerbKind {
-  if (a.hasReview) return a.rating != null ? "ratedAndReviewed" : "reviewed";
-  if (a.watched) return a.rating != null ? "watchedAndRated" : "watched";
-  if (a.rating != null) return "rated";
-  if (a.reaction === "Dislike") return "disliked";
-  return "liked";
 }
 
 /* ---------- tarih/saat yardımcıları ---------- */
@@ -209,7 +176,7 @@ function ActivityRow({ item }: { item: ActivityFeedItem }) {
     ? t("activityPage.you")
     : item.user.fullName || item.user.userName;
   const profileHref = you ? "/profile" : `/users/${item.user.userName}`;
-  const verb = t(VERB_KEYS[getVerbKind(item)][you ? 1 : 0]);
+  const verb = getActivityVerb(item, t);
   const year = item.movie.releaseYear > 0 ? item.movie.releaseYear : null;
   const hideReview = item.containsSpoiler && !revealed;
 
@@ -409,7 +376,9 @@ export default function ActivityPage() {
           <div className={`activity-page__feed${dimmed ? " is-dimmed" : ""}`}>
             {groups.map((g) => (
               <section key={g.key}>
-                <h2 className="activity-page__day">{g.label}</h2>
+                <h2 className="activity-page__day">
+                  <span className="activity-page__day-label">{g.label}</span>
+                </h2>
                 {g.items.map((item) => (
                   <ActivityRow
                     key={`${item.user.id}-${item.movie.id}-${item.lastActivityAtUtc}`}

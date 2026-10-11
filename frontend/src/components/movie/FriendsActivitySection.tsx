@@ -2,7 +2,6 @@ import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import type { TFunction } from "i18next";
 import {
   Film,
   Heart,
@@ -15,6 +14,7 @@ import {
 import { feedService } from "@/services";
 import { useAppSelector } from "@/store";
 import PersonAvatar from "@/components/common/PersonAvatar";
+import { getFriendActivityVerb } from "@/utils/activityVerb";
 import type { FriendActivity, FriendActivityUser } from "@/types";
 import "./FriendsActivitySection.css";
 
@@ -34,20 +34,6 @@ function timeAgo(iso: string, locale: string): string {
 }
 
 const displayName = (u: FriendActivityUser) => u.fullName || u.userName;
-
-/** "Ne yaptı?" cümlesi: puan > izleme > tepki > yorum önceliğiyle. */
-function getVerb(a: FriendActivity, spotlight: boolean, t: TFunction): string {
-  if (spotlight && a.hasReview) {
-    return a.rating != null
-      ? t("friendsActivity.verbRatedAndReviewed")
-      : t("friendsActivity.verbReviewed");
-  }
-  if (a.rating != null) return t("friendsActivity.verbRated");
-  if (a.watched) return t("friendsActivity.verbWatched");
-  if (a.reaction === "Like") return t("friendsActivity.verbLiked");
-  if (a.reaction === "Dislike") return t("friendsActivity.verbDisliked");
-  return t("friendsActivity.verbReviewed");
-}
 
 /** Fiil zaten tepkiyi anlatıyorsa ikinci satırda tekrar etmeyiz. */
 const verbCoversReaction = (a: FriendActivity) =>
@@ -181,7 +167,7 @@ function ActivityCard({ a }: { a: FriendActivity }) {
         </h3>
         <p className="friends-activity__card-who">
           <Link to={`/users/${a.user.userName}`}>{name}</Link>{" "}
-          {getVerb(a, false, t)}
+          {getFriendActivityVerb(a, false, t)}
         </p>
         <p className="friends-activity__card-meta">{meta.join(" · ")}</p>
       </div>
@@ -218,7 +204,7 @@ function Spotlight({ a }: { a: FriendActivity }) {
         </Link>
         <p className="friends-activity__who">
           <Link to={`/users/${a.user.userName}`}>{name}</Link>{" "}
-          {getVerb(a, true, t)}
+          {getFriendActivityVerb(a, true, t)}
         </p>
         <time className="friends-activity__time" dateTime={a.lastActivityAtUtc}>
           {timeAgo(a.lastActivityAtUtc, i18n.language)}
