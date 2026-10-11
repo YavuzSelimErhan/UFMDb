@@ -33,6 +33,8 @@ import type {
   NotificationItem,
   MovieReactionResult,
   FriendsActivity,
+  ActivityFilter,
+  ActivityFeedPage,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -431,6 +433,14 @@ export const notificationService = {
 export const feedService = {
   getFriendsActivity: async (): Promise<FriendsActivity> => {
     const { data } = await api.get("/feed/friends");
+    return data;
+  },
+  getActivity: async (params: {
+    type: ActivityFilter;
+    before?: string;
+    pageSize: number;
+  }): Promise<ActivityFeedPage> => {
+    const { data } = await api.get("/feed/activity", { params });
     return data;
   },
 };

@@ -86,11 +86,24 @@
 }
 
 .friends-activity__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-top: 28px;
   padding-top: 18px;
   border-top: 1px solid var(--color-border);
   font-size: 0.82rem;
   color: var(--color-text-secondary);
+}
+.friends-activity__see-all {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-accent-hover);
+  white-space: nowrap;
+}
+.friends-activity__see-all:hover {
+  color: var(--color-text-primary);
 }
 
 /* ---------- Ortak: poster ---------- */
@@ -288,8 +301,10 @@
 .friends-activity__card {
   transition: transform var(--transition-base);
 }
-.friends-activity__card:hover {
-  transform: translateY(-6px);
+@media (hover: hover) {
+  .friends-activity__card:hover {
+    transform: translateY(-6px);
+  }
 }
 .friends-activity__poster-wrap {
   position: relative;
@@ -443,36 +458,143 @@
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 900px) {
+
+/* Tablet: spotlight üstte tam genişlik, kartlar altında 4'lü sıra kalır
+   (2 sütuna düşmek 700px'lik ekranda devasa poster kartları üretiyordu). */
+@media (max-width: 1000px) {
   .friends-activity__grid {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .friends-activity__rail {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .friends-activity__find {
     flex-direction: column;
     align-items: flex-start;
   }
 }
-@media (max-width: 520px) {
+
+/* Telefon */
+@media (max-width: 640px) {
   .friends-activity {
     margin-bottom: 40px;
   }
+  .friends-activity__header {
+    margin-bottom: 20px;
+    gap: 14px;
+  }
+  .friends-activity__active .friends-activity__see-all {
+    display: none;
+  }
+
+  /* Spotlight: poster + başlık/puan yan yana, yorum ve etiketler TAM genişlikte.
+     (Eskiden yorum, posterin yanındaki ~190px'lik sütuna sıkışıp 5 satırda kesiliyordu.) */
   .friends-activity__spot {
     padding: 18px;
+    gap: 16px;
+  }
+  .friends-activity__spot-top {
+    align-items: flex-start;
+  }
+  .friends-activity__who {
+    flex: 1;
+    font-size: 0.84rem;
+    line-height: 1.4;
+  }
+  .friends-activity__spot-body {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr;
+    column-gap: 16px;
+    align-items: start;
   }
   .friends-activity__spot .friends-activity__poster {
-    width: 104px;
+    width: 96px;
+    grid-column: 1;
+    grid-row: 1 / 4;
+  }
+  .friends-activity__spot-info {
+    display: contents;
   }
   .friends-activity__movie-title {
+    grid-column: 2;
+    grid-row: 1;
     font-size: 1.2rem;
   }
+  .friends-activity__movie-meta {
+    grid-column: 2;
+    grid-row: 2;
+    margin-bottom: 10px;
+  }
+  .friends-activity__rating {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: start;
+    margin-bottom: 0;
+  }
+  .friends-activity__quote,
+  .friends-activity__spoiler {
+    grid-column: 1 / -1;
+    margin: 14px 0 0;
+  }
+  .friends-activity__chips {
+    grid-column: 1 / -1;
+    margin-top: 12px;
+  }
+  .friends-activity__spot-footer {
+    padding-top: 14px;
+    justify-content: stretch;
+  }
+  .friends-activity__spot-footer .btn-primary {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Kartlar: 2x2 yerine yatay kaydırmalı sıra (ana sayfadaki diğer raflar gibi).
+     Dikey yer kazandırır; üçüncü kartın yarısı görünür, kaydırılabildiği belli olur. */
+  .friends-activity__rail {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 8px 0 10px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .friends-activity__rail::-webkit-scrollbar {
+    display: none;
+  }
+  .friends-activity__card {
+    flex: 0 0 138px;
+    scroll-snap-align: start;
+  }
+
+  .friends-activity__footer {
+    margin-top: 16px;
+    padding-top: 14px;
+  }
+
   .friends-activity__find {
     padding: 22px;
+    gap: 22px;
   }
   .friends-activity__find-ghosts span {
-    width: 56px;
+    width: 54px;
+  }
+}
+
+/* Çok dar telefon */
+@media (max-width: 380px) {
+  .friends-activity__spot-body {
+    grid-template-columns: 84px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+  .friends-activity__spot .friends-activity__poster {
+    width: 84px;
+  }
+  .friends-activity__movie-title {
+    font-size: 1.08rem;
+  }
+  .friends-activity__card {
+    flex-basis: 128px;
   }
 }
 

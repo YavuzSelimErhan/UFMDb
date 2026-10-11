@@ -20,6 +20,19 @@ public class FeedController : ControllerBase
         _currentUser = currentUser;
     }
 
+    /// <summary>
+    /// Tüm aktivite sayfası: takip edilenlerin ve kullanıcının kendi hareketleri, yeniden eskiye.
+    /// before: önceki yanıttaki nextBefore (ilk sayfada boş). type: all|reviews|ratings|diary|reactions.
+    /// </summary>
+    [HttpGet("activity")]
+    public async Task<IActionResult> GetActivity(
+        [FromQuery] DateTime? before,
+        [FromQuery] string? type,
+        [FromQuery] int pageSize = 20,
+        CancellationToken ct = default) =>
+        Ok(await _mediator.Send(
+            new GetActivityFeedQuery(_currentUser.UserId!.Value, before, type, pageSize), ct));
+
     /// <summary>Takip edilen kullanıcıların son 7 günlük film aktivitesi (ana sayfa bölümü).</summary>
     [HttpGet("friends")]
     public async Task<IActionResult> GetFriendsActivity(CancellationToken ct) =>

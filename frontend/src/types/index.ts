@@ -480,3 +480,37 @@ export interface FriendsActivity {
   spotlight: FriendActivity | null;
   items: FriendActivity[];
 }
+
+export type ActivityFilter =
+  | "all"
+  | "reviews"
+  | "ratings"
+  | "diary"
+  | "reactions";
+
+export interface ActivityFeedMovie {
+  id: string;
+  title: string;
+  posterUrl: string;
+  releaseYear: number;
+}
+
+export interface ActivityFeedItem {
+  user: FriendActivityUser;
+  isCurrentUser: boolean;
+  movie: ActivityFeedMovie;
+  rating: number | null;
+  watched: boolean;
+  reaction: ReactionType | null;
+  hasReview: boolean;
+  reviewContent: string | null;
+  containsSpoiler: boolean;
+  lastActivityAtUtc: string;
+}
+
+export interface ActivityFeedPage {
+  items: ActivityFeedItem[];
+  hasMore: boolean;
+  nextBefore: string | null;
+  followingCount: number;
+}

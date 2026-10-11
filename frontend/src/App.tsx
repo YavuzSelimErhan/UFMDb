@@ -27,6 +27,7 @@ import UserProfilePage from "@/pages/Users/UserProfilePage";
 import PrivacyPolicyPage from "@/pages/Legal/PrivacyPolicyPage";
 import TermsPage from "@/pages/Legal/TermsPage";
 import { ToastProvider } from "@/components/common/Toast";
+import ActivityPage from "@/pages/Activity/ActivityPage";
 
 function AppShell() {
   useScrollRestoration();
@@ -58,6 +59,7 @@ function AppShell() {
             <Route path="/lists/edit/:id" element={<EditListPage />} />
             <Route path="/users" element={<UsersPage />} />
             <Route path="/users/:userName" element={<UserProfilePage />} />
+            <Route path="/activity" element={<ActivityPage />} />
           </Route>
 
           <Route element={<ProtectedRoute requireAdmin />}>

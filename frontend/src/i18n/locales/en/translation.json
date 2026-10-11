@@ -582,6 +582,45 @@
     "goToMovie": "Go to movie",
     "findTitle": "Find your friends",
     "findText": "What the people you follow watch, rate and review shows up here.",
-    "findCta": "Discover users"
+    "findCta": "Discover users",
+    "seeAll": "See all",
+    "seeAllActivity": "See all activity"
+  },
+  "activityPage": {
+    "title": "Friend activity",
+    "subtitle": "Films the people you follow — and you — watched, rated and reviewed.",
+    "you": "You",
+    "filtersAria": "Activity filter",
+    "filters": {
+      "all": "All",
+      "reviews": "Reviews",
+      "ratings": "Ratings",
+      "diary": "Diary",
+      "reactions": "Reactions"
+    },
+    "verbs": {
+      "rated": "rated",
+      "watched": "watched",
+      "watchedAndRated": "watched and rated",
+      "liked": "liked",
+      "disliked": "wasn't into",
+      "reviewed": "reviewed",
+      "ratedAndReviewed": "rated and reviewed"
+    },
+    "verbsYou": {
+      "rated": "rated",
+      "watched": "watched",
+      "watchedAndRated": "watched and rated",
+      "liked": "liked",
+      "disliked": "weren't into",
+      "reviewed": "reviewed",
+      "ratedAndReviewed": "rated and reviewed"
+    },
+    "spoilerHidden": "This review contains spoilers.",
+    "loadMore": "Show more",
+    "emptyTitle": "No activity yet",
+    "emptyHint": "When you rate, watch or review a film, it shows up here.",
+    "findFriendsTitle": "You're not following anyone yet",
+    "findFriendsText": "Your friends' activity will show up here alongside yours."
   }
 }

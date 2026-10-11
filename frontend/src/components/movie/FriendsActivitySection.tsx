@@ -389,6 +389,9 @@ export default function FriendsActivitySection() {
       <p>
         {t("friendsActivity.activeThisWeek", { n: weeklyActiveFriendCount })}
       </p>
+      <Link to="/activity" className="friends-activity__see-all">
+        {t("friendsActivity.seeAll")}
+      </Link>
     </div>
   );
 
@@ -407,9 +410,14 @@ export default function FriendsActivitySection() {
         </div>
       </div>
 
-      <p className="friends-activity__footer">
-        {t("friendsActivity.activityCount", { n: weeklyActivityCount })}
-      </p>
+      <div className="friends-activity__footer">
+        <span>
+          {t("friendsActivity.activityCount", { n: weeklyActivityCount })}
+        </span>
+        <Link to="/activity" className="friends-activity__see-all">
+          {t("friendsActivity.seeAllActivity")}
+        </Link>
+      </div>
     </section>
   );
 }
