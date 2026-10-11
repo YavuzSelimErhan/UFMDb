@@ -497,8 +497,8 @@ export interface ActivityFeedMovie {
 
 export interface ActivityFeedItem {
   user: FriendActivityUser;
+  movie: FriendActivityMovie;
   isCurrentUser: boolean;
-  movie: ActivityFeedMovie;
   rating: number | null;
   watched: boolean;
   reaction: ReactionType | null;
@@ -509,8 +509,8 @@ export interface ActivityFeedItem {
 }
 
 export interface ActivityFeedPage {
-  items: ActivityFeedItem[];
-  hasMore: boolean;
-  nextBefore: string | null;
   followingCount: number;
+  items: ActivityFeedItem[];
+  nextBefore: string | null;
+  hasMore: boolean;
 }
