@@ -365,6 +365,20 @@ export interface ScreeningLogDay {
   entries: ScreeningLogEntry[];
 }
 
+export interface ScreeningLogPage {
+  days: ScreeningLogDay[];
+  nextCursor: string | null;
+}
+
+export interface ScreeningLogSummary {
+  totalScreenings: number;
+  uniqueFilms: number;
+  ratedScreenings: number;
+  averageRating: number | null;
+  likedFilms: number;
+  notForMeFilms: number;
+}
+
 export interface RecentlyWatchedItem {
   movie: MovieListItem;
   userRating: number | null;

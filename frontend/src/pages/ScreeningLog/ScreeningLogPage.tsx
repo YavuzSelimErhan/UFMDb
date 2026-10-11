@@ -1,7 +1,13 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import {
   Ticket,
   Plus,
@@ -74,6 +80,18 @@ function apiErrorMessage(err: unknown, fallback: string): string {
     ? fieldMessages.join(" ")
     : (data?.title ?? fallback);
 }
+
+/** Arama kutusu her tuşta istek atmasın diye değeri gecikmeli döner. */
+function useDebouncedValue<T>(value: T, delay = 350): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(id);
+  }, [value, delay]);
+  return debounced;
+}
+
+const PAGE_SIZE = 20;
 
 function DayLeaf({ dateStr, locale }: { dateStr: string; locale: string }) {
   const date = toUtcDateOnly(dateStr);
@@ -340,6 +358,7 @@ export default function ScreeningLogPage() {
   const [isAdding, setIsAdding] = useState(false);
   const [filter, setFilter] = useState<ReactionFilter>("all");
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search.trim());
   const [selectedMovie, setSelectedMovie] = useState<{
     id: string;
     title: string;
@@ -352,11 +371,43 @@ export default function ScreeningLogPage() {
     ReactionType | null | undefined
   >(undefined);
 
-  const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["screening-log"],
-    queryFn: screeningLogService.getAll,
+  const reactionParam: ReactionType | undefined =
+    filter === "liked" ? "Like" : filter === "disliked" ? "Dislike" : undefined;
+
+  // Gün bazlı imleçli sayfalama: filtre/arama değişince anahtar değişir, liste baştan yüklenir.
+  const logQuery = useInfiniteQuery({
+    queryKey: [
+      "screening-log",
+      "list",
+      { reaction: reactionParam ?? null, search: debouncedSearch },
+    ],
+    queryFn: ({ pageParam }) =>
+      screeningLogService.getPage({
+        cursor: pageParam,
+        pageSize: PAGE_SIZE,
+        reaction: reactionParam,
+        search: debouncedSearch || undefined,
+      }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+    placeholderData: keepPreviousData,
+    staleTime: 30_000,
     retry: 1,
   });
+
+  // İstatistikler sayfalamadan bağımsız: tüm günlük üzerinden sunucuda hesaplanır.
+  const summaryQuery = useQuery({
+    queryKey: ["screening-log", "summary"],
+    queryFn: screeningLogService.getSummary,
+    staleTime: 30_000,
+    retry: 1,
+  });
+  const summary = summaryQuery.data;
+
+  const days = useMemo(
+    () => logQuery.data?.pages.flatMap((p) => p.days) ?? [],
+    [logQuery.data],
+  );
 
   // Seçilen filmdeki önceki tepki: form onunla başlar.
   const { data: serverReaction, isLoading: isReactionLoading } = useQuery({
@@ -370,6 +421,7 @@ export default function ScreeningLogPage() {
   const reaction = addReaction === undefined ? initialReaction : addReaction;
 
   const invalidateAll = () => {
+    // "screening-log" öneki hem liste hem özet sorgusunu kapsar.
     queryClient.invalidateQueries({ queryKey: ["screening-log"] });
     queryClient.invalidateQueries({ queryKey: ["my-profile"] });
     queryClient.invalidateQueries({ queryKey: ["watched-films"] });
@@ -438,42 +490,23 @@ export default function ScreeningLogPage() {
     rating: number | null,
   ) => updateMutation.mutateAsync({ id, watchedAtUtc, rating });
 
-  if (isLoading) return <PageSpinner label={t("common.loading")} />;
-  if (isError || !data)
+  if (logQuery.isLoading || summaryQuery.isLoading)
+    return <PageSpinner label={t("common.loading")} />;
+  if (logQuery.isError)
     return (
-      <PageError message={t("common.genericError")} onRetry={() => refetch()} />
+      <PageError
+        message={t("common.genericError")}
+        onRetry={() => logQuery.refetch()}
+      />
     );
 
   const locale = i18n.language === "tr" ? "tr-TR" : "en-US";
-  const allEntries = data.flatMap((d) => d.entries);
-  const uniqueFilmCount = new Set(allEntries.map((e) => e.movieId)).size;
-  const ratedEntries = allEntries.filter((e) => e.rating != null);
-  const avgRating =
-    ratedEntries.length > 0
-      ? (
-          ratedEntries.reduce((sum, e) => sum + (e.rating ?? 0), 0) /
-          ratedEntries.length
-        ).toFixed(1)
-      : "—";
-  const likeCount = allEntries.filter((e) => e.reaction === "Like").length;
-  const dislikeCount = allEntries.filter(
-    (e) => e.reaction && e.reaction !== "Like",
-  ).length;
-
-  // Filtre + arama: boş kalan günler listeden düşer.
-  const query = search.trim().toLocaleLowerCase(locale);
-  const matches = (e: ScreeningLogEntry) => {
-    if (filter === "liked" && e.reaction !== "Like") return false;
-    if (filter === "disliked" && (!e.reaction || e.reaction === "Like"))
-      return false;
-    return (
-      query === "" || e.movieTitle.toLocaleLowerCase(locale).includes(query)
-    );
-  };
-  const visibleDays = data
-    .map((d) => ({ ...d, entries: d.entries.filter(matches) }))
-    .filter((d) => d.entries.length > 0);
-  const monthGroups = groupDaysByMonth(visibleDays, locale);
+  const monthGroups = groupDaysByMonth(days, locale);
+  const hasFilter = filter !== "all" || debouncedSearch !== "";
+  // Filtre sonuç vermese bile günlükte kayıt varsa araç çubuğu kalmalı.
+  const hasAnyEntries = summary
+    ? summary.totalScreenings > 0
+    : days.length > 0 || hasFilter;
 
   const filterOptions: { value: ReactionFilter; label: string }[] = [
     { value: "all", label: t("log.filterAll", "Tümü") },
@@ -502,7 +535,7 @@ export default function ScreeningLogPage() {
         </button>
       </div>
 
-      {allEntries.length > 0 && (
+      {summary && summary.totalScreenings > 0 && (
         <section
           className="screening-log__stats"
           aria-label={t("log.pageTitle")}
@@ -512,21 +545,25 @@ export default function ScreeningLogPage() {
               {t("log.statScreenings")}
             </span>
             <span className="screening-log__stat-value">
-              {allEntries.length}
+              {summary.totalScreenings}
             </span>
           </div>
           <div className="card screening-log__stat">
             <span className="screening-log__stat-label">
               {t("log.statUniqueFilms")}
             </span>
-            <span className="screening-log__stat-value">{uniqueFilmCount}</span>
+            <span className="screening-log__stat-value">
+              {summary.uniqueFilms}
+            </span>
           </div>
           <div className="card screening-log__stat">
             <span className="screening-log__stat-label">
               {t("log.statAvgRating")}
             </span>
             <span className="screening-log__stat-value is-accent">
-              {avgRating}
+              {summary.averageRating != null
+                ? summary.averageRating.toFixed(1)
+                : "—"}
             </span>
           </div>
           <div className="card screening-log__stat">
@@ -534,9 +571,9 @@ export default function ScreeningLogPage() {
               {t("log.statReactions", "Beğeni / Bana göre değil")}
             </span>
             <span className="screening-log__stat-value">
-              <span className="is-like">{likeCount}</span>
+              <span className="is-like">{summary.likedFilms}</span>
               <span className="screening-log__stat-sep"> / </span>
-              <span className="is-dislike">{dislikeCount}</span>
+              <span className="is-dislike">{summary.notForMeFilms}</span>
             </span>
           </div>
         </section>
@@ -628,7 +665,7 @@ export default function ScreeningLogPage() {
         </div>
       )}
 
-      {allEntries.length > 0 && (
+      {hasAnyEntries && (
         <div className="screening-log__toolbar">
           <div className="screening-log__filters" role="group">
             {filterOptions.map((opt) => (
@@ -656,13 +693,13 @@ export default function ScreeningLogPage() {
         </div>
       )}
 
-      {data.length === 0 ? (
+      {!hasAnyEntries ? (
         <EmptyState
           icon={<Ticket size={26} />}
           title={t("log.empty")}
           hint={t("log.emptyHint")}
         />
-      ) : visibleDays.length === 0 ? (
+      ) : days.length === 0 ? (
         <EmptyState
           icon={<Search size={26} />}
           title={t("log.noResults", "Eşleşen seans yok")}
@@ -672,71 +709,99 @@ export default function ScreeningLogPage() {
           )}
         />
       ) : (
-        <div className="screening-log__timeline">
-          {monthGroups.map((group) => {
-            const count = group.days.reduce(
-              (sum, d) => sum + d.entries.length,
-              0,
-            );
-            return (
-              <section key={group.label} className="screening-log__month-group">
-                <div className="screening-log__month-heading">
-                  <h2>{group.label}</h2>
-                  <span className="text-muted">
-                    {t("log.monthCount", {
-                      count,
-                      defaultValue: "{{count}} seans",
-                    })}
-                  </span>
-                </div>
-                {group.days.map((day) => (
-                  <div key={day.date} className="screening-log__day-row">
-                    <DayLeaf dateStr={day.date} locale={locale} />
-
-                    {day.entries.length === 2 ? (
-                      <div className="screening-log__double-feature">
-                        <span className="screening-log__double-feature-label">
-                          <Ticket size={11} /> {t("log.doubleFeature")}
-                        </span>
-                        <div className="screening-log__double-feature-halves">
-                          <EntryCard
-                            entry={day.entries[0]}
-                            onDelete={handleDelete}
-                            onSave={handleSave}
-                            compact
-                          />
-                          <div
-                            className="screening-log__double-feature-divider"
-                            aria-hidden="true"
-                          >
-                            <Clapperboard size={12} />
-                          </div>
-                          <EntryCard
-                            entry={day.entries[1]}
-                            onDelete={handleDelete}
-                            onSave={handleSave}
-                            compact
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="screening-log__day-entries">
-                        {day.entries.map((entry) => (
-                          <EntryCard
-                            key={entry.id}
-                            entry={entry}
-                            onDelete={handleDelete}
-                            onSave={handleSave}
-                          />
-                        ))}
-                      </div>
+        <>
+          <div
+            className={`screening-log__timeline${logQuery.isPlaceholderData ? " is-stale" : ""}`}
+            aria-busy={logQuery.isPlaceholderData}
+          >
+            {monthGroups.map((group, groupIndex) => {
+              const count = group.days.reduce(
+                (sum, d) => sum + d.entries.length,
+                0,
+              );
+              // Son ay, sonraki sayfada devam ediyor olabilir: sayı eksik görünmesin diye gizlenir.
+              const isPartial =
+                groupIndex === monthGroups.length - 1 && logQuery.hasNextPage;
+              return (
+                <section
+                  key={group.label}
+                  className="screening-log__month-group"
+                >
+                  <div className="screening-log__month-heading">
+                    <h2>{group.label}</h2>
+                    {!isPartial && (
+                      <span className="text-muted">
+                        {t("log.monthCount", {
+                          count,
+                          defaultValue: "{{count}} seans",
+                        })}
+                      </span>
                     )}
                   </div>
-                ))}
-              </section>
-            );
-          })}
-        </div>
+                  {group.days.map((day) => (
+                    <div key={day.date} className="screening-log__day-row">
+                      <DayLeaf dateStr={day.date} locale={locale} />
+
+                      {day.entries.length === 2 ? (
+                        <div className="screening-log__double-feature">
+                          <span className="screening-log__double-feature-label">
+                            <Ticket size={11} /> {t("log.doubleFeature")}
+                          </span>
+                          <div className="screening-log__double-feature-halves">
+                            <EntryCard
+                              entry={day.entries[0]}
+                              onDelete={handleDelete}
+                              onSave={handleSave}
+                              compact
+                            />
+                            <div
+                              className="screening-log__double-feature-divider"
+                              aria-hidden="true"
+                            >
+                              <Clapperboard size={12} />
+                            </div>
+                            <EntryCard
+                              entry={day.entries[1]}
+                              onDelete={handleDelete}
+                              onSave={handleSave}
+                              compact
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="screening-log__day-entries">
+                          {day.entries.map((entry) => (
+                            <EntryCard
+                              key={entry.id}
+                              entry={entry}
+                              onDelete={handleDelete}
+                              onSave={handleSave}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </section>
+              );
+            })}
+          </div>
+
+          {logQuery.hasNextPage && (
+            <div className="screening-log__more">
+              <button
+                type="button"
+                className="btn-secondary"
+                disabled={logQuery.isFetchingNextPage}
+                onClick={() => logQuery.fetchNextPage()}
+              >
+                {logQuery.isFetchingNextPage
+                  ? t("common.loading")
+                  : t("log.loadMore", "Daha fazla göster")}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

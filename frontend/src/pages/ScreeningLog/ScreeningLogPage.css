@@ -757,3 +757,19 @@
     transition: none;
   }
 }
+
+/* ---------- Sayfalama: "Daha fazla göster" + filtre değişirken eski listenin sönük hali ---------- */
+.screening-log__more {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+.screening-log__more .btn-secondary {
+  min-height: 44px;
+  padding-left: 28px;
+  padding-right: 28px;
+}
+.screening-log__timeline.is-stale {
+  opacity: 0.55;
+  transition: opacity var(--transition-fast);
+}

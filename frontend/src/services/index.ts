@@ -20,7 +20,6 @@ import type {
   DirectorDetail,
   DirectorFormPayload,
   WatchedMovie,
-  ScreeningLogDay,
   Country,
   ListScope,
   MovieReview,
@@ -36,6 +35,8 @@ import type {
   ActivityFilter,
   ActivityFeedPage,
   ReactionType,
+  ScreeningLogPage,
+  ScreeningLogSummary,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -343,8 +344,15 @@ export const listService = {
 
 // ---------------- Screening Log (Seans Defteri) ----------------
 export const screeningLogService = {
-  getAll: async (): Promise<ScreeningLogDay[]> =>
-    (await api.get("/screening-log")).data,
+  getPage: async (params: {
+    cursor?: string;
+    pageSize?: number;
+    reaction?: ReactionType;
+    search?: string;
+  }): Promise<ScreeningLogPage> =>
+    (await api.get("/screening-log", { params })).data,
+  getSummary: async (): Promise<ScreeningLogSummary> =>
+    (await api.get("/screening-log/summary")).data,
   log: async (
     movieId: string,
     watchedAtUtc: string,

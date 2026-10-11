@@ -583,51 +583,6 @@ public record ScreeningLogEntryDto(
 );
 public record ScreeningLogDayDto(DateTime Date, List<ScreeningLogEntryDto> Entries);
 
-public record GetScreeningLogQuery(Guid UserId) : IRequest<List<ScreeningLogDayDto>>;
-
-public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery, List<ScreeningLogDayDto>>
-{
-    private readonly IApplicationDbContext _context;
-    public GetScreeningLogQueryHandler(IApplicationDbContext context) => _context = context;
-
-    public async Task<List<ScreeningLogDayDto>> Handle(GetScreeningLogQuery request, CancellationToken ct)
-    {
-        var entries = await _context.WatchHistory.AsNoTracking()
-            .Include(w => w.Movie)
-            .Where(w => w.UserId == request.UserId)
-            .OrderBy(w => w.WatchedAtUtc)
-            .ToListAsync(ct);
-
-        var reviews = await _context.Reviews.AsNoTracking()
-            .Where(r => r.UserId == request.UserId && !r.IsDeleted)
-            .ToDictionaryAsync(r => r.MovieId, r => r.Content, ct);
-
-        var reactions = await _context.Likes.AsNoTracking()
-            .Where(l => l.UserId == request.UserId)
-            .ToDictionaryAsync(l => l.MovieId, l => l.Reaction, ct);
-
-        var watchCounts = new Dictionary<Guid, int>();
-        var decorated = entries.Select(w =>
-        {
-            watchCounts.TryGetValue(w.MovieId, out var count);
-            count++;
-            watchCounts[w.MovieId] = count;
-            return new ScreeningLogEntryDto(
-                w.Id, w.MovieId, w.Movie.Title, w.Movie.PosterUrl, w.WatchedAtUtc, count,
-                w.Rating, // artık doğrudan seans satırından — her rewatch kendi gerçek puanını taşıyor
-                reviews.TryGetValue(w.MovieId, out var content) ? content : null,
-                reactions.TryGetValue(w.MovieId, out var reaction) ? reaction : (ReactionType?)null
-            );
-        }).ToList();
-
-        return decorated
-            .GroupBy(e => e.WatchedAtUtc.Date)
-            .OrderByDescending(g => g.Key)
-            .Select(g => new ScreeningLogDayDto(g.Key, g.OrderBy(e => e.WatchedAtUtc).ToList()))
-            .ToList();
-    }
-}
-
 // ---------- Günlüğe ekle: artık isteğe bağlı puan da alabiliyor ----------
 public record LogScreeningCommand(Guid UserId, Guid MovieId, DateTime WatchedAtUtc, decimal? Rating) : IRequest<Guid>;
 

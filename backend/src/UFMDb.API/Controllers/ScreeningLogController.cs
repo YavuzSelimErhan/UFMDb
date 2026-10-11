@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.Features.Users;
+using UFMDb.Domain.Enums;
 namespace UFMDb.API.Controllers;
 
 [ApiController]
@@ -20,9 +21,18 @@ public class ScreeningLogController : ControllerBase
     }
     private Guid RequireUserId() => _currentUser.UserId ?? throw new UnauthorizedException("Kullanıcı kimliği doğrulanamadı.");
 
+    /// <summary>Gün bazlı imleçli sayfalama. cursor: önceki yanıttaki nextCursor (yyyy-MM-dd).</summary>
     [HttpGet]
-    public async Task<ActionResult<List<ScreeningLogDayDto>>> Get()
-        => Ok(await _mediator.Send(new GetScreeningLogQuery(RequireUserId())));
+    public async Task<ActionResult<ScreeningLogPageDto>> Get(
+        [FromQuery] string? cursor,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] ReactionType? reaction = null,
+        [FromQuery] string? search = null)
+        => Ok(await _mediator.Send(new GetScreeningLogQuery(RequireUserId(), cursor, pageSize, reaction, search)));
+
+    [HttpGet("summary")]
+    public async Task<ActionResult<ScreeningLogSummaryDto>> GetSummary()
+        => Ok(await _mediator.Send(new GetScreeningLogSummaryQuery(RequireUserId())));
 
     [HttpPost]
     public async Task<ActionResult<Guid>> Log([FromBody] LogScreeningRequest request)
