@@ -203,10 +203,33 @@ public class GetFriendsActivityQueryHandler : IRequestHandler<GetFriendsActivity
                 .ThenByDescending(a => a.Last)
                 .FirstOrDefault();
 
-        var itemAggs = valid
+        // Çeşitlilik (Letterboxd mantığı): kartlar önce FARKLI kişilerden seçilir, her kişinin en
+        // yeni hareketi öne alınır. Yeterince farklı kişi yoksa kalan yerler aynı kişilerin sıradaki
+        // hareketleriyle dolar. Spotlight'taki kişi bir hak kullanmış sayılır, böylece diğer
+        // arkadaşlar onun önüne geçer. Seçilenler en sonda zamana göre dizilir.
+        var queues = valid
             .Where(a => !ReferenceEquals(a, spotlightAgg))
-            .Take(ItemCount)
-            .ToList();
+            .GroupBy(a => a.UserId)
+            .ToDictionary(g => g.Key, g => new Queue<Agg>(g)); // valid zaten yeniden eskiye sıralı
+        var shownCount = queues.Keys.ToDictionary(k => k, _ => 0);
+        if (spotlightAgg is not null && shownCount.ContainsKey(spotlightAgg.UserId))
+            shownCount[spotlightAgg.UserId] = 1;
+
+        var itemAggs = new List<Agg>();
+        while (itemAggs.Count < ItemCount)
+        {
+            var nextUser = queues
+                .Where(q => q.Value.Count > 0)
+                .OrderBy(q => shownCount[q.Key])
+                .ThenByDescending(q => q.Value.Peek().Last)
+                .Select(q => (Guid?)q.Key)
+                .FirstOrDefault();
+            if (nextUser is null) break;
+
+            itemAggs.Add(queues[nextUser.Value].Dequeue());
+            shownCount[nextUser.Value]++;
+        }
+        itemAggs = itemAggs.OrderByDescending(a => a.Last).ToList();
 
         FriendActivityDto Map(Agg a, bool withExcerpt)
         {

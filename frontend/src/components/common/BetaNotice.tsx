@@ -10,7 +10,7 @@ import {
   Check,
   Sparkles,
   Shuffle,
-  Trophy,
+  Users,
   HeartCrack,
 } from "lucide-react";
 import { CONTACT } from "@/config/contact";
@@ -220,19 +220,19 @@ export default function BetaNotice() {
             </span>
             <div className="bn-soon__list">
               <Link
-                to="/lists"
+                to="/"
                 className="bn-soon__item bn-soon__item--added bn-soon__item--featured"
                 onClick={() => setOpen(false)}
               >
                 <span className="bn-soon__icon bn-soon__icon--featured">
-                  <Trophy size={16} aria-hidden="true" />
+                  <Users size={16} aria-hidden="true" />
                 </span>
                 <div className="bn-soon__text">
                   <h4 className="bn-soon__item-title">
-                    {t("betaNotice.soonTop100Title")}
+                    {t("betaNotice.addedFriendsTitle")}
                   </h4>
                   <p className="bn-soon__item-desc">
-                    {t("betaNotice.soonTop100Desc")}
+                    {t("betaNotice.addedFriendsDesc")}
                   </p>
                 </div>
               </Link>

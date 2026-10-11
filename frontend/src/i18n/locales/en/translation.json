@@ -501,11 +501,11 @@
     "soonRecommendDesc": "Personalized picks, tailored to your taste.",
     "soonRandomTitle": "Random Movie Picker",
     "soonRandomDesc": "Can't decide? One click and it's settled.",
-    "soonTop100Title": "All-Time Top 100",
-    "soonTop100Desc": "A carefully hand-picked editorial selection.",
     "addedEyebrow": "Added",
     "addedNotForMeTitle": "Not for me",
-    "addedNotForMeDesc": "Mark films you didn't enjoy, and they'll show a small badge on cards."
+    "addedNotForMeDesc": "Mark films you didn't enjoy, and they'll show a small badge on cards.",
+    "addedFriendsTitle": "Friend activity",
+    "addedFriendsDesc": "Films your friends watch, rate and review now show up on the home page."
   },
   "terms": {
     "updatedAt": "Last updated: October 2026",
