@@ -2,23 +2,23 @@ import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import {
-  Activity,
-  Film,
-  Heart,
-  HeartCrack,
-  Star,
-  Ticket,
-  UserPlus,
-} from "lucide-react";
+import { Activity, Heart, HeartCrack, Ticket, UserPlus } from "lucide-react";
 import { feedService } from "@/services";
 import PersonAvatar from "@/components/common/PersonAvatar";
+import StarDisplay from "@/components/common/StarDisplay";
+import MoviePoster from "@/components/common/MoviePoster";
 import {
   EmptyState,
   PageError,
   PageSpinner,
 } from "@/components/common/PageState";
-import { getActivityVerb } from "@/utils/activityVerb";
+import {
+  getActivityPageVerbKind,
+  getActivityVerb,
+  verbCoversReaction,
+  verbCoversWatched,
+} from "@/utils/activityVerb";
+import { timeAgo } from "@/utils/timeAgo";
 import type { ActivityFeedItem, ActivityFilter } from "@/types";
 import "./ActivityPage.css";
 
@@ -76,16 +76,7 @@ function dayLabel(iso: string, locale: string): string {
 
 /** Bugün: "2 saat önce"; diğer günler: gün başlığı zaten var, sadece saat. */
 function rowTime(iso: string, locale: string): string {
-  if (dayDiff(iso) === 0) {
-    const diffMin = Math.max(
-      0,
-      Math.round((Date.now() - new Date(iso).getTime()) / 60000),
-    );
-    const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
-    if (diffMin < 1) return rtf.format(0, "minute");
-    if (diffMin < 60) return rtf.format(-diffMin, "minute");
-    return rtf.format(-Math.round(diffMin / 60), "hour");
-  }
+  if (dayDiff(iso) === 0) return timeAgo(iso, locale);
   return new Date(iso).toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
@@ -117,55 +108,7 @@ function groupByDay(items: ActivityFeedItem[], locale: string): DayGroup[] {
   return groups;
 }
 
-/* ---------- küçük parçalar ---------- */
-
-function Stars({ value }: { value: number }) {
-  return (
-    <span
-      className="activity-page__stars"
-      role="img"
-      aria-label={value.toFixed(1)}
-    >
-      {[1, 2, 3, 4, 5].map((i) => {
-        const fill = Math.max(0, Math.min(1, value - (i - 1)));
-        return (
-          <span key={i} className="activity-page__star">
-            <Star size={15} className="activity-page__star-base" />
-            <span
-              className="activity-page__star-fill"
-              style={{ width: `${fill * 100}%` }}
-            >
-              <Star size={15} fill="currentColor" />
-            </span>
-          </span>
-        );
-      })}
-    </span>
-  );
-}
-
-function Poster({ item }: { item: ActivityFeedItem }) {
-  const [failed, setFailed] = useState(false);
-  const { movie } = item;
-  const showFallback = !movie.posterUrl || failed;
-  return (
-    <Link to={`/movies/${movie.id}`} className="activity-page__poster">
-      {showFallback ? (
-        <span className="activity-page__poster-fallback">
-          <Film size={18} />
-        </span>
-      ) : (
-        <img
-          src={movie.posterUrl}
-          alt={movie.title}
-          loading="lazy"
-          decoding="async"
-          onError={() => setFailed(true)}
-        />
-      )}
-    </Link>
-  );
-}
+/* ---------- satır ---------- */
 
 function ActivityRow({ item }: { item: ActivityFeedItem }) {
   const { t, i18n } = useTranslation();
@@ -177,12 +120,22 @@ function ActivityRow({ item }: { item: ActivityFeedItem }) {
     : item.user.fullName || item.user.userName;
   const profileHref = you ? "/profile" : `/users/${item.user.userName}`;
   const verb = getActivityVerb(item, t);
+  const kind = getActivityPageVerbKind(item);
   const year = item.movie.releaseYear > 0 ? item.movie.releaseYear : null;
   const hideReview = item.containsSpoiler && !revealed;
 
+  // Fiil "beğenmedi" / "izledi" diyorsa aynı bilgiyi çip olarak tekrar etmeyiz.
+  const showReaction = item.reaction != null && !verbCoversReaction(kind);
+  const showWatched = item.watched && !verbCoversWatched(kind);
+  const showMeta = item.rating != null || showReaction || showWatched;
+
   return (
     <article className={`activity-page__row${you ? " is-you" : ""}`}>
-      <Poster item={item} />
+      <MoviePoster
+        movie={item.movie}
+        className="activity-page__poster"
+        iconSize={18}
+      />
       <div className="activity-page__body">
         <div className="activity-page__line-wrap">
           <Link
@@ -201,7 +154,7 @@ function ActivityRow({ item }: { item: ActivityFeedItem }) {
             <Link to={profileHref} className="activity-page__name">
               {name}
             </Link>{" "}
-            {verb}{" "}
+            {verb} {/* Film linki satırın tamamını kaplar (stretched link). */}
             <Link
               to={`/movies/${item.movie.id}`}
               className="activity-page__movie"
@@ -218,29 +171,29 @@ function ActivityRow({ item }: { item: ActivityFeedItem }) {
           </time>
         </div>
 
-        {(item.rating != null || item.reaction || item.watched) && (
+        {showMeta && (
           <div className="activity-page__meta">
             {item.rating != null && (
               <>
-                <Stars value={item.rating} />
+                <StarDisplay value={item.rating} />
                 <span className="activity-page__rating">
                   {item.rating.toFixed(1)}
                 </span>
               </>
             )}
-            {item.reaction === "Like" && (
+            {showReaction && item.reaction === "Like" && (
               <span className="activity-page__chip activity-page__chip--like">
                 <Heart size={13} fill="currentColor" />
                 {t("friendsActivity.reactionLike")}
               </span>
             )}
-            {item.reaction === "Dislike" && (
+            {showReaction && item.reaction === "Dislike" && (
               <span className="activity-page__chip activity-page__chip--dislike">
                 <HeartCrack size={13} />
                 {t("friendsActivity.reactionDislike")}
               </span>
             )}
-            {item.watched && (
+            {showWatched && (
               <span className="activity-page__chip">
                 <Ticket size={13} />
                 {t("friendsActivity.watched")}

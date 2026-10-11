@@ -1,9 +1,8 @@
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
-  Film,
   Heart,
   HeartCrack,
   MessageSquare,
@@ -14,80 +13,24 @@ import {
 import { feedService } from "@/services";
 import { useAppSelector } from "@/store";
 import PersonAvatar from "@/components/common/PersonAvatar";
-import { getFriendActivityVerb } from "@/utils/activityVerb";
+import StarDisplay from "@/components/common/StarDisplay";
+import MoviePoster from "@/components/common/MoviePoster";
+import {
+  getFriendActivityVerb,
+  getFriendActivityVerbKind,
+  verbCoversReaction,
+  verbCoversWatched,
+} from "@/utils/activityVerb";
+import { timeAgo } from "@/utils/timeAgo";
 import type { FriendActivity, FriendActivityUser } from "@/types";
 import "./FriendsActivitySection.css";
 
-/* ---------- yardımcılar ---------- */
-
-/** Bağımlılıksız göreli zaman (NotificationBell'dekiyle aynı mantık). */
-function timeAgo(iso: string, locale: string): string {
-  const diffMin = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
-  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
-  if (diffMin < 1) return rtf.format(0, "minute");
-  if (diffMin < 60) return rtf.format(-diffMin, "minute");
-  const diffHour = Math.round(diffMin / 60);
-  if (diffHour < 24) return rtf.format(-diffHour, "hour");
-  const diffDay = Math.round(diffHour / 24);
-  if (diffDay < 30) return rtf.format(-diffDay, "day");
-  return rtf.format(-Math.round(diffDay / 30), "month");
-}
+/** Başlıktaki avatar yığınında en fazla bu kadar kişi; kalanı "+N". */
+const MAX_STACK = 5;
 
 const displayName = (u: FriendActivityUser) => u.fullName || u.userName;
 
-/** Fiil zaten tepkiyi anlatıyorsa ikinci satırda tekrar etmeyiz. */
-const verbCoversReaction = (a: FriendActivity) =>
-  a.rating == null && !a.watched && a.reaction != null;
-
 /* ---------- küçük parçalar ---------- */
-
-function Stars({ value }: { value: number }) {
-  return (
-    <span
-      className="friends-activity__stars"
-      role="img"
-      aria-label={value.toFixed(1)}
-    >
-      {[1, 2, 3, 4, 5].map((i) => {
-        const fill = Math.max(0, Math.min(1, value - (i - 1)));
-        return (
-          <span key={i} className="friends-activity__star">
-            <Star size={15} className="friends-activity__star-base" />
-            <span
-              className="friends-activity__star-fill"
-              style={{ width: `${fill * 100}%` }}
-            >
-              <Star size={15} fill="currentColor" />
-            </span>
-          </span>
-        );
-      })}
-    </span>
-  );
-}
-
-function Poster({ movie }: { movie: FriendActivity["movie"] }) {
-  const [failed, setFailed] = useState(false);
-  const showFallback = !movie.posterUrl || failed;
-  return (
-    <Link to={`/movies/${movie.id}`} className="friends-activity__poster">
-      {showFallback ? (
-        <span className="friends-activity__poster-fallback">
-          <Film size={22} />
-          <span>{movie.title}</span>
-        </span>
-      ) : (
-        <img
-          src={movie.posterUrl}
-          alt={movie.title}
-          loading="lazy"
-          decoding="async"
-          onError={() => setFailed(true)}
-        />
-      )}
-    </Link>
-  );
-}
 
 function ActivityBadge({ a }: { a: FriendActivity }) {
   const { t } = useTranslation();
@@ -126,15 +69,53 @@ function ActivityBadge({ a }: { a: FriendActivity }) {
   );
 }
 
+function SectionHeader({ aside }: { aside?: ReactNode }) {
+  const { t } = useTranslation();
+  return (
+    <div className="friends-activity__header">
+      <div>
+        <p className="friends-activity__eyebrow">
+          {t("friendsActivity.eyebrow")}
+        </p>
+        <h2 className="friends-activity__title">
+          {t("friendsActivity.title")}
+        </h2>
+      </div>
+      {aside}
+    </div>
+  );
+}
+
+/** Gerçek yerleşimle aynı iskelet: yüklenince sayfa kaymasın. */
+function LoadingSkeleton() {
+  return (
+    <section className="friends-activity" aria-busy="true">
+      <SectionHeader />
+      <div className="friends-activity__grid" aria-hidden="true">
+        <div className="friends-activity__sk friends-activity__sk-spot" />
+        <div className="friends-activity__rail">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="friends-activity__sk-card">
+              <div className="friends-activity__sk friends-activity__sk-poster" />
+              <div className="friends-activity__sk friends-activity__sk-line" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- sağdaki küçük kart ---------- */
 
 function ActivityCard({ a }: { a: FriendActivity }) {
   const { t, i18n } = useTranslation();
   const name = displayName(a.user);
+  const kind = getFriendActivityVerbKind(a, false);
 
   const meta: string[] = [];
   if (a.rating != null) meta.push(`★ ${a.rating.toFixed(1)}`);
-  if (a.reaction && !verbCoversReaction(a)) {
+  if (a.reaction && !verbCoversReaction(kind)) {
     meta.push(
       a.reaction === "Dislike"
         ? t("friendsActivity.reactionDislike")
@@ -146,7 +127,12 @@ function ActivityCard({ a }: { a: FriendActivity }) {
   return (
     <article className="friends-activity__card">
       <div className="friends-activity__poster-wrap">
-        <Poster movie={a.movie} />
+        <MoviePoster
+          movie={a.movie}
+          className="friends-activity__poster"
+          fallback="title"
+          iconSize={22}
+        />
         <ActivityBadge a={a} />
         <Link
           to={`/users/${a.user.userName}`}
@@ -162,6 +148,7 @@ function ActivityCard({ a }: { a: FriendActivity }) {
         </Link>
       </div>
       <div className="friends-activity__caption">
+        {/* Başlık linki kartın tamamını kaplar (stretched link). */}
         <h3 className="friends-activity__card-title">
           <Link to={`/movies/${a.movie.id}`}>{a.movie.title}</Link>
         </h3>
@@ -180,6 +167,10 @@ function ActivityCard({ a }: { a: FriendActivity }) {
 function Spotlight({ a }: { a: FriendActivity }) {
   const { t, i18n } = useTranslation();
   const name = displayName(a.user);
+  const kind = getFriendActivityVerbKind(a, true);
+  const showReaction = a.reaction != null && !verbCoversReaction(kind);
+  const showWatched = a.watched && !verbCoversWatched(kind);
+
   const movieMeta = [
     a.movie.releaseYear > 0 ? a.movie.releaseYear : null,
     a.movie.genre,
@@ -212,8 +203,14 @@ function Spotlight({ a }: { a: FriendActivity }) {
       </div>
 
       <div className="friends-activity__spot-body">
-        <Poster movie={a.movie} />
+        <MoviePoster
+          movie={a.movie}
+          className="friends-activity__poster"
+          fallback="title"
+          iconSize={22}
+        />
         <div className="friends-activity__spot-info">
+          {/* Başlık linki kartın tamamını kaplar (stretched link). */}
           <h3 className="friends-activity__movie-title">
             <Link to={`/movies/${a.movie.id}`}>{a.movie.title}</Link>
           </h3>
@@ -223,7 +220,7 @@ function Spotlight({ a }: { a: FriendActivity }) {
 
           {a.rating != null && (
             <div className="friends-activity__rating">
-              <Stars value={a.rating} />
+              <StarDisplay value={a.rating} />
               <span>{a.rating.toFixed(1)}</span>
             </div>
           )}
@@ -239,21 +236,21 @@ function Spotlight({ a }: { a: FriendActivity }) {
             </p>
           )}
 
-          {(a.reaction || a.watched) && (
+          {(showReaction || showWatched) && (
             <div className="friends-activity__chips">
-              {a.reaction === "Like" && (
-                <span className="friends-activity__chip">
+              {showReaction && a.reaction === "Like" && (
+                <span className="friends-activity__chip friends-activity__chip--like">
                   <Heart size={13} fill="currentColor" />
                   {t("friendsActivity.reactionLike")}
                 </span>
               )}
-              {a.reaction === "Dislike" && (
+              {showReaction && a.reaction === "Dislike" && (
                 <span className="friends-activity__chip friends-activity__chip--dislike">
                   <HeartCrack size={13} />
                   {t("friendsActivity.reactionDislike")}
                 </span>
               )}
-              {a.watched && (
+              {showWatched && (
                 <span className="friends-activity__chip">
                   <Ticket size={13} />
                   {t("friendsActivity.watched")}
@@ -264,10 +261,11 @@ function Spotlight({ a }: { a: FriendActivity }) {
         </div>
       </div>
 
+      {/* Kartın tamamı zaten tıklanabilir; bu yalnızca görsel ipucu (tekrar eden link/odak durağı değil). */}
       <div className="friends-activity__spot-footer">
-        <Link to={`/movies/${a.movie.id}`} className="btn-primary">
+        <span className="friends-activity__spot-cta" aria-hidden="true">
           {t("friendsActivity.goToMovie")}
-        </Link>
+        </span>
       </div>
     </article>
   );
@@ -291,13 +289,7 @@ export default function FriendsActivitySection() {
   // Misafir ya da hata: bölüm hiç görünmez, ana sayfanın geri kalanı etkilenmez.
   if (!enabled || isError) return null;
 
-  if (isLoading || !data) {
-    return (
-      <section className="friends-activity" aria-busy="true">
-        <div className="friends-activity__skeleton" />
-      </section>
-    );
-  }
+  if (isLoading || !data) return <LoadingSkeleton />;
 
   const {
     followingCount,
@@ -307,25 +299,11 @@ export default function FriendsActivitySection() {
     items,
   } = data;
 
-  const header = (stack?: ReactNode) => (
-    <div className="friends-activity__header">
-      <div>
-        <p className="friends-activity__eyebrow">
-          {t("friendsActivity.eyebrow")}
-        </p>
-        <h2 className="friends-activity__title">
-          {t("friendsActivity.title")}
-        </h2>
-      </div>
-      {stack}
-    </div>
-  );
-
   // Kimseyi takip etmiyor: davet kartı.
   if (followingCount === 0) {
     return (
       <section className="friends-activity">
-        {header()}
+        <SectionHeader />
         <div className="friends-activity__find">
           <div className="friends-activity__find-text">
             <UserPlus size={22} aria-hidden="true" />
@@ -353,9 +331,10 @@ export default function FriendsActivitySection() {
   [spotlight, ...items].forEach((a) => {
     if (a) people.set(a.user.id, a.user);
   });
-  const shown = Array.from(people.values());
+  const shown = Array.from(people.values()).slice(0, MAX_STACK);
   const extra = Math.max(0, weeklyActiveFriendCount - shown.length);
 
+  // "Tümünü gör" yalnızca altbilgide; başlıkta ikinci kopya yok.
   const stack = (
     <div className="friends-activity__active">
       <div className="friends-activity__stack">
@@ -375,15 +354,12 @@ export default function FriendsActivitySection() {
       <p>
         {t("friendsActivity.activeThisWeek", { n: weeklyActiveFriendCount })}
       </p>
-      <Link to="/activity" className="friends-activity__see-all">
-        {t("friendsActivity.seeAll")}
-      </Link>
     </div>
   );
 
   return (
     <section className="friends-activity">
-      {header(stack)}
+      <SectionHeader aside={stack} />
 
       <div
         className={`friends-activity__grid${spotlight ? "" : " friends-activity__grid--rail-only"}`}

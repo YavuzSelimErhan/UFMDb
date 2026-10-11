@@ -33,9 +33,14 @@
   --color-border: #262b36;
   --color-text-primary: #f4f5f7;
   --color-text-secondary: #9ba3b4;
-  --color-text-muted: #676e7d;
+  --color-text-muted: #8a92a3; /* eskisi #676e7d: bg-elevated üstünde ~3.4:1 idi */
   --color-shadow: rgba(0, 0, 0, 0.55);
   --color-shadow-accent: rgba(74, 144, 226, 0.25);
+
+  --color-like: #e0245e;
+  --color-dislike: #9ba3b4;
+  --color-danger: #d3554f;
+  --color-accent-text: #63a2ec; /* metin olarak kullanılan vurgu (puan, linkler) */
 }
 
 /* ---------- LIGHT THEME ---------- */
@@ -47,9 +52,14 @@
   --color-border: #e6e8ec;
   --color-text-primary: #14161a;
   --color-text-secondary: #565d6b;
-  --color-text-muted: #8a919e;
+  --color-text-muted: #656c7a; /* eskisi #8a919e: beyaz üstünde ~3.2:1 idi */
   --color-shadow: rgba(20, 22, 26, 0.08);
   --color-shadow-accent: rgba(74, 144, 226, 0.18);
+
+  --color-like: #d81b55;
+  --color-dislike: #6b7280;
+  --color-danger: #c0392b;
+  --color-accent-text: #2f6bb8; /* #4a90e2 / #63a2ec açık zeminde metin olarak 4.5:1'i geçmez */
 }
 
 * {
@@ -117,6 +127,12 @@ input,
 textarea,
 select {
   font-family: inherit;
+}
+
+/* Klavye odağı: tüm etkileşimli öğeler için tek kural (özgüllüğü 0, bileşenler ezebilir) */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 /* İçerik kısa olsa bile footer'ın sayfanın en altında kalması için */

@@ -3,14 +3,11 @@ import type { ActivityFeedItem, FriendActivity, ReactionType } from "@/types";
 
 /**
  * Ortak "ne yaptı" fiil sözlüğü, ActivityPage ve FriendsActivitySection arasında paylaşılır.
- * Tek kaynak bu: `ACTIVITY_VERB_KEYS` i18n anahtar tablosu her iki yerde de birebir aynıydı,
- * burada tekilleştirildi.
  *
  * ÖNEMLİ: iki sayfanın öncelik SIRASI gerçekten farklı, bu yüzden tek bir ortak "if zinciri"
- * kullanmak YANLIŞ olur (davranışı sessizce değiştirir). Bu yüzden iki ayrı internal
- * `...VerbKind` fonksiyonu var — her biri kendi sayfasının orijinal mantığını birebir
- * koruyor — ve sadece kind → i18n-key eşlemesi ile dışa açılan `get...Verb` sarmalayıcılar
- * paylaşılıyor.
+ * kullanmak davranışı sessizce değiştirir. İki ayrı `...VerbKind` fonksiyonu var; her biri
+ * kendi sayfasının orijinal mantığını birebir korur. Sadece kind → i18n-key eşlemesi ve
+ * "fiil neyi zaten söylüyor?" kuralı (aşağıda) paylaşılır.
  */
 export type ActivityVerbKind =
   | "rated"
@@ -30,10 +27,9 @@ interface ActivityLike {
 
 /**
  * ActivityPage satırı: yorum HER ZAMAN önceliklidir (puanla birlikteyse "ratedAndReviewed"),
- * sonra izleme > puan > tepki (dislike kontrolü önce). Hiçbiri yoksa varsayılan "liked"
- * (orijinal `getVerbKind` davranışı — reaction null olsa bile).
+ * sonra izleme > puan > tepki (dislike kontrolü önce). Hiçbiri yoksa varsayılan "liked".
  */
-function getActivityPageVerbKind(a: ActivityLike): ActivityVerbKind {
+export function getActivityPageVerbKind(a: ActivityLike): ActivityVerbKind {
   if (a.hasReview) return a.rating != null ? "ratedAndReviewed" : "reviewed";
   if (a.watched) return a.rating != null ? "watchedAndRated" : "watched";
   if (a.rating != null) return "rated";
@@ -42,11 +38,10 @@ function getActivityPageVerbKind(a: ActivityLike): ActivityVerbKind {
 }
 
 /**
- * FriendsActivitySection: yorum sadece `spotlight` kartında önceliklidir (büyük kartta yorum
- * metni zaten ayrıca gösteriliyor). Rail kartlarında (`spotlight: false`) sıra puan > izleme >
- * tepki (like kontrolü önce); hiçbiri yoksa varsayılan "reviewed" (orijinal `getVerb` davranışı).
+ * FriendsActivitySection: yorum sadece `spotlight` kartında önceliklidir. Rail kartlarında
+ * (`spotlight: false`) sıra puan > izleme > tepki (like önce); hiçbiri yoksa "reviewed".
  */
-function getFriendActivityVerbKind(
+export function getFriendActivityVerbKind(
   a: ActivityLike,
   spotlight: boolean,
 ): ActivityVerbKind {
@@ -59,6 +54,17 @@ function getFriendActivityVerbKind(
   if (a.reaction === "Dislike") return "disliked";
   return "reviewed";
 }
+
+/**
+ * Fiil zaten tepkiyi anlatıyorsa ("X beğenmedi") aynı bilgiyi çip/meta olarak tekrar etmeyiz.
+ * Üç görünüm (spotlight, rail kartı, aktivite satırı) aynı kuralı buradan okur.
+ */
+export const verbCoversReaction = (kind: ActivityVerbKind): boolean =>
+  kind === "liked" || kind === "disliked";
+
+/** Fiil "izledi" diyorsa ayrıca "İzlendi" çipi göstermeyiz. */
+export const verbCoversWatched = (kind: ActivityVerbKind): boolean =>
+  kind === "watched" || kind === "watchedAndRated";
 
 /** [başkası, sen] — "Elif puanladı" / "Sen puanladın" (Türkçede fiil çekimi değişiyor). */
 const ACTIVITY_VERB_KEYS: Record<ActivityVerbKind, readonly [string, string]> =

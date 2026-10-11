@@ -13,7 +13,7 @@
 }
 .friends-activity__eyebrow {
   font-family: "SF Mono", "Fira Code", monospace;
-  font-size: 0.72rem;
+  font-size: 0.76rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--color-text-secondary);
@@ -33,7 +33,7 @@
   gap: 14px;
 }
 .friends-activity__active p {
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   color: var(--color-text-secondary);
 }
 .friends-activity__stack {
@@ -64,7 +64,7 @@
   border: 2px solid var(--color-bg);
   background-color: var(--color-bg-card);
   color: var(--color-text-secondary);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 700;
 }
 
@@ -78,11 +78,28 @@
 .friends-activity__grid--rail-only {
   grid-template-columns: minmax(0, 1fr);
 }
+
+/* Rail (>1000px): sütun sayısı alana göre kendiliğinden 4 → 3'e düşer, poster ~130px altına inmez.
+   Sığmayan kartlar ikinci satıra taşmak yerine gizlenir (grid-auto-rows: 0). */
 .friends-activity__rail {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  grid-template-rows: auto;
+  grid-auto-rows: 0;
+  row-gap: 0;
+  column-gap: 16px;
+  overflow: hidden;
+  /* hover'da yukarı kalkan kartın kırpılmaması için */
+  padding-top: 8px;
+  margin-top: -8px;
   align-content: start;
+}
+/* Spotlight yokken rail tam genişlikte: kartlar sınırlı genişlikte kalır, devasa posterler olmaz. */
+.friends-activity__grid--rail-only .friends-activity__rail {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 180px));
+  grid-auto-rows: auto;
+  row-gap: 24px;
+  justify-content: start;
 }
 
 .friends-activity__footer {
@@ -93,13 +110,13 @@
   margin-top: 28px;
   padding-top: 18px;
   border-top: 1px solid var(--color-border);
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   color: var(--color-text-secondary);
 }
 .friends-activity__see-all {
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  color: var(--color-accent-hover);
+  color: var(--color-accent-text);
   white-space: nowrap;
 }
 .friends-activity__see-all:hover {
@@ -116,30 +133,36 @@
   background-color: var(--color-bg-elevated);
   flex-shrink: 0;
 }
-.friends-activity__poster img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+
+/* ---------- Stretched link: kartın tamamı tıklanabilir ----------
+   Başlık linkinin ::after'ı en yakın konumlu atayı (spot / card) kaplar.
+   Avatar ve isim linkleri z-index: 2 ile bunun üstünde kalır. */
+.friends-activity__spot,
+.friends-activity__card {
+  position: relative;
 }
-.friends-activity__poster-fallback {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px;
-  text-align: center;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--color-text-secondary);
-  background: linear-gradient(
-    160deg,
-    var(--color-bg-card) 0%,
-    var(--color-bg-elevated) 100%
-  );
+.friends-activity__movie-title a::after,
+.friends-activity__card-title a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: var(--radius-sm);
+}
+.friends-activity__movie-title a:focus-visible,
+.friends-activity__card-title a:focus-visible {
+  outline: none;
+}
+.friends-activity__movie-title a:focus-visible::after,
+.friends-activity__card-title a:focus-visible::after {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+.friends-activity__spot-avatar,
+.friends-activity__who a,
+.friends-activity__card-who a {
+  position: relative;
+  z-index: 2;
 }
 
 /* ---------- Spotlight ---------- */
@@ -157,11 +180,18 @@
       transparent 55%
     ),
     var(--color-bg-elevated);
+  transition: border-color var(--transition-fast);
+}
+.friends-activity__spot:hover {
+  border-color: var(--color-accent-dim);
 }
 .friends-activity__spot-top {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+.friends-activity__spot-avatar {
+  line-height: 0;
 }
 .friends-activity__spot-avatar .person-avatar {
   width: 40px;
@@ -169,7 +199,7 @@
 }
 .friends-activity__who {
   min-width: 0;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--color-text-secondary);
 }
 .friends-activity__who a {
@@ -177,12 +207,12 @@
   font-weight: 700;
 }
 .friends-activity__who a:hover {
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 .friends-activity__time {
   margin-left: auto;
   flex-shrink: 0;
-  font-size: 0.74rem;
+  font-size: 0.8rem;
   color: var(--color-text-muted);
 }
 .friends-activity__spot-body {
@@ -211,11 +241,11 @@
 .friends-activity__movie-title a {
   color: var(--color-text-primary);
 }
-.friends-activity__movie-title a:hover {
-  color: var(--color-accent);
+.friends-activity__spot:hover .friends-activity__movie-title a {
+  color: var(--color-accent-text);
 }
 .friends-activity__movie-meta {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   color: var(--color-text-muted);
   margin-bottom: 12px;
 }
@@ -224,36 +254,22 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 14px;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
-.friends-activity__stars {
-  display: inline-flex;
-  gap: 1px;
-}
-.friends-activity__star {
-  position: relative;
-  display: inline-flex;
-  width: 15px;
-  height: 15px;
-}
-.friends-activity__star-base {
-  color: var(--color-border);
-}
-.friends-activity__star-fill {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  display: block;
-}
+
+/* İnceleme alıntısı: kalın italik display yerine gövde fontu, orta ağırlık.
+   (Plus Jakarta yalnızca 600–800 yükleniyor; italik de sahte oblique'ti.) */
 .friends-activity__quote {
   margin: 0 0 14px;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 700;
-  font-size: 0.98rem;
-  line-height: 1.55;
+  padding-left: 14px;
+  border-left: 2px solid var(--color-accent-muted);
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 0.96rem;
+  line-height: 1.6;
   color: var(--color-text-primary);
   display: -webkit-box;
   -webkit-line-clamp: 5;
@@ -263,7 +279,7 @@
 }
 .friends-activity__spoiler {
   margin-bottom: 14px;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-style: italic;
   color: var(--color-text-muted);
 }
@@ -281,20 +297,30 @@
   border-radius: var(--radius-pill);
   background-color: var(--color-accent-muted);
   color: var(--color-text-primary);
-  font-size: 0.74rem;
+  font-size: 0.8rem;
   font-weight: 600;
 }
-.friends-activity__chip svg {
-  color: #e0245e;
+.friends-activity__chip--like svg {
+  color: var(--color-like);
 }
 .friends-activity__chip--dislike svg {
-  color: var(--color-text-muted);
+  color: var(--color-dislike);
 }
 .friends-activity__spot-footer {
   display: flex;
   justify-content: flex-end;
   padding-top: 16px;
   border-top: 1px solid var(--color-border);
+}
+/* Dolu buton yerine sakin metin ipucu: poster/başlık zaten link, vurgu tekrar etmesin. */
+.friends-activity__spot-cta {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-accent-text);
+  text-underline-offset: 3px;
+}
+.friends-activity__spot:hover .friends-activity__spot-cta {
+  text-decoration: underline;
 }
 
 /* ---------- Sağdaki kartlar (MovieCard diliyle: poster + altında ortalı metin) ---------- */
@@ -325,17 +351,18 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
 }
+/* Rozet her temada koyu zemin üstünde: dislike için sabit açık gri (tema token'ı açık temada sönerdi). */
 .friends-activity__badge.is-like {
-  color: #e0245e;
+  color: var(--color-like);
 }
 .friends-activity__badge.is-dislike {
-  color: #9ba3b4;
+  color: #c3c9d6;
 }
 .friends-activity__card-avatar {
   position: absolute;
   left: 8px;
   bottom: 8px;
-  z-index: 1;
+  z-index: 2;
   display: block;
   line-height: 0;
 }
@@ -351,7 +378,7 @@
 }
 .friends-activity__card-title {
   font-family: var(--font-display);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   font-weight: 700;
   line-height: 1.32;
   margin-bottom: 4px;
@@ -365,10 +392,10 @@
   color: var(--color-text-primary);
 }
 .friends-activity__card:hover .friends-activity__card-title a {
-  color: var(--color-accent-hover);
+  color: var(--color-accent-text);
 }
 .friends-activity__card-who {
-  font-size: 0.76rem;
+  font-size: 0.8rem;
   color: var(--color-text-secondary);
   margin-bottom: 3px;
 }
@@ -377,7 +404,7 @@
   font-weight: 600;
 }
 .friends-activity__card-meta {
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   color: var(--color-text-muted);
 }
 
@@ -404,7 +431,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 .friends-activity__find-text h3 {
   font-family: var(--font-display);
@@ -414,7 +441,7 @@
   color: var(--color-text-primary);
 }
 .friends-activity__find-text p {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   line-height: 1.55;
   color: var(--color-text-secondary);
   margin-bottom: 6px;
@@ -435,9 +462,8 @@
   transform: translateY(10px);
 }
 
-/* ---------- Yükleniyor ---------- */
-.friends-activity__skeleton {
-  min-height: 320px;
+/* ---------- Yükleniyor: gerçek yerleşimin iskeleti ---------- */
+.friends-activity__sk {
   border-radius: var(--radius-sm);
   background: linear-gradient(
     100deg,
@@ -447,6 +473,18 @@
   );
   background-size: 250% 100%;
   animation: friends-activity-sheen 1.6s ease-in-out infinite;
+}
+.friends-activity__sk-spot {
+  min-height: 400px;
+}
+.friends-activity__sk-poster {
+  aspect-ratio: 2 / 3;
+}
+.friends-activity__sk-line {
+  height: 12px;
+  margin-top: 12px;
+  width: 70%;
+  margin-inline: auto;
 }
 @keyframes friends-activity-sheen {
   0% {
@@ -465,9 +503,15 @@
   .friends-activity__grid {
     grid-template-columns: minmax(0, 1fr);
   }
+  .friends-activity__rail {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
   .friends-activity__find {
     flex-direction: column;
     align-items: flex-start;
+  }
+  .friends-activity__sk-spot {
+    min-height: 320px;
   }
 }
 
@@ -480,12 +524,8 @@
     margin-bottom: 20px;
     gap: 14px;
   }
-  .friends-activity__active .friends-activity__see-all {
-    display: none;
-  }
 
-  /* Spotlight: poster + başlık/puan yan yana, yorum ve etiketler TAM genişlikte.
-     (Eskiden yorum, posterin yanındaki ~190px'lik sütuna sıkışıp 5 satırda kesiliyordu.) */
+  /* Spotlight: poster + başlık/puan yan yana, yorum ve etiketler TAM genişlikte. */
   .friends-activity__spot {
     padding: 18px;
     gap: 16px;
@@ -495,7 +535,7 @@
   }
   .friends-activity__who {
     flex: 1;
-    font-size: 0.84rem;
+    font-size: 0.88rem;
     line-height: 1.4;
   }
   .friends-activity__spot-body {
@@ -540,29 +580,30 @@
   }
   .friends-activity__spot-footer {
     padding-top: 14px;
-    justify-content: stretch;
+    justify-content: flex-start;
   }
-  .friends-activity__spot-footer .btn-primary {
-    width: 100%;
-    justify-content: center;
-    text-align: center;
+  .friends-activity__sk-spot {
+    min-height: 280px;
   }
 
-  /* Kartlar: 2x2 yerine yatay kaydırmalı sıra (ana sayfadaki diğer raflar gibi).
-     Dikey yer kazandırır; üçüncü kartın yarısı görünür, kaydırılabildiği belli olur. */
-  .friends-activity__rail {
+  /* Kartlar: yatay kaydırmalı sıra; üçüncü kartın yarısı görünür, kaydırılabildiği belli olur. */
+  .friends-activity__rail,
+  .friends-activity__grid--rail-only .friends-activity__rail {
     display: flex;
     gap: 12px;
     overflow-x: auto;
+    overflow-y: hidden;
     scroll-snap-type: x mandatory;
     padding: 8px 0 10px;
+    margin-top: 0;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }
   .friends-activity__rail::-webkit-scrollbar {
     display: none;
   }
-  .friends-activity__card {
+  .friends-activity__card,
+  .friends-activity__sk-card {
     flex: 0 0 138px;
     scroll-snap-align: start;
   }
@@ -593,19 +634,21 @@
   .friends-activity__movie-title {
     font-size: 1.08rem;
   }
-  .friends-activity__card {
+  .friends-activity__card,
+  .friends-activity__sk-card {
     flex-basis: 128px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .friends-activity__card {
+  .friends-activity__card,
+  .friends-activity__spot {
     transition: none;
   }
   .friends-activity__card:hover {
     transform: none;
   }
-  .friends-activity__skeleton {
+  .friends-activity__sk {
     animation: none;
   }
 }

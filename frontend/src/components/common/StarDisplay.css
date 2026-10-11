@@ -1,0 +1,22 @@
+.star-display {
+  display: inline-flex;
+  gap: 1px;
+}
+.star-display__star {
+  position: relative;
+  display: inline-flex;
+  width: var(--star-size, 15px);
+  height: var(--star-size, 15px);
+}
+/* Boş yıldız: border rengi koyu kartta neredeyse görünmüyordu, muted + düşük opaklık daha okunur */
+.star-display__base {
+  color: var(--color-text-muted);
+  opacity: 0.45;
+}
+.star-display__fill {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: block;
+  color: var(--color-accent);
+}
