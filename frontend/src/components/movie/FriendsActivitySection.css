@@ -1,0 +1,489 @@
+.friends-activity {
+  margin-bottom: 56px;
+}
+
+/* ---------- Başlık ---------- */
+.friends-activity__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.friends-activity__eyebrow {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+.friends-activity__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+}
+.friends-activity__active {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.friends-activity__active p {
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+}
+.friends-activity__stack {
+  display: flex;
+  align-items: center;
+}
+/* PersonAvatar'ın kendi boyut sınıflarını (1 sınıf) ezmek için 2 sınıflı seçici */
+.friends-activity__stack .person-avatar {
+  width: 34px;
+  height: 34px;
+  margin-left: -10px;
+  border: 2px solid var(--color-bg);
+  box-sizing: border-box;
+}
+.friends-activity__stack .person-avatar:first-child {
+  margin-left: 0;
+}
+.friends-activity__more-chip {
+  margin-left: -10px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--color-bg);
+  background-color: var(--color-bg-card);
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* ---------- Izgara ---------- */
+.friends-activity__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 24px;
+  align-items: stretch;
+}
+.friends-activity__grid--rail-only {
+  grid-template-columns: minmax(0, 1fr);
+}
+.friends-activity__rail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  align-content: start;
+}
+
+.friends-activity__footer {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+}
+
+/* ---------- Ortak: poster ---------- */
+.friends-activity__poster {
+  display: block;
+  position: relative;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-elevated);
+  flex-shrink: 0;
+}
+.friends-activity__poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.friends-activity__poster-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  background: linear-gradient(
+    160deg,
+    var(--color-bg-card) 0%,
+    var(--color-bg-elevated) 100%
+  );
+}
+
+/* ---------- Spotlight ---------- */
+.friends-activity__spot {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background:
+    radial-gradient(
+      circle at 0% 0%,
+      var(--color-accent-muted),
+      transparent 55%
+    ),
+    var(--color-bg-elevated);
+}
+.friends-activity__spot-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.friends-activity__spot-avatar .person-avatar {
+  width: 40px;
+  height: 40px;
+}
+.friends-activity__who {
+  min-width: 0;
+  font-size: 0.88rem;
+  color: var(--color-text-secondary);
+}
+.friends-activity__who a {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+.friends-activity__who a:hover {
+  color: var(--color-accent);
+}
+.friends-activity__time {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 0.74rem;
+  color: var(--color-text-muted);
+}
+.friends-activity__spot-body {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  min-width: 0;
+}
+.friends-activity__spot .friends-activity__poster {
+  width: 150px;
+}
+.friends-activity__spot-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.friends-activity__movie-title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 1.6rem;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+.friends-activity__movie-title a {
+  color: var(--color-text-primary);
+}
+.friends-activity__movie-title a:hover {
+  color: var(--color-accent);
+}
+.friends-activity__movie-meta {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin-bottom: 12px;
+}
+.friends-activity__rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+.friends-activity__stars {
+  display: inline-flex;
+  gap: 1px;
+}
+.friends-activity__star {
+  position: relative;
+  display: inline-flex;
+  width: 15px;
+  height: 15px;
+}
+.friends-activity__star-base {
+  color: var(--color-border);
+}
+.friends-activity__star-fill {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: block;
+}
+.friends-activity__quote {
+  margin: 0 0 14px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--color-text-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.friends-activity__spoiler {
+  margin-bottom: 14px;
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+.friends-activity__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+.friends-activity__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent-muted);
+  color: var(--color-text-primary);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+.friends-activity__chip svg {
+  color: #e0245e;
+}
+.friends-activity__chip--dislike svg {
+  color: var(--color-text-muted);
+}
+.friends-activity__spot-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ---------- Sağdaki kartlar (MovieCard diliyle: poster + altında ortalı metin) ---------- */
+.friends-activity__card {
+  transition: transform var(--transition-base);
+}
+.friends-activity__card:hover {
+  transform: translateY(-6px);
+}
+.friends-activity__poster-wrap {
+  position: relative;
+}
+.friends-activity__badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 12, 16, 0.78);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+.friends-activity__badge.is-like {
+  color: #e0245e;
+}
+.friends-activity__badge.is-dislike {
+  color: #9ba3b4;
+}
+.friends-activity__card-avatar {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  z-index: 1;
+  display: block;
+  line-height: 0;
+}
+.friends-activity__card-avatar .person-avatar {
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--color-bg);
+  box-sizing: border-box;
+}
+.friends-activity__caption {
+  padding-top: 10px;
+  text-align: center;
+}
+.friends-activity__card-title {
+  font-family: var(--font-display);
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.32;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.friends-activity__card-title a {
+  color: var(--color-text-primary);
+}
+.friends-activity__card:hover .friends-activity__card-title a {
+  color: var(--color-accent-hover);
+}
+.friends-activity__card-who {
+  font-size: 0.76rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 3px;
+}
+.friends-activity__card-who a {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+.friends-activity__card-meta {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+/* ---------- "Arkadaşlarını bul" kartı ---------- */
+.friends-activity__find {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background:
+    radial-gradient(
+      circle at 0% 0%,
+      var(--color-accent-muted),
+      transparent 55%
+    ),
+    var(--color-bg-elevated);
+}
+.friends-activity__find-text {
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--color-accent);
+}
+.friends-activity__find-text h3 {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--color-text-primary);
+}
+.friends-activity__find-text p {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+.friends-activity__find-ghosts {
+  display: flex;
+  gap: 12px;
+}
+.friends-activity__find-ghosts span {
+  width: 74px;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--color-border);
+  background-color: var(--color-bg-card);
+  opacity: 0.7;
+}
+.friends-activity__find-ghosts span:nth-child(odd) {
+  transform: translateY(10px);
+}
+
+/* ---------- Yükleniyor ---------- */
+.friends-activity__skeleton {
+  min-height: 320px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    100deg,
+    var(--color-bg-elevated) 40%,
+    var(--color-border) 50%,
+    var(--color-bg-elevated) 60%
+  );
+  background-size: 250% 100%;
+  animation: friends-activity-sheen 1.6s ease-in-out infinite;
+}
+@keyframes friends-activity-sheen {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .friends-activity__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .friends-activity__rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .friends-activity__find {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+@media (max-width: 520px) {
+  .friends-activity {
+    margin-bottom: 40px;
+  }
+  .friends-activity__spot {
+    padding: 18px;
+  }
+  .friends-activity__spot .friends-activity__poster {
+    width: 104px;
+  }
+  .friends-activity__movie-title {
+    font-size: 1.2rem;
+  }
+  .friends-activity__find {
+    padding: 22px;
+  }
+  .friends-activity__find-ghosts span {
+    width: 56px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .friends-activity__card {
+    transition: none;
+  }
+  .friends-activity__card:hover {
+    transform: none;
+  }
+  .friends-activity__skeleton {
+    animation: none;
+  }
+}

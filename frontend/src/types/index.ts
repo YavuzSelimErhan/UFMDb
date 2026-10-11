@@ -445,3 +445,38 @@ export interface NotificationItem {
   isRead: boolean;
   createdAtUtc: string;
 }
+
+export interface FriendActivityUser {
+  id: string;
+  userName: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+}
+
+export interface FriendActivityMovie {
+  id: string;
+  title: string;
+  posterUrl: string;
+  releaseYear: number;
+  genre: string | null;
+}
+
+export interface FriendActivity {
+  user: FriendActivityUser;
+  movie: FriendActivityMovie;
+  rating: number | null;
+  watched: boolean;
+  reaction: ReactionType | null;
+  hasReview: boolean;
+  reviewExcerpt: string | null;
+  containsSpoiler: boolean;
+  lastActivityAtUtc: string;
+}
+
+export interface FriendsActivity {
+  followingCount: number;
+  weeklyActiveFriendCount: number;
+  weeklyActivityCount: number;
+  spotlight: FriendActivity | null;
+  items: FriendActivity[];
+}

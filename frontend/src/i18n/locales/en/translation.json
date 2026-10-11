@@ -563,5 +563,25 @@
     },
     "contactHeading": "Contact",
     "contactBody": "Questions about this policy can be sent to <email>{{emailAddress}}</email>."
+  },
+  "friendsActivity": {
+    "eyebrow": "PEOPLE YOU FOLLOW",
+    "title": "What your friends are watching",
+    "activeThisWeek": "{{n}} active this week",
+    "activityCount": "Activity in the last 7 days: {{n}}",
+    "verbRated": "rated",
+    "verbWatched": "watched",
+    "verbLiked": "liked",
+    "verbDisliked": "wasn't into",
+    "verbReviewed": "reviewed",
+    "verbRatedAndReviewed": "rated and reviewed",
+    "reactionLike": "Liked",
+    "reactionDislike": "Not for me",
+    "watched": "Watched",
+    "spoilerHidden": "This review contains spoilers.",
+    "goToMovie": "Go to movie",
+    "findTitle": "Find your friends",
+    "findText": "What the people you follow watch, rate and review shows up here.",
+    "findCta": "Discover users"
   }
 }

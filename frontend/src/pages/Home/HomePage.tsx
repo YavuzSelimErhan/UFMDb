@@ -13,6 +13,7 @@ import Collections from "@/components/movie/Collections";
 import GenresSection from "@/components/movie/GenresSection";
 import { PageError, RailSkeleton } from "@/components/common/PageState";
 import HomeSearchBar from "@/components/movie/HomeSearchBar";
+import FriendsActivitySection from "@/components/movie/FriendsActivitySection";
 import "./HomePage.css";
 
 const RAIL_SIZE = 15;
@@ -98,6 +99,7 @@ export default function HomePage() {
       <HomeSearchBar />
 
       <div className="container home-page__body">
+        <FriendsActivitySection />
         {isLoading && (
           <>
             <RailSkeleton />

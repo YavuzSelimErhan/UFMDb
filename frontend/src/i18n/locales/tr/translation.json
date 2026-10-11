@@ -563,5 +563,25 @@
     },
     "contactHeading": "İletişim",
     "contactBody": "Bu politikayla ilgili sorularını <email>{{emailAddress}}</email> adresine iletebilirsin."
+  },
+  "friendsActivity": {
+    "eyebrow": "TAKİP ETTİKLERİN",
+    "title": "Arkadaşların ne izliyor",
+    "activeThisWeek": "Bu hafta {{n}} kişi aktif",
+    "activityCount": "Son 7 günde {{n}} aktivite",
+    "verbRated": "puanladı",
+    "verbWatched": "izledi",
+    "verbLiked": "beğendi",
+    "verbDisliked": "bana hitap etmedi",
+    "verbReviewed": "yorumladı",
+    "verbRatedAndReviewed": "puanladı ve yorumladı",
+    "reactionLike": "Beğendi",
+    "reactionDislike": "Bana hitap etmedi",
+    "watched": "İzledi",
+    "spoilerHidden": "Bu yorum spoiler içeriyor.",
+    "goToMovie": "Filme git",
+    "findTitle": "Arkadaşlarını bul",
+    "findText": "Takip ettiğin kişilerin izledikleri, puanladıkları ve yorumladıkları burada görünür.",
+    "findCta": "Kullanıcıları keşfet"
   }
 }

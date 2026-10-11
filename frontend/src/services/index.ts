@@ -32,6 +32,7 @@ import type {
   PublicFullProfileDto,
   NotificationItem,
   MovieReactionResult,
+  FriendsActivity,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -423,5 +424,13 @@ export const notificationService = {
   },
   markAllRead: async (): Promise<void> => {
     await api.post("/notifications/read-all");
+  },
+};
+
+// ---------------- Feed ----------------
+export const feedService = {
+  getFriendsActivity: async (): Promise<FriendsActivity> => {
+    const { data } = await api.get("/feed/friends");
+    return data;
   },
 };
