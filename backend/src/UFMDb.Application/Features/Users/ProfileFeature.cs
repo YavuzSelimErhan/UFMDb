@@ -35,6 +35,7 @@ public record ProfileDto(
     List<FavoriteDirectorSlotDto> FavoriteDirectors,
     List<DirectorListItemDto> LikedDirectors,
     int TotalWatchedCount,
+    WatchedFilmsCountsDto WatchedCounts,
     decimal? AverageGivenRating,
     int RatingsCount,
     DateTime MemberSinceUtc,
@@ -68,9 +69,6 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             .OrderByDescending(w => w.WatchedAtUtc).Take(4)
             .ToListAsync(ct);
 
-        var totalWatchedCount = await _context.WatchHistory.AsNoTracking()
-            .CountAsync(w => w.UserId == request.UserId, ct);
-
         // Profildeki "Beğenilen filmler" listesi yalnızca "Beğendi" tepkilerini içerir.
         var liked = await _context.Likes.AsNoTracking()
             .Include(l => l.Movie).ThenInclude(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
@@ -92,9 +90,19 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
         var watchlistMovieIds = watchlist.Select(w => w.MovieId).ToHashSet();
 
         var watchedMovieIds = (await _context.WatchHistory.AsNoTracking()
-            .Where(w => w.UserId == request.UserId)
-            .Select(w => w.MovieId)
-            .ToListAsync(ct)).ToHashSet();
+            .Where(w => w.UserId == request.UserId).Select(w => w.MovieId).ToListAsync(ct)).ToHashSet();
+
+        var userRatings = await _context.MovieRatings.AsNoTracking()
+            .Where(r => r.UserId == request.UserId)
+            .ToListAsync(ct);
+
+        var userRatingsLookup = userRatings.ToDictionary(r => r.MovieId, r => r.Value);
+        var averageGivenRating = userRatings.Count > 0 ? Math.Round(userRatings.Average(r => r.Value), 2) : (decimal?)null;
+        var ratingsCount = userRatings.Count;
+
+        watchedMovieIds.UnionWith(userRatingsLookup.Keys);
+
+        var watchedCounts = WatchedFilmsCounter.From(watchedMovieIds, userRatingsLookup.Keys);
 
         // Her zaman 4 sabit slot döndürülür (1-4); dolu olmayan slotlar Movie=null olarak gelir.
         var favorites = Enumerable.Range(1, 4)
@@ -104,14 +112,6 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
                 return new FavoriteSlotDto(slot, match is null ? null : ToListItem(match.Movie, reactions, watchlistMovieIds, watchedMovieIds));
             })
             .ToList();
-
-        var userRatings = await _context.MovieRatings.AsNoTracking()
-            .Where(r => r.UserId == request.UserId)
-            .ToListAsync(ct);
-
-        var userRatingsLookup = userRatings.ToDictionary(r => r.MovieId, r => r.Value);
-        var averageGivenRating = userRatings.Count > 0 ? Math.Round(userRatings.Average(r => r.Value), 2) : (decimal?)null;
-        var ratingsCount = userRatings.Count;
 
         var recentlyWatched = recent.Select(w => new RecentlyWatchedItemDto(
             ToListItem(w.Movie, reactions, watchlistMovieIds, watchedMovieIds), w.Rating
@@ -179,7 +179,8 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             likedActors,
             favoriteDirectors,
             likedDirectors,
-            totalWatchedCount,
+            watchedCounts.All,
+            watchedCounts,
             averageGivenRating,
             ratingsCount,
             user.CreatedAtUtc,
@@ -719,5 +720,23 @@ public class DeleteScreeningLogEntryCommandHandler : IRequestHandler<DeleteScree
         {
             await MovieRatingRecalculator.RecalculateAsync(_context, movie, ct);
         }
+    }
+}
+
+public record GetWatchedFilmsCountsQuery(Guid UserId) : IRequest<WatchedFilmsCountsDto>;
+
+public class GetWatchedFilmsCountsQueryHandler : IRequestHandler<GetWatchedFilmsCountsQuery, WatchedFilmsCountsDto>
+{
+    private readonly IApplicationDbContext _context;
+    public GetWatchedFilmsCountsQueryHandler(IApplicationDbContext context) => _context = context;
+
+    public async Task<WatchedFilmsCountsDto> Handle(GetWatchedFilmsCountsQuery request, CancellationToken ct)
+    {
+        var watched = await _context.WatchHistory.AsNoTracking()
+            .Where(w => w.UserId == request.UserId).Select(w => w.MovieId).Distinct().ToListAsync(ct);
+        var rated = await _context.MovieRatings.AsNoTracking()
+            .Where(r => r.UserId == request.UserId).Select(r => r.MovieId).ToListAsync(ct);
+
+        return WatchedFilmsCounter.From(watched, rated);
     }
 }

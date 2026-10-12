@@ -163,6 +163,10 @@ public class ProfileController : ControllerBase
         return NoContent();
     }
 
+    [HttpGet("watched-films/counts")]
+    public async Task<IActionResult> GetWatchedFilmsCounts()
+    => Ok(await _mediator.Send(new GetWatchedFilmsCountsQuery(RequireUserId())));
+
     [HttpGet("liked-reviews")]
     public async Task<IActionResult> GetLikedReviews()
     => Ok(await _mediator.Send(new GetLikedReviewsQuery(RequireUserId())));

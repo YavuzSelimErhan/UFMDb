@@ -93,6 +93,8 @@ export default function ProfilePage() {
     staleTime: 60_000,
   });
 
+  // Cache, ProfileHeader içinde profil verisiyle seed ediliyor; bu hook
+  // aynı cache'i okuduğu için ek istek atmıyor.
   const { data: filmsCounts } = useWatchedFilmsCounts();
 
   const settingsMutation = useMutation({
@@ -167,7 +169,7 @@ export default function ProfilePage() {
       key: "films",
       label: t("profile.tabFilms"),
       icon: Film,
-      count: filmsCounts?.all,
+      count: filmsCounts?.all ?? profile.watchedCounts?.all,
     },
     {
       key: "watchlist",

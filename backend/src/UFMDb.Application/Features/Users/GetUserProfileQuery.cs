@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
+using UFMDb.Application.Common.Services;
 using UFMDb.Application.DTOs;
 using UFMDb.Application.Features.Actors;
 using UFMDb.Application.Features.Users;
@@ -59,7 +60,7 @@ public record PublicFullProfileDto(
     List<ActorListItemDto> LikedActors,
     List<FavoriteDirectorSlotDto> FavoriteDirectors,
     List<DirectorListItemDto> LikedDirectors,
-    int TotalWatchedCount, decimal? AverageGivenRating, int RatingsCount, DateTime MemberSinceUtc,
+    int TotalWatchedCount, WatchedFilmsCountsDto WatchedCounts, decimal? AverageGivenRating, int RatingsCount, DateTime MemberSinceUtc,
     int FollowerCount, int FollowingCount, int ListsCount,
     bool IsFollowedByCurrentUser, bool IsCurrentUser
 );
@@ -102,7 +103,7 @@ public class GetPublicFullProfileQueryHandler : IRequestHandler<GetPublicFullPro
             profile.Gender, profile.BirthDate,
             profile.FavoriteMovies, profile.RecentlyWatched, profile.LikedMovies, profile.Watchlist, profile.Reviews,
             profile.FavoriteActors, profile.LikedActors, profile.FavoriteDirectors, profile.LikedDirectors,
-            profile.TotalWatchedCount, profile.AverageGivenRating, profile.RatingsCount, profile.MemberSinceUtc,
+            profile.TotalWatchedCount, profile.WatchedCounts, profile.AverageGivenRating, profile.RatingsCount, profile.MemberSinceUtc,
             followerCount, followingCount, listsCount, isFollowed, request.CurrentUserId == user.Id
         );
     }

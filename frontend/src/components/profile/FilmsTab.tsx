@@ -198,6 +198,12 @@ export default function FilmsTab({ userId }: FilmsTabProps) {
                 })),
               },
           );
+          // Puanlanmamış bir film puanlandıysa rated/unrated sayıları ve
+          // ortalama puan değişir: counts ve profil verisini tazele.
+          queryClient.invalidateQueries({
+            queryKey: ["watched-films-counts"],
+          });
+          queryClient.invalidateQueries({ queryKey: ["my-profile"] });
         } catch {
           setActionError(t("profile.ratingSaveError"));
         }

@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Pencil,
   Star,
@@ -16,6 +17,10 @@ import {
 import type { ProfileData, PublicFullProfileDto } from "@/types";
 import { getImageUrl } from "@/utils/getImageUrl";
 import FollowListModal from "@/components/user/FollowListModal";
+import {
+  useWatchedFilmsCounts,
+  watchedCountsKey,
+} from "@/hooks/useWatchedFilmsCounts";
 import "./ProfileHeader.css";
 
 interface Props {
@@ -52,10 +57,28 @@ export default function ProfileHeader({
   isFollowLoading = false,
 }: Props) {
   const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
   const [isAvatarExpanded, setIsAvatarExpanded] = useState(false);
   const [followModal, setFollowModal] = useState<
     "followers" | "following" | null
   >(null);
+
+  // Film sayılarının tek kaynağı: counts cache'i. Profil yanıtıyla gelen
+  // değerleri buraya yazıyoruz; böylece header, sekme rozeti ve FilmsTab
+  // aynı veriyi okuyor ve ek istek atılmıyor.
+  // useLayoutEffect: aynı anda mount olan FilmsTab'ın counts sorgusu
+  // fetch başlatmadan (passive effect) önce cache dolmuş olsun.
+  const countsUserId = isCurrentUser ? undefined : userId;
+  useLayoutEffect(() => {
+    if (profile.watchedCounts) {
+      queryClient.setQueryData(
+        watchedCountsKey(countsUserId),
+        profile.watchedCounts,
+      );
+    }
+  }, [profile.watchedCounts, countsUserId, queryClient]);
+
+  const { data: counts } = useWatchedFilmsCounts(countsUserId);
 
   useEffect(() => {
     if (!isAvatarExpanded) return;
@@ -119,7 +142,7 @@ export default function ProfileHeader({
         ? "/profile?tab=films"
         : `/users/${targetUserName}?tab=films`,
       icon: Film,
-      value: profile.totalWatchedCount ?? 0,
+      value: counts?.all ?? profile.watchedCounts?.all ?? 0,
       label: t("profile.statFilms"),
     },
     {

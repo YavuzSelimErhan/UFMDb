@@ -37,6 +37,7 @@ import type {
   ReactionType,
   ScreeningLogPage,
   ScreeningLogSummary,
+  WatchedFilmsCounts,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -285,6 +286,10 @@ export const profileService = {
     const { data } = await api.get("/profile/liked-reviews");
     return data;
   },
+  getWatchedFilmCounts: () =>
+    api
+      .get<WatchedFilmsCounts>("/profile/watched-films/counts")
+      .then((r) => r.data),
 };
 
 // ---------------- Genres ----------------
@@ -432,6 +437,10 @@ export const followService = {
     });
     return data;
   },
+  getWatchedFilmCounts: (userId: string) =>
+    api
+      .get<WatchedFilmsCounts>(`/users/${userId}/watched-films/counts`)
+      .then((r) => r.data),
 };
 
 // ---------------- Notifications ----------------

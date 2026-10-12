@@ -1,5 +1,11 @@
 export type ReactionType = "Like" | "Dislike";
 
+export type WatchedFilmsCounts = {
+  all: number;
+  rated: number;
+  unrated: number;
+};
+
 export interface MovieReactionResult {
   currentUserReaction: ReactionType | null;
   likeCount: number;
@@ -294,6 +300,7 @@ export interface ProfileData {
   favoriteDirectors: FavoriteDirectorSlot[];
   likedDirectors: DirectorListItem[];
   totalWatchedCount: number;
+  watchedCounts: WatchedFilmsCounts;
   averageGivenRating: number | null;
   ratingsCount: number;
   memberSinceUtc: string;
@@ -434,6 +441,7 @@ export interface PublicFullProfileDto {
   favoriteDirectors: FavoriteDirectorSlot[];
   likedDirectors: DirectorListItem[];
   totalWatchedCount: number;
+  watchedCounts: WatchedFilmsCounts;
   averageGivenRating: number | null;
   ratingsCount: number;
   memberSinceUtc: string;
