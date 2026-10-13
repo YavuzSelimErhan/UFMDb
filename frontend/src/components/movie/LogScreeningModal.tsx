@@ -73,6 +73,7 @@ export default function LogScreeningModal({ movie, onClose }: Props) {
     },
     onSuccess: ({ reactionFailed }) => {
       queryClient.invalidateQueries({ queryKey: ["movie", movie.id] });
+      queryClient.invalidateQueries({ queryKey: ["watched-films-counts"] });
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
       queryClient.invalidateQueries({ queryKey: ["watched-films"] });
       queryClient.invalidateQueries({ queryKey: ["screening-log"] });

@@ -292,6 +292,12 @@ public class ToggleWatchedCommandHandler : IRequestHandler<ToggleWatchedCommand,
         bool nowWatched;
         if (existingEntries.Count == 0)
         {
+            
+            var hasQuickRating = await _context.MovieRatings
+                .AnyAsync(r => r.MovieId == request.MovieId && r.UserId == request.UserId, ct);
+            if (hasQuickRating)
+                throw new ConflictException("Bu filme puan verdiğin için izlenmedi olarak işaretleyemezsin. Önce puanını kaldır.");
+
             _context.WatchHistory.Add(new WatchHistory { MovieId = request.MovieId, UserId = request.UserId, WatchedAtUtc = DateTime.UtcNow });
             nowWatched = true;
 

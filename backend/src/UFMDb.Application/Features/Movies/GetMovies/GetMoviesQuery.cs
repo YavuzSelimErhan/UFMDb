@@ -204,6 +204,12 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
                 .Select(w => w.MovieId)
                 .ToListAsync(ct)).ToHashSet();
 
+            var ratedIds = await _context.MovieRatings.AsNoTracking()
+                .Where(r => r.UserId == request.UserId.Value && movieIds.Contains(r.MovieId))
+                .Select(r => r.MovieId)
+                .ToListAsync(ct);
+                        watchedIds.UnionWith(ratedIds);
+
             for (int i = 0; i < items.Count; i++)
             {
                 items[i] = (items[i] with

@@ -117,6 +117,8 @@ export default function MovieDetailPage() {
       setWatchedError(null);
       queryClient.invalidateQueries({ queryKey: ["movie", id] });
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["watched-films-counts"] });
+      queryClient.invalidateQueries({ queryKey: ["watched-films"] });
     },
     onError: (err: unknown) => {
       const message = (err as { response?: { data?: { title?: string } } })
@@ -132,6 +134,8 @@ export default function MovieDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["movie", id] });
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["watched-films-counts"] });
+      queryClient.invalidateQueries({ queryKey: ["watched-films"] });
     },
   });
 
@@ -180,6 +184,7 @@ export default function MovieDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["movie", id] });
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
       queryClient.invalidateQueries({ queryKey: ["watched-films"] });
+      queryClient.invalidateQueries({ queryKey: ["watched-films-counts"] });
       queryClient.invalidateQueries({ queryKey: ["screening-log"] });
       queryClient.invalidateQueries({ queryKey: ["movies"] });
       queryClient.invalidateQueries({ queryKey: ["home-feed"] });

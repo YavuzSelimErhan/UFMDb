@@ -425,6 +425,7 @@ export default function ScreeningLogPage() {
     queryClient.invalidateQueries({ queryKey: ["screening-log"] });
     queryClient.invalidateQueries({ queryKey: ["my-profile"] });
     queryClient.invalidateQueries({ queryKey: ["watched-films"] });
+    queryClient.invalidateQueries({ queryKey: ["watched-films-counts"] });
     queryClient.invalidateQueries({ queryKey: ["movie"] });
   };
 

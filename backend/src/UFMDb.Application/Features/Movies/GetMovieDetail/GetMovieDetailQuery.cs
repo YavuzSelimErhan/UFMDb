@@ -29,17 +29,16 @@ public class GetMovieDetailQueryHandler : IRequestHandler<GetMovieDetailQuery, M
                 .Where(l => l.MovieId == movie.Id && l.UserId == uid)
                 .Select(l => (ReactionType?)l.Reaction)
                 .FirstOrDefaultAsync(ct);
-            isInWatchlist = await _context.WatchlistItems.AsNoTracking().AnyAsync(w => w.MovieId == movie.Id && w.UserId == uid, ct);
-            isWatched = await _context.WatchHistory.AsNoTracking().AnyAsync(w => w.MovieId == movie.Id && w.UserId == uid, ct);
+                        isInWatchlist = await _context.WatchlistItems.AsNoTracking().AnyAsync(w => w.MovieId == movie.Id && w.UserId == uid, ct);
 
-            var latestRatedEntry = await _context.WatchHistory.AsNoTracking()
-                .Where(w => w.MovieId == movie.Id && w.UserId == uid && w.Rating != null)
-                .OrderByDescending(w => w.WatchedAtUtc)
-                .FirstOrDefaultAsync(ct);
             myRating = await _context.MovieRatings.AsNoTracking()
                 .Where(r => r.MovieId == movie.Id && r.UserId == uid)
                 .Select(r => (decimal?)r.Value)
                 .FirstOrDefaultAsync(ct);
+
+            // "Ýzlenmiþ" = logu VEYA puaný olan film (profil ve Films listesiyle ayný taným)
+            isWatched = myRating.HasValue
+                || await _context.WatchHistory.AsNoTracking().AnyAsync(w => w.MovieId == movie.Id && w.UserId == uid, ct);
 
             var reviewEntity = await _context.Reviews.AsNoTracking()
                 .FirstOrDefaultAsync(r => r.MovieId == movie.Id && r.UserId == uid && !r.IsDeleted, ct);

@@ -141,6 +141,8 @@ export default function MovieCard({
     onSuccess: (newState) => {
       setIsWatched(newState);
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["watched-films-counts"] });
+      queryClient.invalidateQueries({ queryKey: ["watched-films"] });
       queryClient.invalidateQueries({ queryKey: ["list"] });
       queryClient.invalidateQueries({ queryKey: ["movies"] });
       queryClient.invalidateQueries({ queryKey: ["home-feed"] });
