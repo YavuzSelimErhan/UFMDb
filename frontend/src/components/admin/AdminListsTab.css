@@ -1,0 +1,56 @@
+.admin-lists__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.admin-lists__toolbar h3 {
+  margin: 0;
+  margin-right: auto;
+}
+
+.admin-lists__scopes {
+  display: inline-flex;
+  border: 1px solid var(--border, rgba(128, 128, 128, 0.3));
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.admin-lists__scopes button {
+  padding: 6px 12px;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.admin-lists__scopes button.is-active {
+  background: rgba(128, 128, 128, 0.22);
+  font-weight: 600;
+}
+
+.admin-lists__new {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-lists__badge {
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  background: rgba(128, 128, 128, 0.22);
+  vertical-align: middle;
+}
+
+.admin-lists__pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+}

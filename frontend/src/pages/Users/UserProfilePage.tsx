@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import {
@@ -11,6 +16,7 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { followService } from "@/services";
+import { pickListText } from "@/utils/listText";
 import MovieCard from "@/components/movie/MovieCard";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import ListCard from "../Lists/ListCard";
@@ -32,6 +38,8 @@ type ProfileTab =
   | "liked"
   | "reviews"
   | "lists";
+
+const LISTS_PAGE_SIZE = 24;
 
 export default function UserProfilePage() {
   const { userName = "" } = useParams<{ userName: string }>();
@@ -62,16 +70,27 @@ export default function UserProfilePage() {
   });
 
   const {
-    data: userLists,
+    data: listsData,
     isLoading: isListsLoading,
     isError: isListsError,
     refetch: refetchLists,
-  } = useQuery({
+    fetchNextPage: fetchMoreLists,
+    hasNextPage: hasMoreLists,
+    isFetchingNextPage: isFetchingMoreLists,
+  } = useInfiniteQuery({
     queryKey: ["user-lists", profile?.id],
-    queryFn: () => followService.getUserLists(profile!.id),
+    queryFn: ({ pageParam }) =>
+      followService.getUserLists(profile!.id, pageParam, LISTS_PAGE_SIZE),
+    initialPageParam: 1,
+    getNextPageParam: (last) =>
+      last.page * last.pageSize < last.totalCount ? last.page + 1 : undefined,
     enabled: !!profile?.id,
     staleTime: 60_000,
   });
+
+  const userLists = listsData?.pages.flatMap((p) => p.items);
+  // Header/tab sayacında sunucudaki toplam gösterilir (yüklenen sayfa sayısı değil).
+  const userListsCount = listsData?.pages[0]?.totalCount;
 
   const followMutation = useMutation({
     mutationFn: () => followService.toggleFollow(profile!.id),
@@ -131,7 +150,7 @@ export default function UserProfilePage() {
       key: "lists",
       label: t("profile.myLists"),
       icon: ListVideo,
-      count: userLists?.length,
+      count: userListsCount ?? profile.listsCount,
     },
     {
       key: "reviews",
@@ -150,7 +169,7 @@ export default function UserProfilePage() {
         isFollowedByCurrentUser={profile.isFollowedByCurrentUser}
         onFollowToggle={() => followMutation.mutate()}
         isFollowLoading={followMutation.isPending}
-        listsCount={userLists?.length}
+        listsCount={userListsCount ?? profile.listsCount}
       />
 
       <nav className="profile-page__toptabs">
@@ -245,17 +264,40 @@ export default function UserProfilePage() {
             )}
 
             {userLists && userLists.length > 0 && (
-              <div className="lists-page__grid">
-                {userLists.map((list) => (
-                  <ListCard
-                    key={list.id}
-                    list={list}
-                    displayTitle={
-                      i18n.language === "tr" ? list.titleTr : list.title
-                    }
-                  />
-                ))}
-              </div>
+              <>
+                <div className="lists-page__grid">
+                  {userLists.map((list) => (
+                    <ListCard
+                      key={list.id}
+                      list={list}
+                      displayTitle={pickListText(
+                        list.titleTr,
+                        list.title,
+                        i18n.language,
+                      )}
+                      displayDescription={pickListText(
+                        list.descriptionTr,
+                        list.description,
+                        i18n.language,
+                      )}
+                    />
+                  ))}
+                </div>
+                {hasMoreLists && (
+                  <div style={{ display: "flex", justifyContent: "center" }}>
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      disabled={isFetchingMoreLists}
+                      onClick={() => fetchMoreLists()}
+                    >
+                      {isFetchingMoreLists
+                        ? t("common.loading")
+                        : t("profile.loadMore")}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </section>
         )}

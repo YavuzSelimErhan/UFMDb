@@ -1,7 +1,12 @@
 import { Fragment, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   Bookmark,
   Heart,
@@ -21,6 +26,7 @@ import {
   listService,
   profileService,
 } from "@/services";
+import { pickListText } from "@/utils/listText";
 import MovieCard from "@/components/movie/MovieCard";
 import ListCard from "@/pages/Lists/ListCard";
 import EditReviewModal from "@/components/profile/EditReviewModal";
@@ -43,6 +49,7 @@ type LikedSubTab = "films" | "actors" | "directors" | "lists" | "reviews";
 
 /** Films sekmesindeki PAGE_SIZE ile aynı: iki yerde aynı ritim. */
 const MOVIES_PAGE_SIZE = 24;
+const LISTS_PAGE_SIZE = 24;
 
 interface PagedMovieGridProps {
   movies: MovieListItem[];
@@ -172,16 +179,32 @@ export default function ProfileContentTabs({
   });
 
   const {
-    data: likedLists,
+    data: likedListsData,
     isLoading: isLikedListsLoading,
     isError: isLikedListsError,
     refetch: refetchLikedLists,
-  } = useQuery({
-    queryKey: ["lists", "Liked"],
-    queryFn: () => listService.getAll("Liked"),
+    fetchNextPage: fetchMoreLikedLists,
+    hasNextPage: hasMoreLikedLists,
+    isFetchingNextPage: isFetchingMoreLikedLists,
+  } = useInfiniteQuery({
+    // "lists" öneki: liste beğeni/oluştur/düzenle sonrası invalidate ile yenilenir.
+    queryKey: ["lists", "liked"],
+    queryFn: ({ pageParam }) =>
+      listService.getAll({
+        scope: "Liked",
+        sort: "Newest",
+        page: pageParam,
+        pageSize: LISTS_PAGE_SIZE,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (last) =>
+      last.page * last.pageSize < last.totalCount ? last.page + 1 : undefined,
     staleTime: 60_000,
     enabled: tab === "liked" && isOwnProfile,
   });
+
+  const likedLists = likedListsData?.pages.flatMap((p) => p.items);
+  const likedListsCount = likedListsData?.pages[0]?.totalCount ?? 0;
 
   const {
     data: likedReviews,
@@ -229,7 +252,7 @@ export default function ProfileContentTabs({
       key: "lists",
       label: t("profile.likedLists"),
       icon: ListVideo,
-      count: likedLists?.length ?? 0,
+      count: likedListsCount,
     },
   ];
 
@@ -503,17 +526,40 @@ export default function ProfileContentTabs({
                   onRetry={() => refetchLikedLists()}
                 />
               ) : likedLists && likedLists.length > 0 ? (
-                <div className="profile-tabs__lists-grid">
-                  {likedLists.map((list) => (
-                    <ListCard
-                      key={list.id}
-                      list={list}
-                      displayTitle={
-                        i18n.language === "tr" ? list.titleTr : list.title
-                      }
-                    />
-                  ))}
-                </div>
+                <>
+                  <div className="profile-tabs__lists-grid">
+                    {likedLists.map((list) => (
+                      <ListCard
+                        key={list.id}
+                        list={list}
+                        displayTitle={pickListText(
+                          list.titleTr,
+                          list.title,
+                          i18n.language,
+                        )}
+                        displayDescription={pickListText(
+                          list.descriptionTr,
+                          list.description,
+                          i18n.language,
+                        )}
+                      />
+                    ))}
+                  </div>
+                  {hasMoreLikedLists && (
+                    <div className="paged-grid__actions">
+                      <button
+                        type="button"
+                        className="paged-grid__more btn-secondary"
+                        disabled={isFetchingMoreLikedLists}
+                        onClick={() => fetchMoreLikedLists()}
+                      >
+                        {isFetchingMoreLikedLists
+                          ? t("common.loading")
+                          : t("profile.loadMore")}
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <EmptyState
                   icon={<ListVideo size={26} />}

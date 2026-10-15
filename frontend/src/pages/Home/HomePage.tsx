@@ -17,6 +17,8 @@ import FriendsActivitySection from "@/components/movie/FriendsActivitySection";
 import "./HomePage.css";
 
 const RAIL_SIZE = 15;
+// Ana sayfadaki "Koleksiyonlar" bölümünde gösterilecek resmî liste sayısı.
+const COLLECTIONS_SIZE = 12;
 const CURRENT_YEAR = new Date().getFullYear();
 // Trend rail'i için geriye dönük kaç yıl taransın.
 const TRENDING_YEARS_BACK = 1;
@@ -39,10 +41,20 @@ export default function HomePage() {
     queryKey: ["genres"],
     queryFn: genreService.getAll,
   });
-  const { data: lists } = useQuery({
-    queryKey: ["lists"],
-    queryFn: () => listService.getAll(),
+  // getAll artık sayfalı sonuç (PagedLists) döndürüyor; ana sayfa için resmî
+  // listelerin ilk sayfası yeterli. "lists" öneki, liste oluştur/düzenle/sil
+  // sonrası yapılan invalidate ile bu sorguyu da yeniler.
+  const { data: listsPage } = useQuery({
+    queryKey: ["lists", "home"],
+    queryFn: () =>
+      listService.getAll({
+        scope: "Official",
+        sort: "Default",
+        page: 1,
+        pageSize: COLLECTIONS_SIZE,
+      }),
   });
+  const lists = listsPage?.items;
 
   // 'my-profile' key'i zaten RailCard/HeroCarousel'daki watchlist toggle'ların
   // invalidate ettiği key ile aynı, o yüzden bir yerde ekle/çıkar yapınca burası da otomatik güncellenir.

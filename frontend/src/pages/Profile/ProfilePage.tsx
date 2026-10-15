@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -23,6 +23,7 @@ import { useAppDispatch, useAppSelector } from "@/store";
 import { setTheme } from "@/store/uiSlice";
 import { logout } from "@/store/authSlice";
 import { SUPPORTED_LANGUAGES, languageLabel } from "@/i18n/languages";
+import { pickListText } from "@/utils/listText";
 import Dropdown from "@/components/search/Dropdown";
 import MovieCard from "@/components/movie/MovieCard";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
@@ -47,6 +48,8 @@ type ProfileTab =
   | "reviews"
   | "lists"
   | "settings";
+
+const LISTS_PAGE_SIZE = 24;
 
 export default function ProfilePage() {
   const { t, i18n } = useTranslation();
@@ -83,15 +86,32 @@ export default function ProfilePage() {
   });
 
   const {
-    data: myLists,
+    data: myListsData,
     isLoading: isMyListsLoading,
     isError: isMyListsError,
     refetch: refetchMyLists,
-  } = useQuery({
-    queryKey: ["lists", "Mine"],
-    queryFn: () => listService.getAll("Mine"),
+    fetchNextPage: fetchMoreMyLists,
+    hasNextPage: hasMoreMyLists,
+    isFetchingNextPage: isFetchingMoreMyLists,
+  } = useInfiniteQuery({
+    // "lists" öneki: Create/Edit sayfalarındaki invalidate bunu da yeniler.
+    queryKey: ["lists", "mine"],
+    queryFn: ({ pageParam }) =>
+      listService.getAll({
+        scope: "Mine",
+        sort: "Newest",
+        page: pageParam,
+        pageSize: LISTS_PAGE_SIZE,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (last) =>
+      last.page * last.pageSize < last.totalCount ? last.page + 1 : undefined,
     staleTime: 60_000,
   });
+
+  const myLists = myListsData?.pages.flatMap((p) => p.items);
+  // Sayaç: sunucudaki toplam (yüklenen sayfa sayısı değil).
+  const myListsCount = myListsData?.pages[0]?.totalCount;
 
   // Cache, ProfileHeader içinde profil verisiyle seed ediliyor; bu hook
   // aynı cache'i okuduğu için ek istek atmıyor.
@@ -190,7 +210,7 @@ export default function ProfilePage() {
       key: "lists",
       label: t("profile.myLists"),
       icon: ListVideo,
-      count: myLists?.length,
+      count: myListsCount,
     },
     {
       key: "reviews",
@@ -208,7 +228,7 @@ export default function ProfilePage() {
         userId={profile.userId}
         isCurrentUser
         onEditClick={() => navigate("/profile/edit")}
-        listsCount={myLists?.length}
+        listsCount={myListsCount}
       />
 
       <nav className="profile-page__toptabs">
@@ -316,17 +336,40 @@ export default function ProfilePage() {
             )}
 
             {myLists && myLists.length > 0 && (
-              <div className="lists-page__grid">
-                {myLists.map((list) => (
-                  <ListCard
-                    key={list.id}
-                    list={list}
-                    displayTitle={
-                      i18n.language === "tr" ? list.titleTr : list.title
-                    }
-                  />
-                ))}
-              </div>
+              <>
+                <div className="lists-page__grid">
+                  {myLists.map((list) => (
+                    <ListCard
+                      key={list.id}
+                      list={list}
+                      displayTitle={pickListText(
+                        list.titleTr,
+                        list.title,
+                        i18n.language,
+                      )}
+                      displayDescription={pickListText(
+                        list.descriptionTr,
+                        list.description,
+                        i18n.language,
+                      )}
+                    />
+                  ))}
+                </div>
+                {hasMoreMyLists && (
+                  <div style={{ display: "flex", justifyContent: "center" }}>
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      disabled={isFetchingMoreMyLists}
+                      onClick={() => fetchMoreMyLists()}
+                    >
+                      {isFetchingMoreMyLists
+                        ? t("common.loading")
+                        : t("profile.loadMore")}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </section>
         )}
