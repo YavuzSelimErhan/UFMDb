@@ -9,6 +9,7 @@ namespace UFMDb.Application.Features.Notifications;
 /// <param name="MovieId">Yorum beğenisi gibi film bağlamlı bildirimlerde gidilecek film.</param>
 /// <param name="EntityTitle">Bildirim metninde gösterilecek başlık (film adı veya liste başlığı).</param>
 /// <param name="EntityTitleTr">Liste bildirimlerinde Türkçe başlık (diğerlerinde null).</param>
+/// <param name="ActorIsFollowedByCurrentUser">Bildirimi tetikleyen kişiyi ben zaten takip ediyor muyum? (Follow bildiriminde "sen de takip et" butonu için.)</param>
 public record NotificationDto(
     Guid Id,
     string Type,
@@ -20,6 +21,7 @@ public record NotificationDto(
     Guid? MovieId,
     string? EntityTitle,
     string? EntityTitleTr,
+    bool ActorIsFollowedByCurrentUser,
     bool IsRead,
     DateTime CreatedAtUtc
 );
@@ -96,6 +98,23 @@ public class GetMyNotificationsQueryHandler
                 listInfo[l.Id] = (l.Title, l.TitleTr);
         }
 
+        // Takip bildirimlerinde: aktörü ben zaten takip ediyor muyum? Tek sorguda çöz.
+        var actorIds = rows
+            .Where(r => r.Type == NotificationType.Follow && r.ActorUserId.HasValue)
+            .Select(r => r.ActorUserId!.Value)
+            .Distinct()
+            .ToList();
+
+        var followedActorIds = new HashSet<Guid>();
+        if (actorIds.Count > 0)
+        {
+            var followed = await _context.Follows.AsNoTracking()
+                .Where(f => f.FollowerId == request.UserId && actorIds.Contains(f.FollowingId))
+                .Select(f => f.FollowingId)
+                .ToListAsync(ct);
+            followedActorIds.UnionWith(followed);
+        }
+
         var result = new List<NotificationDto>(rows.Count);
         foreach (var r in rows)
         {
@@ -134,6 +153,7 @@ public class GetMyNotificationsQueryHandler
                 movieId,
                 title,
                 titleTr,
+                r.ActorUserId.HasValue && followedActorIds.Contains(r.ActorUserId.Value),
                 r.IsRead,
                 r.CreatedAtUtc));
         }

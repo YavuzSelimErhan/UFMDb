@@ -474,6 +474,7 @@ export interface NotificationItem {
   movieId?: string | null;
   entityTitle?: string | null;
   entityTitleTr?: string | null;
+  actorIsFollowedByCurrentUser?: boolean;
 }
 
 export interface FriendActivityUser {

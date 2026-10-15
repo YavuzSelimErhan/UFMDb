@@ -8,10 +8,11 @@ import {
   Check,
   Heart,
   ListVideo,
+  UserCheck,
   UserPlus,
   type LucideIcon,
 } from "lucide-react";
-import { notificationService } from "@/services";
+import { notificationService, followService } from "@/services";
 import type { NotificationItem } from "@/types";
 import PersonAvatar from "@/components/common/PersonAvatar";
 import "./NotificationBell.css";
@@ -98,6 +99,25 @@ export default function NotificationBell() {
       queryClient.invalidateQueries({
         queryKey: ["notifications-unread-count"],
       });
+    },
+  });
+
+  // "Sen de takip et": takip/bırak toggle'ı. Sonuç (şu an takip ediyor muyum) aynı kişiden gelen
+  // tüm bildirimlere yansıtılır, takip sayısı değiştiği için profil tazelenir.
+  const followMutation = useMutation({
+    mutationFn: (targetUserId: string) =>
+      followService.toggleFollow(targetUserId),
+    onSuccess: (isFollowing, targetUserId) => {
+      queryClient.setQueryData<NotificationItem[] | undefined>(
+        ["notifications"],
+        (prev) =>
+          prev?.map((n) =>
+            n.actorUserId === targetUserId
+              ? { ...n, actorIsFollowedByCurrentUser: isFollowing }
+              : n,
+          ),
+      );
+      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
     },
   });
 
@@ -225,17 +245,25 @@ export default function NotificationBell() {
     const d = describe(n);
     if (!d || !n.actorUserId) return null;
     const Icon = d.icon;
+    const actorId = n.actorUserId;
+    const isFollowType = n.type === "Follow";
+    const isFollowing = !!n.actorIsFollowedByCurrentUser;
+    const isFollowPending =
+      followMutation.isPending && followMutation.variables === actorId;
 
     return (
-      <li key={n.id}>
+      <li
+        key={n.id}
+        className={`notification-bell__row${!n.isRead ? " is-unread" : ""}`}
+      >
         <Link
           to={d.href}
           onClick={() => handleItemClick(n)}
-          className={`notification-bell__item${!n.isRead ? " is-unread" : ""}`}
+          className="notification-bell__item"
         >
           <span className="notification-bell__avatar">
             <PersonAvatar
-              id={n.actorUserId}
+              id={actorId}
               photoUrl={n.actorAvatarUrl}
               fullName={n.actorFullName || n.actorUserName || "?"}
               size="sm"
@@ -256,13 +284,29 @@ export default function NotificationBell() {
               {timeAgo(n.createdAtUtc, i18n.language)}
             </span>
           </span>
-          {!n.isRead && (
+          {!n.isRead && !isFollowType && (
             <span
               className="notification-bell__unread-dot"
               aria-hidden="true"
             />
           )}
         </Link>
+
+        {isFollowType && (
+          <button
+            type="button"
+            className={`notification-bell__follow-btn${isFollowing ? " is-following" : ""}`}
+            disabled={isFollowPending}
+            aria-pressed={isFollowing}
+            onClick={() => {
+              followMutation.mutate(actorId);
+              if (!n.isRead) markReadMutation.mutate(n.id);
+            }}
+          >
+            {isFollowing ? <UserCheck size={13} /> : <UserPlus size={13} />}
+            {isFollowing ? t("users.following") : t("users.follow")}
+          </button>
+        )}
       </li>
     );
   };
