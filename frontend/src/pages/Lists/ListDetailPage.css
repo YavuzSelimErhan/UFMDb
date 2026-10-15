@@ -109,7 +109,6 @@
   padding: 4px 12px;
   border-radius: var(--radius-pill);
 }
-
 @media (max-width: 600px) {
   .list-detail-page__hero {
     height: 180px;
@@ -338,6 +337,11 @@
   display: flex;
   justify-content: center;
   margin-top: 16px;
+}
+.list-detail-page__header p {
+  max-width: 640px;
+  line-height: 1.6;
+  white-space: pre-line;
 }
 
 @media (max-width: 480px) {
