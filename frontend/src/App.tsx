@@ -43,7 +43,7 @@ function AppShell() {
           <Route path="/actors/:id" element={<ActorDetailPage />} />
           <Route path="/directors/:id" element={<DirectorDetailPage />} />
           <Route path="/lists" element={<ListsPage />} />
-          <Route path="/lists/:id" element={<ListDetailPage />} />
+          <Route path="/lists/:slug" element={<ListDetailPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />

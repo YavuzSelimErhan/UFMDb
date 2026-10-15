@@ -9,7 +9,6 @@ import type {
   ActorDetail,
   AuthResult,
   ProfileData,
-  ListSummary,
   ListDetail,
   ListFormPayload,
   Genre,
@@ -38,6 +37,10 @@ import type {
   ScreeningLogPage,
   ScreeningLogSummary,
   WatchedFilmsCounts,
+  PagedLists,
+  ListCreated,
+  ListSort,
+  ListMembership,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -326,23 +329,57 @@ export const userService = {
     (await api.put(`/users/${id}/toggle-active`)).data,
 };
 
-// ---------------- Lists (sistem/küratör listeleri) ----------------
+// ---------------- Lists ----------------
 export const listService = {
-  getAll: async (scope: ListScope = "Official"): Promise<ListSummary[]> => {
-    const { data } = await api.get("/lists", { params: { scope } });
+  getAll: async (
+    params: {
+      scope?: ListScope;
+      sort?: ListSort;
+      page?: number;
+      pageSize?: number;
+    } = {},
+  ): Promise<PagedLists> => {
+    const { data } = await api.get("/lists", { params });
     return data;
   },
   getById: async (id: string): Promise<ListDetail> => {
     const { data } = await api.get(`/lists/${id}`);
     return data;
   },
-  create: async (payload: ListFormPayload) =>
+  getBySlug: async (slug: string): Promise<ListDetail> => {
+    const { data } = await api.get(`/lists/by-slug/${slug}`);
+    return data;
+  },
+  create: async (payload: ListFormPayload): Promise<ListCreated> =>
     (await api.post("/lists", payload)).data,
-  update: async (id: string, payload: ListFormPayload) =>
-    (await api.put(`/lists/${id}`, payload)).data, // dikkat: artık body'ye id eklemiyoruz, backend UpdateListRequest'te Id yok
-  remove: async (id: string) => (await api.delete(`/lists/${id}`)).data,
+  // isOfficial update'te gönderilmez; fazladan alan zararsız ama gereksiz.
+  update: async (
+    id: string,
+    payload: Omit<ListFormPayload, "isOfficial">,
+  ): Promise<void> => {
+    await api.put(`/lists/${id}`, payload);
+  },
+  remove: async (id: string): Promise<void> => {
+    await api.delete(`/lists/${id}`);
+  },
   toggleLike: async (id: string): Promise<boolean> => {
     const { data } = await api.post(`/lists/${id}/like`);
+    return data;
+  },
+  addItem: async (
+    listId: string,
+    movieId: string,
+    note?: string | null,
+    noteTr?: string | null,
+  ): Promise<void> => {
+    await api.post(`/lists/${listId}/items`, { movieId, note, noteTr });
+  },
+  removeItem: async (listId: string, movieId: string): Promise<void> => {
+    await api.delete(`/lists/${listId}/items/${movieId}`);
+  },
+  /** "Listeye ekle" menüsü: kullanıcının tüm listeleri + bu filmi içerip içermediği. */
+  getMyListsForMovie: async (movieId: string): Promise<ListMembership[]> => {
+    const { data } = await api.get(`/lists/for-movie/${movieId}`);
     return data;
   },
 };
@@ -419,8 +456,14 @@ export const followService = {
     );
     return data;
   },
-  getUserLists: async (userId: string): Promise<ListSummary[]> => {
-    const { data } = await api.get(`/users/${userId}/lists`);
+  getUserLists: async (
+    userId: string,
+    page = 1,
+    pageSize = 24,
+  ): Promise<PagedLists> => {
+    const { data } = await api.get(`/users/${userId}/lists`, {
+      params: { page, pageSize },
+    });
     return data;
   },
   getWatchedFilms: async (

@@ -247,3 +247,101 @@
     display: none;
   }
 }
+/* ---------- Sahip bilgilendirmesi (taslak / özel / bağlantı ile) ---------- */
+.list-detail-page__notice {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  background-color: var(--list-accent-soft, var(--color-bg-elevated));
+  border: 1px dashed var(--list-accent, var(--color-border));
+  border-radius: var(--radius-md);
+}
+
+/* ---------- Meta satırı: sayaçlar + paylaş ---------- */
+.list-detail-page__meta-row {
+  flex-wrap: wrap;
+}
+.list-detail-page__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+.list-detail-page__share {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  padding: 4px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+.list-detail-page__share:hover {
+  color: var(--list-accent, var(--color-accent));
+  border-color: var(--list-accent, var(--color-accent));
+}
+
+.list-detail-page__creator {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+}
+
+/* ---------- Film hücresi: sıra numarası + kürasyon notu ---------- */
+.list-detail-page__item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.list-detail-page__rank {
+  align-self: flex-start;
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--list-accent);
+  background-color: var(--list-accent-soft);
+  border: 1px solid var(--list-accent);
+  padding: 1px 10px;
+  border-radius: var(--radius-pill);
+}
+.list-detail-page__note {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  font-style: italic;
+  color: var(--color-text-secondary);
+  padding-left: 10px;
+  border-left: 2px solid var(--list-accent, var(--color-border));
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---------- 404 / boş liste ---------- */
+.list-detail-page__not-found-hint {
+  text-align: center;
+  margin: 8px 0 0;
+}
+.list-detail-page__not-found-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+@media (max-width: 480px) {
+  .list-detail-page__share span {
+    display: none;
+  }
+}

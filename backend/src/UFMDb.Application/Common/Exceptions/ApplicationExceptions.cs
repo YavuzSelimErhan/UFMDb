@@ -24,6 +24,11 @@ public class ValidationException : Exception
     {
         Errors = errors;
     }
+
+    public ValidationException(string field, string message) : this()
+    {
+        Errors = new Dictionary<string, string[]> { [field] = new[] { message } };
+    }
 }
 
 public class UnauthorizedException : Exception

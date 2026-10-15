@@ -1,6 +1,18 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Heart, Layers, Pencil, Trash2, Check, X } from "lucide-react";
+import {
+  Heart,
+  Layers,
+  Pencil,
+  Trash2,
+  Check,
+  X,
+  Lock,
+  Link2,
+  FileEdit,
+  Archive,
+  ListOrdered,
+} from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { listService } from "@/services";
@@ -12,9 +24,14 @@ import "./ListsPage.css";
 interface Props {
   list: ListSummary;
   displayTitle: string;
+  displayDescription: string;
 }
 
-export default function ListCard({ list, displayTitle }: Props) {
+export default function ListCard({
+  list,
+  displayTitle,
+  displayDescription,
+}: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -27,11 +44,23 @@ export default function ListCard({ list, displayTitle }: Props) {
   const [likeCount, setLikeCount] = useState(list.likeCount);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  // NOT: ListSummary tipinde createdByUserId yoksa (sadece ListDetail'de
-  // varsa) bu satır her zaman false döner ve ikonlar hiç görünmez —
-  // gerekirse backend'in liste özet DTO'suna da bu alanı eklemek gerekir.
   const isAdmin = role === "Admin";
-  const canEdit = isAdmin || currentUserId === list.createdByUserId;
+  const isOwner = currentUserId === list.createdByUserId;
+  // Backend de aynı kuralı uyguluyor: resmi listeleri sadece admin düzenler/siler.
+  const canEdit = list.isOfficial ? isAdmin : isAdmin || isOwner;
+
+  // Rozet sadece sahibine görünür; başkasının kartında zaten sadece herkese açık + yayında listeler gelir.
+  const statusBadge = !isOwner
+    ? null
+    : list.status === "Draft"
+      ? { icon: <FileEdit size={11} />, label: t("lists.draft") }
+      : list.status === "Archived"
+        ? { icon: <Archive size={11} />, label: t("lists.archived") }
+        : list.visibility === "Private"
+          ? { icon: <Lock size={11} />, label: t("lists.private") }
+          : list.visibility === "Unlisted"
+            ? { icon: <Link2 size={11} />, label: t("lists.unlisted") }
+            : null;
 
   const likeMutation = useMutation({
     mutationFn: () => listService.toggleLike(list.id),
@@ -39,7 +68,7 @@ export default function ListCard({ list, displayTitle }: Props) {
       const prevLiked = isLiked;
       const prevCount = likeCount;
       setIsLiked(!prevLiked);
-      setLikeCount(prevLiked ? prevCount - 1 : prevCount + 1);
+      setLikeCount(prevLiked ? Math.max(0, prevCount - 1) : prevCount + 1);
       return { prevLiked, prevCount };
     },
     onSuccess: (newState) => {
@@ -70,7 +99,7 @@ export default function ListCard({ list, displayTitle }: Props) {
 
   return (
     <Link
-      to={`/lists/${list.id}`}
+      to={`/lists/${list.slug}`}
       className="list-card card"
       style={themeStyle}
     >
@@ -175,13 +204,24 @@ export default function ListCard({ list, displayTitle }: Props) {
             </button>
           </div>
         )}
+
+        {statusBadge && (
+          <span className="list-card__badge list-card__badge--status">
+            {statusBadge.icon} {statusBadge.label}
+          </span>
+        )}
+        {list.isRanked && (
+          <span className="list-card__badge list-card__badge--ranked">
+            <ListOrdered size={11} /> {t("lists.ranked")}
+          </span>
+        )}
       </div>
 
       <div className="list-card__perf" aria-hidden="true" />
 
       <div className="list-card__body">
         <h3 title={displayTitle}>{displayTitle}</h3>
-        <p className="text-secondary list-card__desc">{list.description}</p>
+        <p className="text-secondary list-card__desc">{displayDescription}</p>
         <div className="list-card__meta-row">
           <span className="list-card__ticket">
             {list.movieCount} {t("lists.moviesCount")}

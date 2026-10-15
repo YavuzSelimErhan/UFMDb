@@ -496,3 +496,75 @@
 .list-card__icon-btn--confirm:hover {
   background-color: #bf4a44;
 }
+
+/* ---------- Sekme sayacı, sıralama pilleri, "daha fazla" ---------- */
+.lists-page__tab-count {
+  margin-left: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.lists-page__sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+.lists-page__pill {
+  padding: 4px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+.lists-page__pill:hover {
+  color: var(--color-text-primary);
+}
+.lists-page__pill.is-active {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background-color: var(--list-accent-soft, transparent);
+}
+
+.lists-page__more {
+  display: block;
+  margin: 32px auto 0;
+}
+.lists-page__empty-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+/* ---------- Kart rozetleri (sahne üzerinde) ---------- */
+.list-card__badge {
+  position: absolute;
+  bottom: 10px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  border-radius: var(--radius-pill);
+}
+.list-card__badge--status {
+  left: 10px;
+}
+.list-card__badge--ranked {
+  right: 10px;
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+}

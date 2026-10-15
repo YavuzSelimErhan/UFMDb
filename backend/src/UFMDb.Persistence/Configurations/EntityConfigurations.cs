@@ -196,16 +196,37 @@ public class CuratedListConfiguration : IEntityTypeConfiguration<CuratedList>
     public void Configure(EntityTypeBuilder<CuratedList> b)
     {
         b.ToTable("CuratedLists");
+
         b.Property(c => c.Title).IsRequired().HasMaxLength(200);
+        b.Property(c => c.TitleTr).IsRequired().HasMaxLength(200);
+        b.Property(c => c.Description).HasMaxLength(2000);
+        b.Property(c => c.DescriptionTr).HasMaxLength(2000);
+        b.Property(c => c.CoverImageUrl).HasMaxLength(500);
+        b.Property(c => c.Slug).IsRequired().HasMaxLength(250);
+
+        // Projedeki diğer enum'larla aynı yaklaşım: DB'de okunabilir string.
+        b.Property(c => c.Visibility)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .HasDefaultValue(ListVisibility.Public);
+
+        b.Property(c => c.Status)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .HasDefaultValue(ListStatus.Published);
 
         b.HasOne(c => c.CreatedByUser)
             .WithMany(u => u.CreatedLists)
             .HasForeignKey(c => c.CreatedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // "Resmi koleksiyonlar" / "Topluluk listeleri" filtresi ve profil sayfasındaki
-        // "kullanıcının listeleri" sorgusu için.
-        b.HasIndex(c => c.IsOfficial);
+        b.HasIndex(c => c.Slug).IsUnique();
+
+        // "Resmi koleksiyonlar" / "Topluluk listeleri" keşif sorguları
+        // (IsOfficial + Visibility + Status filtresi). Eski tekil IsOfficial index'inin yerini alır.
+        b.HasIndex(c => new { c.IsOfficial, c.Visibility, c.Status });
+
+        // Profil sayfasındaki "kullanıcının listeleri" sorgusu.
         b.HasIndex(c => c.CreatedByUserId);
     }
 }
@@ -216,8 +237,19 @@ public class CuratedListItemConfiguration : IEntityTypeConfiguration<CuratedList
     {
         b.ToTable("CuratedListItems");
         b.HasKey(i => new { i.CuratedListId, i.MovieId });
+
+        b.Property(i => i.Note).HasMaxLength(1000);
+        b.Property(i => i.NoteTr).HasMaxLength(1000);
+
         b.HasOne(i => i.CuratedList).WithMany(c => c.Items).HasForeignKey(i => i.CuratedListId).OnDelete(DeleteBehavior.Cascade);
         b.HasOne(i => i.Movie).WithMany().HasForeignKey(i => i.MovieId).OnDelete(DeleteBehavior.Restrict);
+
+        // Listeyi sıralı çekmek için (unique değil, reorder sırasında geçici çakışmaya izin verir).
+        b.HasIndex(i => new { i.CuratedListId, i.Order });
+
+        // "Bu film hangi listelerde var?" sorgusu. Composite PK CuratedListId ile başladığı için
+        // MovieId tek başına index'siz kalırdı.
+        b.HasIndex(i => i.MovieId);
     }
 }
 

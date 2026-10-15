@@ -1,0 +1,661 @@
+.list-form-page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+.list-form-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+}
+.list-form-page__back:hover {
+  color: var(--color-text-primary);
+}
+
+/* ---------- Başlık + dil anahtarı ---------- */
+.list-form__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.list-form__head h1 {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 1.7rem;
+  margin: 0;
+}
+.list-form__lang {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-bg-elevated);
+}
+.list-form__lang button {
+  position: relative;
+  padding: 5px 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-pill);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+.list-form__lang button.is-active {
+  color: var(--color-accent);
+  background-color: var(--color-accent-muted);
+}
+.list-form__lang-dot {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #e0a45c;
+}
+
+/* ---------- İki sütun ---------- */
+.list-form__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+  align-items: start;
+}
+.list-form__main,
+.list-form__side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+@media (min-width: 901px) {
+  .list-form__side {
+    position: sticky;
+    top: 84px;
+    max-height: calc(100vh - 160px);
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+}
+@media (max-width: 900px) {
+  .list-form__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.list-form__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: var(--radius-lg);
+}
+.list-form__panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.list-form__panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1rem;
+}
+.list-form__side-title {
+  font-size: 0.78rem !important;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.list-form__count {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Alanlar ---------- */
+.list-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.list-form__field label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.list-form__field input,
+.list-form__field textarea,
+.list-form__note {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: border-color var(--transition-fast);
+}
+.list-form__field input:focus,
+.list-form__field textarea:focus,
+.list-form__note:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+.list-form__field textarea,
+.list-form__note {
+  resize: vertical;
+  min-height: 72px;
+}
+.list-form__hint {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+.list-form__error {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #e05c5c;
+}
+
+/* ---------- Film listesi ---------- */
+.list-form__movies-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 12px;
+  text-align: center;
+  color: var(--color-text-muted);
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-md);
+}
+.list-form__movies-empty p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.list-form__movies {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.list-form__movie {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  transition:
+    border-color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+.list-form__movie:hover {
+  border-color: var(--color-accent);
+}
+.list-form__movie.is-dragging {
+  opacity: 0.4;
+}
+.list-form__movie.is-over {
+  border-color: var(--color-accent);
+  box-shadow: 0 -2px 0 var(--color-accent);
+}
+.list-form__movie-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.list-form__handle {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-muted);
+  cursor: grab;
+  flex-shrink: 0;
+  touch-action: none;
+}
+.list-form__handle:active {
+  cursor: grabbing;
+}
+.list-form__movie-rank {
+  min-width: 24px;
+  height: 22px;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent-muted);
+  color: var(--color-accent);
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.list-form__thumb {
+  width: 32px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+  background-color: var(--color-bg-elevated);
+}
+.list-form__thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+.list-form__movie-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.88rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.list-form__movie-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.list-form__icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+.list-form__icon-btn:hover:not(:disabled) {
+  color: var(--color-accent);
+  background-color: var(--color-accent-muted);
+}
+.list-form__icon-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.list-form__icon-btn.has-note {
+  color: var(--color-accent);
+}
+.list-form__icon-btn--danger:hover:not(:disabled) {
+  color: #e05c5c;
+  background-color: rgba(224, 92, 92, 0.12);
+}
+.list-form__note {
+  width: 100%;
+  min-height: 56px;
+  font-size: 0.84rem;
+}
+
+/* ---------- Önizleme kartı ---------- */
+.list-form__preview {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+}
+.list-form__preview-stage {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(
+      circle at 25% 15%,
+      var(--color-accent-muted),
+      transparent 60%
+    ),
+    var(--color-bg-elevated);
+  overflow: hidden;
+}
+.list-form__preview-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.list-form__preview-empty {
+  color: var(--color-accent);
+  opacity: 0.5;
+}
+.list-form__preview-badge {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.55);
+  border-radius: var(--radius-pill);
+}
+.list-form__fan {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.list-form__fan-poster {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 78%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 5px;
+  border: 2px solid var(--color-bg-card);
+  box-shadow: 0 8px 18px var(--color-shadow);
+}
+.list-form__fan-poster:nth-child(1) {
+  transform: translate(-50%, -48%) rotate(-9deg) translateX(-34px);
+  z-index: 4;
+}
+.list-form__fan-poster:nth-child(2) {
+  transform: translate(-50%, -50%) rotate(-3deg) translateX(-11px);
+  z-index: 3;
+}
+.list-form__fan-poster:nth-child(3) {
+  transform: translate(-50%, -50%) rotate(3deg) translateX(11px);
+  z-index: 2;
+}
+.list-form__fan-poster:nth-child(4) {
+  transform: translate(-50%, -48%) rotate(9deg) translateX(34px);
+  z-index: 1;
+}
+.list-form__preview-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  text-align: center;
+}
+.list-form__preview-body strong {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 0.95rem;
+  line-height: 1.28;
+}
+.list-form__preview-ticket {
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  background-color: var(--color-accent-muted);
+  border: 1px solid var(--color-accent);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+}
+
+/* ---------- Görünürlük kartları ---------- */
+.list-form__radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.list-form__radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+.list-form__radio:hover {
+  border-color: var(--color-text-muted);
+}
+.list-form__radio.is-active {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-muted);
+}
+.list-form__radio-icon {
+  display: flex;
+  margin-top: 2px;
+  color: var(--color-text-secondary);
+}
+.list-form__radio.is-active .list-form__radio-icon {
+  color: var(--color-accent);
+}
+.list-form__radio strong,
+.list-form__option strong {
+  display: block;
+  font-size: 0.86rem;
+}
+.list-form__radio small,
+.list-form__option small {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Seçenek satırı + switch ---------- */
+.list-form__option {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.list-form__switch {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.list-form__switch input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+.list-form__switch-track {
+  position: relative;
+  width: 38px;
+  height: 22px;
+  border-radius: 99px;
+  background-color: var(--color-border);
+  transition: background-color var(--transition-fast);
+}
+.list-form__switch-track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #fff;
+  transition: transform var(--transition-fast);
+}
+.list-form__switch input:checked + .list-form__switch-track {
+  background-color: var(--color-accent);
+}
+.list-form__switch input:checked + .list-form__switch-track::after {
+  transform: translateX(16px);
+}
+.list-form__switch input:focus-visible + .list-form__switch-track {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.list-form__switch input:disabled {
+  cursor: not-allowed;
+}
+.list-form__switch input:disabled + .list-form__switch-track {
+  opacity: 0.5;
+}
+
+/* ---------- Segmentli kontrol (durum) ---------- */
+.list-form__segmented {
+  display: flex;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-bg);
+}
+.list-form__segmented button {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-pill);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+.list-form__segmented button.is-active {
+  color: var(--color-accent);
+  background-color: var(--color-accent-muted);
+}
+
+/* ---------- Kapak yükleme (sadece admin) ---------- */
+.list-form__cover {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  border: 1.5px dashed var(--color-border);
+  background-color: var(--color-bg);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+.list-form__cover:hover,
+.list-form__cover.is-dragging {
+  border-color: var(--color-accent);
+  background-color: var(--color-bg-elevated);
+}
+.list-form__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.list-form__cover-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+.list-form__cover-empty span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+}
+.list-form__cover-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.55);
+}
+.list-form__spinner {
+  color: var(--color-accent);
+  animation: list-form-spin 0.9s linear infinite;
+}
+@keyframes list-form-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Alt aksiyon çubuğu ---------- */
+.list-form__bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-card);
+  backdrop-filter: blur(8px);
+}
+.list-form__bar-status {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+.list-form__bar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+@media (max-width: 520px) {
+  .list-form__bar {
+    flex-wrap: wrap;
+  }
+  .list-form__bar-status {
+    flex-basis: 100%;
+  }
+  .list-form__bar button {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .list-form__spinner {
+    animation-duration: 2s;
+  }
+}

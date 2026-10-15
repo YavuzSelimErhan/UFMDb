@@ -307,45 +307,113 @@ export interface ProfileData {
   followerCount: number;
   followingCount: number;
 }
+
+export type ListVisibility = "Public" | "Unlisted" | "Private";
+export type ListStatus = "Published" | "Draft" | "Archived";
+export type ListSort = "Default" | "Newest" | "Popular";
+// "User" sadece backend'in /users/{id}/lists endpoint'i için; sayfalarda "Official" | "Community" | "Mine" | "Liked" kullanılır.
+export type ListScope =
+  | "All"
+  | "Official"
+  | "Community"
+  | "Mine"
+  | "Liked"
+  | "User";
+
 export interface ListSummary {
   id: string;
+  slug: string;
   title: string;
   titleTr: string;
   description: string;
+  descriptionTr: string;
   coverImageUrl: string;
   movieCount: number;
   coverPosters: string[];
+  isRanked: boolean;
+  visibility: ListVisibility;
+  status: ListStatus;
   isOfficial: boolean;
   createdByUserId: string;
   createdByUserName: string;
   likeCount: number;
+  viewCount: number;
   isLikedByCurrentUser: boolean;
+  publishedAt: string | null;
+}
+
+export interface ListItem {
+  order: number;
+  note: string | null;
+  noteTr: string | null;
+  movie: MovieListItem;
 }
 
 export interface ListDetail {
   id: string;
+  slug: string;
   title: string;
   titleTr: string;
   description: string;
+  descriptionTr: string;
   coverImageUrl: string;
-  movies: MovieListItem[];
+  isRanked: boolean;
+  visibility: ListVisibility;
+  status: ListStatus;
+  items: ListItem[];
   isOfficial: boolean;
   createdByUserId: string;
   createdByUserName: string;
   likeCount: number;
+  viewCount: number;
   isLikedByCurrentUser: boolean;
+  canEdit: boolean;
+  publishedAt: string | null;
+  displayOrder: number;
 }
 
-export type ListScope = "All" | "Official" | "Community" | "Mine" | "Liked";
+// Backend listelerde totalPages dönmüyor; gerekirse Math.ceil(totalCount / pageSize).
+export interface PagedLists {
+  items: ListSummary[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+}
+
+export interface ListCreated {
+  id: string;
+  slug: string;
+}
+
+export interface ListItemInput {
+  movieId: string;
+  note?: string | null;
+  noteTr?: string | null;
+}
 
 export interface ListFormPayload {
   title: string;
   titleTr: string;
   description: string;
+  descriptionTr: string;
   coverImageUrl: string;
   displayOrder: number;
-  movieIds: string[];
-  isOfficial: boolean;
+  isRanked: boolean;
+  visibility: ListVisibility;
+  status: ListStatus;
+  items: ListItemInput[];
+  isOfficial: boolean; // sadece create'te kullanılır; admin değilse backend yok sayar
+}
+
+export interface ListMembership {
+  id: string;
+  slug: string;
+  title: string;
+  titleTr: string;
+  itemCount: number;
+  visibility: ListVisibility;
+  status: ListStatus;
+  containsMovie: boolean;
 }
 
 export interface WatchedMovie {

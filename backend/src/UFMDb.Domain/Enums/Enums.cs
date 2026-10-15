@@ -58,3 +58,6 @@ public enum ReactionType
     Like = 0,     // Beğendi
     Dislike = 1   // Beğenmedi (kırık kalp: "iyi film ama bana göre değil")
 }
+
+public enum ListVisibility { Public = 0, Unlisted = 1, Private = 2 }
+public enum ListStatus { Published = 0, Draft = 1, Archived = 2 }

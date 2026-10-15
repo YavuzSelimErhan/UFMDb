@@ -145,7 +145,8 @@ namespace UFMDb.Persistence.Migrations
 
                     b.Property<string>("CoverImageUrl")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
@@ -155,7 +156,13 @@ namespace UFMDb.Persistence.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("DescriptionTr")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("integer");
@@ -166,8 +173,29 @@ namespace UFMDb.Persistence.Migrations
                     b.Property<bool>("IsOfficial")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsRanked")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("ItemCount")
+                        .HasColumnType("integer");
+
                     b.Property<int>("LikeCount")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Published");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -176,16 +204,30 @@ namespace UFMDb.Persistence.Migrations
 
                     b.Property<string>("TitleTr")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime?>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Visibility")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Public");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.HasIndex("IsOfficial");
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.HasIndex("IsOfficial", "Visibility", "Status");
 
                     b.ToTable("CuratedLists", (string)null);
                 });
@@ -198,12 +240,25 @@ namespace UFMDb.Persistence.Migrations
                     b.Property<Guid>("MovieId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("NoteTr")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
                     b.Property<int>("Order")
                         .HasColumnType("integer");
 
                     b.HasKey("CuratedListId", "MovieId");
 
                     b.HasIndex("MovieId");
+
+                    b.HasIndex("CuratedListId", "Order");
 
                     b.ToTable("CuratedListItems", (string)null);
                 });
