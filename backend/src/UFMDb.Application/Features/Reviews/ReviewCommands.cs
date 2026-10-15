@@ -208,12 +208,33 @@ public class ToggleReviewLikeCommandHandler : IRequestHandler<ToggleReviewLikeCo
             _context.ReviewLikes.Add(new ReviewLike { ReviewId = request.ReviewId, UserId = request.UserId });
             review.LikeCount++;
             nowLiked = true;
+
+            // Yorum sahibine bildirim (aynı kişiden aynı yoruma tekrar bildirim üretme).
+            var alreadyNotified = await _context.Notifications.AnyAsync(n =>
+                n.RecipientUserId == review.UserId && n.ActorUserId == request.UserId &&
+                n.Type == NotificationType.ReviewLike && n.EntityId == review.Id, ct);
+            if (!alreadyNotified)
+            {
+                _context.Notifications.Add(new Notification
+                {
+                    RecipientUserId = review.UserId,
+                    ActorUserId = request.UserId,
+                    Type = NotificationType.ReviewLike,
+                    EntityId = review.Id,
+                });
+            }
         }
         else
         {
             _context.ReviewLikes.Remove(existing);
             review.LikeCount = Math.Max(0, review.LikeCount - 1);
             nowLiked = false;
+
+            // Beğeni geri alınınca bildirimi de sil: beğen/geri al/beğen spam üretmesin.
+            var stale = await _context.Notifications.Where(n =>
+                n.RecipientUserId == review.UserId && n.ActorUserId == request.UserId &&
+                n.Type == NotificationType.ReviewLike && n.EntityId == review.Id).ToListAsync(ct);
+            _context.Notifications.RemoveRange(stale);
         }
 
         await _context.SaveChangesAsync(ct);
@@ -289,12 +310,14 @@ public class ToggleWatchedCommandHandler : IRequestHandler<ToggleWatchedCommand,
             .Where(w => w.MovieId == request.MovieId && w.UserId == request.UserId)
             .ToListAsync(ct);
 
+        var hasQuickRating = await _context.MovieRatings
+            .AnyAsync(r => r.MovieId == request.MovieId && r.UserId == request.UserId, ct);
+
         bool nowWatched;
         if (existingEntries.Count == 0)
         {
-            
-            var hasQuickRating = await _context.MovieRatings
-                .AnyAsync(r => r.MovieId == request.MovieId && r.UserId == request.UserId, ct);
+            // Puanı olan film zaten "izlenmiş" sayılır (logu olmasa bile): sessizce log eklemek
+            // yerine aşağıdaki dalla aynı kuralı uygula.
             if (hasQuickRating)
                 throw new ConflictException("Bu filme puan verdiğin için izlenmedi olarak işaretleyemezsin. Önce puanını kaldır.");
 
@@ -310,8 +333,6 @@ public class ToggleWatchedCommandHandler : IRequestHandler<ToggleWatchedCommand,
         else
         {
             var hasRatedEntry = existingEntries.Any(w => w.Rating.HasValue);
-            var hasQuickRating = await _context.MovieRatings
-                .AnyAsync(r => r.MovieId == request.MovieId && r.UserId == request.UserId, ct);
 
             if (hasRatedEntry || hasQuickRating)
                 throw new ConflictException("Bu filme puan verdiğin için izlenmedi olarak işaretleyemezsin. Önce puanını kaldır.");

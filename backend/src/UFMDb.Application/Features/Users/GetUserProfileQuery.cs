@@ -5,10 +5,9 @@ using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.Common.Services;
 using UFMDb.Application.DTOs;
 using UFMDb.Application.Features.Actors;
-using UFMDb.Application.Features.Users;
 using UFMDb.Domain.Entities;
 using UFMDb.Domain.Enums;
-namespace UFMDb.Application.Features.Follows;
+namespace UFMDb.Application.Features.Users;
 
 public record PublicProfileDto(
     Guid Id, string UserName, string? FullName, string? AvatarUrl, string? Biography,

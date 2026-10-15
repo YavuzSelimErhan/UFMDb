@@ -455,7 +455,11 @@ export interface PublicFullProfileDto {
 export type ThemeMode = "dark" | "light";
 export type LanguageCode = "tr" | "en";
 
-export type NotificationType = "Follow";
+export type NotificationType =
+  | "Follow"
+  | "ReviewLike"
+  | "ListLike"
+  | "ListCreated";
 
 export interface NotificationItem {
   id: string;
@@ -467,6 +471,9 @@ export interface NotificationItem {
   entityId: string | null;
   isRead: boolean;
   createdAtUtc: string;
+  movieId?: string | null;
+  entityTitle?: string | null;
+  entityTitleTr?: string | null;
 }
 
 export interface FriendActivityUser {

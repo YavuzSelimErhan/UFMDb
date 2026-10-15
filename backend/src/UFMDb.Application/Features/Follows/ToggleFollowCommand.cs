@@ -38,6 +38,15 @@ public class ToggleFollowCommandHandler : IRequestHandler<ToggleFollowCommand, b
         if (existing is not null)
         {
             _context.Follows.Remove(existing);
+
+            // Takibi bırakınca eski takip bildirimini de sil: takip et/bırak/takip et
+            // yapan biri alıcıya art arda bildirim göndermesin.
+            var stale = await _context.Notifications.Where(n =>
+                n.RecipientUserId == request.TargetUserId &&
+                n.ActorUserId == request.CurrentUserId &&
+                n.Type == NotificationType.Follow).ToListAsync(ct);
+            _context.Notifications.RemoveRange(stale);
+
             await _context.SaveChangesAsync(ct);
             return false;
         }

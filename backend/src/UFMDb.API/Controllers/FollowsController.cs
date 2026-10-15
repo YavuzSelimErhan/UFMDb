@@ -65,8 +65,9 @@ public class FollowsController : ControllerBase
         [FromQuery] string? sortBy = null, [FromQuery] bool? hasRating = null, CancellationToken ct = default) =>
         Ok(await _mediator.Send(new GetUserWatchedMoviesQuery(userId, page, pageSize, sortBy, hasRating), ct));
 
+    // all / rated / unrated sayıları (başka bir kullanıcının profili için)
     [HttpGet("~/api/users/{userId:guid}/watched-films/counts")]
     [AllowAnonymous]
     public async Task<IActionResult> GetUserWatchedFilmsCounts(Guid userId, CancellationToken ct) =>
-    Ok(await _mediator.Send(new GetWatchedFilmsCountsQuery(userId), ct));
+        Ok(await _mediator.Send(new GetWatchedFilmsCountsQuery(userId), ct));
 }

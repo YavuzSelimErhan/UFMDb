@@ -4,9 +4,9 @@ using UFMDb.Domain.Enums;
 namespace UFMDb.Domain.Entities;
 
 /// <summary>
-/// Kullaniciya gosterilecek bildirim (takip, vb.).
-/// Type + EntityId genel amacli tutuldu ki ileride yorum begenisi, liste begenisi gibi
-/// yeni bildirim turleri eklenirken yeni bir tablo/migration gerekmesin.
+/// Kullaniciya gosterilecek bildirim (takip, yorum begenisi, liste begenisi vb.).
+/// Type + EntityId genel amacli tutuldu ki yeni bildirim turleri eklenirken
+/// yeni bir tablo/migration gerekmesin.
 /// </summary>
 public class Notification : BaseEntity
 {
@@ -19,7 +19,10 @@ public class Notification : BaseEntity
 
     public NotificationType Type { get; set; }
 
-    /// <summary>Ileride: begenilen review'in id'si, movie id'si vb. Follow bildiriminde kullanilmiyor.</summary>
+    /// <summary>
+    /// Turune gore hedef kaydin id'si: ReviewLike -> review id, ListLike / ListCreated -> liste id.
+    /// Follow bildiriminde kullanilmiyor.
+    /// </summary>
     public Guid? EntityId { get; set; }
 
     public bool IsRead { get; set; } = false;

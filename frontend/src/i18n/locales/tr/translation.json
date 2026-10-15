@@ -494,7 +494,13 @@
     "title": "Bildirimler",
     "empty": "Henüz bildirimin yok.",
     "startedFollowingYou": "seni takip etmeye başladı",
-    "markAllRead": "Tümünü okundu işaretle"
+    "markAllRead": "Tümünü okundu işaretle",
+    "likedYourReview": "“{{title}}” yorumunu beğendi",
+    "likedYourReviewGeneric": "yorumunu beğendi",
+    "likedYourList": "“{{title}}” listeni beğendi",
+    "createdList": "yeni bir liste oluşturdu: “{{title}}”",
+    "sectionNew": "Yeni",
+    "sectionEarlier": "Daha önce"
   },
   "betaNotice": {
     "badge": "BETA",

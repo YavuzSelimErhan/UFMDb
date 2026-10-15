@@ -495,7 +495,13 @@
     "title": "Notifications",
     "empty": "You don't have any notifications yet.",
     "startedFollowingYou": "started following you",
-    "markAllRead": "Mark all as read"
+    "markAllRead": "Mark all as read",
+    "likedYourReview": "liked your review of “{{title}}”",
+    "likedYourReviewGeneric": "liked your review",
+    "likedYourList": "liked your list “{{title}}”",
+    "createdList": "created a new list: “{{title}}”",
+    "sectionNew": "New",
+    "sectionEarlier": "Earlier"
   },
   "betaNotice": {
     "badge": "BETA",

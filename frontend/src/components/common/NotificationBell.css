@@ -29,7 +29,7 @@
   position: absolute;
   top: calc(100% + 12px);
   right: 0;
-  width: 340px;
+  width: 360px;
   max-width: calc(100vw - 32px);
   background-color: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
@@ -65,15 +65,31 @@
 }
 
 .notification-bell__body {
-  max-height: 360px;
+  max-height: 400px;
   overflow-y: auto;
 }
 
+/* ---------- Boş durum ---------- */
 .notification-bell__empty {
-  padding: 28px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 36px 16px;
   text-align: center;
   color: var(--color-text-muted);
   font-size: 0.85rem;
+}
+
+/* ---------- Bölüm başlıkları ("Yeni" / "Daha önce") ---------- */
+.notification-bell__section-label {
+  padding: 10px 16px 2px;
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
 
 .notification-bell__list {
@@ -82,11 +98,13 @@
   padding: 6px;
 }
 
+/* ---------- Satır ---------- */
 .notification-bell__item {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 10px;
+  gap: 12px;
+  padding: 10px 12px;
   border-radius: var(--radius-sm);
   color: var(--color-text-primary);
   text-decoration: none;
@@ -103,9 +121,47 @@
   filter: brightness(1.1);
 }
 
-.notification-bell__item-text {
+/* Avatar + köşedeki tür rozeti */
+.notification-bell__avatar {
+  position: relative;
+  flex: 0 0 auto;
+  display: block;
+}
+.notification-bell__avatar .person-avatar {
+  width: 42px;
+  height: 42px;
+}
+.notification-bell__type-badge {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  border: 2px solid var(--color-bg-elevated);
+}
+.notification-bell__type-badge--follow {
+  background-color: var(--color-accent);
+}
+.notification-bell__type-badge--like {
+  background-color: var(--color-like, #e0245e);
+}
+.notification-bell__type-badge--list {
+  background-color: var(--print-accent, #7c5cff);
+}
+
+.notification-bell__item-main {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.notification-bell__item-text {
   font-size: 0.82rem;
   line-height: 1.35;
   color: var(--color-text-secondary);
@@ -114,12 +170,19 @@
   color: var(--color-text-primary);
   font-weight: 700;
 }
-
 .notification-bell__item-time {
-  flex-shrink: 0;
   font-size: 0.68rem;
   color: var(--color-text-muted);
   white-space: nowrap;
+}
+
+/* Okunmamış göstergesi */
+.notification-bell__unread-dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
 }
 
 .notification-bell__mark-all {

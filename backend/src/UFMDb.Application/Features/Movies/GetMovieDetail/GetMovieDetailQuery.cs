@@ -29,7 +29,7 @@ public class GetMovieDetailQueryHandler : IRequestHandler<GetMovieDetailQuery, M
                 .Where(l => l.MovieId == movie.Id && l.UserId == uid)
                 .Select(l => (ReactionType?)l.Reaction)
                 .FirstOrDefaultAsync(ct);
-                        isInWatchlist = await _context.WatchlistItems.AsNoTracking().AnyAsync(w => w.MovieId == movie.Id && w.UserId == uid, ct);
+            isInWatchlist = await _context.WatchlistItems.AsNoTracking().AnyAsync(w => w.MovieId == movie.Id && w.UserId == uid, ct);
 
             myRating = await _context.MovieRatings.AsNoTracking()
                 .Where(r => r.MovieId == movie.Id && r.UserId == uid)

@@ -38,10 +38,18 @@ public enum MovieLifecycleStatus
     Stable = 2
 }
 
-/// <summary>Bildirim turu. Ileride yeni turler (yorum begenisi, liste begenisi vb.) buraya eklenebilir.</summary>
+/// <summary>
+/// Bildirim turu. Yeni turler hep SONA eklenmeli: degerler (int) veritabaninda saklaniyor olabilir.
+/// </summary>
 public enum NotificationType
 {
-    Follow = 0
+    Follow = 0,
+    /// <summary>Birisi yorumunu begendi. EntityId = review id.</summary>
+    ReviewLike = 1,
+    /// <summary>Birisi listeni begendi. EntityId = liste id.</summary>
+    ListLike = 2,
+    /// <summary>Takip ettigin biri yeni liste olusturdu. EntityId = liste id.</summary>
+    ListCreated = 3
 }
 
 /// <summary>Bir filme verilen tepki. Mevcut tüm beğeni kayıtları Like (0) olarak kalır.</summary>

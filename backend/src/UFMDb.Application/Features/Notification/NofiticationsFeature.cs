@@ -1,9 +1,14 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UFMDb.Application.Common.Interfaces;
+using UFMDb.Domain.Enums;
 
 namespace UFMDb.Application.Features.Notifications;
 
+/// <param name="EntityId">Türe göre hedef kaydın id'si (ReviewLike: review id, ListLike/ListCreated: liste id).</param>
+/// <param name="MovieId">Yorum beğenisi gibi film bağlamlı bildirimlerde gidilecek film.</param>
+/// <param name="EntityTitle">Bildirim metninde gösterilecek başlık (film adı veya liste başlığı).</param>
+/// <param name="EntityTitleTr">Liste bildirimlerinde Türkçe başlık (diğerlerinde null).</param>
 public record NotificationDto(
     Guid Id,
     string Type,
@@ -12,6 +17,9 @@ public record NotificationDto(
     string? ActorFullName,
     string? ActorAvatarUrl,
     Guid? EntityId,
+    Guid? MovieId,
+    string? EntityTitle,
+    string? EntityTitleTr,
     bool IsRead,
     DateTime CreatedAtUtc
 );
@@ -32,23 +40,105 @@ public class GetMyNotificationsQueryHandler
         var page = Math.Max(1, request.Page);
         var pageSize = Math.Clamp(request.PageSize, 1, 50);
 
-        return await _context.Notifications.AsNoTracking()
+        var rows = await _context.Notifications.AsNoTracking()
             .Where(n => n.RecipientUserId == request.UserId)
             .OrderByDescending(n => n.CreatedAtUtc)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(n => new NotificationDto(
+            .Select(n => new
+            {
                 n.Id,
-                n.Type.ToString(),
+                n.Type,
                 n.ActorUserId,
-                n.ActorUser != null ? n.ActorUser.UserName : null,
-                n.ActorUser != null ? n.ActorUser.FullName : null,
-                n.ActorUser != null ? n.ActorUser.AvatarUrl : null,
+                ActorUserName = n.ActorUser != null ? n.ActorUser.UserName : null,
+                ActorFullName = n.ActorUser != null ? n.ActorUser.FullName : null,
+                ActorAvatarUrl = n.ActorUser != null ? n.ActorUser.AvatarUrl : null,
                 n.EntityId,
                 n.IsRead,
                 n.CreatedAtUtc
-            ))
+            })
             .ToListAsync(ct);
+
+        // Yorum beğenisi bildirimleri için film bilgisini tek sorguda çöz.
+        var reviewIds = rows
+            .Where(r => r.Type == NotificationType.ReviewLike && r.EntityId.HasValue)
+            .Select(r => r.EntityId!.Value)
+            .Distinct()
+            .ToList();
+
+        var reviewInfo = new Dictionary<Guid, (Guid MovieId, string Title)>();
+        if (reviewIds.Count > 0)
+        {
+            var found = await _context.Reviews.AsNoTracking()
+                .Where(r => reviewIds.Contains(r.Id))
+                .Select(r => new { r.Id, r.MovieId, r.Movie.Title })
+                .ToListAsync(ct);
+            foreach (var r in found)
+                reviewInfo[r.Id] = (r.MovieId, r.Title);
+        }
+
+        // Liste bildirimleri için liste başlıklarını tek sorguda çöz (silinmiş listeler dışarıda kalır).
+        var listIds = rows
+            .Where(r => (r.Type == NotificationType.ListLike || r.Type == NotificationType.ListCreated)
+                        && r.EntityId.HasValue)
+            .Select(r => r.EntityId!.Value)
+            .Distinct()
+            .ToList();
+
+        var listInfo = new Dictionary<Guid, (string Title, string TitleTr)>();
+        if (listIds.Count > 0)
+        {
+            var foundLists = await _context.CuratedLists.AsNoTracking()
+                .Where(cl => listIds.Contains(cl.Id) && !cl.IsDeleted)
+                .Select(cl => new { cl.Id, cl.Title, cl.TitleTr })
+                .ToListAsync(ct);
+            foreach (var l in foundLists)
+                listInfo[l.Id] = (l.Title, l.TitleTr);
+        }
+
+        var result = new List<NotificationDto>(rows.Count);
+        foreach (var r in rows)
+        {
+            Guid? movieId = null;
+            string? title = null;
+            string? titleTr = null;
+
+            switch (r.Type)
+            {
+                case NotificationType.ReviewLike:
+                    if (r.EntityId.HasValue && reviewInfo.TryGetValue(r.EntityId.Value, out var review))
+                    {
+                        movieId = review.MovieId;
+                        title = review.Title;
+                    }
+                    break;
+
+                case NotificationType.ListLike:
+                case NotificationType.ListCreated:
+                    // Liste silinmişse bildirimi gösterme.
+                    if (!r.EntityId.HasValue || !listInfo.TryGetValue(r.EntityId.Value, out var list))
+                        continue;
+                    title = list.Title;
+                    titleTr = list.TitleTr;
+                    break;
+            }
+
+            result.Add(new NotificationDto(
+                r.Id,
+                r.Type.ToString(),
+                r.ActorUserId,
+                r.ActorUserName,
+                r.ActorFullName,
+                r.ActorAvatarUrl,
+                r.EntityId,
+                movieId,
+                title,
+                titleTr,
+                r.IsRead,
+                r.CreatedAtUtc));
+        }
+
+        return result;
     }
 }
 

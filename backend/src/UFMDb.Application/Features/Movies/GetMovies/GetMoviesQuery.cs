@@ -204,11 +204,12 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
                 .Select(w => w.MovieId)
                 .ToListAsync(ct)).ToHashSet();
 
+            // "Ýzlenmiþ" = logu VEYA puaný olan film (profil ve film detayýyla ayný taným)
             var ratedIds = await _context.MovieRatings.AsNoTracking()
                 .Where(r => r.UserId == request.UserId.Value && movieIds.Contains(r.MovieId))
                 .Select(r => r.MovieId)
                 .ToListAsync(ct);
-                        watchedIds.UnionWith(ratedIds);
+            watchedIds.UnionWith(ratedIds);
 
             for (int i = 0; i < items.Count; i++)
             {

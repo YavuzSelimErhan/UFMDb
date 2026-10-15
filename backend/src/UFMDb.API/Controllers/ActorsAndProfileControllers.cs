@@ -156,16 +156,17 @@ public class ProfileController : ControllerBase
     public async Task<IActionResult> GetWatchedFilms([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? sortBy = null, [FromQuery] bool? hasRating = null)
     => Ok(await _mediator.Send(new GetUserWatchedMoviesQuery(RequireUserId(), page, pageSize, sortBy, hasRating)));
 
+    // all / rated / unrated sayıları: liste sorgusunu 3 kez çağırmak yerine tek hafif istek.
+    [HttpGet("watched-films/counts")]
+    public async Task<IActionResult> GetWatchedFilmsCounts()
+        => Ok(await _mediator.Send(new GetWatchedFilmsCountsQuery(RequireUserId())));
+
     [HttpDelete("watched-films/{movieId:guid}")]
     public async Task<IActionResult> RemoveWatchedFilm(Guid movieId)
     {
         await _mediator.Send(new RemoveWatchedMovieCommand(RequireUserId(), movieId));
         return NoContent();
     }
-
-    [HttpGet("watched-films/counts")]
-    public async Task<IActionResult> GetWatchedFilmsCounts()
-    => Ok(await _mediator.Send(new GetWatchedFilmsCountsQuery(RequireUserId())));
 
     [HttpGet("liked-reviews")]
     public async Task<IActionResult> GetLikedReviews()

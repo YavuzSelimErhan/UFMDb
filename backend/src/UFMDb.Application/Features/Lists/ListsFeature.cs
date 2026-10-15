@@ -180,6 +180,29 @@ public class CreateListCommandHandler : IRequestHandler<CreateListCommand, Guid>
         };
         _context.CuratedLists.Add(list);
         await _context.SaveChangesAsync(ct);
+
+        // Kullanıcı listesi (resmi değil): aktif takipçilere "yeni liste" bildirimi.
+        // Resmi koleksiyonlar için bildirim üretmiyoruz.
+        if (!request.IsOfficial)
+        {
+            var followerIds = await _context.Follows.AsNoTracking()
+                .Where(f => f.FollowingId == request.CreatedByUserId && f.Follower.IsActive)
+                .Select(f => f.FollowerId)
+                .ToListAsync(ct);
+
+            if (followerIds.Count > 0)
+            {
+                _context.Notifications.AddRange(followerIds.Select(followerId => new Notification
+                {
+                    RecipientUserId = followerId,
+                    ActorUserId = request.CreatedByUserId,
+                    Type = UFMDb.Domain.Enums.NotificationType.ListCreated,
+                    EntityId = list.Id,
+                }));
+                await _context.SaveChangesAsync(ct);
+            }
+        }
+
         return list.Id;
     }
 }
@@ -248,6 +271,15 @@ public class DeleteListCommandHandler : IRequestHandler<DeleteListCommand>
 
         list.IsDeleted = true;
         list.UpdatedAtUtc = DateTime.UtcNow;
+
+        // Silinen listeye ait bildirimler (beğeni / yeni liste) artık hiçbir yere gitmez: temizle.
+        var staleNotifications = await _context.Notifications
+            .Where(n => n.EntityId == list.Id &&
+                (n.Type == UFMDb.Domain.Enums.NotificationType.ListLike ||
+                 n.Type == UFMDb.Domain.Enums.NotificationType.ListCreated))
+            .ToListAsync(ct);
+        _context.Notifications.RemoveRange(staleNotifications);
+
         await _context.SaveChangesAsync(ct);
     }
 }
@@ -274,12 +306,36 @@ public class ToggleListLikeCommandHandler : IRequestHandler<ToggleListLikeComman
             _context.CuratedListLikes.Remove(existing);
             list.LikeCount = Math.Max(0, list.LikeCount - 1);
             isLikedNow = false;
+
+            // Beğeni geri alınınca bildirimi de sil: beğen/geri al/beğen spam üretmesin.
+            var stale = await _context.Notifications.Where(n =>
+                n.RecipientUserId == list.CreatedByUserId && n.ActorUserId == request.UserId &&
+                n.Type == UFMDb.Domain.Enums.NotificationType.ListLike && n.EntityId == list.Id).ToListAsync(ct);
+            _context.Notifications.RemoveRange(stale);
         }
         else
         {
             _context.CuratedListLikes.Add(new CuratedListLike { CuratedListId = request.ListId, UserId = request.UserId });
             list.LikeCount += 1;
             isLikedNow = true;
+
+            // Liste sahibine bildirim: resmi koleksiyonlar ve kendi listeni beğenmen hariç.
+            if (!list.IsOfficial && list.CreatedByUserId != request.UserId)
+            {
+                var alreadyNotified = await _context.Notifications.AnyAsync(n =>
+                    n.RecipientUserId == list.CreatedByUserId && n.ActorUserId == request.UserId &&
+                    n.Type == UFMDb.Domain.Enums.NotificationType.ListLike && n.EntityId == list.Id, ct);
+                if (!alreadyNotified)
+                {
+                    _context.Notifications.Add(new Notification
+                    {
+                        RecipientUserId = list.CreatedByUserId,
+                        ActorUserId = request.UserId,
+                        Type = UFMDb.Domain.Enums.NotificationType.ListLike,
+                        EntityId = list.Id,
+                    });
+                }
+            }
         }
 
         await _context.SaveChangesAsync(ct);
