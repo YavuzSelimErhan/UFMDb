@@ -7,7 +7,15 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Trash2, Pencil, Plus, Image as ImageIcon } from "lucide-react";
+import {
+  Trash2,
+  Pencil,
+  Plus,
+  Heart,
+  Film,
+  User,
+  Image as ImageIcon,
+} from "lucide-react";
 import { listService } from "@/services";
 import { pickListText } from "@/utils/listText";
 import type { ListScope, ListStatus, ListVisibility } from "@/types";
@@ -76,24 +84,12 @@ export default function AdminListsTab() {
 
   return (
     <div className="admin-tab">
-      <div className="admin-tab__list card">
-        <div className="admin-lists__toolbar">
+      <div className="admin-tab__list card admin-lists">
+        <header className="admin-lists__head">
           <h3>
-            {t("admin.lists.listTitle")} ({totalCount})
+            {t("admin.lists.listTitle")}
+            <span className="admin-lists__total">{totalCount}</span>
           </h3>
-          <div className="admin-lists__scopes" role="group">
-            {SCOPES.map((s) => (
-              <button
-                key={s}
-                type="button"
-                aria-pressed={scope === s}
-                className={scope === s ? "is-active" : ""}
-                onClick={() => changeScope(s)}
-              >
-                {scopeLabels[s]}
-              </button>
-            ))}
-          </div>
           <button
             type="button"
             className="btn-primary admin-lists__new"
@@ -101,6 +97,20 @@ export default function AdminListsTab() {
           >
             <Plus size={14} /> {t("admin.lists.newList")}
           </button>
+        </header>
+
+        <div className="admin-lists__scopes" role="group">
+          {SCOPES.map((s) => (
+            <button
+              key={s}
+              type="button"
+              aria-pressed={scope === s}
+              className={scope === s ? "is-active" : ""}
+              onClick={() => changeScope(s)}
+            >
+              {scopeLabels[s]}
+            </button>
+          ))}
         </div>
 
         {isError && (
@@ -114,78 +124,78 @@ export default function AdminListsTab() {
           </p>
         )}
 
-        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>{t("admin.lists.colTitle")}</th>
-              <th>{t("admin.lists.colCreator")}</th>
-              <th>{t("admin.lists.colStatus")}</th>
-              <th>{t("admin.lists.colVisibility")}</th>
-              <th>{t("admin.lists.colMovieCount")}</th>
-              <th>{t("admin.lists.colLikes")}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((l) => {
-              const title = pickListText(l.titleTr, l.title, i18n.language);
-              const cover = l.coverImageUrl || l.coverPosters[0];
-              return (
-                <tr key={l.id}>
-                  <td className="admin-tab__thumb-cell">
-                    {cover ? (
-                      <img src={cover} alt="" className="admin-tab__thumb" />
-                    ) : (
-                      <div className="admin-tab__thumb admin-tab__thumb--empty">
-                        <ImageIcon size={14} />
-                      </div>
-                    )}
-                  </td>
-                  <td>
-                    {title}
+        <ul className="admin-lists__rows" aria-busy={isLoading}>
+          {items.map((l) => {
+            const title = pickListText(l.titleTr, l.title, i18n.language);
+            const cover = l.coverImageUrl || l.coverPosters[0];
+            return (
+              <li key={l.id} className="admin-lists__row">
+                <div className="admin-lists__thumb">
+                  {cover ? (
+                    <img src={cover} alt="" loading="lazy" />
+                  ) : (
+                    <ImageIcon size={16} />
+                  )}
+                </div>
+
+                <div className="admin-lists__info">
+                  <div className="admin-lists__title-line">
+                    <strong className="admin-lists__title">{title}</strong>
                     {l.isOfficial && (
                       <span className="admin-lists__badge">
                         {t("admin.lists.official")}
                       </span>
                     )}
-                  </td>
-                  <td>{l.createdByUserName}</td>
-                  <td>{statusLabels[l.status]}</td>
-                  <td>{visibilityLabels[l.visibility]}</td>
-                  <td>{l.movieCount}</td>
-                  <td>{l.likeCount}</td>
-                  <td>
-                    <div className="admin-tab__row-actions">
-                      <button
-                        className="admin-tab__edit-btn"
-                        aria-label={t("common.edit")}
-                        onClick={() => navigate(editRoute(l.id))}
-                      >
-                        <Pencil size={15} />
-                      </button>
-                      <button
-                        className="admin-tab__delete-btn"
-                        aria-label={t("common.delete")}
-                        disabled={deleteMutation.isPending}
-                        onClick={() => handleDelete(l.id, title)}
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-            {!isLoading && items.length === 0 && (
-              <tr>
-                <td colSpan={8} className="text-muted admin-tab__empty">
-                  {t("search.noResults")}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                  </div>
+                  <div className="admin-lists__meta">
+                    <span
+                      className={`admin-lists__chip admin-lists__chip--${l.status.toLowerCase()}`}
+                    >
+                      {statusLabels[l.status]}
+                    </span>
+                    <span className="admin-lists__chip">
+                      {visibilityLabels[l.visibility]}
+                    </span>
+                    <span className="admin-lists__stat">
+                      <User size={12} /> {l.createdByUserName}
+                    </span>
+                    <span className="admin-lists__stat">
+                      <Film size={12} /> {l.movieCount}
+                    </span>
+                    <span className="admin-lists__stat">
+                      <Heart size={12} /> {l.likeCount}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="admin-tab__row-actions admin-lists__actions">
+                  <button
+                    className="admin-tab__edit-btn"
+                    aria-label={t("common.edit")}
+                    title={t("common.edit")}
+                    onClick={() => navigate(editRoute(l.id))}
+                  >
+                    <Pencil size={15} />
+                  </button>
+                  <button
+                    className="admin-tab__delete-btn"
+                    aria-label={t("common.delete")}
+                    title={t("common.delete")}
+                    disabled={deleteMutation.isPending}
+                    onClick={() => handleDelete(l.id, title)}
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+          {!isLoading && items.length === 0 && (
+            <li className="text-muted admin-lists__empty">
+              {t("search.noResults")}
+            </li>
+          )}
+        </ul>
 
         {totalPages > 1 && (
           <div className="admin-lists__pager">
