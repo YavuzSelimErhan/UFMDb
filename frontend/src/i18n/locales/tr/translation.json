@@ -13,7 +13,9 @@
     "previous": "Önceki",
     "next": "Sonraki",
     "confirm": "Onayla",
-    "clear": "Temizle"
+    "clear": "Temizle",
+    "showMore": "Daha fazla göster",
+    "showLess": "Daha az göster"
   },
   "errors": {
     "profileFailed": "Profil bilgileri yüklenemedi.",

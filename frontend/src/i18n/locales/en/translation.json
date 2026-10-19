@@ -13,7 +13,9 @@
     "previous": "Previous",
     "next": "Next",
     "confirm": "Confirm",
-    "clear": "Clear"
+    "clear": "Clear",
+    "showMore": "Show more",
+    "showLess": "Show less"
   },
   "errors": {
     "profileFailed": "Couldn't load profile details.",
