@@ -1,7 +1,14 @@
-import { useState, useRef, type FormEvent, type DragEvent } from "react";
+import {
+  useEffect,
+  useState,
+  useRef,
+  type FormEvent,
+  type DragEvent,
+} from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { isAxiosError } from "axios";
 import {
   ArrowLeft,
   User,
@@ -17,6 +24,7 @@ import {
   CalendarDays,
 } from "lucide-react";
 import { profileService, countryService } from "@/services";
+import { getUploadErrorKey, validateImageFile } from "@/services/uploadService";
 import Dropdown from "@/components/search/Dropdown";
 import { PageSpinner, PageError } from "@/components/common/PageState";
 import type { ProfileData } from "@/types";
@@ -82,6 +90,8 @@ function EditProfileFormBody({
 }) {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Önizleme için oluşturulan blob URL'i (varsa); bellek sızmasın diye yönetilir.
+  const blobUrlRef = useRef<string | null>(null);
 
   const [name, setName] = useState(profile.userName);
   const [avatar, setAvatar] = useState(profile.avatarUrl ?? "");
@@ -98,10 +108,15 @@ function EditProfileFormBody({
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
+  useEffect(
+    () => () => {
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+    },
+    [],
+  );
+
   const uploadMutation = useMutation({
     mutationFn: (file: File) => profileService.uploadAvatar(file),
-    onSuccess: (url) => setAvatar(url),
-    onError: () => setError(t("profile.uploadError")),
   });
 
   const saveMutation = useMutation({
@@ -117,21 +132,54 @@ function EditProfileFormBody({
       }),
     onSuccess: onDone,
     onError: (err: unknown) => {
-      const message = (err as { response?: { data?: { title?: string } } })
-        ?.response?.data?.title;
-      setError(message ?? t("profile.updateError"));
+      if (isAxiosError(err)) {
+        const d = err.response?.data as
+          | { title?: string; errors?: Record<string, string[]> }
+          | undefined;
+        if (
+          d?.errors &&
+          Object.keys(d.errors).some((k) => k.toLowerCase() === "avatarurl")
+        ) {
+          setError(t("profile.invalidAvatar"));
+          return;
+        }
+        setError(d?.title ?? t("profile.updateError"));
+        return;
+      }
+      setError(t("profile.updateError"));
     },
   });
 
   const handleFile = (file: File | undefined) => {
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setError(t("profile.invalidImageType"));
+    // Yükleme sürerken ikinci bir dosya seçilirse sıralama karışmasın.
+    if (!file || uploadMutation.isPending) return;
+
+    const invalidKey = validateImageFile(file);
+    if (invalidKey) {
+      setError(t(invalidKey));
       return;
     }
+
     setError(null);
-    setPreviewUrl(URL.createObjectURL(file));
-    uploadMutation.mutate(file);
+    const previousPreview = previewUrl;
+    const previousBlob = blobUrlRef.current;
+    const blob = URL.createObjectURL(file);
+    blobUrlRef.current = blob;
+    setPreviewUrl(blob);
+
+    uploadMutation.mutate(file, {
+      onSuccess: (url) => {
+        setAvatar(url);
+        if (previousBlob) URL.revokeObjectURL(previousBlob);
+      },
+      onError: (err) => {
+        // Başarısız dosyayı göstermeye devam etme: önceki görünüme dön.
+        URL.revokeObjectURL(blob);
+        blobUrlRef.current = previousBlob;
+        setPreviewUrl(previousPreview);
+        setError(t(getUploadErrorKey(err)));
+      },
+    });
   };
 
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
@@ -141,6 +189,10 @@ function EditProfileFormBody({
   };
 
   const handleRemoveAvatar = () => {
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = null;
+    }
     setAvatar("");
     setPreviewUrl("");
   };
@@ -199,9 +251,13 @@ function EditProfileFormBody({
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               hidden
-              onChange={(e) => handleFile(e.target.files?.[0])}
+              onChange={(e) => {
+                handleFile(e.target.files?.[0]);
+                // Aynı dosya yeniden seçilebilsin (hata sonrası tekrar deneme).
+                e.target.value = "";
+              }}
             />
             <div className="edit-profile-pass__avatar">
               {uploadMutation.isPending ? (

@@ -259,11 +259,8 @@ public abstract class ListInputValidator<T> : AbstractValidator<T> where T : ILi
         RuleFor(x => x.TitleTr).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Description).MaximumLength(2000);
         RuleFor(x => x.DescriptionTr).MaximumLength(2000);
-        RuleFor(x => x.CoverImageUrl).MaximumLength(500)
-            .Must(u => string.IsNullOrEmpty(u) ||
-                       (Uri.TryCreate(u, UriKind.Absolute, out var uri) &&
-                        (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)))
-            .WithMessage("Kapak görseli geçerli bir http(s) adresi olmalı.");
+        // Kapak adresinin biçimi yetkiye bağlı: Create/Update validator'larında ListCoverPolicy ile denetlenir.
+        RuleFor(x => x.CoverImageUrl).MaximumLength(500);
         RuleFor(x => x.Visibility).IsInEnum();
         RuleFor(x => x.Status).IsInEnum();
         RuleFor(x => x.Items).NotNull()
@@ -285,7 +282,16 @@ public record CreateListCommand(
     List<ListItemInput> Items, Guid CreatedByUserId, bool IsOfficial
 ) : IRequest<ListCreatedDto>, IListInput;
 
-public class CreateListCommandValidator : ListInputValidator<CreateListCommand> { }
+public class CreateListCommandValidator : ListInputValidator<CreateListCommand>
+{
+    public CreateListCommandValidator()
+    {
+        // Resmi (admin) listeler harici/eski adres kullanabilir; diğerleri sadece yüklenen kapak.
+        RuleFor(x => x.CoverImageUrl)
+            .Must((cmd, url) => ListCoverPolicy.IsAllowed(url, cmd.IsOfficial))
+            .WithMessage("Geçersiz kapak görseli adresi.");
+    }
+}
 
 public class CreateListCommandHandler : IRequestHandler<CreateListCommand, ListCreatedDto>
 {
@@ -363,7 +369,15 @@ public record UpdateListCommand(
     List<ListItemInput> Items, Guid RequestingUserId, bool IsRequestingUserAdmin
 ) : IRequest, IListInput;
 
-public class UpdateListCommandValidator : ListInputValidator<UpdateListCommand> { }
+public class UpdateListCommandValidator : ListInputValidator<UpdateListCommand>
+{
+    public UpdateListCommandValidator()
+    {
+        RuleFor(x => x.CoverImageUrl)
+            .Must((cmd, url) => ListCoverPolicy.IsAllowed(url, cmd.IsRequestingUserAdmin))
+            .WithMessage("Geçersiz kapak görseli adresi.");
+    }
+}
 
 public class UpdateListCommandHandler : IRequestHandler<UpdateListCommand>
 {

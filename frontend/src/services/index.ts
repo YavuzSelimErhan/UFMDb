@@ -411,14 +411,7 @@ export const screeningLogService = {
     (await api.delete(`/screening-log/${entryId}`)).data,
 };
 
-export const uploadService = {
-  uploadImage: async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const { data } = await api.post("/uploads/image", formData);
-    return data.url;
-  },
-};
+export { uploadService } from "./uploadService";
 
 // ---------------- Follows ----------------
 export const followService = {

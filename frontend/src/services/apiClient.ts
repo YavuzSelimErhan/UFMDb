@@ -9,6 +9,35 @@ const api = axios.create({
   withCredentials: true, // httpOnly refresh cookie'nin gidip gelebilmesi için şart
 });
 
+// ---------- Giden isteklerde: tam URL'e çevrilmiş upload adreslerini tekrar göreceli yap ----------
+// Response interceptor /api/uploads/... yollarını tam URL'e çeviriyor. Backend yalnızca kendi
+// ürettiği göreceli biçimi kabul ettiği için, bu alanlar geri gönderilirken öneki atıyoruz.
+// Bilerek yalnızca aşağıdaki alanlar: diğer görsel alanlarının validator'ları göreceli adres kabul etmeyebilir.
+const RELATIVE_UPLOAD_KEYS = new Set(["avatarUrl", "coverImageUrl"]);
+
+function toRelativeUploadUrls(data: unknown, key?: string): unknown {
+  if (!API_BASE) return data;
+  if (typeof data === "string") {
+    const prefix = `${API_BASE}/api/uploads/`;
+    return key && RELATIVE_UPLOAD_KEYS.has(key) && data.startsWith(prefix)
+      ? data.slice(API_BASE.length)
+      : data;
+  }
+  if (Array.isArray(data)) return data.map((v) => toRelativeUploadUrls(v));
+  if (
+    data &&
+    typeof data === "object" &&
+    Object.getPrototypeOf(data) === Object.prototype
+  ) {
+    const result: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(data)) {
+      result[k] = toRelativeUploadUrls(v, k);
+    }
+    return result;
+  }
+  return data;
+}
+
 // ---------- Request interceptor: JWT access token'ı ekle (bellekten) ----------
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = getAccessToken();
@@ -16,8 +45,10 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  if (config.data instanceof FormData && config.headers) {
-    delete config.headers["Content-Type"];
+  if (config.data instanceof FormData) {
+    if (config.headers) delete config.headers["Content-Type"];
+  } else if (config.data) {
+    config.data = toRelativeUploadUrls(config.data);
   }
 
   return config;

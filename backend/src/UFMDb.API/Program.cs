@@ -11,6 +11,10 @@ using UFMDb.Persistence;
 using UFMDb.Persistence.Seed;
 using Microsoft.Extensions.FileProviders;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
+using UFMDb.API.Services;
+using UFMDb.Application.Common.Interfaces;
+using Microsoft.AspNetCore.StaticFiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -102,6 +106,20 @@ builder.Services.AddCors(options =>
 // ---------------- Rate Limiting (brute-force koruması: login/register) ----------------
 // Politika tanımı UFMDb.API.RateLimiting.AuthRateLimitingExtensions içinde (bkz. AuthRateLimitingTests).
 builder.Services.AddAuthRateLimiting();
+builder.Services.AddSingleton<IImageStorage, LocalImageStorage>();
+builder.Services.AddRateLimiter(o =>
+{
+    o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    o.AddPolicy("ImageUpload", ctx =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            ctx.User.FindFirst("sub")?.Value ?? ctx.Connection.RemoteIpAddress?.ToString() ?? "anon",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 20,
+                Window = TimeSpan.FromHours(1),
+                QueueLimit = 0
+            }));
+});
 
 // ---------------- Global Logging ----------------
 builder.Logging.ClearProviders();
@@ -116,11 +134,20 @@ var uploadsPath = Path.Combine(
 );
 Directory.CreateDirectory(uploadsPath);
 
-app.UseStaticFiles();
+Action<StaticFileResponseContext> harden = ctx =>
+    ctx.Context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+
+app.UseStaticFiles(new StaticFileOptions { OnPrepareResponse = harden });
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(uploadsPath),
-    RequestPath = "/api/uploads"
+    RequestPath = "/api/uploads",
+    OnPrepareResponse = ctx =>
+    {
+        harden(ctx);
+        // Tüm dosya adları benzersiz GUID olduğu için içerik değişmez; güvenle önbelleğe alınır.
+        ctx.Context.Response.Headers["Cache-Control"] = "public,max-age=31536000,immutable";
+    }
 });
 
 // ---------------- Migration (development kolaylığı) ----------------

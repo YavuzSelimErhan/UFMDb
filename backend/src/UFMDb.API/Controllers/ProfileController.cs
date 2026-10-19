@@ -5,6 +5,7 @@ using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.Features.Reviews;
 using UFMDb.Application.Features.Users;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace UFMDb.API.Controllers
 {
@@ -15,19 +16,16 @@ namespace UFMDb.API.Controllers
     {
         private readonly ISender _mediator;
         private readonly ICurrentUserService _currentUser;
-        private readonly IWebHostEnvironment _env;
+        private readonly IImageStorage _images;
 
-        public ProfileController(ISender mediator, ICurrentUserService currentUser, IWebHostEnvironment env)
+        public ProfileController(ISender mediator, ICurrentUserService currentUser, IImageStorage images)
         {
             _mediator = mediator;
             _currentUser = currentUser;
-            _env = env;
+            _images = images;
         }
 
         private Guid RequireUserId() => _currentUser.UserId ?? throw new UnauthorizedException("Kullanıcı kimliği doğrulanamadı.");
-
-        private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
-        private const long MaxFileSizeBytes = 5 * 1024 * 1024;
 
         [HttpGet]
         public async Task<IActionResult> GetMyProfile()
@@ -119,33 +117,16 @@ namespace UFMDb.API.Controllers
         => Ok(await _mediator.Send(new GetLikedReviewsQuery(RequireUserId())));
 
         [HttpPost("avatar")]
-        public async Task<IActionResult> UploadAvatar(IFormFile file)
+        [EnableRateLimiting("ImageUpload")]
+        [RequestSizeLimit(6 * 1024 * 1024)]
+        public async Task<IActionResult> UploadAvatar(IFormFile file, CancellationToken ct)
         {
             if (file is null || file.Length == 0)
                 return BadRequest("Dosya seçilmedi.");
 
-            if (file.Length > MaxFileSizeBytes)
-                return BadRequest("Dosya boyutu 5 MB'ı geçemez.");
-
-            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            if (!AllowedExtensions.Contains(extension))
-                return BadRequest("Sadece jpg, png, webp veya gif dosyaları yüklenebilir.");
-
-            var userId = RequireUserId();
-            var fileName = $"{userId}-{Guid.NewGuid()}{extension}";
-
-            var webRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-            var uploadsFolder = Path.Combine(webRoot, "uploads", "avatars");
-            Directory.CreateDirectory(uploadsFolder);
-
-            var filePath = Path.Combine(uploadsFolder, fileName);
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            var relativeUrl = $"/api/uploads/avatars/{fileName}";
-            return Ok(new { avatarUrl = relativeUrl });
+            await using var stream = file.OpenReadStream();
+            var url = await _images.SaveAsync(stream, ImageKind.Avatar, ct);
+            return Ok(new { avatarUrl = url });
         }
     }
 

@@ -23,30 +23,53 @@ public class ExceptionHandlingMiddleware
         {
             await _next(context);
         }
+        catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
+        {
+            // İstemci bağlantıyı kesti: hata değil, loglamaya gerek yok.
+            if (!context.Response.HasStarted)
+                context.Response.StatusCode = 499;
+        }
         catch (Exception ex)
         {
             await HandleExceptionAsync(context, ex);
         }
     }
 
-    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private static (HttpStatusCode Status, string Title, object? Errors) Map(Exception exception)
     {
-        context.Response.ContentType = "application/json";
-
-        var (statusCode, title, errors) = exception switch
+        return exception switch
         {
             NotFoundException => (HttpStatusCode.NotFound, exception.Message, null),
-            ValidationException vex => (HttpStatusCode.BadRequest, "Doğrulama hatası", (object?)vex.Errors),
+            ValidationException vex => (HttpStatusCode.BadRequest, "Doğrulama hatası", vex.Errors),
             UnauthorizedException => (HttpStatusCode.Unauthorized, exception.Message, null),
+            ForbiddenException => (HttpStatusCode.Forbidden, exception.Message, null),
             ConflictException => (HttpStatusCode.Conflict, exception.Message, null),
+            // [RequestSizeLimit] aşımı ve bozuk multipart gövdesi: 500 değil, istemci hatası.
+            BadHttpRequestException { StatusCode: StatusCodes.Status413PayloadTooLarge }
+                => (HttpStatusCode.RequestEntityTooLarge, "Dosya çok büyük.", null),
+            BadHttpRequestException => (HttpStatusCode.BadRequest, "Geçersiz istek.", null),
             _ => (HttpStatusCode.InternalServerError, "Beklenmeyen bir sunucu hatası oluştu.", null)
         };
+    }
+
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
+    {
+        var (statusCode, title, errors) = Map(exception);
 
         if (statusCode == HttpStatusCode.InternalServerError)
             _logger.LogError(exception, "İşlenmemiş istisna: {Message}", exception.Message);
         else
             _logger.LogWarning("İşlenen istisna: {Message}", exception.Message);
 
+        // Yanıt başladıysa status/header değiştirilemez.
+        if (context.Response.HasStarted)
+        {
+            _logger.LogWarning("Yanıt başlamış olduğu için hata yanıtı yazılamadı.");
+            return;
+        }
+
+        // Response.Clear() yok ve header'lara dokunmuyoruz: CORS header'ları korunmalı.
+        context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)statusCode;
 
         var payload = JsonSerializer.Serialize(new

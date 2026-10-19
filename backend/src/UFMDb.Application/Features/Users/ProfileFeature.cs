@@ -10,6 +10,7 @@ using UFMDb.Application.DTOs;
 using UFMDb.Application.Features.Actors;
 using UFMDb.Domain.Entities;
 using ReactionType = UFMDb.Domain.Enums.ReactionType;
+using System.Text.RegularExpressions;
 
 
 namespace UFMDb.Application.Features.Users;
@@ -251,8 +252,18 @@ public class UpdateProfileCommandValidator : AbstractValidator<UpdateProfileComm
 
 public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand>
 {
+    // LocalImageStorage'ın avatar için ürettiği biçim; istemci başka bir değer gönderemez.
+    private static readonly Regex ManagedAvatar = new(
+        @"^/api/uploads/avatars/[0-9a-f]{32}\.webp\z", RegexOptions.Compiled);
+
     private readonly IApplicationDbContext _context;
-    public UpdateProfileCommandHandler(IApplicationDbContext context) => _context = context;
+    private readonly IImageStorage _images;
+
+    public UpdateProfileCommandHandler(IApplicationDbContext context, IImageStorage images)
+    {
+        _context = context;
+        _images = images;
+    }
 
     public async Task Handle(UpdateProfileCommand request, CancellationToken ct)
     {
@@ -266,7 +277,21 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand>
             user.UserName = request.UserName;
         }
 
-        user.AvatarUrl = string.IsNullOrWhiteSpace(request.AvatarUrl) ? null : request.AvatarUrl;
+        var oldAvatar = user.AvatarUrl;
+        var newAvatar = string.IsNullOrWhiteSpace(request.AvatarUrl) ? null : request.AvatarUrl.Trim();
+        var avatarChanged = !string.Equals(oldAvatar, newAvatar, StringComparison.Ordinal);
+
+        // Değişmediyse (eski/harici URL dahil) dokunma; değiştiyse yalnızca bizim ürettiğimiz
+        // ve başka kullanıcıda kullanılmayan bir adres kabul edilir.
+        if (avatarChanged && newAvatar is not null)
+        {
+            var valid = ManagedAvatar.IsMatch(newAvatar)
+                && !await _context.Users.AnyAsync(u => u.AvatarUrl == newAvatar && u.Id != request.UserId, ct);
+            if (!valid)
+                throw new Common.Exceptions.ValidationException("AvatarUrl", "Geçersiz profil resmi adresi.");
+        }
+
+        user.AvatarUrl = newAvatar;
         user.FullName = string.IsNullOrWhiteSpace(request.FullName) ? null : request.FullName;
         user.Country = string.IsNullOrWhiteSpace(request.Country) ? null : request.Country;
         user.BirthDate = request.BirthDate;
@@ -277,6 +302,9 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand>
 
         user.UpdatedAtUtc = DateTime.UtcNow;
         await _context.SaveChangesAsync(ct);
+
+        // Kayıt başarılı olduktan sonra eski dosyayı sil (Delete yalnızca yönetilen dosyalara dokunur).
+        if (avatarChanged) _images.Delete(oldAvatar);
     }
 }
 

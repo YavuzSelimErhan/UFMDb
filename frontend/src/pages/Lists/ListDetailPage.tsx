@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -31,6 +31,40 @@ import "./ListDetailPage.css";
 
 const GUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Kürasyon notu: varsayılan olarak 4 satıra kırpılır, kırpıldıysa "devamını oku" gösterilir.
+function ListItemNote({ text }: { text: string }) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+  const [isClamped, setIsClamped] = useState(false);
+  const ref = useRef<HTMLParagraphElement>(null);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (el && !expanded) setIsClamped(el.scrollHeight > el.clientHeight + 1);
+  }, [text, expanded]);
+
+  return (
+    <div className="list-detail-page__note-wrap">
+      <p
+        ref={ref}
+        className={`list-detail-page__note ${expanded ? "is-expanded" : ""}`}
+      >
+        {text}
+      </p>
+      {(isClamped || expanded) && (
+        <button
+          type="button"
+          className="list-detail-page__note-toggle"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? t("common.showLess") : t("common.showMore")}
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function ListDetailPage() {
   // Bildirimlerdeki eski linkler /lists/{guid} biçiminde: parametre GUID ise id ile, değilse slug ile çek.
@@ -334,7 +368,7 @@ export default function ListDetailPage() {
                   movie={item.movie}
                   onLogClick={() => openLog(item.movie)}
                 />
-                {note && <p className="list-detail-page__note">{note}</p>}
+                {note && <ListItemNote text={note} />}
               </div>
             );
           })}

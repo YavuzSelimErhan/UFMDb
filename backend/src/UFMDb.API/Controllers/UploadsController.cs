@@ -1,24 +1,46 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using UFMDb.Application.Common.Interfaces;
 
 namespace UFMDb.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin")]
+[Authorize]   // sınıf düzeyi: giriş zorunlu; admin endpoint'i ayrıca Roles ile daralır (ikisi birlikte aranır)
 public class UploadsController : ControllerBase
 {
-    private readonly IWebHostEnvironment _env;
+    private const long MaxRequestBytes = 6 * 1024 * 1024; // 5 MB dosya + multipart zarfı
 
-    public UploadsController(IWebHostEnvironment env)
+    private readonly IWebHostEnvironment _env;
+    private readonly IImageStorage _images;
+
+    public UploadsController(IWebHostEnvironment env, IImageStorage images)
     {
         _env = env;
+        _images = images;
     }
 
     private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
     private const long MaxFileSizeBytes = 5 * 1024 * 1024;
 
+    /// <summary>Liste kapağı: her giriş yapmış kullanıcı. Doğrulanır, yeniden encode edilir.</summary>
+    [HttpPost("cover")]
+    [EnableRateLimiting("ImageUpload")]
+    [RequestSizeLimit(MaxRequestBytes)]
+    public async Task<IActionResult> UploadCover(IFormFile file, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest("Dosya seçilmedi.");
+
+        await using var stream = file.OpenReadStream();
+        var url = await _images.SaveAsync(stream, ImageKind.Cover, ct);
+        return Ok(new { url });
+    }
+
+    /// <summary>Admin'in film/oyuncu/yönetmen görselleri için mevcut endpoint (değişmedi).</summary>
     [HttpPost("image")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UploadImage(IFormFile file)
     {
         if (file is null || file.Length == 0)

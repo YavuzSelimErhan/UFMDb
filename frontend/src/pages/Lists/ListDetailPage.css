@@ -295,6 +295,10 @@
 }
 
 /* ---------- Film hücresi: sıra numarası + kürasyon notu ---------- */
+/* Not açıldığında satırdaki diğer kartları uzatmasın. */
+.list-detail-page .movie-grid {
+  align-items: start;
+}
 .list-detail-page__item {
   display: flex;
   flex-direction: column;
@@ -321,11 +325,33 @@
   color: var(--color-text-secondary);
   padding-left: 10px;
   border-left: 2px solid var(--list-accent, var(--color-border));
+  white-space: pre-line;
+  overflow-wrap: anywhere;
   display: -webkit-box;
   -webkit-line-clamp: 4;
   line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+/* Açık durum: kırpmayı kaldır, tam metni göster. */
+.list-detail-page__note.is-expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  overflow: visible;
+}
+.list-detail-page__note-toggle {
+  margin-top: 4px;
+  padding: 0 0 0 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--list-accent, var(--color-accent));
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.list-detail-page__note-toggle:hover {
+  text-decoration: underline;
 }
 
 /* ---------- 404 / boş liste ---------- */

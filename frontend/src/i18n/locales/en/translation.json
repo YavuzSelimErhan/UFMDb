@@ -715,5 +715,18 @@
     "emptyHint": "When you rate, watch or review a film, it shows up here.",
     "findFriendsTitle": "You're not following anyone yet",
     "findFriendsText": "Your friends' activity will show up here alongside yours."
+  },
+  "upload": {
+    "errors": {
+      "noFile": "No file selected.",
+      "invalidType": "Only JPG, PNG or WebP images can be uploaded.",
+      "tooLarge": "File size can't exceed 5 MB.",
+      "invalidImage": "Invalid or unsupported image. Only JPG, PNG and WebP are allowed.",
+      "rateLimited": "Too many upload attempts. Please try again in a while.",
+      "sessionExpired": "Your session has expired. Please sign in again.",
+      "forbidden": "You don't have permission to do this.",
+      "network": "Couldn't reach the server. Check your connection.",
+      "generic": "Couldn't upload the image. Please try again."
+    }
   }
 }

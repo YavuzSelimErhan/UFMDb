@@ -714,5 +714,18 @@
     "emptyHint": "Bir filmi puanladığında, izlediğinde ya da yorumladığında burada görünür.",
     "findFriendsTitle": "Henüz kimseyi takip etmiyorsun",
     "findFriendsText": "Arkadaşlarının hareketleri burada, seninkilerle birlikte görünür."
+  },
+  "upload": {
+    "errors": {
+      "noFile": "Dosya seçilmedi.",
+      "invalidType": "Sadece JPG, PNG veya WebP yüklenebilir.",
+      "tooLarge": "Dosya boyutu 5 MB'ı geçemez.",
+      "invalidImage": "Geçersiz veya desteklenmeyen görsel. Sadece JPG, PNG ve WebP yüklenebilir.",
+      "rateLimited": "Çok fazla yükleme denemesi yaptın. Lütfen biraz sonra tekrar dene.",
+      "sessionExpired": "Oturumun sona ermiş. Lütfen tekrar giriş yap.",
+      "forbidden": "Bu işlem için yetkin yok.",
+      "network": "Sunucuya ulaşılamadı. Bağlantını kontrol et.",
+      "generic": "Görsel yüklenemedi. Lütfen tekrar dene."
+    }
   }
 }

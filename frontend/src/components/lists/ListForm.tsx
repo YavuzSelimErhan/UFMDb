@@ -26,7 +26,11 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { uploadService } from "@/services";
+import {
+  uploadService,
+  getUploadErrorKey,
+  validateImageFile,
+} from "@/services/uploadService";
 import { useAppSelector } from "@/store";
 import MovieSearchSelect from "@/components/admin/MovieSearchSelect";
 import { pickListText } from "@/utils/listText";
@@ -35,6 +39,7 @@ import "./ListForm.css";
 
 const MAX_ITEMS = 500;
 // true yaparsan sıradan kullanıcılar da kapak görseli yükleyebilir.
+// Backend artık sıradan kullanıcıda yalnızca yüklenen kapağı kabul ediyor (harici URL reddedilir).
 const ALLOW_USER_COVER = false;
 
 export interface FormMovie {
@@ -219,14 +224,15 @@ export default function ListForm({
 
   // ---------- Kapak ----------
   const uploadMutation = useMutation({
-    mutationFn: (file: File) => uploadService.uploadImage(file),
+    mutationFn: (file: File) => uploadService.uploadCover(file),
     onSuccess: (url) => patch({ coverImageUrl: url }),
-    onError: () => setUploadError(t("admin.lists.uploadError")),
+    onError: (err: unknown) => setUploadError(t(getUploadErrorKey(err))),
   });
   const handleFile = (file: File | undefined) => {
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setUploadError(t("admin.lists.invalidImageType"));
+    if (!file || uploadMutation.isPending) return;
+    const invalidKey = validateImageFile(file);
+    if (invalidKey) {
+      setUploadError(t(invalidKey));
       return;
     }
     setUploadError(null);
@@ -709,9 +715,13 @@ export default function ListForm({
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp"
                       hidden
-                      onChange={(e) => handleFile(e.target.files?.[0])}
+                      onChange={(e) => {
+                        handleFile(e.target.files?.[0]);
+                        // Aynı dosya yeniden seçilebilsin (hata sonrası tekrar deneme).
+                        e.target.value = "";
+                      }}
                     />
                     {uploadMutation.isPending ? (
                       <Loader2 size={22} className="list-form__spinner" />
@@ -742,17 +752,22 @@ export default function ListForm({
                       </div>
                     )}
                   </div>
-                  <div className="list-form__field">
-                    <label htmlFor="list-cover-url">
-                      {t("lists.form.coverUrl")}
-                    </label>
-                    <input
-                      id="list-cover-url"
-                      value={form.coverImageUrl}
-                      placeholder="https://..."
-                      onChange={(e) => patch({ coverImageUrl: e.target.value })}
-                    />
-                  </div>
+                  {/* Harici URL girişi yalnızca admin için (backend de aynı kuralı uygular). */}
+                  {isAdmin && (
+                    <div className="list-form__field">
+                      <label htmlFor="list-cover-url">
+                        {t("lists.form.coverUrl")}
+                      </label>
+                      <input
+                        id="list-cover-url"
+                        value={form.coverImageUrl}
+                        placeholder="https://..."
+                        onChange={(e) =>
+                          patch({ coverImageUrl: e.target.value })
+                        }
+                      />
+                    </div>
+                  )}
                   {uploadError && (
                     <p className="list-form__error">{uploadError}</p>
                   )}
