@@ -2,13 +2,14 @@
   margin-bottom: 56px;
 }
 
-/* Başlık */
+/* ---------- Başlık ---------- */
 .fa__header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
 }
 .fa__eyebrow {
   display: flex;
@@ -35,6 +36,33 @@
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
 }
+.fa__aside {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.fa__active {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.fa__active p {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+.fa__stack {
+  display: flex;
+  padding-left: 10px;
+}
+/* PersonAvatar'ın kendi boyut sınıfını ezmek için 2 sınıflı seçici */
+.fa__stack .person-avatar {
+  width: 34px;
+  height: 34px;
+  margin-left: -10px;
+  border: 2px solid var(--color-bg);
+  box-sizing: border-box;
+}
 .fa__see-all {
   display: inline-flex;
   align-items: center;
@@ -46,9 +74,8 @@
 }
 .fa__see-all-desktop .fa__see-all {
   padding: 10px 16px;
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 10px;
-  background: var(--color-bg-card);
   color: var(--color-text-primary);
 }
 .fa__see-all:hover {
@@ -58,176 +85,140 @@
   display: none;
 }
 
-/* Arkadaş şeridi */
-.fa__strip {
-  display: flex;
-  gap: 12px;
-  padding: 14px 18px;
-  margin-bottom: 20px;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.fa__strip::-webkit-scrollbar {
-  display: none;
-}
-.fa__friend {
-  flex: none;
-  width: 72px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-.fa__ring {
-  padding: 2px;
-  border-radius: 50%;
-  line-height: 0;
-  background: linear-gradient(135deg, #4a90e2, #9cc7ff);
-}
-.fa__ring .person-avatar {
-  width: 48px;
-  height: 48px;
-  border: 3px solid var(--color-bg);
-  box-sizing: border-box;
-}
-.fa__friend-name {
-  max-width: 72px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-}
-
-/* Kart ızgarası */
+/* ---------- Izgara: sabit genişlikli poster sütunları, sola hizalı ---------- */
 .fa__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, 190px);
+  gap: 32px 20px;
+  justify-content: start;
 }
-.fa__card {
+.fa__tile {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 16px;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  transition: border-color var(--transition-fast);
-}
-.fa__card:hover {
-  border-color: var(--color-accent-dim);
-}
-.fa__card-top {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.fa__card-avatar {
-  position: relative;
-  z-index: 2;
-  line-height: 0;
-}
-.fa__card-avatar .person-avatar {
-  width: 36px;
-  height: 36px;
-}
-.fa__card-who {
-  flex: 1;
+  gap: 12px;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
 }
-.fa__card-who a {
+.fa__tile--wide {
+  grid-column: span 2;
+  flex-direction: row;
+  gap: 20px;
+}
+.fa__poster-wrap {
   position: relative;
-  z-index: 2;
-  width: fit-content;
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
+  flex: none;
+  width: 190px;
 }
-.fa__card-who a:hover {
-  color: var(--color-accent-text);
+.fa__poster {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border-radius: 14px;
+  background-color: var(--color-bg-elevated);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
+  transition: transform var(--transition-base);
 }
-.fa__card-who time {
-  font-family: "SF Mono", "Fira Code", monospace;
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
+@media (hover: hover) {
+  .fa__tile:hover .fa__poster {
+    transform: translateY(-4px);
+  }
 }
 
-/* Eylem etiketi: renk + metin birlikte */
-.fa__chip {
+/* ---------- Poster üstü buzlu cam rozetler ---------- */
+.fa__glass {
+  position: absolute;
+  z-index: 1;
   padding: 5px 10px;
   border-radius: 999px;
+  background: rgba(10, 12, 16, 0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.fa__chip {
+  top: 10px;
+  right: 10px;
   font-family: "SF Mono", "Fira Code", monospace;
-  font-size: 0.64rem;
+  font-size: 0.62rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  white-space: nowrap;
 }
 .fa__chip--watched {
-  color: #6fb1ff;
-  background: rgba(74, 144, 226, 0.16);
+  color: #8ec2ff;
 }
 .fa__chip--rated {
-  color: #e2c35a;
-  background: rgba(212, 175, 55, 0.14);
+  color: #f0d060;
 }
 .fa__chip--review {
   color: #3be39a;
-  background: rgba(0, 255, 136, 0.12);
 }
 .fa__chip--like {
   color: #ff8fa0;
-  background: rgba(255, 107, 129, 0.14);
 }
 .fa__chip--dislike {
   color: #c3c9d6;
-  background: rgba(255, 255, 255, 0.08);
+}
+.fa__rating {
+  left: 10px;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.fa__rating svg {
+  color: #f0d060;
 }
 
-.fa__card-body {
-  display: flex;
-  gap: 14px;
+/* ---------- Alt yazı ---------- */
+.fa__caption {
   min-width: 0;
-}
-.fa__poster {
-  flex: none;
-  width: 84px;
-  aspect-ratio: 2/3;
-  overflow: hidden;
-  border-radius: 10px;
-  background: var(--color-bg-elevated);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-}
-.fa__card-info {
   flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 14px;
+}
+.fa__who-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.fa__avatar {
+  position: relative;
+  z-index: 2;
+  flex: none;
+  line-height: 0;
+}
+.fa__avatar .person-avatar {
+  width: 30px;
+  height: 30px;
+}
+.fa__who {
+  min-width: 0;
 }
 .fa__movie-title {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1rem;
-  line-height: 1.2;
+  font-size: 0.88rem;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .fa__movie-title a {
   color: var(--color-text-primary);
 }
+/* Stretched link: kartın tamamı tıklanabilir; avatar ve isim linkleri z-index: 2 ile üstte. */
 .fa__movie-title a::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 1;
-  border-radius: 16px;
+  border-radius: 14px;
 }
 .fa__movie-title a:focus-visible {
   outline: none;
@@ -236,38 +227,57 @@
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
 }
-.fa__card:hover .fa__movie-title a {
+.fa__tile:hover .fa__movie-title a {
   color: var(--color-accent-text);
 }
-.fa__movie-meta {
-  font-size: 0.78rem;
+.fa__who p {
+  margin-top: 2px;
+  font-size: 0.75rem;
   color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.fa__rating {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 4px;
-  color: #d4af37;
-  font-size: 0.9rem;
-  font-weight: 700;
+.fa__who p a {
+  position: relative;
+  z-index: 2;
+  color: inherit;
 }
-.fa__rating span {
+.fa__who p a:hover {
   color: var(--color-text-primary);
 }
 
+/* ---------- Yorum (geniş kart) ---------- */
+.fa__tile--wide .fa__caption {
+  justify-content: center;
+}
+.fa__quote-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.fa__quote-mark {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 2.8rem;
+  line-height: 0.6;
+  height: 20px;
+  color: #d4af37;
+}
 .fa__quote {
-  margin: 2px 0 0;
-  font-family: var(--font-sans);
-  font-size: 0.84rem;
-  line-height: 1.5;
+  margin: 0;
+  font-size: 0.96rem;
+  line-height: 1.6;
+  font-weight: 500;
   color: var(--color-text-primary);
+  text-align: left;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-align: left;
 }
 .fa__quote-btn {
   background: none;
@@ -285,7 +295,6 @@
   user-select: none;
 }
 .fa__spoiler-badge {
-  align-self: flex-start;
   padding: 4px 8px;
   border-radius: 6px;
   font-family: "SF Mono", "Fira Code", monospace;
@@ -297,30 +306,28 @@
   background: rgba(255, 150, 60, 0.14);
 }
 
+/* ---------- Altbilgi ---------- */
 .fa__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid var(--color-border);
+  margin-top: 32px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 0.85rem;
   color: var(--color-text-secondary);
 }
 
-/* Takip yok */
+/* ---------- Kimseyi takip etmiyor ---------- */
 .fa__find {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
-  padding: 28px;
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  background: var(--color-bg-card);
-  color: var(--color-accent-text);
+  padding: 4px 0;
   max-width: 520px;
+  color: var(--color-accent-text);
 }
 .fa__find h3 {
   font-family: var(--font-display);
@@ -336,9 +343,9 @@
   margin-bottom: 6px;
 }
 
-/* Yükleniyor */
+/* ---------- Yükleniyor ---------- */
 .fa__sk {
-  border-radius: 16px;
+  border-radius: 14px;
   background: linear-gradient(
     100deg,
     var(--color-bg-elevated) 40%,
@@ -348,13 +355,9 @@
   background-size: 250% 100%;
   animation: fa-sheen 1.6s ease-in-out infinite;
 }
-.fa__sk-avatar {
-  flex: none;
-  width: 56px;
-  height: 72px;
-}
 .fa__sk-card {
-  height: 190px;
+  width: 190px;
+  height: 285px;
 }
 @keyframes fa-sheen {
   0% {
@@ -365,13 +368,16 @@
   }
 }
 
-/* Mobil */
+/* ---------- Mobil ---------- */
 @media (max-width: 640px) {
   .fa {
     margin-bottom: 40px;
   }
   .fa__header {
-    margin-bottom: 18px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 22px;
   }
   .fa__see-all-desktop {
     display: none;
@@ -379,40 +385,33 @@
   .fa__see-all-mobile {
     display: block;
   }
-  /* Şerit ekran kenarına taşar, kart gibi değil çizgili */
-  .fa__strip {
-    margin-inline: calc(var(--container-pad, 16px) * -1);
-    padding: 12px var(--container-pad, 16px);
-    background: none;
-    border-radius: 0;
-    border-inline: 0;
-    gap: 10px;
-  }
-  .fa__friend {
-    width: 64px;
-  }
-  .fa__ring .person-avatar {
-    width: 44px;
-    height: 44px;
-  }
-  .fa__friend-name {
-    max-width: 64px;
-    font-size: 0.72rem;
-  }
   .fa__grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px 12px;
+    justify-content: stretch;
   }
-  .fa__card {
-    padding: 14px;
-    gap: 12px;
-    border-radius: 14px;
+  .fa__tile--wide {
+    grid-column: 1 / -1;
+    gap: 16px;
   }
-  .fa__poster {
-    width: 72px;
+  .fa__poster-wrap {
+    width: 100%;
+  }
+  .fa__tile--wide .fa__poster-wrap {
+    width: 112px;
+  }
+  .fa__quote {
+    font-size: 0.88rem;
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
+  }
+  .fa__sk-card {
+    width: 100%;
+    height: 260px;
   }
   .fa__footer {
-    margin-top: 20px;
+    margin-top: 24px;
+    padding-top: 16px;
   }
 }
 
@@ -420,7 +419,7 @@
   .fa__sk {
     animation: none;
   }
-  .fa__card {
+  .fa__poster {
     transition: none;
   }
 }
