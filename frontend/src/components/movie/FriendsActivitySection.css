@@ -92,6 +92,7 @@
 }
 .fa__stack {
   display: flex;
+  align-items: center;
   padding-left: 8px;
 }
 /* PersonAvatar'ın kendi boyut sınıfını ezmek için 2 sınıflı seçici */
@@ -101,6 +102,23 @@
   margin-left: -8px;
   border: 2px solid var(--color-bg);
   box-sizing: border-box;
+}
+/* Görünen kartlarda yer almayan aktif arkadaş sayısı */
+.fa__stack-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin-left: -8px;
+  border: 2px solid var(--color-bg);
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: var(--color-bg-elevated);
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
 }
 
 /* Film şeridi delikleri: profil header'ıyla aynı motif */
@@ -117,9 +135,11 @@
 }
 
 /* ---------- Izgara: sabit genişlikli poster sütunları, sola hizalı ---------- */
+/* dense: geniş (yorum) kart satır sonuna sığmayınca arkasında boşluk kalmasın. */
 .fa__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, 190px);
+  grid-auto-flow: row dense;
   gap: 36px 22px;
   justify-content: start;
 }
@@ -207,36 +227,33 @@
   }
 }
 
-/* Eylem etiketi: buzlu cam + parlayan nokta */
-.fa__glass {
+/* Eylem rozetleri: buzlu cam yuvarlak + ikon (metin alt yazıda) */
+.fa__badges {
   position: absolute;
   z-index: 2;
-  border-radius: 999px;
-  background: rgba(10, 12, 16, 0.55);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-}
-.fa__chip {
   top: 10px;
   right: 10px;
+  display: flex;
+  gap: 6px;
+}
+.fa__badge {
   display: inline-flex;
   align-items: center;
-  padding: 5px 10px 5px 9px;
-  font-family: "SF Mono", "Fira Code", monospace;
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(10, 12, 16, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   color: rgb(var(--fa-accent));
 }
-.fa__chip::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  margin-right: 7px;
-  border-radius: 50%;
-  background: currentColor;
-  box-shadow: 0 0 8px currentColor;
+/* İkinci rozet: ana eylem puan/yorum iken kullanıcının tepkisi */
+.fa__badge--like {
+  color: rgb(255, 143, 160);
+}
+.fa__badge--dislike {
+  color: rgb(195, 201, 214);
 }
 
 /* Yıldız satırı (yıldız altın kalır: anlamsal renk) */
@@ -285,7 +302,7 @@
   filter: drop-shadow(0 0 4px rgba(240, 208, 96, 0.6));
 }
 
-/* ---------- Alt yazı ---------- */
+/* ---------- Alt yazı: kim + eylem / film / yıl · zaman ---------- */
 .fa__caption {
   min-width: 0;
   flex: 1;
@@ -295,7 +312,7 @@
 }
 .fa__who-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 11px;
   min-width: 0;
 }
@@ -303,19 +320,62 @@
   position: relative;
   z-index: 2;
   flex: none;
+  margin-top: 1px;
   line-height: 0;
 }
 .fa__avatar .person-avatar {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   box-shadow:
     0 0 0 2px var(--color-bg),
     0 0 0 3.5px rgba(var(--fa-accent), 0.7);
 }
 .fa__who {
   min-width: 0;
+  flex: 1;
 }
+
+/* "Ayşe  • puanladı": isim kalın, eylem küçük harf ve eylem renginde bir nokta ile */
+.fa__line-who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 7px;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--color-text-secondary);
+}
+.fa__user {
+  position: relative;
+  z-index: 2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+.fa__user:hover {
+  text-decoration: underline;
+}
+.fa__verb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  text-transform: lowercase;
+}
+.fa__verb::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgb(var(--fa-accent));
+  box-shadow: 0 0 6px rgba(var(--fa-accent), 0.8);
+}
+
 .fa__movie-title {
+  margin-top: 2px;
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 0.95rem;
@@ -347,30 +407,18 @@
   color: rgb(var(--fa-accent));
 }
 
-/* Kullanıcı adı kısalabilir; zaman her zaman tam görünür */
-.fa__byline {
+/* Yıl ve zaman: her zaman tam görünür */
+.fa__meta {
   display: flex;
   align-items: baseline;
   gap: 6px;
-  margin-top: 3px;
-  font-size: 0.76rem;
+  margin-top: 2px;
+  font-size: 0.74rem;
   color: var(--color-text-secondary);
 }
-.fa__user {
-  position: relative;
-  z-index: 2;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: inherit;
-  font-weight: 600;
-}
-.fa__user:hover {
-  color: var(--color-text-primary);
-}
 .fa__sep,
-.fa__byline time {
+.fa__meta span,
+.fa__meta time {
   flex: none;
   white-space: nowrap;
 }
@@ -411,13 +459,18 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+/* Düğme sadece tıklama alanı; satır kısaltma içindeki span'de çalışır. */
 .fa__quote-btn {
-  background: none;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
+  display: block;
+  width: 100%;
   position: relative;
   z-index: 2;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 .fa__quote-btn:disabled {
   cursor: default;

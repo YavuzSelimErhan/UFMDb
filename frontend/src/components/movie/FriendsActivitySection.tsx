@@ -3,7 +3,15 @@ import type { CSSProperties, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { ChevronRight, Star, UserPlus } from "lucide-react";
+import {
+  ChevronRight,
+  Eye,
+  Heart,
+  MessageSquare,
+  Star,
+  ThumbsDown,
+  UserPlus,
+} from "lucide-react";
 import { feedService } from "@/services";
 import { useAppSelector } from "@/store";
 import PersonAvatar from "@/components/common/PersonAvatar";
@@ -14,6 +22,8 @@ import "./FriendsActivitySection.css";
 
 /** Başlık altındaki avatar yığınında en fazla bu kadar kişi. */
 const MAX_STACK = 4;
+/** Ana sayfada en fazla bu kadar kart; gerisi "Tümünü Gör" sayfasında. */
+const MAX_CARDS = 8;
 
 const displayName = (u: FriendActivityUser) => u.fullName || u.userName;
 
@@ -27,6 +37,21 @@ function getKind(a: FriendActivity): Kind {
   if (a.reaction === "Like") return "like";
   return "watched";
 }
+
+/** Ana eylem puan/yorum olsa bile kullanıcının tepkisi ikinci rozet olarak gösterilir. */
+function getReactionKind(a: FriendActivity): "like" | "dislike" | null {
+  if (a.reaction === "Like") return "like";
+  if (a.reaction === "Dislike") return "dislike";
+  return null;
+}
+
+const KIND_ICON: Record<Kind, ReactNode> = {
+  review: <MessageSquare size={13} />,
+  rated: <Star size={13} fill="currentColor" />,
+  like: <Heart size={13} fill="currentColor" />,
+  dislike: <ThumbsDown size={13} />,
+  watched: <Eye size={13} />,
+};
 
 /* ---------- küçük parçalar ---------- */
 
@@ -77,12 +102,12 @@ function SpoilerText({ text }: { text: string }) {
       <span className="fa__spoiler-badge">{t("movie.containsSpoiler")}</span>
       <button
         type="button"
-        className={`fa__quote fa__quote-btn${shown ? "" : " is-blurred"}`}
+        className="fa__quote-btn"
         onClick={() => setShown(true)}
         aria-label={shown ? undefined : t("reviews.revealSpoiler")}
         disabled={shown}
       >
-        {text}
+        <span className={`fa__quote${shown ? "" : " is-blurred"}`}>{text}</span>
       </button>
     </>
   );
@@ -110,7 +135,11 @@ function ActivityCard({ a, index }: { a: FriendActivity; index: number }) {
   const kind = getKind(a);
   const wide = kind === "review" && !!a.reviewExcerpt;
 
-  const chipLabel = {
+  const reactionKind = getReactionKind(a);
+  const secondaryBadge =
+    reactionKind && reactionKind !== kind ? reactionKind : null;
+
+  const verb = {
     review: t("friendsActivity.verbReviewed"),
     rated: t("friendsActivity.verbRated"),
     like: t("friendsActivity.reactionLike"),
@@ -130,7 +159,17 @@ function ActivityCard({ a, index }: { a: FriendActivity; index: number }) {
           fallback="title"
           iconSize={22}
         />
-        <span className="fa__glass fa__chip">{chipLabel}</span>
+
+        {/* Eylem metni alt yazıda ("Ayşe puanladı"); rozetler sadece görsel ipucu. */}
+        <div className="fa__badges" aria-hidden="true">
+          {secondaryBadge && (
+            <span className={`fa__badge fa__badge--${secondaryBadge}`}>
+              {KIND_ICON[secondaryBadge]}
+            </span>
+          )}
+          <span className="fa__badge">{KIND_ICON[kind]}</span>
+        </div>
+
         {a.rating != null && (
           <div className="fa__rating">
             <StarRow value={a.rating} />
@@ -167,17 +206,25 @@ function ActivityCard({ a, index }: { a: FriendActivity; index: number }) {
             />
           </Link>
           <div className="fa__who">
+            <p className="fa__line-who">
+              <Link to={`/users/${a.user.userName}`} className="fa__user">
+                {name}
+              </Link>
+              <span className="fa__verb">{verb}</span>
+            </p>
             {/* Başlık linki kartın tamamını kaplar (stretched link). */}
             <h3 className="fa__movie-title">
               <Link to={`/movies/${a.movie.id}`}>{a.movie.title}</Link>
             </h3>
-            <p className="fa__byline">
-              <Link to={`/users/${a.user.userName}`} className="fa__user">
-                {name}
-              </Link>
-              <span className="fa__sep" aria-hidden="true">
-                ·
-              </span>
+            <p className="fa__meta">
+              {a.movie.releaseYear > 0 && (
+                <>
+                  <span>{a.movie.releaseYear}</span>
+                  <span className="fa__sep" aria-hidden="true">
+                    ·
+                  </span>
+                </>
+              )}
               <time dateTime={a.lastActivityAtUtc}>
                 {timeAgo(a.lastActivityAtUtc, i18n.language)}
               </time>
@@ -234,9 +281,17 @@ export default function FriendsActivitySection() {
   }
 
   // Spotlight ayrı gösterilmiyor; tek akışta en başta yer alır.
-  const all = [spotlight, ...items].filter(
-    (a): a is FriendActivity => a != null,
-  );
+  // Aynı kişi+film iki kez gelirse (spotlight ile items çakışması) tekilleştirilir.
+  const seen = new Set<string>();
+  const all = [spotlight, ...items]
+    .filter((a): a is FriendActivity => {
+      if (a == null) return false;
+      const key = `${a.user.id}-${a.movie.id}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, MAX_CARDS);
 
   // Takip ediyor ama son 7 günde hareket yok: bölüm gizlenir.
   if (all.length === 0) return null;
@@ -244,6 +299,8 @@ export default function FriendsActivitySection() {
   const people = new Map<string, FriendActivityUser>();
   all.forEach((a) => people.set(a.user.id, a.user));
   const stack = Array.from(people.values()).slice(0, MAX_STACK);
+  // Görünen kartlarda yer almayan ama bu hafta aktif olan arkadaşlar.
+  const extra = Math.max(0, weeklyActiveFriendCount - stack.length);
 
   const sub = (
     <div className="fa__sub">
@@ -257,6 +314,11 @@ export default function FriendsActivitySection() {
             size="sm"
           />
         ))}
+        {extra > 0 && (
+          <span className="fa__stack-more" aria-hidden="true">
+            +{extra}
+          </span>
+        )}
       </div>
       <p>
         {t("friendsActivity.activeThisWeek", { n: weeklyActiveFriendCount })}
