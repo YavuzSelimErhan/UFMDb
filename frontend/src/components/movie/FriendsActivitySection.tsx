@@ -24,6 +24,8 @@ import "./FriendsActivitySection.css";
 const MAX_CARDS = 6;
 /** Bu süreden yeni aktivitesi olan arkadaşın avatarı halkalı görünür. */
 const FRESH_MS = 24 * 60 * 60 * 1000;
+/** Şerit, en az bu kadar kişi (ya da ekstra arkadaş) varsa gösterilir; az kişide boş durur. */
+const MIN_STRIP_PEOPLE = 3;
 
 const displayName = (u: FriendActivityUser) => u.fullName || u.userName;
 
@@ -38,7 +40,7 @@ function getKind(a: FriendActivity): Kind {
   return "watched";
 }
 
-/** Ana eylem puan/yorum olsa bile kullanıcının tepkisi ayrı bir çip olarak gösterilir. */
+/** Ana eylem puan/yorum olsa bile kullanıcının tepkisi ayrı bir ikon olarak gösterilir. */
 function getReactionKind(a: FriendActivity): "like" | "dislike" | null {
   if (a.reaction === "Like") return "like";
   if (a.reaction === "Dislike") return "dislike";
@@ -134,6 +136,7 @@ function FriendStrip({
               fullName={displayName(user)}
               size="sm"
             />
+            {fresh && <span className="fa__dot" aria-hidden="true" />}
           </span>
           <span className="fa__friend-name">{displayName(user)}</span>
         </Link>
@@ -155,7 +158,7 @@ function ActivityCard({ a }: { a: FriendActivity }) {
   const kind = getKind(a);
 
   const reactionKind = getReactionKind(a);
-  // Ana eylem zaten tepkiyse ikinci çip gösterilmez.
+  // Ana eylem zaten tepkiyse ikinci ikon gösterilmez.
   const secondaryReaction =
     reactionKind && reactionKind !== kind ? reactionKind : null;
   // Ana eylem puan değilse (yorum + puan) puan ayrı çip olarak eklenir.
@@ -205,11 +208,15 @@ function ActivityCard({ a }: { a: FriendActivity }) {
         </h3>
 
         <div className="fa__chips">
-          <span className="fa__chip">
+          <span
+            className={`fa__chip${
+              kind === "rated" ? " fa__chip--has-rating" : ""
+            }`}
+          >
             {KIND_ICON[kind]}
             <span className="fa__chip-label">{verb}</span>
             {kind === "rated" && a.rating != null && (
-              <span className="fa__chip-rating">· {a.rating.toFixed(1)}</span>
+              <span className="fa__chip-rating">{a.rating.toFixed(1)}</span>
             )}
           </span>
           {extraRating != null && (
@@ -287,7 +294,7 @@ export default function FriendsActivitySection() {
     );
   }
 
-  // Spotlight ayrı gösterilmiyor; tek akışta en başta yer alır.
+  // Spotlight ayrı gösterilmiyor; tek akışta yer alır.
   // Aynı kişi+film iki kez gelirse tekilleştirilir.
   const seen = new Set<string>();
   const all = [spotlight, ...items]
@@ -298,6 +305,11 @@ export default function FriendsActivitySection() {
       seen.add(key);
       return true;
     })
+    // En yeni en başta: spotlight eski bir aktiviteyse akışta sırayı bozmasın.
+    .sort(
+      (x, y) =>
+        Date.parse(y.lastActivityAtUtc) - Date.parse(x.lastActivityAtUtc),
+    )
     .slice(0, MAX_CARDS);
 
   // Takip ediyor ama son 7 günde hareket yok: bölüm gizlenir.
@@ -317,6 +329,8 @@ export default function FriendsActivitySection() {
   const strip = Array.from(people.values());
   // Kartlarda yer almayan ama bu hafta aktif olan arkadaşlar.
   const extra = Math.max(0, weeklyActiveFriendCount - strip.length);
+  // Çok az kişi varsa şerit boş durur; kartlar zaten kullanıcıyı gösteriyor.
+  const showStrip = strip.length >= MIN_STRIP_PEOPLE || extra > 0;
 
   // ThemedMovieRail'in "Tümünü Gör" bağlantısıyla aynı sınıf ve metin.
   const seeAll = (
@@ -328,7 +342,7 @@ export default function FriendsActivitySection() {
   return (
     <section className="fa">
       <SectionHeader aside={seeAll} />
-      <FriendStrip people={strip} extra={extra} />
+      {showStrip && <FriendStrip people={strip} extra={extra} />}
 
       <div className="fa__grid">
         {all.map((a) => (

@@ -1,9 +1,20 @@
 .fa {
-  /* Bölüm vurgu rengi: Top Rated (altın) ile karışmasın diye mor.
-     Değiştirmek için yalnızca bu iki satır: mavi → #4a90e2 / 74, 144, 226 */
-  --fa-theme: #a78bfa;
-  --fa-theme-rgb: 167, 139, 250;
+  /* Bölüm vurgu rengi: lavanta yerine daha soğuk, koyu lacivert zeminle uyumlu
+     çivit/periwinkle. Top Rated (altın), beğeni (pembe), izledi (yeşil) ile karışmaz.
+     Değiştirmek için yalnızca bu iki satır. */
+  --fa-theme: #8b95ff;
+  --fa-theme-rgb: 139, 149, 255;
+  /* Kart yüzeyi: gri dolgu yok, yalnızca çok ince bir ışık + ince kenarlık. */
+  --fa-edge: rgba(255, 255, 255, 0.09);
+  --fa-neutral: rgba(255, 255, 255, 0.06);
   margin-bottom: 56px;
+}
+/* Açık temada aynı ton beyaz zeminde okunmaz; daha koyu çivit */
+[data-theme="light"] .fa {
+  --fa-theme: #4a55d6;
+  --fa-theme-rgb: 74, 85, 214;
+  --fa-edge: rgba(15, 20, 40, 0.12);
+  --fa-neutral: rgba(15, 20, 40, 0.06);
 }
 
 /* ---------- Başlık (ThemedMovieRail düzeni) ---------- */
@@ -12,7 +23,7 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 22px;
+  margin-bottom: 18px;
 }
 .fa__label-wrap {
   min-width: 0;
@@ -40,6 +51,7 @@
   font-size: clamp(1.6rem, 3vw, 2.25rem);
   font-weight: 800;
   font-style: italic;
+  line-height: 1.1;
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
 }
@@ -56,11 +68,15 @@
   color: var(--color-accent-text);
   white-space: nowrap;
 }
+/* Başlığın taban çizgisine otursun */
+.fa__header > .rail__see-all {
+  padding-bottom: 6px;
+}
 
 /* ---------- Arkadaş şeridi ---------- */
 .fa__strip {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   margin: 0 -4px 22px;
   padding: 4px;
   overflow-x: auto;
@@ -75,8 +91,8 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  width: 64px;
-  font-size: 0.7rem;
+  width: 72px;
+  font-size: 0.72rem;
   font-weight: 500;
   color: var(--color-text-secondary);
   transition: color var(--transition-fast);
@@ -90,16 +106,28 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* Halka: son 24 saatte aktivitesi olan arkadaş mor, diğerleri sönük */
+/* Halka: son 24 saatte aktif olan arkadaş vurgu renginde, diğerleri sönük */
 .fa__ring {
+  position: relative;
   padding: 2px;
-  border: 2px solid var(--color-border);
+  border: 2px solid var(--fa-edge);
   border-radius: 50%;
   line-height: 0;
 }
 .fa__ring.is-new {
   border-color: var(--fa-theme);
-  box-shadow: 0 0 12px rgba(var(--fa-theme-rgb), 0.35);
+  box-shadow: 0 0 14px rgba(var(--fa-theme-rgb), 0.32);
+}
+/* "Yeni" noktası: halkanın sağ altında küçük canlılık göstergesi */
+.fa__dot {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--fa-theme);
+  border: 2px solid var(--color-bg, #0b0c14);
 }
 /* PersonAvatar'ın kendi boyut sınıfını ezmek için 2 sınıflı seçici */
 .fa__ring .person-avatar {
@@ -113,9 +141,9 @@
   width: 52px;
   height: 52px;
   box-sizing: border-box;
-  border: 2px solid var(--color-border);
+  border: 1.5px dashed var(--fa-edge);
   border-radius: 50%;
-  background: var(--color-bg-elevated);
+  background: transparent;
   font-size: 0.78rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -125,27 +153,39 @@
 /* ---------- Izgara ---------- */
 .fa__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
+}
+@media (max-width: 1023px) {
+  .fa__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* Eyleme göre vurgu: --fa-accent (RGB üçlüsü, rgba içinde) ve --fa-ink (çip metni) */
 .fa__card {
-  --fa-accent: 99, 162, 236;
-  --fa-ink: var(--color-accent-text);
+  --fa-accent: var(--fa-theme-rgb);
+  --fa-ink: var(--fa-theme);
   position: relative;
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
+  align-items: stretch;
+  gap: 16px;
   min-width: 0;
   padding: 14px;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
+  /* Gri dolgu yok: şeffaf zemin + köşeden eylem rengine hafif ışık */
+  background:
+    radial-gradient(
+      120% 140% at 0% 0%,
+      rgba(var(--fa-accent), 0.09),
+      transparent 60%
+    ),
+    transparent;
+  border: 1px solid var(--fa-edge);
   border-radius: var(--radius-md);
-  box-shadow: 0 1px 2px var(--color-shadow);
   transition:
     background-color var(--transition-fast),
-    border-color var(--transition-fast);
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 .fa__card--rated {
   --fa-accent: 240, 208, 96;
@@ -165,32 +205,35 @@
 }
 @media (hover: hover) {
   .fa__card:hover {
-    background: var(--color-bg-card-hover);
-    border-color: rgba(var(--fa-accent), 0.55);
+    border-color: rgba(var(--fa-accent), 0.5);
+    box-shadow: 0 10px 28px -12px rgba(var(--fa-accent), 0.35);
   }
 }
 
 /* ---------- Poster ---------- */
 .fa__poster-wrap {
   flex: none;
-  width: 76px;
+  align-self: flex-start;
+  width: 88px;
   overflow: hidden;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 18px -8px rgba(0, 0, 0, 0.6);
 }
 .fa__poster {
   display: block;
   width: 100%;
   aspect-ratio: 2 / 3;
   object-fit: cover;
-  background-color: var(--color-bg-elevated);
+  background-color: var(--fa-neutral);
 }
 
 /* ---------- Gövde ---------- */
 .fa__body {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  justify-content: space-between;
+  gap: 8px;
   min-width: 0;
   flex: 1;
 }
@@ -213,21 +256,23 @@
   height: 22px;
   flex: none;
 }
+/* Hiyerarşi: film başlığı birinci, kullanıcı ikinci */
 .fa__user {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
+  font-weight: 600;
+  color: var(--color-text-secondary);
 }
 .fa__who:hover .fa__user {
+  color: var(--color-text-primary);
   text-decoration: underline;
 }
 .fa__time {
   flex: none;
   margin-left: auto;
-  font-size: 0.7rem;
+  font-size: 0.74rem;
   white-space: nowrap;
   color: var(--color-text-muted);
 }
@@ -235,13 +280,15 @@
 .fa__title-row {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: -0.01em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .fa__title-row a {
   color: var(--color-text-primary);
@@ -264,7 +311,7 @@
 .fa__year {
   margin-left: 6px;
   font-family: var(--font-sans);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 500;
   color: var(--color-text-muted);
 }
@@ -273,6 +320,7 @@
 .fa__chips {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 6px;
 }
 .fa__chip {
@@ -282,7 +330,7 @@
   padding: 3px 9px;
   border-radius: var(--radius-pill);
   background: rgba(var(--fa-accent), 0.14);
-  font-size: 0.69rem;
+  font-size: 0.72rem;
   font-weight: 700;
   line-height: 1.3;
   white-space: nowrap;
@@ -295,7 +343,14 @@
 .fa__chip-label::first-letter {
   text-transform: uppercase;
 }
+/* Puan çipinde fiil sönük, rakam vurgulu */
+.fa__chip--has-rating .fa__chip-label {
+  font-weight: 600;
+  opacity: 0.8;
+}
 .fa__chip-rating {
+  font-size: 0.82rem;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
 .fa__chip--rating {
@@ -303,12 +358,16 @@
   color: #e6bf5a;
   font-variant-numeric: tabular-nums;
 }
+/* İkincil tepki: çipsiz, yalnızca ikon (yanındaki çipin tekrarı gibi durmasın) */
+.fa__chip--like,
+.fa__chip--dislike {
+  padding: 3px 2px;
+  background: none;
+}
 .fa__chip--like {
-  background: rgba(255, 143, 160, 0.16);
   color: #f27ba0;
 }
 .fa__chip--dislike {
-  background: rgba(195, 201, 214, 0.16);
   color: var(--color-text-secondary);
 }
 
@@ -382,7 +441,7 @@
   justify-content: center;
   min-height: 44px;
   margin-top: 14px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--fa-edge);
   border-radius: var(--radius-sm);
   font-size: 0.92rem;
   font-weight: 500;
@@ -392,20 +451,29 @@
     background-color var(--transition-fast);
 }
 .fa__more:hover {
-  border-color: var(--color-accent);
-  background-color: var(--color-accent-muted);
+  border-color: var(--fa-theme);
+  background-color: rgba(var(--fa-theme-rgb), 0.1);
 }
 
 /* ---------- Altbilgi ---------- */
 .fa__footer {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 28px;
-  padding-top: 18px;
-  border-top: 1px solid var(--color-border);
+  gap: 10px;
+  margin-top: 26px;
+  padding-top: 16px;
+  border-top: 1px solid var(--fa-edge);
   font-size: 0.85rem;
   color: var(--color-text-secondary);
+}
+.fa__footer::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fa-theme);
+  box-shadow: 0 0 8px rgba(var(--fa-theme-rgb), 0.6);
 }
 
 /* ---------- Kimseyi takip etmiyor ---------- */
@@ -437,9 +505,9 @@
   border-radius: var(--radius-md);
   background: linear-gradient(
     100deg,
-    var(--color-bg-elevated) 40%,
-    var(--color-border) 50%,
-    var(--color-bg-elevated) 60%
+    var(--fa-neutral) 40%,
+    var(--fa-edge) 50%,
+    var(--fa-neutral) 60%
   );
   background-size: 250% 100%;
   animation: fa-sheen 1.6s ease-in-out infinite;
@@ -448,7 +516,7 @@
   flex: none;
   width: 52px;
   height: 52px;
-  margin: 0 6px;
+  margin: 0 10px;
   border-radius: 50%;
 }
 .fa__sk-card {
@@ -469,7 +537,7 @@
     margin-bottom: 40px;
   }
   .fa__header {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
   /* Şerit kenara taşar, ilk ve son avatar container padding'iyle hizalı kalır */
   .fa__strip {
@@ -488,19 +556,23 @@
     display: none;
   }
   .fa__poster-wrap {
-    width: 60px;
+    width: 64px;
   }
   .fa__more {
     display: flex;
   }
   .fa__footer {
     margin-top: 22px;
-    padding-top: 16px;
+    padding-top: 14px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .fa__sk {
     animation: none;
+  }
+  .fa__card,
+  .fa__more {
+    transition: none;
   }
 }
