@@ -1,15 +1,22 @@
 .fa {
+  /* Bölüm vurgu rengi: Top Rated (altın) ile karışmasın diye mor.
+     Değiştirmek için yalnızca bu iki satır: teal → #1a9e8f / 26, 158, 143 */
+  --fa-theme: #a78bfa;
+  --fa-theme-rgb: 167, 139, 250;
   margin-bottom: 56px;
 }
 
-/* ---------- Başlık ---------- */
+/* ---------- Başlık (ThemedMovieRail düzeni) ---------- */
 .fa__header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
-  flex-wrap: wrap;
   margin-bottom: 22px;
+}
+.fa__label-wrap {
+  min-width: 0;
+  flex: 1;
 }
 .fa__eyebrow {
   display: flex;
@@ -20,13 +27,13 @@
   font-size: 0.76rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #d4af37;
+  color: var(--fa-theme);
 }
 .fa__eyebrow::before {
   content: "";
   width: 28px;
   height: 1px;
-  background: #d4af37;
+  background: var(--fa-theme);
 }
 .fa__title {
   font-family: var(--font-display);
@@ -36,25 +43,35 @@
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
 }
-.fa__aside {
-  display: flex;
+
+/* "Tümünü Gör": asıl stil ThemedMovieRail.css'teki .rail__see-all'dan gelir.
+   :where() sıfır özgüllük taşıdığı için rail stili varsa o kazanır, yoksa bu yedek devreye girer. */
+:where(.fa .rail__see-all) {
+  display: inline-flex;
   align-items: center;
-  gap: 18px;
-  flex-wrap: wrap;
+  gap: 4px;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-accent-text);
+  white-space: nowrap;
 }
-.fa__active {
+
+/* Başlık altı: aktif arkadaşlar */
+.fa__sub {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-top: 14px;
 }
-.fa__active p {
+.fa__sub p {
   display: flex;
   align-items: center;
   font-size: 0.85rem;
   color: var(--color-text-secondary);
 }
 /* Canlı nokta */
-.fa__active p::before {
+.fa__sub p::before {
   content: "";
   width: 7px;
   height: 7px;
@@ -75,40 +92,15 @@
 }
 .fa__stack {
   display: flex;
-  padding-left: 10px;
+  padding-left: 8px;
 }
 /* PersonAvatar'ın kendi boyut sınıfını ezmek için 2 sınıflı seçici */
 .fa__stack .person-avatar {
-  width: 34px;
-  height: 34px;
-  margin-left: -10px;
+  width: 30px;
+  height: 30px;
+  margin-left: -8px;
   border: 2px solid var(--color-bg);
   box-sizing: border-box;
-}
-.fa__see-all {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-accent-text);
-  white-space: nowrap;
-}
-.fa__see-all-desktop .fa__see-all {
-  padding: 10px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 10px;
-  color: var(--color-text-primary);
-  transition:
-    border-color var(--transition-fast),
-    background-color var(--transition-fast);
-}
-.fa__see-all-desktop .fa__see-all:hover {
-  border-color: rgba(255, 255, 255, 0.32);
-  background-color: rgba(255, 255, 255, 0.04);
-}
-.fa__see-all-mobile {
-  display: none;
 }
 
 /* Film şeridi delikleri: profil header'ıyla aynı motif */
@@ -247,7 +239,7 @@
   box-shadow: 0 0 8px currentColor;
 }
 
-/* Yıldız satırı */
+/* Yıldız satırı (yıldız altın kalır: anlamsal renk) */
 .fa__rating {
   position: absolute;
   z-index: 2;
@@ -403,8 +395,8 @@
   font-size: 3rem;
   line-height: 0.6;
   height: 22px;
-  color: #d4af37;
-  text-shadow: 0 0 24px rgba(212, 175, 55, 0.45);
+  color: var(--fa-theme);
+  text-shadow: 0 0 24px rgba(var(--fa-theme-rgb), 0.45);
 }
 .fa__quote {
   margin: 0;
@@ -450,7 +442,6 @@
 .fa__footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   margin-top: 36px;
   padding-top: 18px;
@@ -467,7 +458,7 @@
   gap: 10px;
   padding: 4px 0;
   max-width: 520px;
-  color: var(--color-accent-text);
+  color: var(--fa-theme);
 }
 .fa__find h3 {
   font-family: var(--font-display);
@@ -514,16 +505,7 @@
     margin-bottom: 40px;
   }
   .fa__header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
     margin-bottom: 18px;
-  }
-  .fa__see-all-desktop {
-    display: none;
-  }
-  .fa__see-all-mobile {
-    display: block;
   }
   .fa__perf {
     margin-bottom: 22px;
@@ -575,7 +557,7 @@
 @media (prefers-reduced-motion: reduce) {
   .fa__tile,
   .fa__sk,
-  .fa__active p::before {
+  .fa__sub p::before {
     animation: none;
   }
   .fa__poster-wrap {

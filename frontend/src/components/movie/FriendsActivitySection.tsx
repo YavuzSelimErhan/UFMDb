@@ -3,7 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Star, UserPlus } from "lucide-react";
+import { ChevronRight, Star, UserPlus } from "lucide-react";
 import { feedService } from "@/services";
 import { useAppSelector } from "@/store";
 import PersonAvatar from "@/components/common/PersonAvatar";
@@ -12,7 +12,7 @@ import { timeAgo } from "@/utils/timeAgo";
 import type { FriendActivity, FriendActivityUser } from "@/types";
 import "./FriendsActivitySection.css";
 
-/** Başlıktaki avatar yığınında en fazla bu kadar kişi. */
+/** Başlık altındaki avatar yığınında en fazla bu kadar kişi. */
 const MAX_STACK = 4;
 
 const displayName = (u: FriendActivityUser) => u.fullName || u.userName;
@@ -30,13 +30,15 @@ function getKind(a: FriendActivity): Kind {
 
 /* ---------- küçük parçalar ---------- */
 
-function SectionHeader({ aside }: { aside?: ReactNode }) {
+/** ThemedMovieRail ile aynı başlık düzeni: solda başlık, sağda "Tümünü Gör". */
+function SectionHeader({ sub, aside }: { sub?: ReactNode; aside?: ReactNode }) {
   const { t } = useTranslation();
   return (
     <div className="fa__header">
-      <div>
+      <div className="fa__label-wrap">
         <p className="fa__eyebrow">{t("friendsActivity.eyebrow")}</p>
         <h2 className="fa__title">{t("friendsActivity.title")}</h2>
+        {sub}
       </div>
       {aside}
     </div>
@@ -243,37 +245,35 @@ export default function FriendsActivitySection() {
   all.forEach((a) => people.set(a.user.id, a.user));
   const stack = Array.from(people.values()).slice(0, MAX_STACK);
 
-  const seeAll = (
-    <Link to="/activity" className="fa__see-all">
-      {t("friendsActivity.seeAllActivity")} <ArrowRight size={13} />
-    </Link>
+  const sub = (
+    <div className="fa__sub">
+      <div className="fa__stack">
+        {stack.map((u) => (
+          <PersonAvatar
+            key={u.id}
+            id={u.id}
+            photoUrl={u.avatarUrl}
+            fullName={displayName(u)}
+            size="sm"
+          />
+        ))}
+      </div>
+      <p>
+        {t("friendsActivity.activeThisWeek", { n: weeklyActiveFriendCount })}
+      </p>
+    </div>
   );
 
-  const aside = (
-    <div className="fa__aside">
-      <div className="fa__active">
-        <div className="fa__stack">
-          {stack.map((u) => (
-            <PersonAvatar
-              key={u.id}
-              id={u.id}
-              photoUrl={u.avatarUrl}
-              fullName={displayName(u)}
-              size="sm"
-            />
-          ))}
-        </div>
-        <p>
-          {t("friendsActivity.activeThisWeek", { n: weeklyActiveFriendCount })}
-        </p>
-      </div>
-      <span className="fa__see-all-desktop">{seeAll}</span>
-    </div>
+  // ThemedMovieRail'in "Tümünü Gör" bağlantısıyla aynı sınıf ve metin.
+  const seeAll = (
+    <Link to="/activity" className="rail__see-all">
+      {t("home.seeAll")} <ChevronRight size={14} />
+    </Link>
   );
 
   return (
     <section className="fa">
-      <SectionHeader aside={aside} />
+      <SectionHeader sub={sub} aside={seeAll} />
       <div className="fa__perf" aria-hidden="true" />
 
       <div className="fa__grid">
@@ -286,7 +286,6 @@ export default function FriendsActivitySection() {
         <span>
           {t("friendsActivity.activityCount", { n: weeklyActivityCount })}
         </span>
-        <span className="fa__see-all-mobile">{seeAll}</span>
       </div>
     </section>
   );
