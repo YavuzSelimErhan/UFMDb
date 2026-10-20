@@ -9,7 +9,7 @@
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 32px;
+  margin-bottom: 22px;
 }
 .fa__eyebrow {
   display: flex;
@@ -48,8 +48,30 @@
   gap: 12px;
 }
 .fa__active p {
+  display: flex;
+  align-items: center;
   font-size: 0.85rem;
   color: var(--color-text-secondary);
+}
+/* Canlı nokta */
+.fa__active p::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: #3be39a;
+  box-shadow: 0 0 0 0 rgba(59, 227, 154, 0.6);
+  animation: fa-pulse 2.2s ease-out infinite;
+}
+@keyframes fa-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 227, 154, 0.55);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 8px rgba(59, 227, 154, 0);
+  }
 }
 .fa__stack {
   display: flex;
@@ -77,37 +99,88 @@
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 10px;
   color: var(--color-text-primary);
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
 }
-.fa__see-all:hover {
-  opacity: 0.85;
+.fa__see-all-desktop .fa__see-all:hover {
+  border-color: rgba(255, 255, 255, 0.32);
+  background-color: rgba(255, 255, 255, 0.04);
 }
 .fa__see-all-mobile {
   display: none;
+}
+
+/* Film şeridi delikleri: profil header'ıyla aynı motif */
+.fa__perf {
+  height: 6px;
+  margin-bottom: 30px;
+  opacity: 0.9;
+  background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.2) 1.6px,
+      transparent 1.8px
+    )
+    0 50% / 14px 6px repeat-x;
 }
 
 /* ---------- Izgara: sabit genişlikli poster sütunları, sola hizalı ---------- */
 .fa__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, 190px);
-  gap: 32px 20px;
+  gap: 36px 22px;
   justify-content: start;
 }
+
+/* Eyleme göre vurgu rengi (RGB üçlüsü: rgba() içinde kullanılır) */
 .fa__tile {
+  --fa-accent: 142, 194, 255;
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   min-width: 0;
+  animation: fa-rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+.fa__tile--rated {
+  --fa-accent: 240, 208, 96;
+}
+.fa__tile--review {
+  --fa-accent: 59, 227, 154;
+}
+.fa__tile--like {
+  --fa-accent: 255, 143, 160;
+}
+.fa__tile--dislike {
+  --fa-accent: 195, 201, 214;
 }
 .fa__tile--wide {
   grid-column: span 2;
   flex-direction: row;
-  gap: 20px;
+  gap: 22px;
 }
+@keyframes fa-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Poster ---------- */
 .fa__poster-wrap {
   position: relative;
   flex: none;
   width: 190px;
+  border-radius: 14px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
 }
 .fa__poster {
   display: block;
@@ -116,20 +189,36 @@
   overflow: hidden;
   border-radius: 14px;
   background-color: var(--color-bg-elevated);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
-  transition: transform var(--transition-base);
 }
+/* Alt gradient + ince iç çerçeve: koyu/açık posterlerde okunurluk ve kenar netliği */
+.fa__poster-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 14px;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent 32%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+}
+.fa__tile--rated .fa__poster-wrap::after {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.88), transparent 48%);
+}
+/* Rozetlerle birlikte yükselir, altında eylem renginde ışık oluşur */
 @media (hover: hover) {
-  .fa__tile:hover .fa__poster {
-    transform: translateY(-4px);
+  .fa__tile:hover .fa__poster-wrap {
+    transform: translateY(-6px);
+    box-shadow:
+      0 0 0 1px rgba(var(--fa-accent), 0.4),
+      0 26px 50px -16px rgba(var(--fa-accent), 0.5),
+      0 14px 32px rgba(0, 0, 0, 0.5);
   }
 }
 
-/* ---------- Poster üstü buzlu cam rozetler ---------- */
+/* Eylem etiketi: buzlu cam + parlayan nokta */
 .fa__glass {
   position: absolute;
-  z-index: 1;
-  padding: 5px 10px;
+  z-index: 2;
   border-radius: 999px;
   background: rgba(10, 12, 16, 0.55);
   backdrop-filter: blur(8px);
@@ -138,39 +227,70 @@
 .fa__chip {
   top: 10px;
   right: 10px;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px 5px 9px;
   font-family: "SF Mono", "Fira Code", monospace;
   font-size: 0.62rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: rgb(var(--fa-accent));
 }
-.fa__chip--watched {
-  color: #8ec2ff;
+.fa__chip::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
 }
-.fa__chip--rated {
-  color: #f0d060;
-}
-.fa__chip--review {
-  color: #3be39a;
-}
-.fa__chip--like {
-  color: #ff8fa0;
-}
-.fa__chip--dislike {
-  color: #c3c9d6;
-}
+
+/* Yıldız satırı */
 .fa__rating {
-  left: 10px;
-  bottom: 10px;
+  position: absolute;
+  z-index: 2;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
   display: flex;
   align-items: center;
-  gap: 5px;
-  color: #fff;
-  font-size: 0.82rem;
-  font-weight: 700;
+  gap: 8px;
 }
-.fa__rating svg {
+.fa__rating b {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+}
+.fa__stars {
+  display: inline-flex;
+  gap: 2px;
+}
+.fa__star {
+  position: relative;
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+}
+.fa__star svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+.fa__star-base {
+  color: rgba(255, 255, 255, 0.4);
+  fill: rgba(255, 255, 255, 0.08);
+}
+.fa__star-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  overflow: hidden;
   color: #f0d060;
+  filter: drop-shadow(0 0 4px rgba(240, 208, 96, 0.6));
 }
 
 /* ---------- Alt yazı ---------- */
@@ -184,7 +304,7 @@
 .fa__who-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   min-width: 0;
 }
 .fa__avatar {
@@ -194,8 +314,11 @@
   line-height: 0;
 }
 .fa__avatar .person-avatar {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
+  box-shadow:
+    0 0 0 2px var(--color-bg),
+    0 0 0 3.5px rgba(var(--fa-accent), 0.7);
 }
 .fa__who {
   min-width: 0;
@@ -203,7 +326,7 @@
 .fa__movie-title {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   line-height: 1.25;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -211,6 +334,7 @@
 }
 .fa__movie-title a {
   color: var(--color-text-primary);
+  transition: color var(--transition-fast);
 }
 /* Stretched link: kartın tamamı tıklanabilir; avatar ve isim linkleri z-index: 2 ile üstte. */
 .fa__movie-title a::after {
@@ -228,23 +352,38 @@
   outline-offset: 3px;
 }
 .fa__tile:hover .fa__movie-title a {
-  color: var(--color-accent-text);
+  color: rgb(var(--fa-accent));
 }
-.fa__who p {
-  margin-top: 2px;
-  font-size: 0.75rem;
+
+/* Kullanıcı adı kısalabilir; zaman her zaman tam görünür */
+.fa__byline {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 3px;
+  font-size: 0.76rem;
   color: var(--color-text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
-.fa__who p a {
+.fa__user {
   position: relative;
   z-index: 2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: inherit;
+  font-weight: 600;
 }
-.fa__who p a:hover {
+.fa__user:hover {
   color: var(--color-text-primary);
+}
+.fa__sep,
+.fa__byline time {
+  flex: none;
+  white-space: nowrap;
+}
+.fa__sep {
+  opacity: 0.5;
 }
 
 /* ---------- Yorum (geniş kart) ---------- */
@@ -261,15 +400,16 @@
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 800;
-  font-size: 2.8rem;
+  font-size: 3rem;
   line-height: 0.6;
-  height: 20px;
+  height: 22px;
   color: #d4af37;
+  text-shadow: 0 0 24px rgba(212, 175, 55, 0.45);
 }
 .fa__quote {
   margin: 0;
-  font-size: 0.96rem;
-  line-height: 1.6;
+  font-size: 0.98rem;
+  line-height: 1.65;
   font-weight: 500;
   color: var(--color-text-primary);
   text-align: left;
@@ -312,7 +452,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 32px;
+  margin-top: 36px;
   padding-top: 18px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 0.85rem;
@@ -377,7 +517,7 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 14px;
-    margin-bottom: 22px;
+    margin-bottom: 18px;
   }
   .fa__see-all-desktop {
     display: none;
@@ -385,9 +525,12 @@
   .fa__see-all-mobile {
     display: block;
   }
+  .fa__perf {
+    margin-bottom: 22px;
+  }
   .fa__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 26px 12px;
+    gap: 28px 12px;
     justify-content: stretch;
   }
   .fa__tile--wide {
@@ -400,6 +543,20 @@
   .fa__tile--wide .fa__poster-wrap {
     width: 112px;
   }
+  /* Dar posterde sayı gizlenir, yıldızlar küçülür (değer aria-label'da) */
+  .fa__tile--wide .fa__rating {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+  }
+  .fa__tile--wide .fa__rating b {
+    display: none;
+  }
+  .fa__tile--wide .fa__star,
+  .fa__tile--wide .fa__star svg {
+    width: 12px;
+    height: 12px;
+  }
   .fa__quote {
     font-size: 0.88rem;
     -webkit-line-clamp: 5;
@@ -410,16 +567,21 @@
     height: 260px;
   }
   .fa__footer {
-    margin-top: 24px;
+    margin-top: 26px;
     padding-top: 16px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fa__sk {
+  .fa__tile,
+  .fa__sk,
+  .fa__active p::before {
     animation: none;
   }
-  .fa__poster {
+  .fa__poster-wrap {
     transition: none;
+  }
+  .fa__tile:hover .fa__poster-wrap {
+    transform: none;
   }
 }

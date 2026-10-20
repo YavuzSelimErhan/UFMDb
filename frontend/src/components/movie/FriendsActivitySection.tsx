@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -43,6 +43,29 @@ function SectionHeader({ aside }: { aside?: ReactNode }) {
   );
 }
 
+/** 5 yıldız yan yana; 3.5 gibi değerlerde yıldız kısmen dolar. */
+function StarRow({ value }: { value: number }) {
+  return (
+    <span
+      className="fa__stars"
+      role="img"
+      aria-label={`${value.toFixed(1)} / 5`}
+    >
+      {[0, 1, 2, 3, 4].map((i) => {
+        const fill = Math.max(0, Math.min(1, value - i));
+        return (
+          <span key={i} className="fa__star" aria-hidden="true">
+            <Star size={14} className="fa__star-base" />
+            <span className="fa__star-fill" style={{ width: `${fill * 100}%` }}>
+              <Star size={14} fill="currentColor" />
+            </span>
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
 /** Spoiler'lı yorum: bulanık, tıklayınca açılır. */
 function SpoilerText({ text }: { text: string }) {
   const { t } = useTranslation();
@@ -79,7 +102,7 @@ function Skeleton() {
 
 /* ---------- aktivite kartı ---------- */
 
-function ActivityCard({ a }: { a: FriendActivity }) {
+function ActivityCard({ a, index }: { a: FriendActivity; index: number }) {
   const { t, i18n } = useTranslation();
   const name = displayName(a.user);
   const kind = getKind(a);
@@ -94,7 +117,10 @@ function ActivityCard({ a }: { a: FriendActivity }) {
   }[kind];
 
   return (
-    <article className={`fa__tile${wide ? " fa__tile--wide" : ""}`}>
+    <article
+      className={`fa__tile fa__tile--${kind}${wide ? " fa__tile--wide" : ""}`}
+      style={{ "--i": index } as CSSProperties}
+    >
       <div className="fa__poster-wrap">
         <MoviePoster
           movie={a.movie}
@@ -102,14 +128,12 @@ function ActivityCard({ a }: { a: FriendActivity }) {
           fallback="title"
           iconSize={22}
         />
-        <span className={`fa__glass fa__chip fa__chip--${kind}`}>
-          {chipLabel}
-        </span>
+        <span className="fa__glass fa__chip">{chipLabel}</span>
         {a.rating != null && (
-          <span className="fa__glass fa__rating">
-            <Star size={13} fill="currentColor" />
-            {a.rating.toFixed(1)}
-          </span>
+          <div className="fa__rating">
+            <StarRow value={a.rating} />
+            <b>{a.rating.toFixed(1)}</b>
+          </div>
         )}
       </div>
 
@@ -145,8 +169,13 @@ function ActivityCard({ a }: { a: FriendActivity }) {
             <h3 className="fa__movie-title">
               <Link to={`/movies/${a.movie.id}`}>{a.movie.title}</Link>
             </h3>
-            <p>
-              <Link to={`/users/${a.user.userName}`}>{name}</Link> ·{" "}
+            <p className="fa__byline">
+              <Link to={`/users/${a.user.userName}`} className="fa__user">
+                {name}
+              </Link>
+              <span className="fa__sep" aria-hidden="true">
+                ·
+              </span>
               <time dateTime={a.lastActivityAtUtc}>
                 {timeAgo(a.lastActivityAtUtc, i18n.language)}
               </time>
@@ -245,10 +274,11 @@ export default function FriendsActivitySection() {
   return (
     <section className="fa">
       <SectionHeader aside={aside} />
+      <div className="fa__perf" aria-hidden="true" />
 
       <div className="fa__grid">
-        {all.map((a) => (
-          <ActivityCard key={`${a.user.id}-${a.movie.id}`} a={a} />
+        {all.map((a, i) => (
+          <ActivityCard key={`${a.user.id}-${a.movie.id}`} a={a} index={i} />
         ))}
       </div>
 
