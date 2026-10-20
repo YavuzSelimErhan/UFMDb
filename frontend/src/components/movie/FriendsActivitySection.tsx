@@ -20,7 +20,7 @@ import { timeAgo } from "@/utils/timeAgo";
 import type { FriendActivity, FriendActivityUser } from "@/types";
 import "./FriendsActivitySection.css";
 
-/** Ana sayfada en fazla bu kadar kart (mobilde CSS ilk 4'ü gösterir). */
+/** Ana sayfada en fazla bu kadar dikey kart. */
 const MAX_CARDS = 6;
 /** Bu süreden yeni aktivitesi olan arkadaşın avatarı halkalı görünür. */
 const FRESH_MS = 24 * 60 * 60 * 1000;
@@ -54,6 +54,31 @@ const KIND_ICON: Record<Kind, ReactNode> = {
   dislike: <ThumbsDown size={12} />,
   watched: <Eye size={12} />,
 };
+
+const byNewest = (x: FriendActivity, y: FriendActivity) =>
+  Date.parse(y.lastActivityAtUtc) - Date.parse(x.lastActivityAtUtc);
+
+/**
+ * Her arkadaştan önce en son aktivite seçilir (çeşitlilik); yer kalırsa
+ * kalan en yeni aktivitelerle MAX_CARDS'a tamamlanır. Sonuç en yeniden eskiye sıralı.
+ * Not: elde yalnızca backend'in döndürdüğü kayıtlar var; backend 6'dan az dönerse
+ * burada daha fazlası gösterilemez.
+ */
+function pickCards(list: FriendActivity[]): FriendActivity[] {
+  const sorted = [...list].sort(byNewest);
+  const users = new Set<string>();
+  const firstPerUser: FriendActivity[] = [];
+  const rest: FriendActivity[] = [];
+  for (const a of sorted) {
+    if (users.has(a.user.id)) {
+      rest.push(a);
+    } else {
+      users.add(a.user.id);
+      firstPerUser.push(a);
+    }
+  }
+  return [...firstPerUser, ...rest].slice(0, MAX_CARDS).sort(byNewest);
+}
 
 /* ---------- küçük parçalar ---------- */
 
@@ -104,7 +129,7 @@ function Skeleton() {
         ))}
       </div>
       <div className="fa__grid" aria-hidden="true">
-        {[0, 1, 2].map((i) => (
+        {[0, 1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="fa__sk fa__sk-card" />
         ))}
       </div>
@@ -192,11 +217,13 @@ function ActivityCard({ a }: { a: FriendActivity }) {
               fullName={name}
               size="sm"
             />
-            <span className="fa__user">{name}</span>
+            <span className="fa__who-text">
+              <span className="fa__user">{name}</span>
+              <time className="fa__time" dateTime={a.lastActivityAtUtc}>
+                {timeAgo(a.lastActivityAtUtc, i18n.language)}
+              </time>
+            </span>
           </Link>
-          <time className="fa__time" dateTime={a.lastActivityAtUtc}>
-            {timeAgo(a.lastActivityAtUtc, i18n.language)}
-          </time>
         </div>
 
         {/* Başlık linki kartın tamamını kaplar (stretched link). */}
@@ -297,20 +324,14 @@ export default function FriendsActivitySection() {
   // Spotlight ayrı gösterilmiyor; tek akışta yer alır.
   // Aynı kişi+film iki kez gelirse tekilleştirilir.
   const seen = new Set<string>();
-  const all = [spotlight, ...items]
-    .filter((a): a is FriendActivity => {
-      if (a == null) return false;
-      const key = `${a.user.id}-${a.movie.id}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    // En yeni en başta: spotlight eski bir aktiviteyse akışta sırayı bozmasın.
-    .sort(
-      (x, y) =>
-        Date.parse(y.lastActivityAtUtc) - Date.parse(x.lastActivityAtUtc),
-    )
-    .slice(0, MAX_CARDS);
+  const unique = [spotlight, ...items].filter((a): a is FriendActivity => {
+    if (a == null) return false;
+    const key = `${a.user.id}-${a.movie.id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  const all = pickCards(unique);
 
   // Takip ediyor ama son 7 günde hareket yok: bölüm gizlenir.
   if (all.length === 0) return null;
