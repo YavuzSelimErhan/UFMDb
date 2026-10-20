@@ -3,6 +3,7 @@
   --fa-theme: #8b95ff;
   --fa-gold: #d4af37;
   --fa-gold-ink: #e6bf5a;
+  --fa-green: #4fd1a5;
   --fa-green-ink: #4fd1a5;
   position: relative;
   margin-bottom: 32px; /* .rail ile aynı */
@@ -91,53 +92,70 @@
   cursor: grabbing;
 }
 
-/* ---------- Kart: MovieCard compact ile aynı ölçü ve davranış ---------- */
+/* ---------- Kart: kişi odaklı etkinlik kartı ---------- */
 .fa__card {
+  /* Eyleme göre renk: avatar halkası, fiil ve hover çerçevesi */
+  --fa-kind: var(--fa-theme);
+  --fa-ink: var(--fa-theme);
+  --fa-surface: var(--color-bg-elevated);
   position: relative;
   display: flex;
-  flex: 0 0 160px;
+  flex: 0 0 176px;
   flex-direction: column;
-  width: 160px;
-  max-width: 160px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  background: transparent;
+  width: 176px;
+  max-width: 176px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--fa-surface);
   scroll-snap-align: start;
   transition:
     transform var(--transition-base),
     box-shadow var(--transition-base),
     border-color var(--transition-base);
 }
+.fa__card--rated {
+  --fa-kind: var(--fa-gold);
+  --fa-ink: var(--fa-gold-ink);
+}
+.fa__card--like {
+  --fa-kind: var(--color-like);
+  --fa-ink: var(--color-like);
+}
+.fa__card--dislike {
+  --fa-kind: var(--color-dislike);
+  --fa-ink: var(--color-dislike);
+}
+.fa__card--watched {
+  --fa-kind: var(--fa-green);
+  --fa-ink: var(--fa-green-ink);
+}
 @media (hover: hover) {
   .fa__card:hover {
     transform: translateY(-6px);
-    border-color: var(--color-accent);
+    border-color: var(--fa-kind);
     box-shadow:
-      0 18px 34px var(--color-shadow-accent),
+      0 18px 34px -14px color-mix(in srgb, var(--fa-kind) 45%, transparent),
       0 14px 28px var(--color-shadow);
   }
   .fa__card:hover .fa__poster {
     transform: scale(1.04);
   }
-  .fa__card:hover .fa__title-row a {
-    color: var(--color-accent-hover);
-  }
 }
 @media (max-width: 480px) {
   .fa__card {
-    flex-basis: 122px;
-    width: 122px;
-    max-width: 122px;
+    flex-basis: 140px;
+    width: 140px;
+    max-width: 140px;
   }
 }
 
-/* ---------- Poster ---------- */
+/* ---------- Poster (kartın üstüne tam oturur) ---------- */
 .fa__poster-wrap {
   position: relative;
   width: 100%;
   aspect-ratio: 2 / 3;
   overflow: hidden;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   background-color: var(--color-bg-elevated);
 }
 .fa__poster {
@@ -147,7 +165,16 @@
   object-fit: cover;
   transition: transform var(--transition-slow);
 }
-/* İkincil tepki rozeti: MovieCard'daki dislike rozetiyle aynı yer ve boyut */
+/* Alt kenarda yüzeye karışan yumuşak geçiş: avatar posterden taşınca bağ kurulur */
+.fa__poster-wrap::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 40%;
+  background: linear-gradient(to top, var(--fa-surface), transparent);
+  pointer-events: none;
+}
+/* İkincil tepki rozeti: poster sağ üstte */
 .fa__badge {
   position: absolute;
   top: 8px;
@@ -156,8 +183,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   color: #fff;
@@ -170,8 +197,8 @@
   background: var(--color-dislike);
 }
 .fa__badge svg {
-  width: 12px;
-  height: 12px;
+  width: 13px;
+  height: 13px;
 }
 
 /* ---------- Bilgi alanı ---------- */
@@ -179,137 +206,173 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  padding: 10px 6px 10px;
+  align-items: center;
   min-width: 0;
+  padding: 0 10px 14px;
   text-align: center;
 }
+
+/* Kişi: avatar posterin üstüne taşar */
+.fa__who {
+  position: relative;
+  z-index: 2; /* stretched link'in üstünde */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  max-width: 100%;
+  margin-top: -22px;
+  margin-bottom: 10px;
+}
+.fa__avatar {
+  display: block;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  line-height: 0;
+  box-shadow:
+    0 0 0 3px var(--fa-surface),
+    0 0 0 5px var(--fa-kind);
+}
+.fa__avatar .person-avatar {
+  width: 40px;
+  height: 40px;
+}
+.fa__user {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+.fa__who:hover .fa__user {
+  text-decoration: underline;
+}
+.fa__time {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+.fa__time.is-fresh {
+  color: var(--fa-theme);
+  font-weight: 600;
+}
+
+/* ---------- Film başlığı ---------- */
 .fa__title-row {
   margin: 0;
-  min-height: calc(1.32em * 2);
+  max-width: 100%;
   font-family: var(--font-display);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.32;
   letter-spacing: -0.01em;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
 }
 .fa__title-row a {
-  color: var(--color-text-primary);
+  color: inherit;
   transition: color var(--transition-fast);
 }
-/* Stretched link: kartın tamamı tıklanabilir; kullanıcı linki z-index: 2 ile üstte. */
+/* Stretched link: kartın tamamı tıklanabilir; kişi linki z-index: 2 ile üstte. */
 .fa__title-row a::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 1;
-  border-radius: var(--radius-sm);
 }
 .fa__title-row a:focus-visible {
   outline: none;
 }
 .fa__title-row a:focus-visible::after {
-  box-shadow:
-    0 0 0 2px var(--color-bg),
-    0 0 0 4px var(--color-accent);
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+  border-radius: var(--radius-md);
 }
 .fa__year {
-  margin-top: 4px;
-  font-size: 0.7rem;
+  margin-left: 6px;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
   font-weight: 500;
   color: var(--color-text-muted);
 }
 
-/* ---------- Eylem satırı ---------- */
+/* ---------- Eylem ---------- */
 .fa__action {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
-  margin-top: 8px;
+  gap: 6px;
+  margin-top: 10px;
 }
 .fa__verb {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.74rem;
+  gap: 6px;
+  font-size: 0.82rem;
   font-weight: 700;
-  color: var(--color-text-secondary);
+  color: var(--fa-ink);
+}
+.fa__verb svg {
+  width: 15px;
+  height: 15px;
 }
 /* Fiil küçük harf geliyor; ilk harf büyük */
 .fa__verb-label::first-letter {
   text-transform: uppercase;
 }
-.fa__card--review .fa__verb {
-  color: var(--fa-theme);
-}
-.fa__card--like .fa__verb {
-  color: var(--color-like);
-}
-.fa__card--dislike .fa__verb {
-  color: var(--color-dislike);
-}
-.fa__card--watched .fa__verb {
-  color: var(--fa-green-ink);
-}
 
-/* Yıldızlar: MovieCard puan satırıyla aynı altın ton */
+/* Yıldızlar: yalnızca kazanılanlar, altın tonda */
 .fa__stars {
   display: inline-flex;
   align-items: center;
-  gap: 1px;
+  gap: 2px;
   color: var(--fa-gold);
 }
-.fa__star {
-  position: relative;
-  display: inline-flex;
-  width: 13px;
-  height: 13px;
-}
-.fa__star-base {
-  color: rgba(255, 255, 255, 0.18);
-}
-[data-theme="light"] .fa__star-base {
-  color: rgba(15, 20, 40, 0.16);
-}
-.fa__star-fill {
-  position: absolute;
-  inset: 0;
+.fa__stars svg {
   display: block;
+}
+.fa__star-part {
+  display: block;
+  height: 16px;
   overflow: hidden;
 }
 .fa__stars-value {
   margin-left: 6px;
-  font-size: 0.74rem;
+  font-size: 0.86rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   color: var(--fa-gold-ink);
 }
 
 /* ---------- Yorum özeti ---------- */
+.fa__snippet {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  width: 100%;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .fa__quote {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-}
-.fa__snippet {
-  margin: 8px 0 0;
-  font-size: 0.74rem;
-  line-height: 1.45;
-  color: var(--color-text-secondary);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  width: 100%;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
 }
 .fa__quote .fa__snippet {
-  margin-top: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 /* Düğme sadece tıklama alanı; satır kısaltma içindeki span'de çalışır. */
 .fa__snippet-btn {
@@ -332,7 +395,6 @@
   user-select: none;
 }
 .fa__spoiler-badge {
-  margin-top: 8px;
   padding: 2px 7px;
   border-radius: 6px;
   font-family: "SF Mono", "Fira Code", monospace;
@@ -342,69 +404,6 @@
   text-transform: uppercase;
   color: #ffb36b;
   background: rgba(255, 150, 60, 0.14);
-}
-
-/* ---------- Kullanıcı satırı: en altta, kartlar farklı yükseklikte olsa da hizalı ---------- */
-.fa__who {
-  position: relative;
-  z-index: 2; /* stretched link'in üstünde */
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  margin-top: auto;
-  padding-top: 10px;
-  text-align: left;
-}
-.fa__info > .fa__action,
-.fa__info > .fa__snippet,
-.fa__info > .fa__quote {
-  margin-bottom: 10px;
-}
-.fa__avatar {
-  position: relative;
-  flex: none;
-  line-height: 0;
-}
-.fa__avatar .person-avatar {
-  width: 24px;
-  height: 24px;
-}
-.fa__dot {
-  position: absolute;
-  right: -2px;
-  bottom: -2px;
-  width: 8px;
-  height: 8px;
-  border: 2px solid var(--color-bg);
-  border-radius: 50%;
-  background: var(--fa-theme);
-  box-sizing: content-box;
-}
-.fa__who-text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  line-height: 1.25;
-}
-.fa__user {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.74rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-.fa__who:hover .fa__user {
-  color: var(--color-text-primary);
-  text-decoration: underline;
-}
-.fa__time {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.68rem;
-  color: var(--color-text-muted);
 }
 
 /* ---------- Alt not ---------- */
@@ -450,13 +449,14 @@
   animation: fa-sheen 1.6s ease-in-out infinite;
 }
 .fa__sk-card {
-  flex: 0 0 160px;
-  height: 330px;
+  flex: 0 0 176px;
+  height: 430px;
+  border-radius: var(--radius-md);
 }
 @media (max-width: 480px) {
   .fa__sk-card {
-    flex-basis: 122px;
-    height: 270px;
+    flex-basis: 140px;
+    height: 350px;
   }
 }
 @keyframes fa-sheen {

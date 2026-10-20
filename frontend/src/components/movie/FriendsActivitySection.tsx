@@ -25,6 +25,9 @@ const MAX_CARDS = 10;
 /** Bu süreden yeni aktivitenin avatarında küçük "yeni" noktası görünür. */
 const FRESH_MS = 24 * 60 * 60 * 1000;
 
+/** Yıldız boyutu (px). */
+const STAR_SIZE = 16;
+
 const displayName = (u: FriendActivityUser) => u.fullName || u.userName;
 
 type Kind = "review" | "rated" | "like" | "dislike" | "watched";
@@ -132,22 +135,31 @@ function Track({ children }: { children: ReactNode }) {
   );
 }
 
-/** Yarım puanı destekleyen yıldız satırı (MovieCard puan satırıyla aynı mantık). */
+/** Yalnızca kazanılan yıldızlar gösterilir (boş yıldız yok); son yıldız kesirliyse kırpılır. */
 function Stars({ value }: { value: number }) {
+  const count = Math.max(1, Math.ceil(value));
   return (
     <span
       className="fa__stars"
       role="img"
       aria-label={`${value.toFixed(1)} / 5`}
     >
-      {[1, 2, 3, 4, 5].map((i) => {
-        const fill = Math.max(0, Math.min(1, value - (i - 1)));
-        return (
-          <span key={i} className="fa__star">
-            <Star size={13} className="fa__star-base" aria-hidden="true" />
-            <span className="fa__star-fill" style={{ width: `${fill * 100}%` }}>
-              <Star size={13} fill="currentColor" aria-hidden="true" />
-            </span>
+      {Array.from({ length: count }, (_, i) => {
+        const fill = Math.min(1, value - i);
+        return fill >= 1 ? (
+          <Star
+            key={i}
+            size={STAR_SIZE}
+            fill="currentColor"
+            aria-hidden="true"
+          />
+        ) : (
+          <span
+            key={i}
+            className="fa__star-part"
+            style={{ width: `${fill * STAR_SIZE}px` }}
+          >
+            <Star size={STAR_SIZE} fill="currentColor" aria-hidden="true" />
           </span>
         );
       })}
@@ -229,14 +241,32 @@ function ActivityCard({ a }: { a: FriendActivity }) {
       </div>
 
       <div className="fa__info">
+        {/* Kişi önce: avatar posterin alt kenarına taşar. */}
+        <Link to={`/users/${a.user.userName}`} className="fa__who">
+          <span className="fa__avatar">
+            <PersonAvatar
+              id={a.user.id}
+              photoUrl={a.user.avatarUrl}
+              fullName={name}
+              size="sm"
+            />
+          </span>
+          <span className="fa__user">{name}</span>
+          <time
+            className={`fa__time${fresh ? " is-fresh" : ""}`}
+            dateTime={a.lastActivityAtUtc}
+          >
+            {timeAgo(a.lastActivityAtUtc, i18n.language)}
+          </time>
+        </Link>
+
         {/* Başlık linki kartın tamamını kaplar (stretched link). */}
         <h3 className="fa__title-row">
           <Link to={`/movies/${a.movie.id}`}>{a.movie.title}</Link>
+          {a.movie.releaseYear > 0 && (
+            <span className="fa__year">{a.movie.releaseYear}</span>
+          )}
         </h3>
-
-        {a.movie.releaseYear > 0 && (
-          <div className="fa__year">{a.movie.releaseYear}</div>
-        )}
 
         {/* Eylem: puan varsa yıldızlar, değilse ikon + fiil. Yorum + puan ikisini de gösterir. */}
         <div className="fa__action">
@@ -255,24 +285,6 @@ function ActivityCard({ a }: { a: FriendActivity }) {
           ) : (
             <p className="fa__snippet">{a.reviewExcerpt}</p>
           ))}
-
-        <Link to={`/users/${a.user.userName}`} className="fa__who">
-          <span className="fa__avatar">
-            <PersonAvatar
-              id={a.user.id}
-              photoUrl={a.user.avatarUrl}
-              fullName={name}
-              size="sm"
-            />
-            {fresh && <span className="fa__dot" aria-hidden="true" />}
-          </span>
-          <span className="fa__who-text">
-            <span className="fa__user">{name}</span>
-            <time className="fa__time" dateTime={a.lastActivityAtUtc}>
-              {timeAgo(a.lastActivityAtUtc, i18n.language)}
-            </time>
-          </span>
-        </Link>
       </div>
     </article>
   );
