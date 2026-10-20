@@ -1,142 +1,89 @@
+import { useState } from "react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import {
-  Heart,
-  HeartCrack,
-  MessageSquare,
-  Star,
-  Ticket,
-  UserPlus,
-} from "lucide-react";
+import { ArrowRight, Star, UserPlus } from "lucide-react";
 import { feedService } from "@/services";
 import { useAppSelector } from "@/store";
 import PersonAvatar from "@/components/common/PersonAvatar";
-import StarDisplay from "@/components/common/StarDisplay";
 import MoviePoster from "@/components/common/MoviePoster";
-import {
-  getFriendActivityVerb,
-  getFriendActivityVerbKind,
-  verbCoversReaction,
-  verbCoversWatched,
-} from "@/utils/activityVerb";
 import { timeAgo } from "@/utils/timeAgo";
 import type { FriendActivity, FriendActivityUser } from "@/types";
 import "./FriendsActivitySection.css";
 
-/** Başlıktaki avatar yığınında en fazla bu kadar kişi; kalanı "+N". */
-const MAX_STACK = 5;
-
+const MAX_STRIP = 8;
 const displayName = (u: FriendActivityUser) => u.fullName || u.userName;
 
-/* ---------- küçük parçalar ---------- */
+type Kind = "review" | "rated" | "like" | "dislike" | "watched";
 
-function ActivityBadge({ a }: { a: FriendActivity }) {
-  const { t } = useTranslation();
-  let icon: ReactNode;
-  let label: string;
-  let modifier = "";
-
-  if (a.reaction === "Dislike") {
-    icon = <HeartCrack size={13} />;
-    label = t("friendsActivity.reactionDislike");
-    modifier = " is-dislike";
-  } else if (a.reaction === "Like") {
-    icon = <Heart size={13} fill="currentColor" />;
-    label = t("friendsActivity.reactionLike");
-    modifier = " is-like";
-  } else if (a.rating != null) {
-    icon = <Star size={13} />;
-    label = t("friendsActivity.verbRated");
-  } else if (a.watched) {
-    icon = <Ticket size={13} />;
-    label = t("friendsActivity.verbWatched");
-  } else {
-    icon = <MessageSquare size={13} />;
-    label = t("friendsActivity.verbReviewed");
-  }
-
-  return (
-    <span
-      className={`friends-activity__badge${modifier}`}
-      title={label}
-      role="img"
-      aria-label={label}
-    >
-      {icon}
-    </span>
-  );
+/** Kartın ana eylemi: yorum > puan > reaksiyon > izledi. */
+function getKind(a: FriendActivity): Kind {
+  if (a.reviewExcerpt || a.containsSpoiler) return "review";
+  if (a.rating != null) return "rated";
+  if (a.reaction === "Dislike") return "dislike";
+  if (a.reaction === "Like") return "like";
+  return "watched";
 }
 
 function SectionHeader({ aside }: { aside?: ReactNode }) {
   const { t } = useTranslation();
   return (
-    <div className="friends-activity__header">
+    <div className="fa__header">
       <div>
-        <p className="friends-activity__eyebrow">
-          {t("friendsActivity.eyebrow")}
-        </p>
-        <h2 className="friends-activity__title">
-          {t("friendsActivity.title")}
-        </h2>
+        <p className="fa__eyebrow">{t("friendsActivity.eyebrow")}</p>
+        <h2 className="fa__title">{t("friendsActivity.title")}</h2>
       </div>
       {aside}
     </div>
   );
 }
 
-/** Gerçek yerleşimle aynı iskelet: yüklenince sayfa kaymasın. */
-function LoadingSkeleton() {
+function SpoilerText({ text }: { text: string }) {
+  const { t } = useTranslation();
+  const [shown, setShown] = useState(false);
   return (
-    <section className="friends-activity" aria-busy="true">
-      <SectionHeader />
-      <div className="friends-activity__grid" aria-hidden="true">
-        <div className="friends-activity__sk friends-activity__sk-spot" />
-        <div className="friends-activity__rail">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="friends-activity__sk-card">
-              <div className="friends-activity__sk friends-activity__sk-poster" />
-              <div className="friends-activity__sk friends-activity__sk-line" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
+    <>
+      <span className="fa__spoiler-badge">{t("movie.containsSpoiler")}</span>
+      <button
+        type="button"
+        className={`fa__quote fa__quote-btn${shown ? "" : " is-blurred"}`}
+        onClick={() => setShown(true)}
+        aria-label={shown ? undefined : t("reviews.revealSpoiler")}
+        disabled={shown}
+      >
+        {text}
+      </button>
+    </>
   );
 }
-
-/* ---------- sağdaki küçük kart ---------- */
 
 function ActivityCard({ a }: { a: FriendActivity }) {
   const { t, i18n } = useTranslation();
   const name = displayName(a.user);
-  const kind = getFriendActivityVerbKind(a, false);
+  const kind = getKind(a);
 
-  const meta: string[] = [];
-  if (a.rating != null) meta.push(`★ ${a.rating.toFixed(1)}`);
-  if (a.reaction && !verbCoversReaction(kind)) {
-    meta.push(
-      a.reaction === "Dislike"
-        ? t("friendsActivity.reactionDislike")
-        : t("friendsActivity.reactionLike"),
-    );
-  }
-  meta.push(timeAgo(a.lastActivityAtUtc, i18n.language));
+  const chipLabel = {
+    review: t("friendsActivity.verbReviewed"),
+    rated: t("friendsActivity.verbRated"),
+    like: t("friendsActivity.reactionLike"),
+    dislike: t("friendsActivity.reactionDislike"),
+    watched: t("friendsActivity.verbWatched"),
+  }[kind];
+
+  const meta = [
+    a.movie.releaseYear > 0 ? a.movie.releaseYear : null,
+    a.movie.genre,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
-    <article className="friends-activity__card">
-      <div className="friends-activity__poster-wrap">
-        <MoviePoster
-          movie={a.movie}
-          className="friends-activity__poster"
-          fallback="title"
-          iconSize={22}
-        />
-        <ActivityBadge a={a} />
+    <article className="fa__card">
+      <div className="fa__card-top">
         <Link
           to={`/users/${a.user.userName}`}
-          className="friends-activity__card-avatar"
+          className="fa__card-avatar"
           aria-label={name}
         >
           <PersonAvatar
@@ -146,132 +93,65 @@ function ActivityCard({ a }: { a: FriendActivity }) {
             size="sm"
           />
         </Link>
-      </div>
-      <div className="friends-activity__caption">
-        {/* Başlık linki kartın tamamını kaplar (stretched link). */}
-        <h3 className="friends-activity__card-title">
-          <Link to={`/movies/${a.movie.id}`}>{a.movie.title}</Link>
-        </h3>
-        <p className="friends-activity__card-who">
-          <Link to={`/users/${a.user.userName}`}>{name}</Link>{" "}
-          {getFriendActivityVerb(a, false, t)}
-        </p>
-        <p className="friends-activity__card-meta">{meta.join(" · ")}</p>
-      </div>
-    </article>
-  );
-}
-
-/* ---------- soldaki büyük kart ---------- */
-
-function Spotlight({ a }: { a: FriendActivity }) {
-  const { t, i18n } = useTranslation();
-  const name = displayName(a.user);
-  const kind = getFriendActivityVerbKind(a, true);
-  const showReaction = a.reaction != null && !verbCoversReaction(kind);
-  const showWatched = a.watched && !verbCoversWatched(kind);
-
-  const movieMeta = [
-    a.movie.releaseYear > 0 ? a.movie.releaseYear : null,
-    a.movie.genre,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-
-  return (
-    <article className="friends-activity__spot">
-      <div className="friends-activity__spot-top">
-        <Link
-          to={`/users/${a.user.userName}`}
-          className="friends-activity__spot-avatar"
-          aria-label={name}
-        >
-          <PersonAvatar
-            id={a.user.id}
-            photoUrl={a.user.avatarUrl}
-            fullName={name}
-            size="md"
-          />
-        </Link>
-        <p className="friends-activity__who">
-          <Link to={`/users/${a.user.userName}`}>{name}</Link>{" "}
-          {getFriendActivityVerb(a, true, t)}
-        </p>
-        <time className="friends-activity__time" dateTime={a.lastActivityAtUtc}>
-          {timeAgo(a.lastActivityAtUtc, i18n.language)}
-        </time>
+        <div className="fa__card-who">
+          <Link to={`/users/${a.user.userName}`}>{name}</Link>
+          <time dateTime={a.lastActivityAtUtc}>
+            {timeAgo(a.lastActivityAtUtc, i18n.language)}
+          </time>
+        </div>
+        <span className={`fa__chip fa__chip--${kind}`}>{chipLabel}</span>
       </div>
 
-      <div className="friends-activity__spot-body">
+      <div className="fa__card-body">
         <MoviePoster
           movie={a.movie}
-          className="friends-activity__poster"
+          className="fa__poster"
           fallback="title"
-          iconSize={22}
+          iconSize={20}
         />
-        <div className="friends-activity__spot-info">
-          {/* Başlık linki kartın tamamını kaplar (stretched link). */}
-          <h3 className="friends-activity__movie-title">
+        <div className="fa__card-info">
+          <h3 className="fa__movie-title">
+            {/* stretched link: kartın tamamı tıklanabilir */}
             <Link to={`/movies/${a.movie.id}`}>{a.movie.title}</Link>
           </h3>
-          {movieMeta && (
-            <p className="friends-activity__movie-meta">{movieMeta}</p>
-          )}
+          {meta && <p className="fa__movie-meta">{meta}</p>}
 
           {a.rating != null && (
-            <div className="friends-activity__rating">
-              <StarDisplay value={a.rating} />
+            <div className="fa__rating">
+              <Star size={13} fill="currentColor" />
               <span>{a.rating.toFixed(1)}</span>
             </div>
           )}
 
-          {a.reviewExcerpt && (
-            <blockquote className="friends-activity__quote">
-              {a.reviewExcerpt}
-            </blockquote>
-          )}
-          {a.containsSpoiler && !a.reviewExcerpt && (
-            <p className="friends-activity__spoiler">
-              {t("friendsActivity.spoilerHidden")}
-            </p>
-          )}
-
-          {(showReaction || showWatched) && (
-            <div className="friends-activity__chips">
-              {showReaction && a.reaction === "Like" && (
-                <span className="friends-activity__chip friends-activity__chip--like">
-                  <Heart size={13} fill="currentColor" />
-                  {t("friendsActivity.reactionLike")}
-                </span>
-              )}
-              {showReaction && a.reaction === "Dislike" && (
-                <span className="friends-activity__chip friends-activity__chip--dislike">
-                  <HeartCrack size={13} />
-                  {t("friendsActivity.reactionDislike")}
-                </span>
-              )}
-              {showWatched && (
-                <span className="friends-activity__chip">
-                  <Ticket size={13} />
-                  {t("friendsActivity.watched")}
-                </span>
-              )}
-            </div>
-          )}
+          {a.reviewExcerpt &&
+            (a.containsSpoiler ? (
+              <SpoilerText text={a.reviewExcerpt} />
+            ) : (
+              <p className="fa__quote">{a.reviewExcerpt}</p>
+            ))}
         </div>
-      </div>
-
-      {/* Kartın tamamı zaten tıklanabilir; bu yalnızca görsel ipucu (tekrar eden link/odak durağı değil). */}
-      <div className="friends-activity__spot-footer">
-        <span className="friends-activity__spot-cta" aria-hidden="true">
-          {t("friendsActivity.goToMovie")}
-        </span>
       </div>
     </article>
   );
 }
 
-/* ---------- ana bölüm ---------- */
+function Skeleton() {
+  return (
+    <section className="fa" aria-busy="true">
+      <SectionHeader />
+      <div className="fa__strip" aria-hidden="true">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <div key={i} className="fa__sk fa__sk-avatar" />
+        ))}
+      </div>
+      <div className="fa__grid" aria-hidden="true">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="fa__sk fa__sk-card" />
+        ))}
+      </div>
+    </section>
+  );
+}
 
 export default function FriendsActivitySection() {
   const { t } = useTranslation();
@@ -286,99 +166,75 @@ export default function FriendsActivitySection() {
     retry: 1,
   });
 
-  // Misafir ya da hata: bölüm hiç görünmez, ana sayfanın geri kalanı etkilenmez.
   if (!enabled || isError) return null;
+  if (isLoading || !data) return <Skeleton />;
 
-  if (isLoading || !data) return <LoadingSkeleton />;
+  const { followingCount, weeklyActivityCount, spotlight, items } = data;
 
-  const {
-    followingCount,
-    weeklyActiveFriendCount,
-    weeklyActivityCount,
-    spotlight,
-    items,
-  } = data;
-
-  // Kimseyi takip etmiyor: davet kartı.
   if (followingCount === 0) {
     return (
-      <section className="friends-activity">
+      <section className="fa">
         <SectionHeader />
-        <div className="friends-activity__find">
-          <div className="friends-activity__find-text">
-            <UserPlus size={22} aria-hidden="true" />
-            <h3>{t("friendsActivity.findTitle")}</h3>
-            <p>{t("friendsActivity.findText")}</p>
-            <Link to="/users" className="btn-primary">
-              {t("friendsActivity.findCta")}
-            </Link>
-          </div>
-          <div className="friends-activity__find-ghosts" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-            <span />
-          </div>
+        <div className="fa__find">
+          <UserPlus size={22} aria-hidden="true" />
+          <h3>{t("friendsActivity.findTitle")}</h3>
+          <p>{t("friendsActivity.findText")}</p>
+          <Link to="/users" className="btn-primary">
+            {t("friendsActivity.findCta")}
+          </Link>
         </div>
       </section>
     );
   }
 
-  // Takip ediyor ama son 7 günde hareket yok: bölüm gizlenir.
-  if (!spotlight && items.length === 0) return null;
+  const all = [spotlight, ...items].filter(
+    (a): a is FriendActivity => a != null,
+  );
+  if (all.length === 0) return null;
 
   const people = new Map<string, FriendActivityUser>();
-  [spotlight, ...items].forEach((a) => {
-    if (a) people.set(a.user.id, a.user);
-  });
-  const shown = Array.from(people.values()).slice(0, MAX_STACK);
-  const extra = Math.max(0, weeklyActiveFriendCount - shown.length);
+  all.forEach((a) => people.set(a.user.id, a.user));
+  const strip = Array.from(people.values()).slice(0, MAX_STRIP);
 
-  // "Tümünü gör" yalnızca altbilgide; başlıkta ikinci kopya yok.
-  const stack = (
-    <div className="friends-activity__active">
-      <div className="friends-activity__stack">
-        {shown.map((u) => (
-          <PersonAvatar
-            key={u.id}
-            id={u.id}
-            photoUrl={u.avatarUrl}
-            fullName={displayName(u)}
-            size="sm"
-          />
-        ))}
-        {extra > 0 && (
-          <span className="friends-activity__more-chip">+{extra}</span>
-        )}
-      </div>
-      <p>
-        {t("friendsActivity.activeThisWeek", { n: weeklyActiveFriendCount })}
-      </p>
-    </div>
+  const seeAll = (
+    <Link to="/activity" className="fa__see-all">
+      {t("friendsActivity.seeAllActivity")} <ArrowRight size={13} />
+    </Link>
   );
 
   return (
-    <section className="friends-activity">
-      <SectionHeader aside={stack} />
+    <section className="fa">
+      <SectionHeader
+        aside={<span className="fa__see-all-desktop">{seeAll}</span>}
+      />
 
-      <div
-        className={`friends-activity__grid${spotlight ? "" : " friends-activity__grid--rail-only"}`}
-      >
-        {spotlight && <Spotlight a={spotlight} />}
-        <div className="friends-activity__rail">
-          {items.map((a) => (
-            <ActivityCard key={`${a.user.id}-${a.movie.id}`} a={a} />
-          ))}
-        </div>
+      <div className="fa__strip">
+        {strip.map((u) => (
+          <Link key={u.id} to={`/users/${u.userName}`} className="fa__friend">
+            <span className="fa__ring">
+              <PersonAvatar
+                id={u.id}
+                photoUrl={u.avatarUrl}
+                fullName={displayName(u)}
+                size="md"
+              />
+            </span>
+            <span className="fa__friend-name">{u.userName}</span>
+          </Link>
+        ))}
       </div>
 
-      <div className="friends-activity__footer">
+      <div className="fa__grid">
+        {all.map((a) => (
+          <ActivityCard key={`${a.user.id}-${a.movie.id}`} a={a} />
+        ))}
+      </div>
+
+      <div className="fa__footer">
         <span>
           {t("friendsActivity.activityCount", { n: weeklyActivityCount })}
         </span>
-        <Link to="/activity" className="friends-activity__see-all">
-          {t("friendsActivity.seeAllActivity")}
-        </Link>
+        <span className="fa__see-all-mobile">{seeAll}</span>
       </div>
     </section>
   );

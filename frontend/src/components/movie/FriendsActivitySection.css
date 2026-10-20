@@ -1,470 +1,344 @@
-.friends-activity {
+.fa {
   margin-bottom: 56px;
 }
 
-/* ---------- Başlık ---------- */
-.friends-activity__header {
+/* Başlık */
+.fa__header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-bottom: 28px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
-.friends-activity__eyebrow {
+.fa__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
   font-family: "SF Mono", "Fira Code", monospace;
   font-size: 0.76rem;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--color-text-secondary);
-  margin-bottom: 6px;
+  color: #d4af37;
 }
-.friends-activity__title {
+.fa__eyebrow::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: #d4af37;
+}
+.fa__title {
   font-family: var(--font-display);
-  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
   font-weight: 800;
   font-style: italic;
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
 }
-.friends-activity__active {
-  display: flex;
+.fa__see-all {
+  display: inline-flex;
   align-items: center;
-  gap: 14px;
-}
-.friends-activity__active p {
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-}
-.friends-activity__stack {
-  display: flex;
-  align-items: center;
-}
-/* PersonAvatar'ın kendi boyut sınıflarını (1 sınıf) ezmek için 2 sınıflı seçici */
-.friends-activity__stack .person-avatar {
-  width: 34px;
-  height: 34px;
-  margin-left: -10px;
-  border: 2px solid var(--color-bg);
-  box-sizing: border-box;
-}
-.friends-activity__stack .person-avatar:first-child {
-  margin-left: 0;
-}
-.friends-activity__more-chip {
-  margin-left: -10px;
-  min-width: 34px;
-  height: 34px;
-  padding: 0 8px;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-pill);
-  border: 2px solid var(--color-bg);
-  background-color: var(--color-bg-card);
-  color: var(--color-text-secondary);
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-/* ---------- Izgara ---------- */
-.friends-activity__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  gap: 24px;
-  align-items: stretch;
-}
-.friends-activity__grid--rail-only {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-/* Rail (>1000px): sütun sayısı alana göre kendiliğinden 4 → 3'e düşer, poster ~130px altına inmez.
-   Sığmayan kartlar ikinci satıra taşmak yerine gizlenir (grid-auto-rows: 0). */
-.friends-activity__rail {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
-  grid-template-rows: auto;
-  grid-auto-rows: 0;
-  row-gap: 0;
-  column-gap: 16px;
-  overflow: hidden;
-  /* hover'da yukarı kalkan kartın kırpılmaması için */
-  padding-top: 8px;
-  margin-top: -8px;
-  align-content: start;
-}
-/* Spotlight yokken rail tam genişlikte: kartlar sınırlı genişlikte kalır, devasa posterler olmaz. */
-.friends-activity__grid--rail-only .friends-activity__rail {
-  grid-template-columns: repeat(auto-fill, minmax(150px, 180px));
-  grid-auto-rows: auto;
-  row-gap: 24px;
-  justify-content: start;
-}
-
-.friends-activity__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 28px;
-  padding-top: 18px;
-  border-top: 1px solid var(--color-border);
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-}
-.friends-activity__see-all {
+  gap: 8px;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--color-accent-text);
   white-space: nowrap;
 }
-.friends-activity__see-all:hover {
+.fa__see-all-desktop .fa__see-all {
+  padding: 10px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-bg-card);
   color: var(--color-text-primary);
 }
+.fa__see-all:hover {
+  opacity: 0.85;
+}
+.fa__see-all-mobile {
+  display: none;
+}
 
-/* ---------- Ortak: poster ---------- */
-.friends-activity__poster {
-  display: block;
-  position: relative;
-  aspect-ratio: 2 / 3;
+/* Arkadaş şeridi */
+.fa__strip {
+  display: flex;
+  gap: 12px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.fa__strip::-webkit-scrollbar {
+  display: none;
+}
+.fa__friend {
+  flex: none;
+  width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.fa__ring {
+  padding: 2px;
+  border-radius: 50%;
+  line-height: 0;
+  background: linear-gradient(135deg, #4a90e2, #9cc7ff);
+}
+.fa__ring .person-avatar {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--color-bg);
+  box-sizing: border-box;
+}
+.fa__friend-name {
+  max-width: 72px;
   overflow: hidden;
-  border-radius: var(--radius-sm);
-  background-color: var(--color-bg-elevated);
-  flex-shrink: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
 }
 
-/* ---------- Stretched link: kartın tamamı tıklanabilir ----------
-   Başlık linkinin ::after'ı en yakın konumlu atayı (spot / card) kaplar.
-   Avatar ve isim linkleri z-index: 2 ile bunun üstünde kalır. */
-.friends-activity__spot,
-.friends-activity__card {
-  position: relative;
+/* Kart ızgarası */
+.fa__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
 }
-.friends-activity__movie-title a::after,
-.friends-activity__card-title a::after {
+.fa__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  transition: border-color var(--transition-fast);
+}
+.fa__card:hover {
+  border-color: var(--color-accent-dim);
+}
+.fa__card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.fa__card-avatar {
+  position: relative;
+  z-index: 2;
+  line-height: 0;
+}
+.fa__card-avatar .person-avatar {
+  width: 36px;
+  height: 36px;
+}
+.fa__card-who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.fa__card-who a {
+  position: relative;
+  z-index: 2;
+  width: fit-content;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+.fa__card-who a:hover {
+  color: var(--color-accent-text);
+}
+.fa__card-who time {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+/* Eylem etiketi: renk + metin birlikte */
+.fa__chip {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.fa__chip--watched {
+  color: #6fb1ff;
+  background: rgba(74, 144, 226, 0.16);
+}
+.fa__chip--rated {
+  color: #e2c35a;
+  background: rgba(212, 175, 55, 0.14);
+}
+.fa__chip--review {
+  color: #3be39a;
+  background: rgba(0, 255, 136, 0.12);
+}
+.fa__chip--like {
+  color: #ff8fa0;
+  background: rgba(255, 107, 129, 0.14);
+}
+.fa__chip--dislike {
+  color: #c3c9d6;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.fa__card-body {
+  display: flex;
+  gap: 14px;
+  min-width: 0;
+}
+.fa__poster {
+  flex: none;
+  width: 84px;
+  aspect-ratio: 2/3;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--color-bg-elevated);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+.fa__card-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.fa__movie-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+.fa__movie-title a {
+  color: var(--color-text-primary);
+}
+.fa__movie-title a::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 1;
-  border-radius: var(--radius-sm);
+  border-radius: 16px;
 }
-.friends-activity__movie-title a:focus-visible,
-.friends-activity__card-title a:focus-visible {
+.fa__movie-title a:focus-visible {
   outline: none;
 }
-.friends-activity__movie-title a:focus-visible::after,
-.friends-activity__card-title a:focus-visible::after {
+.fa__movie-title a:focus-visible::after {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
 }
-.friends-activity__spot-avatar,
-.friends-activity__who a,
-.friends-activity__card-who a {
-  position: relative;
-  z-index: 2;
+.fa__card:hover .fa__movie-title a {
+  color: var(--color-accent-text);
 }
-
-/* ---------- Spotlight ---------- */
-.friends-activity__spot {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 24px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background:
-    radial-gradient(
-      circle at 0% 0%,
-      var(--color-accent-muted),
-      transparent 55%
-    ),
-    var(--color-bg-elevated);
-  transition: border-color var(--transition-fast);
-}
-.friends-activity__spot:hover {
-  border-color: var(--color-accent-dim);
-}
-.friends-activity__spot-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.friends-activity__spot-avatar {
-  line-height: 0;
-}
-.friends-activity__spot-avatar .person-avatar {
-  width: 40px;
-  height: 40px;
-}
-.friends-activity__who {
-  min-width: 0;
-  font-size: 0.9rem;
+.fa__movie-meta {
+  font-size: 0.78rem;
   color: var(--color-text-secondary);
 }
-.friends-activity__who a {
-  color: var(--color-text-primary);
-  font-weight: 700;
-}
-.friends-activity__who a:hover {
-  color: var(--color-accent-text);
-}
-.friends-activity__time {
-  margin-left: auto;
-  flex-shrink: 0;
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-}
-.friends-activity__spot-body {
+.fa__rating {
   display: flex;
-  gap: 20px;
-  flex: 1;
-  min-width: 0;
-}
-.friends-activity__spot .friends-activity__poster {
-  width: 150px;
-}
-.friends-activity__spot-info {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-.friends-activity__movie-title {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 800;
-  font-size: 1.6rem;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  margin-bottom: 6px;
-}
-.friends-activity__movie-title a {
-  color: var(--color-text-primary);
-}
-.friends-activity__spot:hover .friends-activity__movie-title a {
-  color: var(--color-accent-text);
-}
-.friends-activity__movie-meta {
-  font-size: 0.82rem;
-  color: var(--color-text-muted);
-  margin-bottom: 12px;
-}
-.friends-activity__rating {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--color-accent-text);
-}
-
-/* İnceleme alıntısı: kalın italik display yerine gövde fontu, orta ağırlık.
-   (Plus Jakarta yalnızca 600–800 yükleniyor; italik de sahte oblique'ti.) */
-.friends-activity__quote {
-  margin: 0 0 14px;
-  padding-left: 14px;
-  border-left: 2px solid var(--color-accent-muted);
-  font-family: var(--font-sans);
-  font-style: normal;
-  font-weight: 500;
-  font-size: 0.96rem;
-  line-height: 1.6;
-  color: var(--color-text-primary);
-  display: -webkit-box;
-  -webkit-line-clamp: 5;
-  line-clamp: 5;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.friends-activity__spoiler {
-  margin-bottom: 14px;
-  font-size: 0.85rem;
-  font-style: italic;
-  color: var(--color-text-muted);
-}
-.friends-activity__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: auto;
-}
-.friends-activity__chip {
-  display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 11px;
-  border-radius: var(--radius-pill);
-  background-color: var(--color-accent-muted);
-  color: var(--color-text-primary);
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-.friends-activity__chip--like svg {
-  color: var(--color-like);
-}
-.friends-activity__chip--dislike svg {
-  color: var(--color-dislike);
-}
-.friends-activity__spot-footer {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 16px;
-  border-top: 1px solid var(--color-border);
-}
-/* Dolu buton yerine sakin metin ipucu: poster/başlık zaten link, vurgu tekrar etmesin. */
-.friends-activity__spot-cta {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-accent-text);
-  text-underline-offset: 3px;
-}
-.friends-activity__spot:hover .friends-activity__spot-cta {
-  text-decoration: underline;
-}
-
-/* ---------- Sağdaki kartlar (MovieCard diliyle: poster + altında ortalı metin) ---------- */
-.friends-activity__card {
-  transition: transform var(--transition-base);
-}
-@media (hover: hover) {
-  .friends-activity__card:hover {
-    transform: translateY(-6px);
-  }
-}
-.friends-activity__poster-wrap {
-  position: relative;
-}
-.friends-activity__badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 1;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(10, 12, 16, 0.78);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-}
-/* Rozet her temada koyu zemin üstünde: dislike için sabit açık gri (tema token'ı açık temada sönerdi). */
-.friends-activity__badge.is-like {
-  color: var(--color-like);
-}
-.friends-activity__badge.is-dislike {
-  color: #c3c9d6;
-}
-.friends-activity__card-avatar {
-  position: absolute;
-  left: 8px;
-  bottom: 8px;
-  z-index: 2;
-  display: block;
-  line-height: 0;
-}
-.friends-activity__card-avatar .person-avatar {
-  width: 30px;
-  height: 30px;
-  border: 2px solid var(--color-bg);
-  box-sizing: border-box;
-}
-.friends-activity__caption {
-  padding-top: 10px;
-  text-align: center;
-}
-.friends-activity__card-title {
-  font-family: var(--font-display);
+  margin-top: 4px;
+  color: #d4af37;
   font-size: 0.9rem;
   font-weight: 700;
-  line-height: 1.32;
-  margin-bottom: 4px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
-.friends-activity__card-title a {
+.fa__rating span {
   color: var(--color-text-primary);
-}
-.friends-activity__card:hover .friends-activity__card-title a {
-  color: var(--color-accent-text);
-}
-.friends-activity__card-who {
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
-  margin-bottom: 3px;
-}
-.friends-activity__card-who a {
-  color: var(--color-text-primary);
-  font-weight: 600;
-}
-.friends-activity__card-meta {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
 }
 
-/* ---------- "Arkadaşlarını bul" kartı ---------- */
-.friends-activity__find {
+.fa__quote {
+  margin: 2px 0 0;
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-align: left;
+}
+.fa__quote-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+}
+.fa__quote-btn:disabled {
+  cursor: default;
+}
+.fa__quote.is-blurred {
+  filter: blur(5px);
+  user-select: none;
+}
+.fa__spoiler-badge {
+  align-self: flex-start;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffb36b;
+  background: rgba(255, 150, 60, 0.14);
+}
+
+.fa__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 32px;
-  padding: 32px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background:
-    radial-gradient(
-      circle at 0% 0%,
-      var(--color-accent-muted),
-      transparent 55%
-    ),
-    var(--color-bg-elevated);
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
 }
-.friends-activity__find-text {
-  max-width: 440px;
+
+/* Takip yok */
+.fa__find {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
+  padding: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-bg-card);
   color: var(--color-accent-text);
+  max-width: 520px;
 }
-.friends-activity__find-text h3 {
+.fa__find h3 {
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 800;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   color: var(--color-text-primary);
 }
-.friends-activity__find-text p {
+.fa__find p {
   font-size: 0.9rem;
   line-height: 1.55;
   color: var(--color-text-secondary);
   margin-bottom: 6px;
 }
-.friends-activity__find-ghosts {
-  display: flex;
-  gap: 12px;
-}
-.friends-activity__find-ghosts span {
-  width: 74px;
-  aspect-ratio: 2 / 3;
-  border-radius: var(--radius-sm);
-  border: 1px dashed var(--color-border);
-  background-color: var(--color-bg-card);
-  opacity: 0.7;
-}
-.friends-activity__find-ghosts span:nth-child(odd) {
-  transform: translateY(10px);
-}
 
-/* ---------- Yükleniyor: gerçek yerleşimin iskeleti ---------- */
-.friends-activity__sk {
-  border-radius: var(--radius-sm);
+/* Yükleniyor */
+.fa__sk {
+  border-radius: 16px;
   background: linear-gradient(
     100deg,
     var(--color-bg-elevated) 40%,
@@ -472,21 +346,17 @@
     var(--color-bg-elevated) 60%
   );
   background-size: 250% 100%;
-  animation: friends-activity-sheen 1.6s ease-in-out infinite;
+  animation: fa-sheen 1.6s ease-in-out infinite;
 }
-.friends-activity__sk-spot {
-  min-height: 400px;
+.fa__sk-avatar {
+  flex: none;
+  width: 56px;
+  height: 72px;
 }
-.friends-activity__sk-poster {
-  aspect-ratio: 2 / 3;
+.fa__sk-card {
+  height: 190px;
 }
-.friends-activity__sk-line {
-  height: 12px;
-  margin-top: 12px;
-  width: 70%;
-  margin-inline: auto;
-}
-@keyframes friends-activity-sheen {
+@keyframes fa-sheen {
   0% {
     background-position: 200% 0;
   }
@@ -495,160 +365,62 @@
   }
 }
 
-/* ---------- Responsive ---------- */
-
-/* Tablet: spotlight üstte tam genişlik, kartlar altında 4'lü sıra kalır
-   (2 sütuna düşmek 700px'lik ekranda devasa poster kartları üretiyordu). */
-@media (max-width: 1000px) {
-  .friends-activity__grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .friends-activity__rail {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .friends-activity__find {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .friends-activity__sk-spot {
-    min-height: 320px;
-  }
-}
-
-/* Telefon */
+/* Mobil */
 @media (max-width: 640px) {
-  .friends-activity {
+  .fa {
     margin-bottom: 40px;
   }
-  .friends-activity__header {
-    margin-bottom: 20px;
-    gap: 14px;
+  .fa__header {
+    margin-bottom: 18px;
   }
-
-  /* Spotlight: poster + başlık/puan yan yana, yorum ve etiketler TAM genişlikte. */
-  .friends-activity__spot {
-    padding: 18px;
-    gap: 16px;
-  }
-  .friends-activity__spot-top {
-    align-items: flex-start;
-  }
-  .friends-activity__who {
-    flex: 1;
-    font-size: 0.88rem;
-    line-height: 1.4;
-  }
-  .friends-activity__spot-body {
-    display: grid;
-    grid-template-columns: 96px minmax(0, 1fr);
-    grid-template-rows: auto auto 1fr;
-    column-gap: 16px;
-    align-items: start;
-  }
-  .friends-activity__spot .friends-activity__poster {
-    width: 96px;
-    grid-column: 1;
-    grid-row: 1 / 4;
-  }
-  .friends-activity__spot-info {
-    display: contents;
-  }
-  .friends-activity__movie-title {
-    grid-column: 2;
-    grid-row: 1;
-    font-size: 1.2rem;
-  }
-  .friends-activity__movie-meta {
-    grid-column: 2;
-    grid-row: 2;
-    margin-bottom: 10px;
-  }
-  .friends-activity__rating {
-    grid-column: 2;
-    grid-row: 3;
-    align-self: start;
-    margin-bottom: 0;
-  }
-  .friends-activity__quote,
-  .friends-activity__spoiler {
-    grid-column: 1 / -1;
-    margin: 14px 0 0;
-  }
-  .friends-activity__chips {
-    grid-column: 1 / -1;
-    margin-top: 12px;
-  }
-  .friends-activity__spot-footer {
-    padding-top: 14px;
-    justify-content: flex-start;
-  }
-  .friends-activity__sk-spot {
-    min-height: 280px;
-  }
-
-  /* Kartlar: yatay kaydırmalı sıra; üçüncü kartın yarısı görünür, kaydırılabildiği belli olur. */
-  .friends-activity__rail,
-  .friends-activity__grid--rail-only .friends-activity__rail {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    padding: 8px 0 10px;
-    margin-top: 0;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-  .friends-activity__rail::-webkit-scrollbar {
+  .fa__see-all-desktop {
     display: none;
   }
-  .friends-activity__card,
-  .friends-activity__sk-card {
-    flex: 0 0 138px;
-    scroll-snap-align: start;
+  .fa__see-all-mobile {
+    display: block;
   }
-
-  .friends-activity__footer {
-    margin-top: 16px;
-    padding-top: 14px;
+  /* Şerit ekran kenarına taşar, kart gibi değil çizgili */
+  .fa__strip {
+    margin-inline: calc(var(--container-pad, 16px) * -1);
+    padding: 12px var(--container-pad, 16px);
+    background: none;
+    border-radius: 0;
+    border-inline: 0;
+    gap: 10px;
   }
-
-  .friends-activity__find {
-    padding: 22px;
-    gap: 22px;
+  .fa__friend {
+    width: 64px;
   }
-  .friends-activity__find-ghosts span {
-    width: 54px;
+  .fa__ring .person-avatar {
+    width: 44px;
+    height: 44px;
   }
-}
-
-/* Çok dar telefon */
-@media (max-width: 380px) {
-  .friends-activity__spot-body {
-    grid-template-columns: 84px minmax(0, 1fr);
-    column-gap: 12px;
+  .fa__friend-name {
+    max-width: 64px;
+    font-size: 0.72rem;
   }
-  .friends-activity__spot .friends-activity__poster {
-    width: 84px;
+  .fa__grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
-  .friends-activity__movie-title {
-    font-size: 1.08rem;
+  .fa__card {
+    padding: 14px;
+    gap: 12px;
+    border-radius: 14px;
   }
-  .friends-activity__card,
-  .friends-activity__sk-card {
-    flex-basis: 128px;
+  .fa__poster {
+    width: 72px;
+  }
+  .fa__footer {
+    margin-top: 20px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .friends-activity__card,
-  .friends-activity__spot {
-    transition: none;
-  }
-  .friends-activity__card:hover {
-    transform: none;
-  }
-  .friends-activity__sk {
+  .fa__sk {
     animation: none;
+  }
+  .fa__card {
+    transition: none;
   }
 }
