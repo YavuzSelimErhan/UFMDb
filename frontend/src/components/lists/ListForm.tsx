@@ -40,7 +40,7 @@ import "./ListForm.css";
 const MAX_ITEMS = 500;
 // true yaparsan sıradan kullanıcılar da kapak görseli yükleyebilir.
 // Backend artık sıradan kullanıcıda yalnızca yüklenen kapağı kabul ediyor (harici URL reddedilir).
-const ALLOW_USER_COVER = false;
+const ALLOW_USER_COVER = true;
 
 export interface FormMovie {
   movieId: string;
