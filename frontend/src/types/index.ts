@@ -247,7 +247,8 @@ export interface MovieSearchFilter {
     | "year"
     | "popularity"
     | "newest"
-    | "releaseDate";
+    | "releaseDate"
+    | "votes";
   sortDirection?: "asc" | "desc";
   releaseDateFrom?: string;
   releaseDateTo?: string;

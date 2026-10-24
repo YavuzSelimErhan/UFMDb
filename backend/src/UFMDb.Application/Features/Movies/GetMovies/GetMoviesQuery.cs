@@ -103,11 +103,9 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             //   C = filtrelenmiþ listenin ortalama puaný.
             // Skor SQL'de hesaplanýyor; sadece sayfanýn film id'leri çekiliyor.
             //
-            // NOT: AverageRating property'si double ama kolonu decimal(3,2) (numeric). Parametre tipi
-            // çýkarýmýnda ve tip karýþýmýnda sorun çýkmasýn diye:
-            //   - global ortalama nullable double olarak alýnýyor,
-            //   - m*C önceden tek bir double'a hesaplanýyor (SQL'e giden tek parametre),
-            //   - RatingCount açýkça double'a çevriliyor, böylece tüm aritmetik double üzerinden yürüyor.
+            // NOT: AverageRating artýk double precision kolon (decimal(3,2) overflow hatasý giderildi).
+            // Yine de tip karýþýmý olmasýn diye global ortalama nullable double, m*C önceden tek
+            // double ve RatingCount açýkça double'a çevrilerek hesaplanýyor.
             var minVotes = Math.Max(1.0, (double)RatingRankPolicy.MinVotesForRatingRank);
 
             totalCount = await query.CountAsync(ct);
@@ -149,6 +147,9 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
         }
         else
         {
+            // Sýralama seçenekleri:
+            //   popularity : TMDB'nin güncel popülerlik skoru (yeni/konuþulan filmler öne çýkar) -> "Trend"
+            //   votes      : toplam oy sayýsý (TMDB oylarý + site oylarý)                        -> "Popüler (tüm zamanlar)"
             if (hasTitleSearch)
             {
                 // Alaka düzeyi popülerlikten önce gelir: "ran" aratýldýðýnda "Ran" filmi, içinde "ran"
@@ -165,6 +166,8 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
                     ("year", false) => ordered.ThenBy(m => m.ReleaseYear),
                     ("popularity", true) => ordered.ThenByDescending(m => m.TmdbPopularity).ThenByDescending(m => m.RatingCount),
                     ("popularity", false) => ordered.ThenBy(m => m.TmdbPopularity).ThenBy(m => m.RatingCount),
+                    ("votes", true) => ordered.ThenByDescending(m => m.RatingCount).ThenByDescending(m => m.TmdbPopularity),
+                    ("votes", false) => ordered.ThenBy(m => m.RatingCount).ThenBy(m => m.TmdbPopularity),
                     ("newest", true) => ordered.ThenByDescending(m => m.CreatedAtUtc),
                     ("newest", false) => ordered.ThenBy(m => m.CreatedAtUtc),
                     ("releaseDate", true) => ordered.ThenByDescending(m => m.ReleaseDate),
@@ -181,6 +184,8 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
                     ("year", false) => query.OrderBy(m => m.ReleaseYear),
                     ("popularity", true) => query.OrderByDescending(m => m.TmdbPopularity).ThenByDescending(m => m.RatingCount),
                     ("popularity", false) => query.OrderBy(m => m.TmdbPopularity).ThenBy(m => m.RatingCount),
+                    ("votes", true) => query.OrderByDescending(m => m.RatingCount).ThenByDescending(m => m.TmdbPopularity),
+                    ("votes", false) => query.OrderBy(m => m.RatingCount).ThenBy(m => m.TmdbPopularity),
                     ("newest", true) => query.OrderByDescending(m => m.CreatedAtUtc),
                     ("newest", false) => query.OrderBy(m => m.CreatedAtUtc),
                     ("releaseDate", true) => query.OrderByDescending(m => m.ReleaseDate),

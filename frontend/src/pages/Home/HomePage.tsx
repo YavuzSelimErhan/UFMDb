@@ -64,19 +64,21 @@ export default function HomePage() {
     enabled: isAuthenticated,
   });
 
-  // Popüler: tüm zamanlar, oy sayısına göre (backend'de RatingCount bazlı sıralıyor).
+  // Popüler: TÜM ZAMANLAR, toplam oy sayısına göre (backend "votes" sıralaması = RatingCount).
+  // Trend rafından bilerek farklı: o güncel ilgiye (TMDB popülerlik skoru) bakar ve yeni filmleri
+  // öne çıkarır; burada ise uzun yıllardır çok izlenen/oylanan filmler (klasikler) görünür.
   const { data: popularMovies, isLoading: isPopularLoading } = useQuery({
     queryKey: ["home-popular"],
     queryFn: () =>
       movieService.search({
         page: 1,
         pageSize: RAIL_SIZE,
-        sortBy: "popularity",
+        sortBy: "votes",
         sortDirection: "desc",
       }),
   });
 
-  // Trend: son N yılın en yüksek oy sayılı filmleri.
+  // Trend: son N yılın, TMDB'nin güncel popülerlik skoruna göre en çok konuşulan filmleri.
   const { data: trendingMovies, isLoading: isTrendingLoading } = useQuery({
     queryKey: ["home-trending", TRENDING_YEARS_BACK],
     queryFn: () =>
@@ -168,7 +170,7 @@ export default function HomePage() {
                 movies={popularMovies.items}
                 theme="frost"
                 showRank
-                seeAllHref="/search?sortBy=popularity&sortDirection=desc"
+                seeAllHref="/search?sortBy=votes&sortDirection=desc"
               />
             )}
 
