@@ -102,16 +102,29 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             //   v = RatingCount, R = AverageRating, m = RatingRankPolicy.MinVotesForRatingRank,
             //   C = filtrelenmiþ listenin ortalama puaný.
             // Skor SQL'de hesaplanýyor; sadece sayfanýn film id'leri çekiliyor.
+            //
+            // NOT: AverageRating property'si double ama kolonu decimal(3,2) (numeric). Parametre tipi
+            // çýkarýmýnda ve tip karýþýmýnda sorun çýkmasýn diye:
+            //   - global ortalama nullable double olarak alýnýyor,
+            //   - m*C önceden tek bir double'a hesaplanýyor (SQL'e giden tek parametre),
+            //   - RatingCount açýkça double'a çevriliyor, böylece tüm aritmetik double üzerinden yürüyor.
             var minVotes = Math.Max(1.0, (double)RatingRankPolicy.MinVotesForRatingRank);
 
             totalCount = await query.CountAsync(ct);
-            var globalMean = totalCount > 0 ? await query.AverageAsync(m => m.AverageRating, ct) : 0.0;
+
+            double globalMean = 0.0;
+            if (totalCount > 0)
+            {
+                var avg = await query.Select(m => (double?)m.AverageRating).AverageAsync(ct);
+                globalMean = avg ?? 0.0;
+            }
+            var priorWeight = minVotes * globalMean;
 
             var scored = query.Select(m => new
             {
                 m.Id,
                 m.RatingCount,
-                Score = (m.RatingCount * m.AverageRating + minVotes * globalMean) / (m.RatingCount + minVotes),
+                Score = ((double)m.RatingCount * m.AverageRating + priorWeight) / ((double)m.RatingCount + minVotes),
                 // Baþlýk aramasýnda alaka düzeyi her zaman önce gelir, puan katman içinde uygulanýr.
                 Relevance = !hasTitleSearch ? 2 :
                     (EF.Functions.ILike(m.Title, term) || EF.Functions.ILike(m.OriginalTitle, term) || EF.Functions.ILike(m.TitleTr, term)) ? 0 :

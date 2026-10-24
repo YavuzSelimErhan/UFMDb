@@ -30,7 +30,12 @@ public class MovieConfiguration : IEntityTypeConfiguration<Movie>
 
         b.Property(m => m.PosterUrl).HasMaxLength(500);
         b.Property(m => m.BackdropUrl).HasMaxLength(500);
-        b.Property(m => m.AverageRating).HasColumnType("decimal(3,2)");
+
+        // NOT: AverageRating property'si double; kolon tipini ELLE decimal(3,2) yapmıyoruz.
+        // Aksi halde EF, "RatingCount * AverageRating" gibi ifadelerde int operandı numeric(3,2)'ye
+        // cast eder ve oy sayısı >= 10 olan filmlerde "22003: numeric field overflow" hatası verir
+        // (Bayesian puan sıralaması ve Home Feed bu yüzden 500 dönüyordu). Varsayılan: double precision.
+
         b.Property(m => m.Certification).HasMaxLength(10);
         b.Property(m => m.CertificationCountry).HasMaxLength(2);
 

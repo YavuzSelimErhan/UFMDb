@@ -581,7 +581,7 @@ namespace UFMDb.Persistence.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<double>("AverageRating")
-                        .HasColumnType("decimal(3,2)");
+                        .HasColumnType("double precision");
 
                     b.Property<string>("BackdropUrl")
                         .IsRequired()
