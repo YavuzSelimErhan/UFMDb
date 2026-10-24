@@ -8,7 +8,7 @@ namespace UFMDb.Application.Features.Notifications;
 /// <param name="EntityId">Türe göre hedef kaydın id'si (ReviewLike: review id, ListLike/ListCreated: liste id).</param>
 /// <param name="MovieId">Yorum beğenisi gibi film bağlamlı bildirimlerde gidilecek film.</param>
 /// <param name="EntityTitle">Bildirim metninde gösterilecek başlık (film adı veya liste başlığı).</param>
-/// <param name="EntityTitleTr">Liste bildirimlerinde Türkçe başlık (diğerlerinde null).</param>
+/// <param name="EntityTitleTr">Liste ve yorum bildirimlerinde Türkçe başlık.</param>
 /// <param name="ActorIsFollowedByCurrentUser">Bildirimi tetikleyen kişiyi ben zaten takip ediyor muyum? (Follow bildiriminde "sen de takip et" butonu için.)</param>
 public record NotificationDto(
     Guid Id,
@@ -68,15 +68,15 @@ public class GetMyNotificationsQueryHandler
             .Distinct()
             .ToList();
 
-        var reviewInfo = new Dictionary<Guid, (Guid MovieId, string Title)>();
+        var reviewInfo = new Dictionary<Guid, (Guid MovieId, string Title, string TitleTr)>();
         if (reviewIds.Count > 0)
         {
             var found = await _context.Reviews.AsNoTracking()
-                .Where(r => reviewIds.Contains(r.Id))
-                .Select(r => new { r.Id, r.MovieId, r.Movie.Title })
+                .Where(r => reviewIds.Contains(r.Id) && !r.IsDeleted)
+                .Select(r => new { r.Id, r.MovieId, r.Movie.Title, r.Movie.TitleTr })
                 .ToListAsync(ct);
             foreach (var r in found)
-                reviewInfo[r.Id] = (r.MovieId, r.Title);
+                reviewInfo[r.Id] = (r.MovieId, r.Title, r.TitleTr);
         }
 
         // Liste bildirimleri için liste başlıklarını tek sorguda çöz (silinmiş listeler dışarıda kalır).
@@ -125,11 +125,12 @@ public class GetMyNotificationsQueryHandler
             switch (r.Type)
             {
                 case NotificationType.ReviewLike:
-                    if (r.EntityId.HasValue && reviewInfo.TryGetValue(r.EntityId.Value, out var review))
-                    {
-                        movieId = review.MovieId;
-                        title = review.Title;
-                    }
+                    // Yorum silinmişse bildirimi gösterme.
+                    if (!r.EntityId.HasValue || !reviewInfo.TryGetValue(r.EntityId.Value, out var review))
+                        continue;
+                    movieId = review.MovieId;
+                    title = review.Title;
+                    titleTr = review.TitleTr;
                     break;
 
                 case NotificationType.ListLike:

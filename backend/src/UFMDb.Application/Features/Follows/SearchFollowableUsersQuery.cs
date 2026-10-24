@@ -1,6 +1,7 @@
 ﻿// Application/Features/Follows/SearchFollowableUsersQuery.cs
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UFMDb.Application.Common;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.DTOs;
 namespace UFMDb.Application.Features.Follows;
@@ -25,7 +26,7 @@ public class SearchFollowableUsersQueryHandler : IRequestHandler<SearchFollowabl
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
-            var search = $"%{request.Search.Trim()}%";
+            var search = $"%{SqlLike.Escape(request.Search.Trim())}%";
             query = query.Where(u =>
                 EF.Functions.ILike(u.UserName, search) ||
                 (u.FullName != null && EF.Functions.ILike(u.FullName, search)));

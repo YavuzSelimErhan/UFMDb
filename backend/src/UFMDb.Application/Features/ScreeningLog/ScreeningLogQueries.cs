@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
-using UFMDb.Application.Common.Exceptions;
+using UFMDb.Application.Common;
 using UFMDb.Application.Common.Interfaces;
 using ReactionType = UFMDb.Domain.Enums.ReactionType;
 
@@ -19,7 +19,8 @@ public record GetScreeningLogQuery(
     string? Cursor = null,
     int PageSize = 20,
     ReactionType? Reaction = null,
-    string? Search = null) : IRequest<ScreeningLogPageDto>;
+    string? Search = null,
+    string Lang = "en") : IRequest<ScreeningLogPageDto>;
 
 public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery, ScreeningLogPageDto>
 {
@@ -33,6 +34,7 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
     public async Task<ScreeningLogPageDto> Handle(GetScreeningLogQuery request, CancellationToken ct)
     {
         var userId = request.UserId;
+        var isTr = Localization.IsTurkish(request.Lang);
         var pageSize = request.PageSize is < 1 or > MaxPageSize ? DefaultPageSize : request.PageSize;
 
         var query = _context.WatchHistory.AsNoTracking().Where(w => w.UserId == userId);
@@ -49,10 +51,12 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
         {
             var term = request.Search.Trim();
             if (term.Length > MaxSearchLength) term = term[..MaxSearchLength];
-            var pattern = $"%{EscapeLike(term)}%";
+            var pattern = $"%{SqlLike.Escape(term)}%";
+            // Dilden bağımsız: İngilizce, orijinal ve Türkçe başlıkların hepsinde aranır.
             query = query.Where(w =>
                 EF.Functions.ILike(w.Movie.Title, pattern) ||
-                EF.Functions.ILike(w.Movie.OriginalTitle, pattern));
+                EF.Functions.ILike(w.Movie.OriginalTitle, pattern) ||
+                EF.Functions.ILike(w.Movie.TitleTr, pattern));
         }
 
         if (!string.IsNullOrWhiteSpace(request.Cursor))
@@ -91,7 +95,7 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
             {
                 w.Id,
                 w.MovieId,
-                w.Movie.Title,
+                Title = isTr && w.Movie.TitleTr != "" ? w.Movie.TitleTr : w.Movie.Title,
                 w.Movie.PosterUrl,
                 w.WatchedAtUtc,
                 w.Rating
@@ -140,9 +144,6 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
         var nextCursor = hasMore ? days[^1].ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) : null;
         return new ScreeningLogPageDto(result, nextCursor);
     }
-
-    private static string EscapeLike(string s) =>
-        s.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_");
 }
 
 // ---------- Özet istatistikler: sayfalamadan bağımsız, tüm günlük üzerinden ----------

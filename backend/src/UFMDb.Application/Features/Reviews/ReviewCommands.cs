@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UFMDb.Application.Common;
 using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.Common.Services;
@@ -178,6 +179,12 @@ public class DeleteReviewCommandHandler : IRequestHandler<DeleteReviewCommand>
 
         review.IsDeleted = true;
         review.UpdatedAtUtc = DateTime.UtcNow;
+
+        var staleNotifications = await _context.Notifications
+            .Where(n => n.EntityId == review.Id && n.Type == NotificationType.ReviewLike)
+            .ToListAsync(ct);
+        _context.Notifications.RemoveRange(staleNotifications);
+
         await _context.SaveChangesAsync(ct);
     }
 }
@@ -256,7 +263,7 @@ public record LikedReviewItemDto(
     DateTime CreatedAtUtc
 );
 
-public record GetLikedReviewsQuery(Guid UserId) : IRequest<List<LikedReviewItemDto>>;
+public record GetLikedReviewsQuery(Guid UserId, string Lang = "en") : IRequest<List<LikedReviewItemDto>>;
 
 public class GetLikedReviewsQueryHandler : IRequestHandler<GetLikedReviewsQuery, List<LikedReviewItemDto>>
 {
@@ -265,31 +272,27 @@ public class GetLikedReviewsQueryHandler : IRequestHandler<GetLikedReviewsQuery,
 
     public async Task<List<LikedReviewItemDto>> Handle(GetLikedReviewsQuery request, CancellationToken ct)
     {
-        var items = await _context.ReviewLikes.AsNoTracking()
-            .Where(rl => rl.UserId == request.UserId)
-            .Join(_context.Reviews.AsNoTracking().Where(r => !r.IsDeleted),
-                rl => rl.ReviewId,
-                r => r.Id,
-                (rl, r) => r)
-            .Include(r => r.User)
-            .Include(r => r.Movie)
-            .OrderByDescending(r => r.CreatedAtUtc)
-            .Select(r => new LikedReviewItemDto(
-                r.Id,
-                r.MovieId,
-                r.Movie.Title,
-                r.Movie.PosterUrl,
-                r.UserId,
-                r.User.UserName,
-                r.User.AvatarUrl,
-                r.Content,
-                r.ContainsSpoiler,
-                r.LikeCount,
-                r.CreatedAtUtc
-            ))
-            .ToListAsync(ct);
+        var isTr = Localization.IsTurkish(request.Lang);
 
-        return items;
+        return await _context.ReviewLikes.AsNoTracking()
+            .Where(rl => rl.UserId == request.UserId
+                         && !rl.Review.IsDeleted
+                         && !rl.Review.User.IsDeleted
+                         && !rl.Review.Movie.IsDeleted)
+            .OrderByDescending(rl => rl.CreatedAtUtc)
+            .Select(rl => new LikedReviewItemDto(
+                rl.Review.Id,
+                rl.Review.MovieId,
+                isTr && rl.Review.Movie.TitleTr != "" ? rl.Review.Movie.TitleTr : rl.Review.Movie.Title,
+                rl.Review.Movie.PosterUrl,
+                rl.Review.UserId,
+                rl.Review.User.UserName,
+                rl.Review.User.AvatarUrl,
+                rl.Review.Content,
+                rl.Review.ContainsSpoiler,
+                rl.Review.LikeCount,
+                rl.Review.CreatedAtUtc))
+            .ToListAsync(ct);
     }
 }
 

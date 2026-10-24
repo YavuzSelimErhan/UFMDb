@@ -68,6 +68,65 @@ export interface ReviewLikeResult {
 
 export type ReviewSortBy = "newest" | "oldest" | "popular";
 
+// ---------- Film detayına eklenen TMDB verileri ----------
+
+export interface MovieVideo {
+  /** YouTube anahtarı (URL değil): https://www.youtube.com/watch?v={key} */
+  key: string;
+  site: string;
+  /** "Trailer" | "Teaser" */
+  type: string;
+  name: string;
+  /** ISO 639-1 ("en", "tr"); boşsa dil belirtilmemiş */
+  language: string;
+  isOfficial: boolean;
+}
+
+export type MovieImageType = "Poster" | "Backdrop" | "Logo";
+
+export interface MovieImage {
+  type: MovieImageType | string;
+  /** TMDB yolu ("/abc.jpg"); tam URL: https://image.tmdb.org/t/p/{size}{filePath} */
+  filePath: string;
+  language: string;
+  width: number;
+  height: number;
+}
+
+export interface Keyword {
+  id: string;
+  name: string;
+}
+
+export interface ProductionCompany {
+  id: string;
+  name: string;
+  /** TMDB yolu; boş olabilir */
+  logoPath: string;
+  originCountry: string;
+}
+
+export interface MovieCountry {
+  isoCode: string;
+  name: string;
+}
+
+export interface CollectionMovie {
+  id: string;
+  title: string;
+  releaseYear: number;
+  posterUrl: string;
+}
+
+export interface MovieCollection {
+  id: string;
+  name: string;
+  posterUrl: string;
+  backdropUrl: string;
+  /** Serideki DİĞER filmler (geçerli film hariç) */
+  movies: CollectionMovie[];
+}
+
 export interface MovieDetail {
   id: string;
   title: string;
@@ -93,6 +152,30 @@ export interface MovieDetail {
   myReview: MyReview | null;
   myRating: number | null;
   currentUserReaction: ReactionType | null;
+
+  // --- TMDB'den gelen ek alanlar ---
+  tagline: string;
+  /** Hızlı erişim için ana fragman anahtarı; tam liste `videos` içinde */
+  trailerKey: string;
+  /** Yaş sınırı (örn. "PG-13", "13+") ve hangi ülkeye ait olduğu ("TR" | "US") */
+  certification: string;
+  certificationCountry: string;
+  imdbId: string | null;
+  homepage: string;
+  /** ISO 639-1 (örn. "en", "ko") */
+  originalLanguage: string;
+  /** USD; 0 = bilinmiyor */
+  budget: number;
+  /** USD; 0 = bilinmiyor */
+  revenue: number;
+  /** TMDB'nin ham durumu: "Released", "Post Production" vb. */
+  tmdbStatus: string;
+  countries: MovieCountry[];
+  keywords: Keyword[];
+  companies: ProductionCompany[];
+  videos: MovieVideo[];
+  images: MovieImage[];
+  collection: MovieCollection | null;
 }
 
 export interface CastMemberInput {
@@ -114,6 +197,17 @@ export interface MovieFormPayload {
   country: string;
   genreIds: string[];
   cast: CastMemberInput[];
+  /**
+   * Backend bu alanı her güncellemede yazıyor; gönderilmezse 0 olarak kaydedilir.
+   * Admin formu mevcut değeri her zaman geri göndermeli.
+   */
+  seedRating?: number;
+  // Backend'de null = "dokunma", "" = "temizle"
+  titleTr?: string | null;
+  overviewTr?: string | null;
+  tagline?: string | null;
+  taglineTr?: string | null;
+  trailerKey?: string | null;
 }
 
 export interface AdminUser {
@@ -143,6 +237,8 @@ export interface MovieSearchFilter {
   actorName?: string;
   directorName?: string;
   minRating?: number;
+  keyword?: string;
+  collectionId?: string;
   page?: number;
   pageSize?: number;
   sortBy?:
@@ -612,4 +708,21 @@ export interface ActivityFeedPage {
   items: ActivityFeedItem[];
   nextBefore: string | null;
   hasMore: boolean;
+}
+
+export interface MovieFriendActivity {
+  user: FriendActivityUser;
+  rating: number | null;
+  watched: boolean;
+  reaction: ReactionType | null;
+  hasReview: boolean;
+  reviewExcerpt: string | null;
+  containsSpoiler: boolean;
+  lastActivityAtUtc: string;
+}
+
+export interface MovieFriendsActivity {
+  followingCount: number;
+  totalCount: number;
+  items: MovieFriendActivity[];
 }

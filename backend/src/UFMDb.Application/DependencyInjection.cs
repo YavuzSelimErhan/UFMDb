@@ -19,7 +19,7 @@ public static class DependencyInjection
         services.AddTransient(typeof(MediatR.Pipeline.IRequestPreProcessor<>), typeof(RequestLoggingPreProcessor<>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
-
+        services.AddMemoryCache();
         return services;
     }
 }

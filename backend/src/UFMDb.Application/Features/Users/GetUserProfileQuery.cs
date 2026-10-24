@@ -64,7 +64,7 @@ public record PublicFullProfileDto(
     bool IsFollowedByCurrentUser, bool IsCurrentUser
 );
 
-public record GetPublicFullProfileQuery(string UserName, Guid? CurrentUserId) : IRequest<PublicFullProfileDto>;
+public record GetPublicFullProfileQuery(string UserName, Guid? CurrentUserId, string Lang = "en") : IRequest<PublicFullProfileDto>;
 
 public class GetPublicFullProfileQueryHandler : IRequestHandler<GetPublicFullProfileQuery, PublicFullProfileDto>
 {
@@ -85,7 +85,7 @@ public class GetPublicFullProfileQueryHandler : IRequestHandler<GetPublicFullPro
             ?? throw new NotFoundException(nameof(User), request.UserName);
 
         // Zengin profil verisini mevcut GetProfileQuery'den alıyoruz — mükerrer sorgu yazmıyoruz.
-        var profile = await _mediator.Send(new GetProfileQuery(user.Id), ct);
+        var profile = await _mediator.Send(new GetProfileQuery(user.Id, request.Lang), ct);
 
         var followerCount = await _context.Follows.AsNoTracking()
             .CountAsync(f => f.FollowingId == user.Id, ct);

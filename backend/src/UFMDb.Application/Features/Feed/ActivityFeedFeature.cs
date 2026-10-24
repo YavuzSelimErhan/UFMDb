@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UFMDb.Application.Common;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Domain.Enums;
 
@@ -37,7 +38,7 @@ public record ActivityFeedPageDto(
 );
 
 /// <summary>Type: all | reviews | ratings | diary | reactions (bilinmeyen değer "all" sayılır).</summary>
-public record GetActivityFeedQuery(Guid UserId, DateTime? Before, string? Type, int PageSize)
+public record GetActivityFeedQuery(Guid UserId, DateTime? Before, string? Type, int PageSize, string Lang = "en")
     : IRequest<ActivityFeedPageDto>;
 
 public class GetActivityFeedQueryHandler : IRequestHandler<GetActivityFeedQuery, ActivityFeedPageDto>
@@ -79,6 +80,8 @@ public class GetActivityFeedQueryHandler : IRequestHandler<GetActivityFeedQuery,
     {
         var pageSize = request.PageSize <= 0 ? DefaultPageSize : Math.Min(request.PageSize, MaxPageSize);
         var type = (request.Type ?? "all").Trim().ToLowerInvariant();
+        if (type is not ("all" or "reviews" or "ratings" or "diary" or "reactions")) type = "all";
+        var isTr = Localization.IsTurkish(request.Lang);
         var before = NormalizeUtc(request.Before);
 
         var friendIds = await _context.Follows.AsNoTracking()
@@ -101,6 +104,7 @@ public class GetActivityFeedQueryHandler : IRequestHandler<GetActivityFeedQuery,
         // DbContext paralel çalışmaz: sorgular sırayla.
         if (type is "all" or "ratings")
         {
+            // Puanın tek kaynağı MovieRatings (Review'da puan alanı yok).
             var q = _context.MovieRatings.AsNoTracking().Where(r => userIds.Contains(r.UserId));
             if (before.HasValue)
             {
@@ -170,7 +174,7 @@ public class GetActivityFeedQueryHandler : IRequestHandler<GetActivityFeedQuery,
 
         if (type is "all" or "reviews")
         {
-            var q = _context.Reviews.AsNoTracking().Where(r => userIds.Contains(r.UserId));
+            var q = _context.Reviews.AsNoTracking().Where(r => userIds.Contains(r.UserId) && !r.IsDeleted);
             if (before.HasValue)
             {
                 var b = before.Value;
@@ -241,10 +245,12 @@ public class GetActivityFeedQueryHandler : IRequestHandler<GetActivityFeedQuery,
             .Select(m => new
             {
                 m.Id,
-                m.Title,
+                Title = isTr && m.TitleTr != "" ? m.TitleTr : m.Title,
                 m.PosterUrl,
                 m.ReleaseYear,
-                Genre = m.MovieGenres.Select(mg => mg.Genre.Name).FirstOrDefault()
+                Genre = m.MovieGenres
+                    .Select(mg => isTr && mg.Genre.NameTr != "" ? mg.Genre.NameTr : mg.Genre.Name)
+                    .FirstOrDefault()
             })
             .ToDictionaryAsync(m => m.Id, ct);
 

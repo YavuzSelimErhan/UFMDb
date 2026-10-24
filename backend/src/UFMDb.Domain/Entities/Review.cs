@@ -3,7 +3,7 @@ using UFMDb.Domain.Enums;
 
 namespace UFMDb.Domain.Entities;
 
-/// <summary>Yorum + puan birlikte tutulur (Letterboxd tarzı)</summary>
+/// <summary>Kullanıcının bir filme yazdığı yorum. Puan burada değil, MovieRatings'te tutulur.</summary>
 public class Review : BaseEntity
 {
     public Guid MovieId { get; set; }

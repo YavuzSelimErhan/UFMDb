@@ -1,0 +1,213 @@
+/* =========================================================================
+   Film detay: "Aynı Seansta" (takip edilenlerin bu filmdeki hareketi).
+   Her arkadaş bir bilet koçanı; sol yaka avatar + perforasyon, sağ yaka bilgi.
+   ========================================================================= */
+
+.ff-section {
+  margin-top: 38px;
+  max-width: 860px;
+}
+
+.ff-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.ff-heading__eyebrow {
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  color: var(--print-accent, var(--color-accent));
+}
+.ff-heading__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-family: var(--font-display);
+}
+.ff-heading::after {
+  content: "";
+  flex: 1;
+  min-width: 20px;
+  border-bottom: 2px dotted var(--color-border);
+  transform: translateY(-3px);
+}
+
+.ff-sub {
+  margin: 0 0 14px;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.ff-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 14px;
+}
+
+/* ---------- Bilet ---------- */
+.ff-ticket {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  background: var(--color-bg-elevated, var(--color-bg));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: inherit;
+  text-decoration: none;
+  transition: transform var(--transition-fast);
+}
+.ff-ticket:hover {
+  transform: translateY(-3px);
+}
+
+.ff-ticket__stub {
+  position: relative;
+  flex: 0 0 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 8px;
+  border-right: 2px dashed var(--print-accent, var(--color-accent));
+}
+.ff-ticket__stub::before,
+.ff-ticket__stub::after {
+  content: "";
+  position: absolute;
+  right: -9px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+.ff-ticket__stub::before {
+  top: -9px;
+}
+.ff-ticket__stub::after {
+  bottom: -9px;
+}
+.ff-ticket__admit {
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  color: var(--color-text-muted);
+}
+
+.ff-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 3px 10px var(--color-shadow);
+}
+.ff-avatar--fallback {
+  display: grid;
+  place-items: center;
+  background: var(--print-accent-soft, var(--color-accent-muted));
+  border: 1px solid var(--print-accent, var(--color-accent));
+  color: var(--print-accent, var(--color-accent));
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.ff-ticket__body {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+}
+.ff-ticket__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ff-ticket__name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ff-ticket__when {
+  flex: 0 0 auto;
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.ff-ticket__marks {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+  font-size: 0.78rem;
+}
+.ff-ticket__rating {
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-weight: 700;
+  color: var(--print-accent, var(--color-accent));
+}
+.ff-ticket__mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+.ff-ticket__mark--like {
+  color: #e0245e;
+}
+.ff-ticket__mark--dislike {
+  color: #5a7ad6;
+}
+
+.ff-ticket__excerpt {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ff-ticket__note {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 8px 0 0;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.ff-more {
+  margin: 12px 0 0;
+  font-family:
+    "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 480px) {
+  .ff-grid {
+    grid-template-columns: 1fr;
+  }
+  .ff-ticket__stub {
+    flex-basis: 66px;
+  }
+}

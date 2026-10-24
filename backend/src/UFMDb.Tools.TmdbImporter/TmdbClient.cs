@@ -1,7 +1,7 @@
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using UFMDb.Tools.TmdbImporter.Models;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace UFMDb.Tools.TmdbImporter;
 
@@ -20,7 +20,19 @@ public class TmdbClient
     public TmdbClient(string apiKey)
     {
         _apiKey = apiKey;
-        _http = new HttpClient { BaseAddress = new Uri("https://api.themoviedb.org/3/") };
+
+        var handler = new SocketsHttpHandler
+        {
+            AutomaticDecompression = DecompressionMethods.All,
+            EnableMultipleHttp2Connections = true,
+            PooledConnectionLifetime = TimeSpan.FromMinutes(5)
+        };
+        _http = new HttpClient(handler)
+        {
+            BaseAddress = new Uri("https://api.themoviedb.org/3/"),
+            DefaultRequestVersion = HttpVersion.Version20,
+            DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower
+        };
     }
 
     public async Task<TmdbGenreListResponse> GetGenresAsync(CancellationToken ct)
@@ -40,13 +52,13 @@ public class TmdbClient
     }
 
     public async Task<TmdbDiscoverResponse> DiscoverMoviesAsync(
-    int page,
-    int minVoteCount,
-    CancellationToken ct,
-    string? releaseDateGte = null,
-    string? releaseDateLte = null,
-    string sortBy = "vote_count.desc",
-    string? originCountry = null)
+        int page,
+        int minVoteCount,
+        CancellationToken ct,
+        string? releaseDateGte = null,
+        string? releaseDateLte = null,
+        string sortBy = "vote_count.desc",
+        string? originCountry = null)
     {
         var url = $"discover/movie?api_key={_apiKey}&language=en-US&sort_by={sortBy}" +
                   $"&include_adult=false&include_video=false&page={page}&vote_count.gte={minVoteCount}";
@@ -72,10 +84,26 @@ public class TmdbClient
 
     public async Task<TmdbMovieDetail?> GetMovieDetailAsync(int tmdbMovieId, CancellationToken ct)
     {
-        var url = $"movie/{tmdbMovieId}?api_key={_apiKey}&language=en-US&append_to_response=credits";
-        var response = await _http.GetAsync(url, ct);
-        if (!response.IsSuccessStatusCode) return null; // bazı filmler kaldırılmış/erişilemez olabilir, atla
-        return await response.Content.ReadFromJsonAsync<TmdbMovieDetail>(_jsonOptions, ct);
+        var url = $"movie/{tmdbMovieId}?api_key={_apiKey}&language=en-US" +
+                  "&append_to_response=credits,keywords,images,release_dates,videos,translations" +
+                  "&include_image_language=en,tr,null" +
+                  "&include_video_language=en,tr,null";
+
+        for (var attempt = 0; attempt < 4; attempt++)
+        {
+            var response = await _http.GetAsync(url, ct);
+
+            if ((int)response.StatusCode == 429 || (int)response.StatusCode >= 500)
+            {
+                var wait = response.Headers.RetryAfter?.Delta ?? TimeSpan.FromSeconds(1 << attempt);
+                await Task.Delay(wait, ct);
+                continue;
+            }
+
+            if (!response.IsSuccessStatusCode) return null; // kaldırılmış/erişilemez film
+            return await response.Content.ReadFromJsonAsync<TmdbMovieDetail>(_jsonOptions, ct);
+        }
+        return null;
     }
 
     public async Task<TmdbPersonDetail?> GetPersonDetailAsync(int personId, CancellationToken ct)
@@ -89,5 +117,3 @@ public class TmdbClient
     public static string? BuildImageUrl(string? path, string size) =>
         string.IsNullOrEmpty(path) ? null : $"{ImageBaseUrl}{size}{path}";
 }
-
-

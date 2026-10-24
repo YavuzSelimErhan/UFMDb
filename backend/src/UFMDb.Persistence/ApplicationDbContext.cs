@@ -36,6 +36,14 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<FavoriteDirector> FavoriteDirectors => Set<FavoriteDirector>();
     public DbSet<Follow> Follows => Set<Follow>();
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<MovieVideo> MovieVideos => Set<MovieVideo>();
+    public DbSet<MovieImage> MovieImages => Set<MovieImage>();
+    public DbSet<Keyword> Keywords => Set<Keyword>();
+    public DbSet<MovieKeyword> MovieKeywords => Set<MovieKeyword>();
+    public DbSet<ProductionCompany> ProductionCompanies => Set<ProductionCompany>();
+    public DbSet<MovieProductionCompany> MovieProductionCompanies => Set<MovieProductionCompany>();
+    public DbSet<MovieCollection> MovieCollections => Set<MovieCollection>();
+    public DbSet<MovieCountry> MovieCountries => Set<MovieCountry>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

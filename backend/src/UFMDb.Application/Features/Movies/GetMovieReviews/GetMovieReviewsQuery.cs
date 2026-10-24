@@ -8,7 +8,7 @@ namespace UFMDb.Application.Features.Reviews;
 public record ReviewListItemDto(
     Guid Id, Guid UserId, string UserName, string? UserAvatarUrl,
     string Content, bool ContainsSpoiler, int LikeCount, bool IsLikedByCurrentUser,
-    DateTime CreatedAtUtc, DateTime? UpdatedAtUtc
+    DateTime CreatedAtUtc, DateTime? UpdatedAtUtc, decimal? Rating = null
 );
 
 public record GetMovieReviewsQuery(
@@ -23,36 +23,40 @@ public class GetMovieReviewsQueryHandler : IRequestHandler<GetMovieReviewsQuery,
     public async Task<PagedResult<ReviewListItemDto>> Handle(GetMovieReviewsQuery request, CancellationToken ct)
     {
         var query = _context.Reviews.AsNoTracking()
-            .Include(r => r.User)
-            .Where(r => r.MovieId == request.MovieId && !r.IsDeleted);
+    .Where(r => r.MovieId == request.MovieId && !r.IsDeleted && !r.User.IsDeleted);
 
         query = request.SortBy switch
         {
-            "newest" => query.OrderByDescending(r => r.CreatedAtUtc),
-            "oldest" => query.OrderBy(r => r.CreatedAtUtc),
-            _ => query.OrderByDescending(r => r.LikeCount).ThenByDescending(r => r.CreatedAtUtc)
+            "newest" => query.OrderByDescending(r => r.CreatedAtUtc).ThenBy(r => r.Id),
+            "oldest" => query.OrderBy(r => r.CreatedAtUtc).ThenBy(r => r.Id),
+            _ => query.OrderByDescending(r => r.LikeCount).ThenByDescending(r => r.CreatedAtUtc).ThenBy(r => r.Id)
         };
 
         var totalCount = await query.CountAsync(ct);
-
+        var page = Math.Max(1, request.Page);
         var pageSize = request.PageSize is < 1 or > 100 ? 10 : request.PageSize;
 
         var pageItems = await query
-            .Skip((request.Page - 1) * pageSize)
+            .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(r => new
-            {
-                r.Id,
-                r.UserId,
-                r.User.UserName,
-                r.User.AvatarUrl,
-                r.Content,
-                r.ContainsSpoiler,
-                r.LikeCount,
-                r.CreatedAtUtc,
-                r.UpdatedAtUtc
-            })
+                {
+                    r.Id,
+                    r.UserId,
+                    r.User.UserName,
+                    r.User.AvatarUrl,
+                    r.Content,
+                    r.ContainsSpoiler,
+                    r.LikeCount,
+                    r.CreatedAtUtc,
+                    r.UpdatedAtUtc
+                })
             .ToListAsync(ct);
+
+        var authorIds = pageItems.Select(r => r.UserId).Distinct().ToList();
+        var ratings = await _context.MovieRatings.AsNoTracking()
+            .Where(r => r.MovieId == request.MovieId && authorIds.Contains(r.UserId))
+            .ToDictionaryAsync(r => r.UserId, r => r.Value, ct);
 
         var likedReviewIds = new HashSet<Guid>();
         if (request.CurrentUserId.HasValue && pageItems.Count > 0)
@@ -66,9 +70,10 @@ public class GetMovieReviewsQueryHandler : IRequestHandler<GetMovieReviewsQuery,
 
         var items = pageItems.Select(r => new ReviewListItemDto(
             r.Id, r.UserId, r.UserName, r.AvatarUrl, r.Content, r.ContainsSpoiler,
-            r.LikeCount, likedReviewIds.Contains(r.Id), r.CreatedAtUtc, r.UpdatedAtUtc
+            r.LikeCount, likedReviewIds.Contains(r.Id), r.CreatedAtUtc, r.UpdatedAtUtc,
+            ratings.TryGetValue(r.UserId, out var rating) ? rating : (decimal?)null
         )).ToList();
 
-        return new PagedResult<ReviewListItemDto>(items, totalCount, request.Page, pageSize);
+        return new PagedResult<ReviewListItemDto>(items, totalCount, page, pageSize);
     }
 }

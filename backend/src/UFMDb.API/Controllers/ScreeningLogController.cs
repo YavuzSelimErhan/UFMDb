@@ -28,7 +28,7 @@ public class ScreeningLogController : ControllerBase
         [FromQuery] int pageSize = 20,
         [FromQuery] ReactionType? reaction = null,
         [FromQuery] string? search = null)
-        => Ok(await _mediator.Send(new GetScreeningLogQuery(RequireUserId(), cursor, pageSize, reaction, search)));
+        => Ok(await _mediator.Send(new GetScreeningLogQuery(RequireUserId(), cursor, pageSize, reaction, search, Request.GetLang())));
 
     [HttpGet("summary")]
     public async Task<ActionResult<ScreeningLogSummaryDto>> GetSummary()

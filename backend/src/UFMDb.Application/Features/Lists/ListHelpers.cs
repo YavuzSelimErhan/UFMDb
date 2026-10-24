@@ -109,7 +109,7 @@ internal static class ListItemsHelper
 
         var ids = distinct.Select(i => i.MovieId).ToList();
         var existing = (await ctx.Movies.AsNoTracking()
-            .Where(m => ids.Contains(m.Id)).Select(m => m.Id).ToListAsync(ct)).ToHashSet();
+            .Where(m => !m.IsDeleted && ids.Contains(m.Id)).Select(m => m.Id).ToListAsync(ct)).ToHashSet();
 
         var missing = ids.FirstOrDefault(id => !existing.Contains(id));
         if (missing != Guid.Empty) throw new NotFoundException(nameof(Movie), missing);

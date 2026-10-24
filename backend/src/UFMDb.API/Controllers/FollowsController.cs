@@ -56,14 +56,14 @@ public class FollowsController : ControllerBase
     [HttpGet("~/api/users/by-username/{userName}/full-profile")]
     [AllowAnonymous]
     public async Task<IActionResult> GetFullProfile(string userName, CancellationToken ct) =>
-    Ok(await _mediator.Send(new GetPublicFullProfileQuery(userName, _currentUser.UserId), ct));
+    Ok(await _mediator.Send(new GetPublicFullProfileQuery(userName, _currentUser.UserId, Request.GetLang()), ct));
 
     [HttpGet("~/api/users/{userId:guid}/watched-films")]
     [AllowAnonymous]
     public async Task<IActionResult> GetUserWatchedFilms(
         Guid userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
         [FromQuery] string? sortBy = null, [FromQuery] bool? hasRating = null, CancellationToken ct = default) =>
-        Ok(await _mediator.Send(new GetUserWatchedMoviesQuery(userId, page, pageSize, sortBy, hasRating), ct));
+        Ok(await _mediator.Send(new GetUserWatchedMoviesQuery(userId, page, pageSize, sortBy, hasRating, Request.GetLang()), ct));
 
     // all / rated / unrated sayıları (başka bir kullanıcının profili için)
     [HttpGet("~/api/users/{userId:guid}/watched-films/counts")]

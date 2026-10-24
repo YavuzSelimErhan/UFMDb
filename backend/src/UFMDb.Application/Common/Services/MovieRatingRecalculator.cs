@@ -42,11 +42,24 @@ public static class MovieRatingRecalculator
         await context.SaveChangesAsync(ct);
         await RecalculateAsync(context, movie, ct);
     }
+    
+    public static void ApplyStats(Movie movie, int localCount, double localSum)
+    {
+        var totalVotes = movie.SeedVoteCount + localCount;
+
+        movie.AverageRating = totalVotes == 0
+            ? movie.SeedRating
+            : Math.Round((movie.SeedRating * movie.SeedVoteCount + localSum) / totalVotes, 2);
+
+        movie.RatingCount = totalVotes;
+    }
 
     /// <summary>Filmin AverageRating/RatingCount alanlarını yeniden hesaplar. TMDB'den içe aktarılan
     /// orijinal oy sayısı (SeedVoteCount) ve ortalaması (SeedRating) hiç silinmez; sitede verilen
     /// yeni puanlar bunun üzerine, gerçek oy sayılarıyla ağırlıklandırılarak eklenir. Tek doğru
     /// kaynak burasıdır — TmdbImporter'daki tek seferlik backfill de aynı mantığı izler.</summary>
+    /// <summary>Hesaplama formülünün tek yeri: toplu ve tekil yeniden hesap aynı kodu kullanır.</summary>
+
     public static async Task RecalculateAsync(IApplicationDbContext context, Movie movie, CancellationToken ct)
     {
         var stats = await context.MovieRatings
@@ -55,17 +68,7 @@ public static class MovieRatingRecalculator
             .Select(g => new { Sum = g.Sum(r => (double)r.Value), Count = g.Count() })
             .FirstOrDefaultAsync(ct);
 
-        var localCount = stats?.Count ?? 0;
-        var localSum = stats?.Sum ?? 0;
-
-        var totalVotes = movie.SeedVoteCount + localCount;
-
-        movie.AverageRating = totalVotes == 0
-            ? movie.SeedRating
-            : Math.Round((movie.SeedRating * movie.SeedVoteCount + localSum) / totalVotes, 2);
-
-        movie.RatingCount = totalVotes;
-
+        ApplyStats(movie, stats?.Count ?? 0, stats?.Sum ?? 0);
         await context.SaveChangesAsync(ct);
     }
 }

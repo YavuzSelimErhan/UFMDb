@@ -1,28 +1,44 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UFMDb.Application.Common;
 using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.DTOs;
 using UFMDb.Domain.Enums;
 namespace UFMDb.Application.Features.Movies.GetMovieDetail;
-public record GetMovieDetailQuery(Guid MovieId, Guid? CurrentUserId) : IRequest<MovieDetailDto>;
+
+public record GetMovieDetailQuery(Guid MovieId, Guid? CurrentUserId, string Lang = "en") : IRequest<MovieDetailDto>;
+
 public class GetMovieDetailQueryHandler : IRequestHandler<GetMovieDetailQuery, MovieDetailDto>
 {
     private readonly IApplicationDbContext _context;
     public GetMovieDetailQueryHandler(IApplicationDbContext context) => _context = context;
+
     public async Task<MovieDetailDto> Handle(GetMovieDetailQuery request, CancellationToken ct)
     {
+        var isTr = Localization.IsTurkish(request.Lang);
+
         var movie = await _context.Movies
             .AsNoTracking()
             .Include(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
             .Include(m => m.MovieActors.OrderBy(ma => ma.Order)).ThenInclude(ma => ma.Actor)
             .Include(m => m.MovieDirectors).ThenInclude(md => md.Director)
+            .Include(m => m.MovieCountries.OrderBy(mc => mc.Order)).ThenInclude(mc => mc.Country)
+            .Include(m => m.MovieKeywords).ThenInclude(mk => mk.Keyword)
+            .Include(m => m.MovieProductionCompanies).ThenInclude(pc => pc.ProductionCompany)
+            .Include(m => m.Videos)
+            .Include(m => m.Images)
+            .Include(m => m.Collection)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(m => m.Id == request.MovieId && !m.IsDeleted, ct);
+
         if (movie is null) throw new NotFoundException(nameof(Domain.Entities.Movie), request.MovieId);
+
         bool isInWatchlist = false, isWatched = false;
         ReactionType? myReaction = null;
         decimal? myRating = null;
         MyReviewDto? myReview = null;
+
         if (request.CurrentUserId is Guid uid)
         {
             myReaction = await _context.Likes.AsNoTracking()
@@ -45,17 +61,75 @@ public class GetMovieDetailQueryHandler : IRequestHandler<GetMovieDetailQuery, M
             if (reviewEntity is not null)
                 myReview = new MyReviewDto(reviewEntity.Content, reviewEntity.ContainsSpoiler);
         }
+
+        // ---- Koleksiyon (seri/üçleme) + serideki diðer filmler ----
+        MovieCollectionDto? collectionDto = null;
+        if (movie.Collection is { } col)
+        {
+            var siblings = await _context.Movies.AsNoTracking()
+                .Where(m => m.CollectionId == col.Id && !m.IsDeleted && m.Id != movie.Id)
+                .OrderBy(m => m.ReleaseDate)
+                .Take(20)
+                .Select(m => new CollectionMovieDto(
+                    m.Id, isTr && m.TitleTr != "" ? m.TitleTr : m.Title, m.ReleaseYear, m.PosterUrl))
+                .ToListAsync(ct);
+            collectionDto = new MovieCollectionDto(col.Id, col.Name, col.PosterUrl, col.BackdropUrl, siblings);
+        }
+
+        var countries = movie.MovieCountries
+            .OrderBy(mc => mc.Order)
+            .Select(mc => new MovieCountryDto(mc.Country.IsoCode, Localization.Pick(isTr, mc.Country.Name, mc.Country.NameTr)))
+            .ToList();
+        var primaryCountry = countries.FirstOrDefault()?.Name ?? movie.Country;
+
+        var videos = movie.Videos
+            .OrderBy(v => v.Type == "Trailer" ? 0 : 1)
+            .ThenByDescending(v => v.IsOfficial)
+            .ThenByDescending(v => v.PublishedAtUtc)
+            .Select(v => new MovieVideoDto(v.Key, v.Site, v.Type, v.Name, v.Language, v.IsOfficial))
+            .ToList();
+
+        var images = movie.Images
+            .OrderBy(i => i.Type)
+            .ThenByDescending(i => i.VoteAverage)
+            .Select(i => new MovieImageDto(i.Type, i.FilePath, i.Language, i.Width, i.Height))
+            .ToList();
+
         return new MovieDetailDto(
-            movie.Id, movie.Title, movie.OriginalTitle, movie.Overview, movie.ReleaseYear, movie.ReleaseDate,
+            movie.Id,
+            Localization.Pick(isTr, movie.Title, movie.TitleTr),
+            movie.OriginalTitle,
+            Localization.Pick(isTr, movie.Overview, movie.OverviewTr),
+            movie.ReleaseYear, movie.ReleaseDate,
             movie.RuntimeMinutes, movie.PosterUrl, movie.BackdropUrl,
             movie.MovieDirectors.OrderBy(md => md.Order)
-            .Select(md => new MovieDirectorDto(md.DirectorId, md.Director.FullName, md.Director.PhotoUrl)).ToList(),
-            movie.Country, movie.AverageRating, movie.RatingCount, movie.LikeCount,
-            movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
+                .Select(md => new MovieDirectorDto(md.DirectorId, md.Director.FullName, md.Director.PhotoUrl)).ToList(),
+            primaryCountry, movie.AverageRating, movie.RatingCount, movie.LikeCount,
+            movie.MovieGenres.Select(mg => Localization.Pick(isTr, mg.Genre.Name, mg.Genre.NameTr)).ToList(),
             movie.MovieGenres.Select(mg => mg.GenreId).ToList(),
             movie.MovieActors.Select(ma => new MovieCastDto(ma.ActorId, ma.Actor.FullName, ma.Actor.PhotoUrl, ma.CharacterName, ma.Order)).ToList(),
             myReaction == ReactionType.Like, isInWatchlist, isWatched, myRating, myReview,
-            movie.DislikeCount, myReaction
+            movie.DislikeCount, myReaction,
+            Tagline: Localization.Pick(isTr, movie.Tagline, movie.TaglineTr),
+            TrailerKey: movie.TrailerKey,
+            Certification: movie.Certification,
+            CertificationCountry: movie.CertificationCountry,
+            ImdbId: movie.ImdbId,
+            Homepage: movie.Homepage,
+            OriginalLanguage: movie.OriginalLanguage,
+            Budget: movie.Budget,
+            Revenue: movie.Revenue,
+            TmdbStatus: movie.TmdbStatus,
+            Countries: countries,
+            Keywords: movie.MovieKeywords.Select(mk => new KeywordDto(mk.KeywordId, mk.Keyword.Name))
+                .OrderBy(k => k.Name).ToList(),
+            Companies: movie.MovieProductionCompanies
+                .Select(pc => new ProductionCompanyDto(pc.ProductionCompanyId, pc.ProductionCompany.Name,
+                    pc.ProductionCompany.LogoPath, pc.ProductionCompany.OriginCountry))
+                .OrderBy(c => c.Name).ToList(),
+            Videos: videos,
+            Images: images,
+            Collection: collectionDto
         );
     }
 }

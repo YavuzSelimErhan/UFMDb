@@ -30,6 +30,7 @@ import type {
   PublicFullProfileDto,
   NotificationItem,
   MovieReactionResult,
+  MovieFriendsActivity,
   FriendsActivity,
   ActivityFilter,
   ActivityFeedPage,
@@ -57,6 +58,11 @@ export const movieService = {
   },
   getHomeFeed: async (): Promise<HomeFeed> => {
     const { data } = await api.get("/movies/home-feed");
+    return data;
+  },
+  /** Takip edilenlerin bu filmdeki hareketleri (giriş gerekir). */
+  getFriendsActivity: async (id: string): Promise<MovieFriendsActivity> => {
+    const { data } = await api.get(`/movies/${id}/friends-activity`);
     return data;
   },
   like: async (id: string): Promise<MovieReactionResult> => {

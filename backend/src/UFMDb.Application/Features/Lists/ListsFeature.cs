@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UFMDb.Application.Common;
 using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.DTOs;
@@ -118,9 +119,11 @@ public class GetListsQueryHandler : IRequestHandler<GetListsQuery, PagedListsDto
             })
             .ToListAsync(ct);
 
-        var likedListIds = hasViewer
+        // Sadece bu sayfadaki listeler için beğeni durumu (kullanıcının tüm beğenileri değil).
+        var pageListIds = lists.Select(l => l.Id).ToList();
+        var likedListIds = hasViewer && pageListIds.Count > 0
             ? (await _context.CuratedListLikes.AsNoTracking()
-                .Where(l => l.UserId == viewerId)
+                .Where(l => l.UserId == viewerId && pageListIds.Contains(l.CuratedListId))
                 .Select(l => l.CuratedListId)
                 .ToListAsync(ct)).ToHashSet()
             : new HashSet<Guid>();
@@ -137,8 +140,8 @@ public class GetListsQueryHandler : IRequestHandler<GetListsQuery, PagedListsDto
 }
 
 // ======================= Liste detayı (Id veya slug ile) =======================
-public record GetListDetailQuery(Guid ListId, Guid? UserId, bool IsAdmin) : IRequest<ListDetailDto>;
-public record GetListDetailBySlugQuery(string Slug, Guid? UserId, bool IsAdmin) : IRequest<ListDetailDto>;
+public record GetListDetailQuery(Guid ListId, Guid? UserId, bool IsAdmin, string Lang = "en") : IRequest<ListDetailDto>;
+public record GetListDetailBySlugQuery(string Slug, Guid? UserId, bool IsAdmin, string Lang = "en") : IRequest<ListDetailDto>;
 
 public class GetListDetailQueryHandler : IRequestHandler<GetListDetailQuery, ListDetailDto>
 {
@@ -146,7 +149,8 @@ public class GetListDetailQueryHandler : IRequestHandler<GetListDetailQuery, Lis
     public GetListDetailQueryHandler(IApplicationDbContext context) => _context = context;
 
     public Task<ListDetailDto> Handle(GetListDetailQuery r, CancellationToken ct) =>
-        ListDetailBuilder.BuildAsync(_context, _context.CuratedLists.Where(cl => cl.Id == r.ListId), r.ListId, r.UserId, r.IsAdmin, ct);
+        ListDetailBuilder.BuildAsync(_context, _context.CuratedLists.Where(cl => cl.Id == r.ListId),
+            r.ListId, r.UserId, r.IsAdmin, r.Lang, ct);
 }
 
 public class GetListDetailBySlugQueryHandler : IRequestHandler<GetListDetailBySlugQuery, ListDetailDto>
@@ -155,61 +159,71 @@ public class GetListDetailBySlugQueryHandler : IRequestHandler<GetListDetailBySl
     public GetListDetailBySlugQueryHandler(IApplicationDbContext context) => _context = context;
 
     public Task<ListDetailDto> Handle(GetListDetailBySlugQuery r, CancellationToken ct) =>
-        ListDetailBuilder.BuildAsync(_context, _context.CuratedLists.Where(cl => cl.Slug == r.Slug), r.Slug, r.UserId, r.IsAdmin, ct);
+        ListDetailBuilder.BuildAsync(_context, _context.CuratedLists.Where(cl => cl.Slug == r.Slug),
+            r.Slug, r.UserId, r.IsAdmin, r.Lang, ct);
 }
 
 internal static class ListDetailBuilder
 {
     public static async Task<ListDetailDto> BuildAsync(
         IApplicationDbContext context, IQueryable<CuratedList> source, object key,
-        Guid? userId, bool isAdmin, CancellationToken ct)
+        Guid? userId, bool isAdmin, string lang, CancellationToken ct)
     {
+        var isTr = Localization.IsTurkish(lang);
+
         // Erişim yoksa "bulunamadı" dön: private listenin varlığı sızmasın.
         var list = await source.AsNoTracking()
             .VisibleTo(userId, isAdmin)
-            .Include(cl => cl.Items.OrderBy(i => i.Order)).ThenInclude(i => i.Movie).ThenInclude(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
-            .Include(cl => cl.CreatedByUser)
+            .Select(cl => new
+            {
+                cl.Id,
+                cl.Slug,
+                cl.Title,
+                cl.TitleTr,
+                cl.Description,
+                cl.DescriptionTr,
+                cl.CoverImageUrl,
+                cl.IsRanked,
+                cl.Visibility,
+                cl.Status,
+                cl.IsOfficial,
+                cl.CreatedByUserId,
+                CreatedByUserName = cl.CreatedByUser.UserName,
+                cl.LikeCount,
+                cl.ViewCount,
+                cl.PublishedAt,
+                cl.DisplayOrder
+            })
             .FirstOrDefaultAsync(ct)
             ?? throw new NotFoundException(nameof(CuratedList), key);
 
-        var orderedItems = list.Items.OrderBy(i => i.Order).ToList();
-        var movies = orderedItems.Select(i => new MovieListItemDto(
-            i.Movie.Id, i.Movie.Title, i.Movie.ReleaseYear, i.Movie.PosterUrl,
-            (decimal)i.Movie.AverageRating, i.Movie.RatingCount,
-            i.Movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
-            i.Movie.BackdropUrl, i.Movie.Overview,
-            false, false, false, i.Movie.ReleaseDate, null
-        )).ToList();
+        // Include zinciri yerine iki düz sorgu: öğeler, sonra sadece o filmlerin liste projeksiyonu.
+        // Soft-delete edilmiş filmler Movies sorgusunda elendiği için listeden de düşer.
+        var itemRows = await context.CuratedLists.AsNoTracking()
+            .Where(cl => cl.Id == list.Id)
+            .SelectMany(cl => cl.Items)
+            .OrderBy(i => i.Order)
+            .Select(i => new { i.MovieId, i.Order, i.Note, i.NoteTr })
+            .ToListAsync(ct);
+
+        var movieIds = itemRows.Select(i => i.MovieId).ToList();
+        var loaded = await context.Movies.AsNoTracking()
+            .Where(m => !m.IsDeleted && movieIds.Contains(m.Id))
+            .Select(MovieProjections.ListItem(isTr))
+            .ToListAsync(ct);
+        var byId = loaded.ToDictionary(m => m.Id);
+
+        var items = itemRows
+            .Where(i => byId.ContainsKey(i.MovieId))
+            .Select(i => new ListItemDto(i.Order, i.Note, i.NoteTr, byId[i.MovieId]))
+            .ToList();
 
         var isLikedByCurrentUser = false;
-
         if (userId.HasValue)
         {
-            if (movies.Count > 0)
-            {
-                var movieIds = movies.Select(m => m.Id).ToHashSet();
-
-                var watchlistIds = (await context.WatchlistItems.AsNoTracking()
-                    .Where(w => w.UserId == userId.Value && movieIds.Contains(w.MovieId))
-                    .Select(w => w.MovieId).ToListAsync(ct)).ToHashSet();
-
-                var reactions = await context.Likes.AsNoTracking()
-                    .Where(l => l.UserId == userId.Value && movieIds.Contains(l.MovieId))
-                    .ToDictionaryAsync(l => l.MovieId, l => l.Reaction, ct);
-
-                var watchedIds = (await context.WatchHistory.AsNoTracking()
-                    .Where(w => w.UserId == userId.Value && movieIds.Contains(w.MovieId))
-                    .Select(w => w.MovieId).ToListAsync(ct)).ToHashSet();
-
-                for (var i = 0; i < movies.Count; i++)
-                {
-                    movies[i] = (movies[i] with
-                    {
-                        IsInWatchlistByCurrentUser = watchlistIds.Contains(movies[i].Id),
-                        IsWatchedByCurrentUser = watchedIds.Contains(movies[i].Id)
-                    }).WithReaction(reactions);
-                }
-            }
+            var flagged = await MovieUserFlags.ApplyAsync(
+                context, items.Select(i => i.Movie).ToList(), userId.Value, ct);
+            items = items.Select((it, idx) => it with { Movie = flagged[idx] }).ToList();
 
             isLikedByCurrentUser = await context.CuratedListLikes.AsNoTracking()
                 .AnyAsync(l => l.CuratedListId == list.Id && l.UserId == userId.Value, ct);
@@ -222,16 +236,12 @@ internal static class ListDetailBuilder
                 .ExecuteUpdateAsync(s => s.SetProperty(cl => cl.ViewCount, cl => cl.ViewCount + 1), ct);
         }
 
-        var items = orderedItems
-            .Select((it, idx) => new ListItemDto(it.Order, it.Note, it.NoteTr, movies[idx]))
-            .ToList();
-
         var canEdit = isAdmin || userId == list.CreatedByUserId;
 
         return new ListDetailDto(
             list.Id, list.Slug, list.Title, list.TitleTr, list.Description, list.DescriptionTr,
             list.CoverImageUrl, list.IsRanked, list.Visibility, list.Status, items,
-            list.IsOfficial, list.CreatedByUserId, list.CreatedByUser.UserName,
+            list.IsOfficial, list.CreatedByUserId, list.CreatedByUserName,
             list.LikeCount, list.ViewCount, isLikedByCurrentUser, canEdit, list.PublishedAt,
             list.DisplayOrder
         );
@@ -587,7 +597,7 @@ public class AddMovieToListCommandHandler : IRequestHandler<AddMovieToListComman
         if (list.Items.Count >= ListLimits.MaxItemsPerList)
             throw new ValidationException("Items", $"Bir listede en fazla {ListLimits.MaxItemsPerList} film olabilir.");
 
-        if (!await _context.Movies.AnyAsync(m => m.Id == request.MovieId, ct))
+        if (!await _context.Movies.AnyAsync(m => m.Id == request.MovieId && !m.IsDeleted, ct))
             throw new NotFoundException(nameof(Movie), request.MovieId);
 
         var wasEmpty = list.Items.Count == 0;

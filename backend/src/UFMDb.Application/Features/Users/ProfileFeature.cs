@@ -44,7 +44,7 @@ public record ProfileDto(
     int FollowingCount
 );
 
-public record GetProfileQuery(Guid UserId) : IRequest<ProfileDto>;
+public record GetProfileQuery(Guid UserId, string Lang = "en") : IRequest<ProfileDto>;
 
 public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDto>
 {
@@ -53,6 +53,8 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
 
     public async Task<ProfileDto> Handle(GetProfileQuery request, CancellationToken ct)
     {
+        var isTr = Localization.IsTurkish(request.Lang);
+
         var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == request.UserId, ct)
             ?? throw new NotFoundException(nameof(User), request.UserId);
 
@@ -112,12 +114,12 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             .Select(slot =>
             {
                 var match = favoriteEntities.FirstOrDefault(f => f.Slot == slot);
-                return new FavoriteSlotDto(slot, match is null ? null : ToListItem(match.Movie, reactions, watchlistMovieIds, watchedMovieIds));
+                return new FavoriteSlotDto(slot, match is null ? null : ToListItem(match.Movie, reactions, watchlistMovieIds, watchedMovieIds, isTr));
             })
             .ToList();
 
         var recentlyWatched = recent.Select(w => new RecentlyWatchedItemDto(
-            ToListItem(w.Movie, reactions, watchlistMovieIds, watchedMovieIds), w.Rating
+            ToListItem(w.Movie, reactions, watchlistMovieIds, watchedMovieIds, isTr), w.Rating
         )).ToList();
 
         var reviewEntities = await _context.Reviews.AsNoTracking()
@@ -126,7 +128,7 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             .OrderByDescending(r => r.CreatedAtUtc)
             .ToListAsync(ct);
         var reviews = reviewEntities.Select(r => new ReviewSummaryDto(
-            r.Id, r.MovieId, r.Movie.Title, r.Movie.PosterUrl, r.Content, r.ContainsSpoiler, r.CreatedAtUtc)).ToList();
+            r.Id, r.MovieId, MovieText.Title(r.Movie, isTr), r.Movie.PosterUrl, r.Content, r.ContainsSpoiler, r.CreatedAtUtc)).ToList();
 
         var favoriteActorEntities = await _context.FavoriteActors.AsNoTracking()
             .Include(f => f.Actor)
@@ -175,8 +177,8 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             user.FullName, user.Country, user.BirthDate, user.Gender.ToString(), user.Biography,
             favorites,
             recentlyWatched,
-            liked.Select(l => ToListItem(l.Movie, reactions, watchlistMovieIds, watchedMovieIds)).ToList(),
-            watchlist.Select(w => ToListItem(w.Movie, reactions, watchlistMovieIds, watchedMovieIds)).ToList(),
+            liked.Select(l => ToListItem(l.Movie, reactions, watchlistMovieIds, watchedMovieIds, isTr)).ToList(),
+            watchlist.Select(w => ToListItem(w.Movie, reactions, watchlistMovieIds, watchedMovieIds, isTr)).ToList(),
             reviews,
             favoriteActors,
             likedActors,
@@ -192,12 +194,12 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
         );
     }
 
-    private static MovieListItemDto ToListItem(Movie m, IReadOnlyDictionary<Guid, ReactionType> reactions, HashSet<Guid> watchlistIds, HashSet<Guid> watchedIds)
+    private static MovieListItemDto ToListItem(Movie m, IReadOnlyDictionary<Guid, ReactionType> reactions, HashSet<Guid> watchlistIds, HashSet<Guid> watchedIds, bool isTr)
     {
         ReactionType? reaction = reactions.TryGetValue(m.Id, out var r) ? r : null;
         return new MovieListItemDto(
-            m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
-            m.MovieGenres.Select(g => g.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
+            m.Id, MovieText.Title(m, isTr), m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
+            m.MovieGenres.Select(g => MovieText.GenreName(g.Genre, isTr)).ToList(), m.BackdropUrl, MovieText.Overview(m, isTr),
             watchlistIds.Contains(m.Id), reaction == ReactionType.Like, watchedIds.Contains(m.Id),
             m.ReleaseDate, reaction);
     }
@@ -494,7 +496,7 @@ public class UpdateUserSettingsCommandHandler : IRequestHandler<UpdateUserSettin
 }
 
 public record WatchedMovieDto(Guid MovieId, MovieListItemDto Movie, DateTime WatchedAtUtc, decimal? UserRating);
-public record GetUserWatchedMoviesQuery(Guid UserId, int Page, int PageSize, string? SortBy, bool? HasRating) : IRequest<PagedResult<WatchedMovieDto>>;
+public record GetUserWatchedMoviesQuery(Guid UserId, int Page, int PageSize, string? SortBy, bool? HasRating, string Lang = "en") : IRequest<PagedResult<WatchedMovieDto>>;
 
 public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMoviesQuery, PagedResult<WatchedMovieDto>>
 {
@@ -503,6 +505,8 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
 
     public async Task<PagedResult<WatchedMovieDto>> Handle(GetUserWatchedMoviesQuery request, CancellationToken ct)
     {
+        var isTr = Localization.IsTurkish(request.Lang);
+
         // Her film için en son izleme tarihi (varsa)
         var lastWatchedByMovie = await _context.WatchHistory.AsNoTracking()
             .Where(w => w.UserId == request.UserId)
@@ -539,7 +543,7 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
             var date = hasWatch ? lastWatched : ratingDateByMovie[m.Id];
             var rating = ratingValueByMovie.TryGetValue(m.Id, out var r) ? r : (decimal?)null;
             // Listedeki her film tanım gereği izlenmiş (logu VEYA puanı var): bayrak her zaman true.
-            return new WatchedMovieDto(m.Id, ToListItem(m, reactions, watchlistSet, true), date, rating);
+            return new WatchedMovieDto(m.Id, ToListItem(m, reactions, watchlistSet, true, isTr), date, rating);
         });
 
         if (request.HasRating is true) all = all.Where(w => w.UserRating.HasValue);
@@ -572,12 +576,12 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
         return new PagedResult<WatchedMovieDto>(page, totalCount, request.Page, pageSize);
     }
 
-    private static MovieListItemDto ToListItem(Movie m, IReadOnlyDictionary<Guid, ReactionType> reactions, HashSet<Guid> watchlistIds, bool isWatched)
+    private static MovieListItemDto ToListItem(Movie m, IReadOnlyDictionary<Guid, ReactionType> reactions, HashSet<Guid> watchlistIds, bool isWatched, bool isTr)
     {
         ReactionType? reaction = reactions.TryGetValue(m.Id, out var r) ? r : null;
         return new MovieListItemDto(
-            m.Id, m.Title, m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
-            m.MovieGenres.Select(g => g.Genre.Name).ToList(), m.BackdropUrl, m.Overview,
+            m.Id, MovieText.Title(m, isTr), m.ReleaseYear, m.PosterUrl, (decimal)m.AverageRating, m.RatingCount,
+            m.MovieGenres.Select(g => MovieText.GenreName(g.Genre, isTr)).ToList(), m.BackdropUrl, MovieText.Overview(m, isTr),
             watchlistIds.Contains(m.Id), reaction == ReactionType.Like, isWatched, m.ReleaseDate, reaction);
     }
 }

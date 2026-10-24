@@ -10,12 +10,29 @@ public class MovieConfiguration : IEntityTypeConfiguration<Movie>
     public void Configure(EntityTypeBuilder<Movie> b)
     {
         b.ToTable("Movies");
+
+        // Lokalize alanlar (EN = X, TR = XTr)
         b.Property(m => m.Title).IsRequired().HasMaxLength(300);
+        b.Property(m => m.TitleTr).HasMaxLength(300);
         b.Property(m => m.OriginalTitle).HasMaxLength(300);
         b.Property(m => m.Overview).HasMaxLength(4000);
+        b.Property(m => m.OverviewTr).HasMaxLength(4000);
+        b.Property(m => m.Tagline).HasMaxLength(500);
+        b.Property(m => m.TaglineTr).HasMaxLength(500);
+
+        // TMDB'den gelen tek değerli alanlar
+        b.Property(m => m.ImdbId).HasMaxLength(20);
+        b.Property(m => m.OriginalLanguage).HasMaxLength(10);
+        b.Property(m => m.Homepage).HasMaxLength(500);
+        b.Property(m => m.TrailerKey).HasMaxLength(50);
+        b.Property(m => m.TmdbStatus).HasMaxLength(30);
+        // Budget / Revenue: long -> bigint (USD cinsinden, int sınırını aşabilir)
+
         b.Property(m => m.PosterUrl).HasMaxLength(500);
         b.Property(m => m.BackdropUrl).HasMaxLength(500);
         b.Property(m => m.AverageRating).HasColumnType("decimal(3,2)");
+        b.Property(m => m.Certification).HasMaxLength(10);
+        b.Property(m => m.CertificationCountry).HasMaxLength(2);
 
         // Enum'u DB'de okunabilir string olarak sakla (int yerine) — migration sonrası
         // veritabanına bakıldığında "Upcoming"/"Stable" görmek int'ten daha az hataya açık.
@@ -24,8 +41,10 @@ public class MovieConfiguration : IEntityTypeConfiguration<Movie>
             .HasMaxLength(20);
 
         b.HasIndex(m => m.Title);
+        b.HasIndex(m => m.TitleTr);
         b.HasIndex(m => m.ReleaseYear);
         b.HasIndex(m => m.TmdbId).IsUnique().HasFilter("\"TmdbId\" IS NOT NULL");
+        b.HasIndex(m => m.ImdbId).IsUnique().HasFilter("\"ImdbId\" IS NOT NULL");
         b.HasIndex(m => m.ReleaseDate);
         b.HasIndex(m => new { m.RatingCount, m.AverageRating });
         b.HasIndex(m => m.CreatedAtUtc);
@@ -33,6 +52,108 @@ public class MovieConfiguration : IEntityTypeConfiguration<Movie>
         // refresh-released ve refresh-post-release job'larının WHERE LifecycleStatus = ... AND ReleaseDate ...
         // sorgularını hızlandırmak için bileşik index.
         b.HasIndex(m => new { m.LifecycleStatus, m.ReleaseDate });
+    }
+}
+public class MovieVideoConfiguration : IEntityTypeConfiguration<MovieVideo>
+{
+    public void Configure(EntityTypeBuilder<MovieVideo> b)
+    {
+        b.ToTable("MovieVideos");
+        b.Property(v => v.Key).IsRequired().HasMaxLength(50);
+        b.Property(v => v.Site).HasMaxLength(20);
+        b.Property(v => v.Type).HasMaxLength(30);
+        b.Property(v => v.Name).HasMaxLength(200);
+        b.Property(v => v.Language).HasMaxLength(10);
+
+        b.HasOne(v => v.Movie).WithMany(m => m.Videos)
+            .HasForeignKey(v => v.MovieId).OnDelete(DeleteBehavior.Cascade);
+
+        b.HasIndex(v => v.MovieId);
+    }
+}
+public class MovieImageConfiguration : IEntityTypeConfiguration<MovieImage>
+{
+    public void Configure(EntityTypeBuilder<MovieImage> b)
+    {
+        b.ToTable("MovieImages");
+        b.Property(i => i.Type).IsRequired().HasMaxLength(10);
+        b.Property(i => i.FilePath).IsRequired().HasMaxLength(300);
+        b.Property(i => i.Language).HasMaxLength(10);
+        b.HasOne(i => i.Movie).WithMany(m => m.Images).HasForeignKey(i => i.MovieId).OnDelete(DeleteBehavior.Cascade);
+        b.HasIndex(i => new { i.MovieId, i.Type });
+    }
+}
+
+public class KeywordConfiguration : IEntityTypeConfiguration<Keyword>
+{
+    public void Configure(EntityTypeBuilder<Keyword> b)
+    {
+        b.ToTable("Keywords");
+        b.Property(k => k.Name).IsRequired().HasMaxLength(100);
+        b.HasIndex(k => k.TmdbId).IsUnique();
+        b.HasIndex(k => k.Name);
+    }
+}
+
+public class MovieKeywordConfiguration : IEntityTypeConfiguration<MovieKeyword>
+{
+    public void Configure(EntityTypeBuilder<MovieKeyword> b)
+    {
+        b.ToTable("MovieKeywords");
+        b.HasOne(x => x.Movie).WithMany(m => m.MovieKeywords).HasForeignKey(x => x.MovieId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne(x => x.Keyword).WithMany(k => k.MovieKeywords).HasForeignKey(x => x.KeywordId).OnDelete(DeleteBehavior.Cascade);
+        b.HasIndex(x => new { x.MovieId, x.KeywordId });
+        b.HasIndex(x => x.KeywordId);
+    }
+}
+
+public class ProductionCompanyConfiguration : IEntityTypeConfiguration<ProductionCompany>
+{
+    public void Configure(EntityTypeBuilder<ProductionCompany> b)
+    {
+        b.ToTable("ProductionCompanies");
+        b.Property(c => c.Name).IsRequired().HasMaxLength(200);
+        b.Property(c => c.LogoPath).HasMaxLength(300);
+        b.Property(c => c.OriginCountry).HasMaxLength(10);
+        b.HasIndex(c => c.TmdbId).IsUnique();
+    }
+}
+
+public class MovieProductionCompanyConfiguration : IEntityTypeConfiguration<MovieProductionCompany>
+{
+    public void Configure(EntityTypeBuilder<MovieProductionCompany> b)
+    {
+        b.ToTable("MovieProductionCompanies");
+        b.HasOne(x => x.Movie).WithMany(m => m.MovieProductionCompanies).HasForeignKey(x => x.MovieId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne(x => x.ProductionCompany).WithMany(c => c.MovieProductionCompanies).HasForeignKey(x => x.ProductionCompanyId).OnDelete(DeleteBehavior.Cascade);
+        b.HasIndex(x => new { x.MovieId, x.ProductionCompanyId });
+        b.HasIndex(x => x.ProductionCompanyId);
+    }
+}
+
+public class MovieCollectionConfiguration : IEntityTypeConfiguration<MovieCollection>
+{
+    public void Configure(EntityTypeBuilder<MovieCollection> b)
+    {
+        b.ToTable("MovieCollections");
+        b.Property(c => c.Name).IsRequired().HasMaxLength(200);
+        b.Property(c => c.PosterUrl).HasMaxLength(500);
+        b.Property(c => c.BackdropUrl).HasMaxLength(500);
+        b.HasIndex(c => c.TmdbId).IsUnique();
+        b.HasMany(c => c.Movies).WithOne(m => m.Collection)
+            .HasForeignKey(m => m.CollectionId).OnDelete(DeleteBehavior.SetNull);
+    }
+}
+
+public class MovieCountryConfiguration : IEntityTypeConfiguration<MovieCountry>
+{
+    public void Configure(EntityTypeBuilder<MovieCountry> b)
+    {
+        b.ToTable("MovieCountries");
+        b.HasOne(x => x.Movie).WithMany(m => m.MovieCountries).HasForeignKey(x => x.MovieId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne(x => x.Country).WithMany().HasForeignKey(x => x.CountryId).OnDelete(DeleteBehavior.Restrict);
+        b.HasIndex(x => new { x.MovieId, x.CountryId });
+        b.HasIndex(x => x.CountryId);
     }
 }
 

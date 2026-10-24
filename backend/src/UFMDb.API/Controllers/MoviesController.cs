@@ -5,6 +5,7 @@ using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.DTOs;
 using UFMDb.Application.Features.Movies.GetMovieDetail;
+using UFMDb.Application.Features.Movies.GetMovieFriendsActivity;
 using UFMDb.Application.Features.Movies.GetMovies;
 using UFMDb.Application.Features.Movies.HomeFeed;
 using UFMDb.Application.Features.Movies.ManageMovie;
@@ -30,23 +31,29 @@ public class MoviesController : ControllerBase
     /// <summary>[Authorize] altındaki endpoint'lerde UserId'nin garanti dolu olduğunu netleştirir.</summary>
     private Guid RequireUserId() => _currentUser.UserId ?? throw new UnauthorizedException("Kullanıcı kimliği doğrulanamadı.");
 
-    /// <summary>Gelişmiş arama: isim, tür, yıl, oyuncu, puan filtreleri</summary>
+    /// <summary>Gelişmiş arama: isim, tür, yıl, oyuncu, puan, anahtar kelime, koleksiyon filtreleri</summary>
     [HttpGet]
     public async Task<ActionResult<PagedResult<MovieListItemDto>>> GetMovies([FromQuery] MovieSearchQueryDto filter)
     {
         Guid? userId = User.Identity?.IsAuthenticated == true ? RequireUserId() : null;
-        return Ok(await _mediator.Send(new GetMoviesQuery(filter, userId)));
+        return Ok(await _mediator.Send(new GetMoviesQuery(filter, userId, Request.GetLang())));
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<MovieDetailDto>> GetById(Guid id)
-        => Ok(await _mediator.Send(new GetMovieDetailQuery(id, _currentUser.UserId)));
+        => Ok(await _mediator.Send(new GetMovieDetailQuery(id, _currentUser.UserId, Request.GetLang())));
+
+    /// <summary>Takip edilenlerin bu filmdeki hareketleri (film sayfasındaki "Aynı Seansta" bölümü).</summary>
+    [Authorize]
+    [HttpGet("{id:guid}/friends-activity")]
+    public async Task<ActionResult<MovieFriendsActivityDto>> GetFriendsActivity(Guid id)
+        => Ok(await _mediator.Send(new GetMovieFriendsActivityQuery(id, RequireUserId())));
 
     [HttpGet("home-feed")]
     public async Task<ActionResult<HomeFeedDto>> GetHomeFeed()
     {
         Guid? userId = User.Identity?.IsAuthenticated == true ? RequireUserId() : null;
-        return Ok(await _mediator.Send(new GetHomeFeedQuery(userId)));
+        return Ok(await _mediator.Send(new GetHomeFeedQuery(userId, Request.GetLang())));
     }
 
     // ---------------- Kullanıcı etkileşimleri ----------------

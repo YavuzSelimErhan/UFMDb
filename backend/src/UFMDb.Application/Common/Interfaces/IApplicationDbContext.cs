@@ -1,3 +1,4 @@
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UFMDb.Domain.Entities;
 
@@ -34,8 +35,15 @@ public interface IApplicationDbContext
     DbSet<DirectorLike> DirectorLikes { get; }
     DbSet<FavoriteDirector> FavoriteDirectors { get; }
     DbSet<Follow> Follows { get; }
-
     DbSet<Notification> Notifications { get; }
+    DbSet<MovieVideo> MovieVideos { get; }
+    DbSet<MovieImage> MovieImages { get; }
+    DbSet<Keyword> Keywords { get; }
+    DbSet<MovieKeyword> MovieKeywords { get; }
+    DbSet<ProductionCompany> ProductionCompanies { get; }
+    DbSet<MovieProductionCompany> MovieProductionCompanies { get; }
+    DbSet<MovieCollection> MovieCollections { get; }
+    DbSet<MovieCountry> MovieCountries { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

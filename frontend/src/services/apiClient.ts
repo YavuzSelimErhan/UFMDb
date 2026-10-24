@@ -1,4 +1,5 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
+import i18n from "i18next";
 import { getAccessToken, setAccessToken } from "./tokenStore";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
@@ -8,6 +9,14 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
   withCredentials: true, // httpOnly refresh cookie'nin gidip gelebilmesi için şart
 });
+
+// ---------- Arayüz dilini backend'e ilet ----------
+// Backend film başlığı/özet/tür adlarını bu başlığa göre Türkçe'ye düşürüyor (tr | en).
+// Tarayıcının kendi Accept-Language değeri yerine her zaman arayüzde seçili dil gönderilir.
+function currentApiLang(): "tr" | "en" {
+  const lang = i18n.resolvedLanguage || i18n.language || "en";
+  return lang.toLowerCase().startsWith("tr") ? "tr" : "en";
+}
 
 // ---------- Giden isteklerde: tam URL'e çevrilmiş upload adreslerini tekrar göreceli yap ----------
 // Response interceptor /api/uploads/... yollarını tam URL'e çeviriyor. Backend yalnızca kendi
@@ -38,11 +47,15 @@ function toRelativeUploadUrls(data: unknown, key?: string): unknown {
   return data;
 }
 
-// ---------- Request interceptor: JWT access token'ı ekle (bellekten) ----------
+// ---------- Request interceptor: JWT access token'ı ekle (bellekten) + dil başlığı ----------
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = getAccessToken();
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  if (config.headers) {
+    config.headers["Accept-Language"] = currentApiLang();
   }
 
   if (config.data instanceof FormData) {

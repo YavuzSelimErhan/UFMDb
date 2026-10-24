@@ -29,7 +29,7 @@ namespace UFMDb.API.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetMyProfile()
-            => Ok(await _mediator.Send(new GetProfileQuery(RequireUserId())));
+            => Ok(await _mediator.Send(new GetProfileQuery(RequireUserId(), Request.GetLang())));
 
         [HttpPut]
         public async Task<IActionResult> UpdateProfile(UpdateProfileRequest request)
@@ -98,7 +98,7 @@ namespace UFMDb.API.Controllers
 
         [HttpGet("watched-films")]
         public async Task<IActionResult> GetWatchedFilms([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? sortBy = null, [FromQuery] bool? hasRating = null)
-        => Ok(await _mediator.Send(new GetUserWatchedMoviesQuery(RequireUserId(), page, pageSize, sortBy, hasRating)));
+        => Ok(await _mediator.Send(new GetUserWatchedMoviesQuery(RequireUserId(), page, pageSize, sortBy, hasRating, Request.GetLang())));
 
         // all / rated / unrated sayıları: liste sorgusunu 3 kez çağırmak yerine tek hafif istek.
         [HttpGet("watched-films/counts")]
@@ -114,7 +114,7 @@ namespace UFMDb.API.Controllers
 
         [HttpGet("liked-reviews")]
         public async Task<IActionResult> GetLikedReviews()
-        => Ok(await _mediator.Send(new GetLikedReviewsQuery(RequireUserId())));
+        => Ok(await _mediator.Send(new GetLikedReviewsQuery(RequireUserId(), Request.GetLang())));
 
         [HttpPost("avatar")]
         [EnableRateLimiting("ImageUpload")]

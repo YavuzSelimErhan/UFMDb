@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import type { MovieDetail, ReactionType } from "@/types";
 import ReviewsSection from "@/components/movie/ReviewsSection";
+import MovieExtraSections from "./MovieExtraSections";
+import MovieFriendsActivity from "./MovieFriendsActivity";
 import { movieService, screeningLogService } from "@/services";
 import { useToast } from "@/components/common/Toast";
 import { useAppSelector } from "@/store";
@@ -242,6 +244,10 @@ export default function MovieDetailPage() {
         <div className="movie-detail__info-col">
           <h1>{movie.title}</h1>
 
+          {movie.tagline && (
+            <p className="movie-detail__tagline">“{movie.tagline}”</p>
+          )}
+
           {movie.genres.length > 0 && (
             <div className="movie-detail__genres">
               {movie.genres.map((g) => (
@@ -279,6 +285,23 @@ export default function MovieDetailPage() {
                 </span>
                 <span className="movie-detail__ticket-value">
                   {movie.country}
+                </span>
+              </div>
+            )}
+            {movie.certification && (
+              <div className="movie-detail__ticket-cell">
+                <span className="movie-detail__ticket-label">
+                  {t("movie.extras.ageRating")}
+                </span>
+                <span className="movie-detail__ticket-value">
+                  <span className="movie-detail__cert-stamp">
+                    {movie.certification}
+                  </span>
+                  {movie.certificationCountry && (
+                    <span className="movie-detail__cert-country">
+                      {movie.certificationCountry}
+                    </span>
+                  )}
                 </span>
               </div>
             )}
@@ -527,6 +550,19 @@ export default function MovieDetailPage() {
               ))}
             </div>
           </div>
+
+          {/* Takip edilenlerin bu filmdeki hareketi (giriş yapmamışsa kendini gizler) */}
+          <MovieFriendsActivity
+            key={`friends-${movie.id}`}
+            movieId={movie.id}
+          />
+
+          {/* Fragman, galeri, yapım fişi, etiketler, seri koçanları */}
+          <MovieExtraSections
+            key={movie.id}
+            movie={movie}
+            printCode={printCode}
+          />
 
           {isAuthenticated && !isUnreleased && (
             <div className="movie-detail__review-box card">

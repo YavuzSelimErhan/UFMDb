@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UFMDb.Application.Common;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Domain.Enums;
 
@@ -41,7 +42,7 @@ public record FriendsActivityDto(
     List<FriendActivityDto> Items
 );
 
-public record GetFriendsActivityQuery(Guid UserId) : IRequest<FriendsActivityDto>;
+public record GetFriendsActivityQuery(Guid UserId, string Lang = "en") : IRequest<FriendsActivityDto>;
 
 public class GetFriendsActivityQueryHandler : IRequestHandler<GetFriendsActivityQuery, FriendsActivityDto>
 {
@@ -74,6 +75,7 @@ public class GetFriendsActivityQueryHandler : IRequestHandler<GetFriendsActivity
 
     public async Task<FriendsActivityDto> Handle(GetFriendsActivityQuery request, CancellationToken ct)
     {
+        var isTr = Localization.IsTurkish(request.Lang);
         var now = DateTime.UtcNow;
         var since = now.AddDays(-WindowDays);
 
@@ -114,7 +116,8 @@ public class GetFriendsActivityQueryHandler : IRequestHandler<GetFriendsActivity
             .ToListAsync(ct);
 
         var reviews = await _context.Reviews.AsNoTracking()
-            .Where(r => friendIds.Contains(r.UserId) && (r.UpdatedAtUtc ?? r.CreatedAtUtc) >= since)
+            .Where(r => friendIds.Contains(r.UserId) && !r.IsDeleted
+                        && (r.UpdatedAtUtc ?? r.CreatedAtUtc) >= since)
             .OrderByDescending(r => r.UpdatedAtUtc ?? r.CreatedAtUtc)
             .Take(PerSourceLimit)
             .Select(r => new { r.UserId, r.MovieId, r.Content, r.ContainsSpoiler, At = r.UpdatedAtUtc ?? r.CreatedAtUtc })
@@ -172,10 +175,12 @@ public class GetFriendsActivityQueryHandler : IRequestHandler<GetFriendsActivity
             .Select(m => new
             {
                 m.Id,
-                m.Title,
+                Title = isTr && m.TitleTr != "" ? m.TitleTr : m.Title,
                 m.PosterUrl,
                 m.ReleaseYear,
-                Genre = m.MovieGenres.Select(mg => mg.Genre.Name).FirstOrDefault()
+                Genre = m.MovieGenres
+                    .Select(mg => isTr && mg.Genre.NameTr != "" ? mg.Genre.NameTr : mg.Genre.Name)
+                    .FirstOrDefault()
             })
             .ToDictionaryAsync(m => m.Id, ct);
 
