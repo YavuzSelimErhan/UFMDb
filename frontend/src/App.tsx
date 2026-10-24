@@ -21,6 +21,7 @@ import BetaNotice from "@/components/common/BetaNotice";
 import EditProfilePage from "@/pages/Profile/EditProfilePage";
 import CreateListPage from "@/pages/Lists/CreateListPage";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
+import { useRefetchOnLanguageChange } from "@/hooks/useRefetchOnLanguageChange";
 import EditListPage from "@/pages/Lists/EditListPage";
 import UsersPage from "@/pages/Users/UsersPage";
 import UserProfilePage from "@/pages/Users/UserProfilePage";
@@ -31,6 +32,8 @@ import ActivityPage from "@/pages/Activity/ActivityPage";
 
 function AppShell() {
   useScrollRestoration();
+  // Dil değişince lokalize veriler (film/tür/ülke adları) yeniden çekilsin.
+  useRefetchOnLanguageChange();
 
   return (
     <div className="app-shell">
