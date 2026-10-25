@@ -31,10 +31,11 @@ public class FeedController : ControllerBase
         [FromQuery] int pageSize = 20,
         CancellationToken ct = default) =>
         Ok(await _mediator.Send(
-            new GetActivityFeedQuery(_currentUser.UserId!.Value, before, type, pageSize), ct));
+            new GetActivityFeedQuery(_currentUser.UserId!.Value, before, type, pageSize, Request.GetLang()), ct));
 
     /// <summary>Takip edilen kullanıcıların son 7 günlük film aktivitesi (ana sayfa bölümü).</summary>
     [HttpGet("friends")]
     public async Task<IActionResult> GetFriendsActivity(CancellationToken ct) =>
-        Ok(await _mediator.Send(new GetFriendsActivityQuery(_currentUser.UserId!.Value), ct));
+        Ok(await _mediator.Send(
+            new GetFriendsActivityQuery(_currentUser.UserId!.Value, Request.GetLang()), ct));
 }
