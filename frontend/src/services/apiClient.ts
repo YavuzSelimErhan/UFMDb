@@ -74,7 +74,11 @@ function fixImageUrls(data: unknown): unknown {
     return data.startsWith("/api/uploads") ? `${API_BASE}${data}` : data;
   }
   if (Array.isArray(data)) return data.map(fixImageUrls);
-  if (data && typeof data === "object") {
+  if (
+    data &&
+    typeof data === "object" &&
+    Object.getPrototypeOf(data) === Object.prototype
+  ) {
     const result: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(data)) {
       result[key] = fixImageUrls(value);

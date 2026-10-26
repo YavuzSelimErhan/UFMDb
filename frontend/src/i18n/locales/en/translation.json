@@ -786,5 +786,29 @@
       "network": "Couldn't reach the server. Check your connection.",
       "generic": "Couldn't upload the image. Please try again."
     }
+  },
+  "watchlist": {
+    "export": "Download as CSV",
+    "exportFailed": "Couldn't download the file. Please try again.",
+    "import": {
+      "button": "Import from CSV",
+      "importing": "Importing…",
+      "resultTitle": "{{count}} rows processed",
+      "missesTitle": "Unmatched rows ({{count}})",
+      "tooLarge": "The file can't exceed 1 MB.",
+      "rateLimited": "Too many attempts. Please wait a moment and try again.",
+      "failed": "Import failed.",
+      "stats": {
+        "added": "Added",
+        "alreadyInWatchlist": "Already in watchlist",
+        "duplicateRows": "Duplicate rows",
+        "notFound": "Not found",
+        "invalidRows": "Invalid rows"
+      },
+      "reason": {
+        "NotFound": "Not in catalog",
+        "Ambiguous": "Multiple matches"
+      }
+    }
   }
 }

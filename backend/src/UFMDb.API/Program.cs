@@ -119,6 +119,15 @@ builder.Services.AddRateLimiter(o =>
                 Window = TimeSpan.FromHours(1),
                 QueueLimit = 0
             }));
+    o.AddPolicy("WatchlistImport", ctx =>
+    RateLimitPartition.GetFixedWindowLimiter(
+        ctx.User.FindFirst("sub")?.Value ?? ctx.Connection.RemoteIpAddress?.ToString() ?? "anon",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 10,
+            Window = TimeSpan.FromHours(1),
+            QueueLimit = 0
+        }));
 });
 
 // ---------------- Global Logging ----------------

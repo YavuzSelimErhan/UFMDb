@@ -783,5 +783,29 @@
       "network": "Sunucuya ulaşılamadı. Bağlantını kontrol et.",
       "generic": "Görsel yüklenemedi. Lütfen tekrar dene."
     }
+  },
+  "watchlist": {
+    "export": "CSV olarak indir",
+    "exportFailed": "Dosya indirilemedi, tekrar dene.",
+    "import": {
+      "button": "CSV'den içe aktar",
+      "importing": "İçe aktarılıyor…",
+      "resultTitle": "{{count}} satır işlendi",
+      "missesTitle": "Eşleşmeyen satırlar ({{count}})",
+      "tooLarge": "Dosya 1 MB'ı geçemez.",
+      "rateLimited": "Çok fazla deneme yaptın, biraz bekleyip tekrar dene.",
+      "failed": "İçe aktarma başarısız oldu.",
+      "stats": {
+        "added": "Eklendi",
+        "alreadyInWatchlist": "Zaten listede",
+        "duplicateRows": "Tekrar eden satır",
+        "notFound": "Bulunamadı",
+        "invalidRows": "Geçersiz satır"
+      },
+      "reason": {
+        "NotFound": "Katalogda yok",
+        "Ambiguous": "Birden fazla eşleşme"
+      }
+    }
   }
 }

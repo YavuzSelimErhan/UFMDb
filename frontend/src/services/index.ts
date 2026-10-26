@@ -42,6 +42,7 @@ import type {
   ListCreated,
   ListSort,
   ListMembership,
+  WatchlistImportResult,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -299,6 +300,23 @@ export const profileService = {
     api
       .get<WatchedFilmsCounts>("/profile/watched-films/counts")
       .then((r) => r.data),
+
+  exportWatchlist: async (): Promise<Blob> => {
+    const { data } = await api.get<Blob>("/profile/watchlist/export", {
+      responseType: "blob",
+    });
+    return data;
+  },
+
+  importWatchlist: async (file: File): Promise<WatchlistImportResult> => {
+    const form = new FormData();
+    form.append("file", file); // controller parametresi: "file"
+    const { data } = await api.post<WatchlistImportResult>(
+      "/profile/watchlist/import",
+      form,
+    );
+    return data;
+  },
 };
 
 // ---------------- Genres ----------------

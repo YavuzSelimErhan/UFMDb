@@ -727,3 +727,19 @@ export interface MovieFriendsActivity {
   totalCount: number;
   items: MovieFriendActivity[];
 }
+
+export interface WatchlistImportMiss {
+  row: number;
+  title: string;
+  year: number | null;
+  reason: "NotFound" | "Ambiguous";
+}
+
+export interface WatchlistImportResult {
+  totalRows: number;
+  added: number;
+  alreadyInWatchlist: number;
+  duplicateRows: number;
+  notFound: WatchlistImportMiss[];
+  invalidRows: number;
+}

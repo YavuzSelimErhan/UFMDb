@@ -1,0 +1,114 @@
+.watchlist-tab__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.watchlist-tab__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.watchlist-tab__error {
+  margin-bottom: 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #d3554f;
+}
+
+.import-summary {
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+}
+.import-summary__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.import-summary__header h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+.import-summary__close {
+  display: flex;
+  color: var(--color-text-muted);
+}
+.import-summary__close:hover {
+  color: var(--color-text-primary);
+}
+
+.import-summary__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+.import-summary__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-elevated);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+.import-summary__stat strong {
+  font-size: 1.2rem;
+  color: var(--color-text-primary);
+}
+.import-summary__stat.is-success strong {
+  color: var(--color-accent);
+}
+
+.import-summary__misses {
+  margin-top: 14px;
+  font-size: 0.82rem;
+}
+.import-summary__misses summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.import-summary__misses ul {
+  margin-top: 10px;
+  max-height: 240px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.import-summary__misses li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.import-summary__row {
+  min-width: 36px;
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+.import-summary__title {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--color-text-primary);
+}
+.import-summary__reason {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+.import-summary__reason--notfound {
+  color: #d3554f;
+  background: rgba(211, 85, 79, 0.12);
+}
+.import-summary__reason--ambiguous {
+  color: #e0a02f;
+  background: rgba(224, 160, 47, 0.12);
+}

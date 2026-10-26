@@ -17,6 +17,7 @@ namespace UFMDb.API.Controllers
         private readonly ISender _mediator;
         private readonly ICurrentUserService _currentUser;
         private readonly IImageStorage _images;
+        private const long MaxImportFileBytes = 1024 * 1024;
 
         public ProfileController(ISender mediator, ICurrentUserService currentUser, IImageStorage images)
         {
@@ -127,6 +128,33 @@ namespace UFMDb.API.Controllers
             await using var stream = file.OpenReadStream();
             var url = await _images.SaveAsync(stream, ImageKind.Avatar, ct);
             return Ok(new { avatarUrl = url });
+        }
+
+        /// <summary>Kendi watchlist'ini CSV olarak indirir.</summary>
+        [HttpGet("watchlist/export")]
+        public async Task<IActionResult> ExportWatchlist(CancellationToken ct)
+        {
+            var file = await _mediator.Send(new ExportWatchlistQuery(RequireUserId()), ct);
+            Response.Headers.CacheControl = "no-store";
+            return File(file.Content, "text/csv; charset=utf-8", file.FileName);
+        }
+
+        /// <summary>CSV'den (UFMDb / IMDb / Letterboxd) watchlist'e film ekler.</summary>
+        [HttpPost("watchlist/import")]
+        [EnableRateLimiting("WatchlistImport")]
+        [RequestSizeLimit(MaxImportFileBytes + 64 * 1024)] // dosya + multipart zarfı
+        public async Task<IActionResult> ImportWatchlist(IFormFile file, CancellationToken ct)
+        {
+            if (file is null || file.Length == 0)
+                return BadRequest("Dosya seçilmedi.");
+            if (file.Length > MaxImportFileBytes)
+                throw new ValidationException("File", "Dosya 1 MB'ı geçemez.");
+
+            using var ms = new MemoryStream((int)file.Length);
+            await using (var stream = file.OpenReadStream())
+                await stream.CopyToAsync(ms, ct);
+
+            return Ok(await _mediator.Send(new ImportWatchlistCommand(RequireUserId(), ms.ToArray()), ct));
         }
     }
 

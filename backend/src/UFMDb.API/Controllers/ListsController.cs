@@ -29,11 +29,13 @@ public class ListsController : ControllerBase
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
-        => Ok(await _mediator.Send(new GetListDetailQuery(id, _currentUser.UserId, _currentUser.IsAdmin), ct));
+    => Ok(await _mediator.Send(
+        new GetListDetailQuery(id, _currentUser.UserId, _currentUser.IsAdmin, Request.GetLang()), ct));
 
     [HttpGet("by-slug/{slug}")]
     public async Task<IActionResult> GetBySlug(string slug, CancellationToken ct)
-        => Ok(await _mediator.Send(new GetListDetailBySlugQuery(slug, _currentUser.UserId, _currentUser.IsAdmin), ct));
+        => Ok(await _mediator.Send(
+            new GetListDetailBySlugQuery(slug, _currentUser.UserId, _currentUser.IsAdmin, Request.GetLang()), ct));
 
     [Authorize]
     [HttpGet("for-movie/{movieId:guid}")]
