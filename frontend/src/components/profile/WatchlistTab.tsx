@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,6 +8,7 @@ import {
   Bookmark,
   Dice5,
   Download,
+  MoreHorizontal,
   Search,
   Trash2,
   Upload,
@@ -48,12 +49,14 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
   const queryClient = useQueryClient();
   const { openLog, logModal } = useScreeningLogModal();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   const [result, setResult] = useState<WatchlistImportResult | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
   const [sort, setSort] = useState<SortKey>("added");
   const [confirmingClear, setConfirmingClear] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const exportMutation = useMutation({
     mutationFn: () => profileService.exportWatchlist(),
@@ -86,8 +89,38 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
     },
   });
 
+  // Menü: dışarı tıklayınca ya da Esc ile kapanır.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
   const watchlistIds = useMemo(
     () => new Set(watchlist.map((m) => m.id)),
+    [watchlist],
+  );
+
+  // `runtime` şu an yalnızca film detayında; liste DTO'suna eklenince (aşağıdaki
+  // not) bu satır kendiliğinden çalışır, o zamana kadar süre gösterilmez.
+  const totalMinutes = useMemo(
+    () =>
+      watchlist.reduce(
+        (sum, m) =>
+          sum +
+          ((m as MovieListItem & { runtime?: number | null }).runtime ?? 0),
+        0,
+      ),
     [watchlist],
   );
 
@@ -135,6 +168,13 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
   };
 
   const hasItems = watchlist.length > 0;
+  const runtimeLabel =
+    totalMinutes > 0
+      ? t("watchlist.totalRuntime", {
+          hours: Math.floor(totalMinutes / 60),
+          minutes: totalMinutes % 60,
+        })
+      : null;
 
   return (
     <div className="watchlist-tab">
@@ -143,16 +183,24 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
           <h2 className="watchlist-tab__title">{t("watchlist.title")}</h2>
           <p className="watchlist-tab__count">
             {t("watchlist.count", { count: watchlist.length })}
+            {runtimeLabel && ` · ${runtimeLabel}`}
           </p>
         </div>
+
         {hasItems && (
-          <button
-            type="button"
-            className="btn-secondary watchlist-tab__btn"
-            onClick={pickRandom}
-          >
-            <Dice5 size={14} /> {t("watchlist.random")}
-          </button>
+          <div className="watchlist-tab__random">
+            <p className="watchlist-tab__random-text">
+              <strong>{t("watchlist.randomTitle")}</strong>
+              <span>{t("watchlist.randomHint")}</span>
+            </p>
+            <button
+              type="button"
+              className="watchlist-tab__random-btn"
+              onClick={pickRandom}
+            >
+              <Dice5 size={15} /> {t("watchlist.random")}
+            </button>
+          </div>
         )}
       </header>
 
@@ -186,30 +234,76 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
         )}
 
         {isOwnProfile && (
-          <div className="watchlist-tab__actions">
+          <div className="watchlist-tab__menu" ref={menuRef}>
             <button
               type="button"
-              className="btn-secondary watchlist-tab__btn"
-              disabled={exportMutation.isPending || !hasItems}
-              onClick={() => exportMutation.mutate()}
+              className={`watchlist-tab__menu-btn ${menuOpen ? "is-open" : ""}`}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              aria-label={t("watchlist.menu.label")}
+              onClick={() => setMenuOpen((o) => !o)}
             >
-              <Download size={14} />
-              {exportMutation.isPending
-                ? t("common.loading")
-                : t("watchlist.export")}
+              <MoreHorizontal size={18} />
             </button>
 
-            <button
-              type="button"
-              className="btn-secondary watchlist-tab__btn"
-              disabled={importMutation.isPending}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload size={14} />
-              {importMutation.isPending
-                ? t("watchlist.import.importing")
-                : t("watchlist.import.button")}
-            </button>
+            {menuOpen && (
+              <>
+                <button
+                  type="button"
+                  className="watchlist-tab__menu-backdrop"
+                  aria-label={t("common.close")}
+                  tabIndex={-1}
+                  onClick={() => setMenuOpen(false)}
+                />
+                <div className="watchlist-tab__menu-list" role="menu">
+                  {hasItems && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="watchlist-tab__menu-item"
+                      disabled={exportMutation.isPending}
+                      onClick={() => {
+                        setMenuOpen(false);
+                        exportMutation.mutate();
+                      }}
+                    >
+                      <Download size={16} /> {t("watchlist.export")}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="watchlist-tab__menu-item"
+                    disabled={importMutation.isPending}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      fileInputRef.current?.click();
+                    }}
+                  >
+                    <Upload size={16} /> {t("watchlist.import.button")}
+                  </button>
+                  {hasItems && (
+                    <>
+                      <div
+                        className="watchlist-tab__menu-sep"
+                        role="separator"
+                      />
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="watchlist-tab__menu-item watchlist-tab__menu-item--danger"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          setConfirmingClear(true);
+                        }}
+                      >
+                        <Trash2 size={16} /> {t("watchlist.clear.button")}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
 
             <input
               ref={fileInputRef}
@@ -218,19 +312,15 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
               hidden
               onChange={onFileChosen}
             />
-
-            {hasItems && (
-              <button
-                type="button"
-                className="btn-secondary watchlist-tab__btn watchlist-tab__btn--danger"
-                onClick={() => setConfirmingClear(true)}
-              >
-                <Trash2 size={14} /> {t("watchlist.clear.button")}
-              </button>
-            )}
           </div>
         )}
       </div>
+
+      {importMutation.isPending && (
+        <p className="watchlist-tab__status" role="status">
+          {t("watchlist.import.importing")}
+        </p>
+      )}
 
       {confirmingClear && (
         <div className="watchlist-tab__confirm" role="alertdialog">

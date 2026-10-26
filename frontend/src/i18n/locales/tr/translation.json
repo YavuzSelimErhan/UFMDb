@@ -810,7 +810,13 @@
     "title": "İzleme Listem",
     "count_one": "{{count}} film",
     "count_other": "{{count}} film",
+    "totalRuntime": "{{hours}} sa {{minutes}} dk",
     "random": "Rastgele seç",
+    "randomTitle": "Ne izlesem?",
+    "randomHint": "Listenden rastgele bir film",
+    "menu": {
+      "label": "Liste işlemleri"
+    },
     "filterPlaceholder": "Listede ara…",
     "noMatches": "Eşleşen film yok.",
     "sort": {

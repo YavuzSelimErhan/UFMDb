@@ -813,7 +813,13 @@
     "title": "My Watchlist",
     "count_one": "{{count}} film",
     "count_other": "{{count}} films",
+    "totalRuntime": "{{hours}} h {{minutes}} min",
     "random": "Pick random",
+    "randomTitle": "What should I watch?",
+    "randomHint": "A random pick from your list",
+    "menu": {
+      "label": "List actions"
+    },
     "filterPlaceholder": "Search your list…",
     "noMatches": "No matching films.",
     "sort": {
