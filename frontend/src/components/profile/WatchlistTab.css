@@ -93,14 +93,9 @@
 .wl-add__field:focus-within {
   border-color: var(--color-accent);
 }
+/* Görünüm Dropdown bileşeninden gelir; burası sadece yerleşim için. */
 .watchlist-tab__sort {
-  height: 38px;
-  padding: 0 12px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-elevated);
-  color: var(--color-text-secondary);
-  font-size: 0.82rem;
+  position: relative;
 }
 
 /* ---------- ⋯ menüsü ---------- */

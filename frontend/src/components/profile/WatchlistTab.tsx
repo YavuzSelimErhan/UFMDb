@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import type { TFunction } from "i18next";
 import {
+  ArrowUpDown,
   Bookmark,
   Dice5,
   Download,
@@ -19,13 +20,15 @@ import MovieCard from "@/components/movie/MovieCard";
 import PagedMovieGrid from "@/components/profile/PagedMovieGrid";
 import WatchlistAddSearch from "@/components/profile/WatchlistAddSearch";
 import { EmptyState } from "@/components/common/PageState";
+import Dropdown from "@/components/search/Dropdown";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import type { MovieListItem, WatchlistImportResult } from "@/types";
 import "./WatchlistTab.css";
 
 const MAX_IMPORT_BYTES = 1024 * 1024;
 
-type SortKey = "added" | "title" | "yearDesc" | "yearAsc";
+const SORT_OPTIONS = ["added", "title", "yearDesc", "yearAsc"] as const;
+type SortKey = (typeof SORT_OPTIONS)[number];
 
 interface Props {
   watchlist: MovieListItem[];
@@ -219,17 +222,17 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
                 onChange={(e) => setFilter(e.target.value)}
               />
             </label>
-            <select
-              className="watchlist-tab__sort"
-              value={sort}
-              aria-label={t("watchlist.sort.label")}
-              onChange={(e) => setSort(e.target.value as SortKey)}
-            >
-              <option value="added">{t("watchlist.sort.added")}</option>
-              <option value="title">{t("watchlist.sort.title")}</option>
-              <option value="yearDesc">{t("watchlist.sort.yearDesc")}</option>
-              <option value="yearAsc">{t("watchlist.sort.yearAsc")}</option>
-            </select>
+            <div className="watchlist-tab__sort">
+              <Dropdown
+                icon={<ArrowUpDown size={14} />}
+                value={sort}
+                options={SORT_OPTIONS.map((o) => ({
+                  value: o,
+                  label: t(`watchlist.sort.${o}`),
+                }))}
+                onChange={(v) => setSort(v as SortKey)}
+              />
+            </div>
           </>
         )}
 
