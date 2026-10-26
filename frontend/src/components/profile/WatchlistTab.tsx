@@ -1,17 +1,30 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
-import { Bookmark, Download, Upload, X } from "lucide-react";
+import type { TFunction } from "i18next";
+import {
+  Bookmark,
+  Dice5,
+  Download,
+  Search,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
 import { profileService } from "@/services";
 import MovieCard from "@/components/movie/MovieCard";
 import PagedMovieGrid from "@/components/profile/PagedMovieGrid";
+import WatchlistAddSearch from "@/components/profile/WatchlistAddSearch";
 import { EmptyState } from "@/components/common/PageState";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import type { MovieListItem, WatchlistImportResult } from "@/types";
 import "./WatchlistTab.css";
 
 const MAX_IMPORT_BYTES = 1024 * 1024;
+
+type SortKey = "added" | "title" | "yearDesc" | "yearAsc";
 
 interface Props {
   watchlist: MovieListItem[];
@@ -30,12 +43,17 @@ function downloadBlob(blob: Blob, fileName: string) {
 }
 
 export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { openLog, logModal } = useScreeningLogModal();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   const [result, setResult] = useState<WatchlistImportResult | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [filter, setFilter] = useState("");
+  const [sort, setSort] = useState<SortKey>("added");
+  const [confirmingClear, setConfirmingClear] = useState(false);
 
   const exportMutation = useMutation({
     mutationFn: () => profileService.exportWatchlist(),
@@ -50,7 +68,6 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
     onSuccess: (data) => {
       setImportError(null);
       setResult(data);
-      // Watchlist profil yanıtıyla geliyor.
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
     },
     onError: (err) => {
@@ -58,6 +75,49 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
       setImportError(resolveImportError(err, t));
     },
   });
+
+  const clearMutation = useMutation({
+    mutationFn: () => profileService.clearWatchlist(),
+    onSuccess: () => {
+      setConfirmingClear(false);
+      setResult(null);
+      setFilter("");
+      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+    },
+  });
+
+  const watchlistIds = useMemo(
+    () => new Set(watchlist.map((m) => m.id)),
+    [watchlist],
+  );
+
+  const shown = useMemo(() => {
+    const q = filter.trim().toLocaleLowerCase(i18n.language);
+    let list = q
+      ? watchlist.filter((m) =>
+          m.title.toLocaleLowerCase(i18n.language).includes(q),
+        )
+      : watchlist;
+
+    if (sort !== "added") {
+      list = [...list].sort((a, b) => {
+        if (sort === "title") {
+          return a.title.localeCompare(b.title, i18n.language);
+        }
+        return sort === "yearDesc"
+          ? b.releaseYear - a.releaseYear
+          : a.releaseYear - b.releaseYear;
+      });
+    }
+    return list;
+  }, [watchlist, filter, sort, i18n.language]);
+
+  const pickRandom = () => {
+    if (watchlist.length === 0) return;
+    const pool = shown.length > 0 ? shown : watchlist;
+    const m = pool[Math.floor(Math.random() * pool.length)];
+    navigate(`/movies/${m.id}`);
+  };
 
   const onFileChosen = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -74,41 +134,126 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
     importMutation.mutate(file);
   };
 
+  const hasItems = watchlist.length > 0;
+
   return (
     <div className="watchlist-tab">
-      {isOwnProfile && (
-        <div className="watchlist-tab__toolbar">
+      <header className="watchlist-tab__head">
+        <div>
+          <h2 className="watchlist-tab__title">{t("watchlist.title")}</h2>
+          <p className="watchlist-tab__count">
+            {t("watchlist.count", { count: watchlist.length })}
+          </p>
+        </div>
+        {hasItems && (
           <button
             type="button"
             className="btn-secondary watchlist-tab__btn"
-            disabled={exportMutation.isPending || watchlist.length === 0}
-            onClick={() => exportMutation.mutate()}
+            onClick={pickRandom}
           >
-            <Download size={14} />
-            {exportMutation.isPending
-              ? t("common.loading")
-              : t("watchlist.export")}
+            <Dice5 size={14} /> {t("watchlist.random")}
           </button>
+        )}
+      </header>
 
-          <button
-            type="button"
-            className="btn-secondary watchlist-tab__btn"
-            disabled={importMutation.isPending}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Upload size={14} />
-            {importMutation.isPending
-              ? t("watchlist.import.importing")
-              : t("watchlist.import.button")}
-          </button>
+      {isOwnProfile && <WatchlistAddSearch watchlistIds={watchlistIds} />}
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".csv,text/csv"
-            hidden
-            onChange={onFileChosen}
-          />
+      <div className="watchlist-tab__toolbar">
+        {hasItems && (
+          <>
+            <label className="watchlist-tab__filter">
+              <Search size={14} />
+              <input
+                type="search"
+                value={filter}
+                placeholder={t("watchlist.filterPlaceholder")}
+                aria-label={t("watchlist.filterPlaceholder")}
+                onChange={(e) => setFilter(e.target.value)}
+              />
+            </label>
+            <select
+              className="watchlist-tab__sort"
+              value={sort}
+              aria-label={t("watchlist.sort.label")}
+              onChange={(e) => setSort(e.target.value as SortKey)}
+            >
+              <option value="added">{t("watchlist.sort.added")}</option>
+              <option value="title">{t("watchlist.sort.title")}</option>
+              <option value="yearDesc">{t("watchlist.sort.yearDesc")}</option>
+              <option value="yearAsc">{t("watchlist.sort.yearAsc")}</option>
+            </select>
+          </>
+        )}
+
+        {isOwnProfile && (
+          <div className="watchlist-tab__actions">
+            <button
+              type="button"
+              className="btn-secondary watchlist-tab__btn"
+              disabled={exportMutation.isPending || !hasItems}
+              onClick={() => exportMutation.mutate()}
+            >
+              <Download size={14} />
+              {exportMutation.isPending
+                ? t("common.loading")
+                : t("watchlist.export")}
+            </button>
+
+            <button
+              type="button"
+              className="btn-secondary watchlist-tab__btn"
+              disabled={importMutation.isPending}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload size={14} />
+              {importMutation.isPending
+                ? t("watchlist.import.importing")
+                : t("watchlist.import.button")}
+            </button>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              hidden
+              onChange={onFileChosen}
+            />
+
+            {hasItems && (
+              <button
+                type="button"
+                className="btn-secondary watchlist-tab__btn watchlist-tab__btn--danger"
+                onClick={() => setConfirmingClear(true)}
+              >
+                <Trash2 size={14} /> {t("watchlist.clear.button")}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {confirmingClear && (
+        <div className="watchlist-tab__confirm" role="alertdialog">
+          <p>{t("watchlist.clear.confirm", { count: watchlist.length })}</p>
+          <div className="watchlist-tab__confirm-actions">
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => setConfirmingClear(false)}
+            >
+              {t("common.cancel")}
+            </button>
+            <button
+              type="button"
+              className="watchlist-tab__confirm-delete"
+              disabled={clearMutation.isPending}
+              onClick={() => clearMutation.mutate()}
+            >
+              {clearMutation.isPending
+                ? t("common.loading")
+                : t("watchlist.clear.confirmButton")}
+            </button>
+          </div>
         </div>
       )}
 
@@ -117,20 +262,36 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
           {t("watchlist.exportFailed")}
         </p>
       )}
-
+      {isOwnProfile && clearMutation.isError && (
+        <p className="watchlist-tab__error" role="alert">
+          {t("watchlist.clear.failed")}
+        </p>
+      )}
       {importError && (
         <p className="watchlist-tab__error" role="alert">
           {importError}
         </p>
       )}
-
       {result && (
         <ImportSummary result={result} onClose={() => setResult(null)} />
       )}
 
-      {watchlist.length > 0 ? (
+      {!hasItems ? (
+        <EmptyState
+          icon={<Bookmark size={26} />}
+          title={t("profile.emptyContent")}
+          hint={t("profile.watchlistHint")}
+        />
+      ) : shown.length === 0 ? (
+        <EmptyState
+          icon={<Search size={26} />}
+          title={t("watchlist.noMatches")}
+        />
+      ) : (
         <PagedMovieGrid
-          movies={watchlist}
+          // Filtre/sıralama değişince "Daha fazla yükle" sayacı sıfırlansın.
+          key={`${filter}|${sort}`}
+          movies={shown}
           renderCard={(m) => (
             <MovieCard
               movie={m}
@@ -138,12 +299,6 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
               onLogClick={isOwnProfile ? () => openLog(m) : undefined}
             />
           )}
-        />
-      ) : (
-        <EmptyState
-          icon={<Bookmark size={26} />}
-          title={t("profile.emptyContent")}
-          hint={t("profile.watchlistHint")}
         />
       )}
 
@@ -225,7 +380,7 @@ function ImportSummary({
   );
 }
 
-function resolveImportError(err: unknown, t: (k: string) => string): string {
+function resolveImportError(err: unknown, t: TFunction): string {
   if (isAxiosError(err)) {
     const status = err.response?.status;
     if (status === 429) return t("watchlist.import.rateLimited");

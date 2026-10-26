@@ -317,6 +317,13 @@ export const profileService = {
     );
     return data;
   },
+
+  clearWatchlist: async (): Promise<{ removed: number }> => {
+    const { data } = await api.delete<{ removed: number }>(
+      "/profile/watchlist",
+    );
+    return data;
+  },
 };
 
 // ---------------- Genres ----------------

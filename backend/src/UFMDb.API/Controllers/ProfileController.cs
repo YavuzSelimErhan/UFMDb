@@ -156,6 +156,11 @@ namespace UFMDb.API.Controllers
 
             return Ok(await _mediator.Send(new ImportWatchlistCommand(RequireUserId(), ms.ToArray()), ct));
         }
+
+        /// <summary>Kendi watchlist'ini tamamen temizler.</summary>
+        [HttpDelete("watchlist")]
+        public async Task<IActionResult> ClearWatchlist(CancellationToken ct)
+            => Ok(new { removed = await _mediator.Send(new ClearWatchlistCommand(RequireUserId()), ct) });
     }
 
     public record DeleteAccountRequest(string Password);

@@ -806,6 +806,32 @@
         "NotFound": "Katalogda yok",
         "Ambiguous": "Birden fazla eşleşme"
       }
+    },
+    "title": "İzleme Listem",
+    "count_one": "{{count}} film",
+    "count_other": "{{count}} film",
+    "random": "Rastgele seç",
+    "filterPlaceholder": "Listede ara…",
+    "noMatches": "Eşleşen film yok.",
+    "sort": {
+      "label": "Sırala",
+      "added": "Eklenme tarihi",
+      "title": "Başlık (A-Z)",
+      "yearDesc": "Yıl (yeni → eski)",
+      "yearAsc": "Yıl (eski → yeni)"
+    },
+    "add": {
+      "placeholder": "Film ara ve listeye ekle…",
+      "noResults": "Sonuç bulunamadı.",
+      "add": "Ekle",
+      "inList": "Listede",
+      "failed": "Film eklenemedi, tekrar dene."
+    },
+    "clear": {
+      "button": "Listeyi temizle",
+      "confirm": "{{count}} filmin hepsi watchlist'ten silinsin mi? Bu işlem geri alınamaz.",
+      "confirmButton": "Evet, temizle",
+      "failed": "Liste temizlenemedi, tekrar dene."
     }
   }
 }

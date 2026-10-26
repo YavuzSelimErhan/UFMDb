@@ -809,6 +809,32 @@
         "NotFound": "Not in catalog",
         "Ambiguous": "Multiple matches"
       }
+    },
+    "title": "My Watchlist",
+    "count_one": "{{count}} film",
+    "count_other": "{{count}} films",
+    "random": "Pick random",
+    "filterPlaceholder": "Search your list…",
+    "noMatches": "No matching films.",
+    "sort": {
+      "label": "Sort",
+      "added": "Date added",
+      "title": "Title (A-Z)",
+      "yearDesc": "Year (newest first)",
+      "yearAsc": "Year (oldest first)"
+    },
+    "add": {
+      "placeholder": "Search a film to add…",
+      "noResults": "No results found.",
+      "add": "Add",
+      "inList": "In list",
+      "failed": "Couldn't add the film. Please try again."
+    },
+    "clear": {
+      "button": "Clear list",
+      "confirm": "Remove all {{count}} films from your watchlist? This can't be undone.",
+      "confirmButton": "Yes, clear",
+      "failed": "Couldn't clear the list. Please try again."
     }
   }
 }
