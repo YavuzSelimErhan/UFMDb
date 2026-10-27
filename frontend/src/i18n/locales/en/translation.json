@@ -847,7 +847,9 @@
       "skip": "Skip",
       "tonight": "The film of tonight",
       "go": "Go to film",
-      "again": "Spin again"
+      "again": "Spin again",
+      "mute": "Mute",
+      "unmute": "Unmute"
     }
   }
 }

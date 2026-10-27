@@ -844,7 +844,9 @@
       "skip": "Atla",
       "tonight": "Bu akşamın filmi",
       "go": "Filme git",
-      "again": "Tekrar çevir"
+      "again": "Tekrar çevir",
+      "mute": "Sesi kapat",
+      "unmute": "Sesi aç"
     }
   }
 }

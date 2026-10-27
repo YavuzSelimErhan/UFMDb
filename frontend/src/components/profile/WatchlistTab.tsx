@@ -17,9 +17,10 @@ import {
 } from "lucide-react";
 import { profileService } from "@/services";
 import MovieCard from "@/components/movie/MovieCard";
-import RandomPickerModal from "@/components/profile/RandomPickerModal";
 import PagedMovieGrid from "@/components/profile/PagedMovieGrid";
+import RandomPickerModal from "@/components/profile/RandomPickerModal";
 import WatchlistAddSearch from "@/components/profile/WatchlistAddSearch";
+import { unlockAudio } from "@/components/profile/usePickerSound";
 import { EmptyState } from "@/components/common/PageState";
 import Dropdown from "@/components/search/Dropdown";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
@@ -89,6 +90,7 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
       setConfirmingClear(false);
       setResult(null);
       setFilter("");
+      setPicker(null);
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
     },
   });
@@ -149,7 +151,14 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
     return list;
   }, [watchlist, filter, sort, i18n.language]);
 
+  // Rastgele seçici: filtre varsa ve eşleşme varsa sadece onlardan, yoksa tüm liste.
   const pool = shown.length > 0 ? shown : watchlist;
+
+  const openPicker = (mode: "spin" | "instant") => {
+    if (watchlist.length === 0) return;
+    unlockAudio(); // Safari/iOS: ses ancak tıklama anında açılabilir
+    setPicker(mode);
+  };
 
   const onFileChosen = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -196,14 +205,14 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
               <button
                 type="button"
                 className="watchlist-tab__random-btn"
-                onClick={() => setPicker("spin")}
+                onClick={() => openPicker("spin")}
               >
                 <Dice5 size={15} /> {t("watchlist.random")}
               </button>
               <button
                 type="button"
                 className="watchlist-tab__random-btn watchlist-tab__random-btn--ghost"
-                onClick={() => setPicker("instant")}
+                onClick={() => openPicker("instant")}
               >
                 <Zap size={15} /> {t("watchlist.quickPick")}
               </button>
@@ -401,7 +410,8 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
       )}
 
       {isOwnProfile && logModal}
-      {picker && (
+
+      {picker && hasItems && (
         <RandomPickerModal
           pool={pool}
           mode={picker}

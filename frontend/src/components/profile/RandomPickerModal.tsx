@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { Dice5, X } from "lucide-react";
+import { Dice5, Volume2, VolumeX, X } from "lucide-react";
 import type { MovieListItem } from "@/types";
+import { usePickerSound } from "./usePickerSound";
 import "./RandomPickerModal.css";
 
 const CARD_W = 140;
@@ -11,7 +12,7 @@ const STEP = CARD_W + GAP;
 const REEL_LEN = 60;
 const WIN_INDEX = 50;
 const SPIN_MS = 5200;
-const MIN_SPIN_POOL = 3;
+const MIN_SPIN_POOL = 3; // bundan az filmde animasyon anlamsız
 
 const rand = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -40,6 +41,7 @@ interface Props {
 export default function RandomPickerModal({ pool, mode, onClose }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const sound = usePickerSound();
   const trackRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
 
@@ -69,6 +71,7 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  // Şeridi başlat.
   useLayoutEffect(() => {
     if (instant) {
       setDone(true);
@@ -81,7 +84,7 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
 
     track.style.transition = "none";
     track.style.transform = "translateX(0)";
-    track.getBoundingClientRect(); // reflow
+    track.getBoundingClientRect(); // reflow: başlangıç konumu uygulansın
 
     const jitter = (Math.random() - 0.5) * CARD_W * 0.7;
     const x = vp.clientWidth / 2 - (WIN_INDEX * STEP + CARD_W / 2 + jitter);
@@ -93,6 +96,33 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
     return () => cancelAnimationFrame(id);
   }, [round, instant]);
 
+  // Ortadaki çizgiden her afiş geçtiğinde tık sesi.
+  useEffect(() => {
+    if (instant || done) return;
+    const track = trackRef.current;
+    const vp = viewportRef.current;
+    if (!track || !vp) return;
+
+    let raf = 0;
+    let last = -1;
+    const loop = () => {
+      const x = new DOMMatrixReadOnly(getComputedStyle(track).transform).m41;
+      const idx = Math.floor((vp.clientWidth / 2 - x) / STEP);
+      if (idx !== last) {
+        if (last !== -1) sound.tick();
+        last = idx;
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [round, instant, done, sound.tick]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sonuç belli olunca bir kez çal.
+  useEffect(() => {
+    if (done) sound.win();
+  }, [done, round]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div className="picker" role="dialog" aria-modal="true">
       <button
@@ -102,6 +132,18 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
         onClick={onClose}
       />
       <div className="picker__panel">
+        <button
+          type="button"
+          className="picker__mute"
+          aria-label={
+            sound.muted
+              ? t("watchlist.picker.unmute")
+              : t("watchlist.picker.mute")
+          }
+          onClick={sound.toggleMuted}
+        >
+          {sound.muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+        </button>
         <button
           type="button"
           className="picker__close"

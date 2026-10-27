@@ -136,6 +136,16 @@
   font-size: 0.85rem;
   font-weight: 700;
 }
+.picker__mute {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  color: var(--color-text-muted);
+}
+.picker__mute:hover {
+  color: var(--color-text-primary);
+}
 
 @keyframes picker-in {
   from {
