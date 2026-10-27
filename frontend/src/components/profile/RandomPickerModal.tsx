@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Dice5, X } from "lucide-react";
@@ -11,6 +11,7 @@ const STEP = CARD_W + GAP;
 const REEL_LEN = 60;
 const WIN_INDEX = 50;
 const SPIN_MS = 5200;
+const MIN_SPIN_POOL = 3;
 
 const rand = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -46,11 +47,21 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
     () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     [],
   );
-  const [fast, setFast] = useState(mode === "instant" || reduceMotion);
+  const alwaysFast =
+    mode === "instant" || reduceMotion || pool.length < MIN_SPIN_POOL;
+
   const [round, setRound] = useState(0);
-  const [done, setDone] = useState(fast);
+  const [skipped, setSkipped] = useState(false); // sadece bu tur için
+  const [done, setDone] = useState(alwaysFast);
+  const instant = alwaysFast || skipped;
 
   const { reel, winner } = useMemo(() => build(pool), [pool, round]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const reroll = () => {
+    setSkipped(false);
+    setDone(alwaysFast); // yeni sonuç, animasyon bitene kadar gizli kalsın
+    setRound((r) => r + 1);
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -58,8 +69,8 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  useEffect(() => {
-    if (fast) {
+  useLayoutEffect(() => {
+    if (instant) {
       setDone(true);
       return;
     }
@@ -70,7 +81,7 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
 
     track.style.transition = "none";
     track.style.transform = "translateX(0)";
-    track.getBoundingClientRect(); // reflow: başlangıç konumu uygulansın
+    track.getBoundingClientRect(); // reflow
 
     const jitter = (Math.random() - 0.5) * CARD_W * 0.7;
     const x = vp.clientWidth / 2 - (WIN_INDEX * STEP + CARD_W / 2 + jitter);
@@ -80,7 +91,7 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
       track.style.transform = `translateX(${x}px)`;
     });
     return () => cancelAnimationFrame(id);
-  }, [round, fast]);
+  }, [round, instant]);
 
   return (
     <div className="picker" role="dialog" aria-modal="true">
@@ -100,14 +111,22 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
           <X size={18} />
         </button>
 
-        {!fast && (
+        {!instant && (
           <div className={`picker__stage ${done ? "is-done" : ""}`}>
             <div className="picker__viewport" ref={viewportRef}>
               <div className="picker__marker" />
               <div
                 className="picker__track"
                 ref={trackRef}
-                onTransitionEnd={() => setDone(true)}
+                onTransitionEnd={(e) => {
+                  // Kartlardan gelen geçişler sayılmasın, sadece şeridin kayması.
+                  if (
+                    e.target === e.currentTarget &&
+                    e.propertyName === "transform"
+                  ) {
+                    setDone(true);
+                  }
+                }}
               >
                 {reel.map((m, i) => (
                   <img
@@ -124,7 +143,7 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
               <button
                 type="button"
                 className="picker__skip"
-                onClick={() => setFast(true)}
+                onClick={() => setSkipped(true)}
               >
                 {t("watchlist.picker.skip")}
               </button>
@@ -150,7 +169,7 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
                 <button
                   type="button"
                   className="btn-secondary"
-                  onClick={() => setRound((r) => r + 1)}
+                  onClick={reroll}
                 >
                   <Dice5 size={15} /> {t("watchlist.picker.again")}
                 </button>
