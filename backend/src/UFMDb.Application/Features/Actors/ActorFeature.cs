@@ -23,7 +23,10 @@ public class GetActorsQueryHandler : IRequestHandler<GetActorsQuery, PagedResult
     {
         var query = _context.Actors.AsNoTracking().Where(a => !a.IsDeleted);
         if (!string.IsNullOrWhiteSpace(request.Search))
-            query = query.Where(a => EF.Functions.ILike(a.FullName, $"%{request.Search.Trim()}%"));
+        {
+            var pattern = $"%{request.Search.Trim()}%";
+            query = query.Where(a => EF.Functions.ILike(EF.Functions.Unaccent(a.FullName), EF.Functions.Unaccent(pattern)));
+        }
 
         var total = await query.CountAsync(ct);
         var pageSize = request.PageSize is < 1 or > 100 ? 20 : request.PageSize;

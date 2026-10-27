@@ -47,6 +47,9 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
+        // Aksan duyarsız arama için (EF.Functions.Unaccent)
+        builder.HasPostgresExtension("unaccent");
+
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         // Global soft-delete query filter (BaseEntity'den türeyen tüm tipler için)

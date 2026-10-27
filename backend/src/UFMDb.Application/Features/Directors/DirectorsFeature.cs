@@ -21,7 +21,10 @@ public class GetDirectorsQueryHandler : IRequestHandler<GetDirectorsQuery, Paged
     {
         var query = _context.Directors.AsNoTracking().Where(d => !d.IsDeleted);
         if (!string.IsNullOrWhiteSpace(request.Search))
-            query = query.Where(d => EF.Functions.ILike(d.FullName, $"%{request.Search.Trim()}%"));
+        {
+            var pattern = $"%{request.Search.Trim()}%";
+            query = query.Where(d => EF.Functions.ILike(EF.Functions.Unaccent(d.FullName), EF.Functions.Unaccent(pattern)));
+        }
 
         var total = await query.CountAsync(ct);
         var pageSize = request.PageSize is < 1 or > 100 ? 20 : request.PageSize;

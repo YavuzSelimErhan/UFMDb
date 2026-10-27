@@ -52,11 +52,11 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
             var term = request.Search.Trim();
             if (term.Length > MaxSearchLength) term = term[..MaxSearchLength];
             var pattern = $"%{SqlLike.Escape(term)}%";
-            // Dilden bağımsız: İngilizce, orijinal ve Türkçe başlıkların hepsinde aranır.
+            // Dilden ve aksandan bağımsız: İngilizce, orijinal ve Türkçe başlıkların hepsinde aranır.
             query = query.Where(w =>
-                EF.Functions.ILike(w.Movie.Title, pattern) ||
-                EF.Functions.ILike(w.Movie.OriginalTitle, pattern) ||
-                EF.Functions.ILike(w.Movie.TitleTr, pattern));
+                EF.Functions.ILike(EF.Functions.Unaccent(w.Movie.Title), EF.Functions.Unaccent(pattern)) ||
+                EF.Functions.ILike(EF.Functions.Unaccent(w.Movie.OriginalTitle), EF.Functions.Unaccent(pattern)) ||
+                EF.Functions.ILike(EF.Functions.Unaccent(w.Movie.TitleTr), EF.Functions.Unaccent(pattern)));
         }
 
         if (!string.IsNullOrWhiteSpace(request.Cursor))
