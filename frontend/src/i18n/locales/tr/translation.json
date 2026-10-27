@@ -812,6 +812,7 @@
     "count_other": "{{count}} film",
     "totalRuntime": "{{hours}} sa {{minutes}} dk",
     "random": "Rastgele seç",
+    "quickPick": "Hızlı seç",
     "randomTitle": "Ne izlesem?",
     "randomHint": "Listenden rastgele bir film",
     "menu": {
@@ -838,6 +839,12 @@
       "confirm": "{{count}} filmin hepsi watchlist'ten silinsin mi? Bu işlem geri alınamaz.",
       "confirmButton": "Evet, temizle",
       "failed": "Liste temizlenemedi, tekrar dene."
+    },
+    "picker": {
+      "skip": "Atla",
+      "tonight": "Bu akşamın filmi",
+      "go": "Filme git",
+      "again": "Tekrar çevir"
     }
   }
 }

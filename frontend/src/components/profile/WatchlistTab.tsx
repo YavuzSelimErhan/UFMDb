@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import type { TFunction } from "i18next";
@@ -14,9 +13,11 @@ import {
   Trash2,
   Upload,
   X,
+  Zap,
 } from "lucide-react";
 import { profileService } from "@/services";
 import MovieCard from "@/components/movie/MovieCard";
+import RandomPickerModal from "@/components/profile/RandomPickerModal";
 import PagedMovieGrid from "@/components/profile/PagedMovieGrid";
 import WatchlistAddSearch from "@/components/profile/WatchlistAddSearch";
 import { EmptyState } from "@/components/common/PageState";
@@ -48,7 +49,6 @@ function downloadBlob(blob: Blob, fileName: string) {
 
 export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { openLog, logModal } = useScreeningLogModal();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -60,6 +60,7 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
   const [sort, setSort] = useState<SortKey>("added");
   const [confirmingClear, setConfirmingClear] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [picker, setPicker] = useState<null | "spin" | "instant">(null);
 
   const exportMutation = useMutation({
     mutationFn: () => profileService.exportWatchlist(),
@@ -148,12 +149,7 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
     return list;
   }, [watchlist, filter, sort, i18n.language]);
 
-  const pickRandom = () => {
-    if (watchlist.length === 0) return;
-    const pool = shown.length > 0 ? shown : watchlist;
-    const m = pool[Math.floor(Math.random() * pool.length)];
-    navigate(`/movies/${m.id}`);
-  };
+  const pool = shown.length > 0 ? shown : watchlist;
 
   const onFileChosen = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -196,13 +192,22 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
               <strong>{t("watchlist.randomTitle")}</strong>
               <span>{t("watchlist.randomHint")}</span>
             </p>
-            <button
-              type="button"
-              className="watchlist-tab__random-btn"
-              onClick={pickRandom}
-            >
-              <Dice5 size={15} /> {t("watchlist.random")}
-            </button>
+            <div className="watchlist-tab__random-btns">
+              <button
+                type="button"
+                className="watchlist-tab__random-btn"
+                onClick={() => setPicker("spin")}
+              >
+                <Dice5 size={15} /> {t("watchlist.random")}
+              </button>
+              <button
+                type="button"
+                className="watchlist-tab__random-btn watchlist-tab__random-btn--ghost"
+                onClick={() => setPicker("instant")}
+              >
+                <Zap size={15} /> {t("watchlist.quickPick")}
+              </button>
+            </div>
           </div>
         )}
       </header>
@@ -396,6 +401,13 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
       )}
 
       {isOwnProfile && logModal}
+      {picker && (
+        <RandomPickerModal
+          pool={pool}
+          mode={picker}
+          onClose={() => setPicker(null)}
+        />
+      )}
     </div>
   );
 }

@@ -470,3 +470,12 @@
     transition: none;
   }
 }
+.watchlist-tab__random-btns {
+  display: flex;
+  gap: 8px;
+}
+.watchlist-tab__random-btn--ghost {
+  background: transparent;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+}

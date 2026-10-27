@@ -1,0 +1,162 @@
+.picker {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.picker__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+}
+.picker__panel {
+  position: relative;
+  width: min(900px, 100%);
+  padding: 28px 0;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+.picker__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  color: var(--color-text-muted);
+}
+
+.picker__viewport {
+  position: relative;
+  overflow: hidden;
+  height: 230px;
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 15%,
+    #000 85%,
+    transparent
+  );
+}
+.picker__track {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  will-change: transform;
+}
+.picker__card {
+  height: 210px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition:
+    opacity 0.4s,
+    transform 0.4s;
+}
+.picker__stage.is-done .picker__card:not(.is-winner) {
+  opacity: 0.25;
+}
+.picker__card.is-winner {
+  transform: scale(1.08);
+  box-shadow:
+    0 0 0 2px var(--color-accent),
+    0 0 28px var(--color-accent-muted);
+}
+
+.picker__marker {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 2px;
+  transform: translateX(-50%);
+  background: var(--color-accent);
+  box-shadow: 0 0 12px var(--color-accent);
+}
+.picker__skip {
+  display: block;
+  margin: 14px auto 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+.picker__skip:hover {
+  color: var(--color-text-primary);
+}
+
+.picker__result {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 8px 28px 0;
+  animation: picker-in 0.3s ease-out;
+}
+.picker__stage + .picker__result {
+  padding-top: 22px;
+}
+.picker__result img {
+  width: 120px;
+  border-radius: 8px;
+}
+.picker__eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.picker__result h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+.picker__result-meta span {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+.picker__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.picker__actions .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.picker__primary {
+  padding: 9px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+@keyframes picker-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (max-width: 640px) {
+  .picker__viewport {
+    height: 190px;
+  }
+  .picker__card {
+    height: 170px;
+  }
+  .picker__result {
+    flex-direction: column;
+    text-align: center;
+    padding: 8px 20px 0;
+  }
+  .picker__actions {
+    justify-content: center;
+  }
+}

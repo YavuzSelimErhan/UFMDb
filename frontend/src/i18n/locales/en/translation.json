@@ -815,6 +815,7 @@
     "count_other": "{{count}} films",
     "totalRuntime": "{{hours}} h {{minutes}} min",
     "random": "Pick random",
+    "quickPick": "Quick pick",
     "randomTitle": "What should I watch?",
     "randomHint": "A random pick from your list",
     "menu": {
@@ -841,6 +842,12 @@
       "confirm": "Remove all {{count}} films from your watchlist? This can't be undone.",
       "confirmButton": "Yes, clear",
       "failed": "Couldn't clear the list. Please try again."
+    },
+    "picker": {
+      "skip": "Skip",
+      "tonight": "The film of tonight",
+      "go": "Go to film",
+      "again": "Spin again"
     }
   }
 }
