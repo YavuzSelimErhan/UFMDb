@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -7,6 +8,8 @@ import {
   Users,
   Clapperboard,
   X,
+  Dice5,
+  Zap,
 } from "lucide-react";
 import {
   movieService,
@@ -15,6 +18,8 @@ import {
   directorService,
   countryService,
 } from "@/services";
+import RandomPickerModal from "@/components/profile/RandomPickerModal";
+import { unlockAudio } from "@/components/profile/usePickerSound";
 import MovieCard from "@/components/movie/MovieCard";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import YearPicker from "@/components/search/YearPicker";
@@ -28,6 +33,7 @@ import {
 } from "@/components/common/PageState";
 import type {
   MovieSearchFilter,
+  MovieListItem,
   PagedResult,
   ActorListItem,
   DirectorListItem,
@@ -151,6 +157,32 @@ export default function SearchPage() {
 
   // ---- Film state (URL'den) ----
   const filter = filterFromParams(searchParams);
+
+  const [picker, setPicker] = useState<null | {
+    mode: "spin" | "instant";
+    pool: MovieListItem[];
+  }>(null);
+
+  const randomMutation = useMutation({
+    mutationFn: async (mode: "spin" | "instant") => {
+      const res = await movieService.search({
+        ...filter,
+        sortBy: "random",
+        sortDirection: "desc",
+        page: 1,
+        pageSize: 40,
+      });
+      return { mode, pool: res.items };
+    },
+    onSuccess: ({ mode, pool }) => {
+      if (pool.length > 0) setPicker({ mode, pool });
+    },
+  });
+
+  const startRandom = (mode: "spin" | "instant") => {
+    unlockAudio(); // Safari/iOS: ses ancak tıklama anında açılabilir
+    randomMutation.mutate(mode);
+  };
 
   // ---- Oyuncu state (URL'den) ----
   const actorQuery = tab === "actors" ? (searchParams.get("q") ?? "") : "";
@@ -429,9 +461,32 @@ export default function SearchPage() {
       {tab === "movies" && (
         <>
           {data && !isLoading && (
-            <p className="search-page__results-count">
-              {t("search.resultsCount", { count: data.totalCount })}
-            </p>
+            <div className="search-page__results-bar">
+              <p className="search-page__results-count">
+                {t("search.resultsCount", { count: data.totalCount })}
+              </p>
+
+              {data.totalCount > 0 && (
+                <div className="search-page__random">
+                  <button
+                    type="button"
+                    className="search-page__random-btn"
+                    disabled={randomMutation.isPending}
+                    onClick={() => startRandom("spin")}
+                  >
+                    <Dice5 size={15} /> {t("search.pickRandom")}
+                  </button>
+                  <button
+                    type="button"
+                    className="search-page__random-btn search-page__random-btn--ghost"
+                    disabled={randomMutation.isPending}
+                    onClick={() => startRandom("instant")}
+                  >
+                    <Zap size={15} /> {t("search.quickPick")}
+                  </button>
+                </div>
+              )}
+            </div>
           )}
 
           {isLoading && <MovieGridSkeleton count={12} />}
@@ -493,6 +548,13 @@ export default function SearchPage() {
       )}
 
       {logModal}
+      {picker && (
+        <RandomPickerModal
+          pool={picker.pool}
+          mode={picker.mode}
+          onClose={() => setPicker(null)}
+        />
+      )}
     </div>
   );
 }

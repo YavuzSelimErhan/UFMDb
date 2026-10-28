@@ -97,7 +97,23 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
         List<MovieListItemDto> items;
         int totalCount;
 
-        if (f.SortBy == "rating")
+        if (f.SortBy == "random")
+        {
+            // Sayfalama yok: filtreye uyan TÜM filmlerden eþit olasýlýklý rastgele örneklem.
+            // Rating dalýndaki gibi önce sadece id'ler seçilir, sonra projeksiyon yüklenir.
+            var randomIds = await query
+                .OrderBy(_ => EF.Functions.Random())   // Npgsql: random()
+                .Select(m => m.Id)
+                .Take(pageSize)
+                .ToListAsync(ct);
+
+            items = await ProjectToListItem(
+                    _context.Movies.AsNoTracking().Where(m => randomIds.Contains(m.Id)), isTr)
+                .ToListAsync(ct);
+            totalCount = items.Count; // rastgele modda toplam sayý kullanýlmýyor, ekstra COUNT sorgusu atmýyoruz
+            page = 1;
+        }
+        else if (f.SortBy == "rating")
         {
             // Bayesian aðýrlýklý puan: WR = (v*R + m*C) / (v + m)
             //   v = RatingCount, R = AverageRating, m = RatingRankPolicy.MinVotesForRatingRank,

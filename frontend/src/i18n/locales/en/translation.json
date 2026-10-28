@@ -180,7 +180,10 @@
     "resultsCount_other": "{{count}} results found",
     "changeFilters": "Try changing your filters",
     "startTyping": "Start typing to search",
-    "titlesCount": "titles"
+    "titlesCount": "titles",
+    "pickRandom": "Spin",
+    "quickPick": "Quick pick",
+    "randomFailed": "Couldn't pick a random movie. Please try again."
   },
   "auth": {
     "email": "Email",

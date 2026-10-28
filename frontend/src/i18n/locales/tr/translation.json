@@ -179,7 +179,10 @@
     "resultsCount": "{{count}} sonuç bulundu",
     "changeFilters": "Filtreleri değiştirip tekrar dene",
     "startTyping": "Aramaya başlamak için yazmaya başla",
-    "titlesCount": "başlık"
+    "titlesCount": "başlık",
+    "pickRandom": "Çevir",
+    "quickPick": "Hızlı seç",
+    "randomFailed": "Rastgele seçim yapılamadı, tekrar dene"
   },
   "auth": {
     "email": "E-posta",
