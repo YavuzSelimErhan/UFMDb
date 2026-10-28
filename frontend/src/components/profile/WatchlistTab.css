@@ -358,6 +358,35 @@
 .wl-add__hint--error {
   color: #d3554f;
 }
+.watchlist-tab__random {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 8px 8px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent-muted);
+}
+.watchlist-tab__random-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+.watchlist-tab__random-text strong {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+/* Paylaşılan RandomPicker bu kartın içinde: boyutu kartla uyumlu, parıltısı yok. */
+.watchlist-tab__random .random-picker {
+  --picker-height: 38px;
+  flex-shrink: 0;
+}
+.watchlist-tab__random .random-picker__seg {
+  box-shadow: none;
+}
 
 /* ---------- Mobil ---------- */
 @media (max-width: 640px) {
@@ -420,5 +449,12 @@
   }
   .watchlist-tab__confirm-actions {
     justify-content: flex-end;
+  }
+  .watchlist-tab__random {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .watchlist-tab__random .random-picker {
+    flex: 1 1 100%;
   }
 }
