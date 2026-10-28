@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -8,8 +7,6 @@ import {
   Users,
   Clapperboard,
   X,
-  Dice5,
-  Zap,
 } from "lucide-react";
 import {
   movieService,
@@ -18,8 +15,7 @@ import {
   directorService,
   countryService,
 } from "@/services";
-import RandomPickerModal from "@/components/profile/RandomPickerModal";
-import { unlockAudio } from "@/components/profile/usePickerSound";
+import RandomPicker from "@/components/random/RandomPicker";
 import MovieCard from "@/components/movie/MovieCard";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import YearPicker from "@/components/search/YearPicker";
@@ -33,7 +29,6 @@ import {
 } from "@/components/common/PageState";
 import type {
   MovieSearchFilter,
-  MovieListItem,
   PagedResult,
   ActorListItem,
   DirectorListItem,
@@ -158,31 +153,16 @@ export default function SearchPage() {
   // ---- Film state (URL'den) ----
   const filter = filterFromParams(searchParams);
 
-  // ---- Rastgele seçici (aktif filtrelerle) ----
-  const [picker, setPicker] = useState<null | {
-    mode: "spin" | "instant";
-    pool: MovieListItem[];
-  }>(null);
-
-  const randomMutation = useMutation({
-    mutationFn: async (mode: "spin" | "instant") => {
-      const res = await movieService.search({
-        ...filter,
-        sortBy: "random",
-        sortDirection: "desc",
-        page: 1,
-        pageSize: 40,
-      });
-      return { mode, pool: res.items };
-    },
-    onSuccess: ({ mode, pool }) => {
-      if (pool.length > 0) setPicker({ mode, pool });
-    },
-  });
-
-  const startRandom = (mode: "spin" | "instant") => {
-    unlockAudio(); // Safari/iOS: ses ancak tıklama anında açılabilir
-    randomMutation.mutate(mode);
+  // Rastgele seçici havuzu: aktif filtrelere uyan filmlerden sunucu örneklemi.
+  const fetchRandomPool = async () => {
+    const res = await movieService.search({
+      ...filter,
+      sortBy: "random",
+      sortDirection: "desc",
+      page: 1,
+      pageSize: 40,
+    });
+    return res.items;
   };
 
   // ---- Oyuncu state (URL'den) ----
@@ -340,9 +320,6 @@ export default function SearchPage() {
     "--tab-glow": theme.glow,
   } as React.CSSProperties;
 
-  const randomDisabled =
-    randomMutation.isPending || !data || data.totalCount === 0;
-
   return (
     <div className="container search-page" style={cssVars}>
       <div className="spotlight-card">
@@ -444,24 +421,11 @@ export default function SearchPage() {
                 }))}
               />
 
-              <div className="search-page__random">
-                <button
-                  type="button"
-                  className="search-page__random-btn"
-                  disabled={randomDisabled}
-                  onClick={() => startRandom("spin")}
-                >
-                  <Dice5 size={15} /> {t("search.pickRandom")}
-                </button>
-                <button
-                  type="button"
-                  className="search-page__random-btn search-page__random-btn--ghost"
-                  disabled={randomDisabled}
-                  onClick={() => startRandom("instant")}
-                >
-                  <Zap size={15} /> {t("search.quickPick")}
-                </button>
-              </div>
+              <RandomPicker
+                className="search-page__random"
+                source={fetchRandomPool}
+                disabled={!data || data.totalCount === 0}
+              />
             </div>
           )}
 
@@ -477,12 +441,6 @@ export default function SearchPage() {
                 </button>
               ))}
             </div>
-          )}
-
-          {tab === "movies" && randomMutation.isError && (
-            <p className="search-page__random-error" role="alert">
-              {t("search.randomFailed")}
-            </p>
           )}
         </div>
       </div>
@@ -554,13 +512,6 @@ export default function SearchPage() {
       )}
 
       {logModal}
-      {picker && (
-        <RandomPickerModal
-          pool={picker.pool}
-          mode={picker.mode}
-          onClose={() => setPicker(null)}
-        />
-      )}
     </div>
   );
 }

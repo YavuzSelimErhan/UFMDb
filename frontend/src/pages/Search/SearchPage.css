@@ -261,83 +261,18 @@
   font-weight: 600;
   color: var(--tab-accent);
 }
-/* ---------- Rastgele seç: segmentli kontrol ---------- */
-.spotlight-card__filters .search-page__random {
-  display: flex;
+.search-page__random {
   margin-left: auto;
   align-self: center;
-  height: 36px;
-  border: 1px solid var(--tab-accent);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: 0 0 18px var(--tab-dim);
+  --picker-height: 48px;
+  --picker-accent: var(--tab-accent);
+  --picker-accent-muted: var(--tab-dim);
+  --picker-accent-hover: var(--tab-glow);
+  --picker-on-accent: #14110a;
 }
-
-/* Üst seçici: filtre satırındaki genel button stillerini ezmek için */
-.spotlight-card__filters .search-page__random-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 100%;
-  padding: 0 18px;
-  border: 0;
-  border-radius: 0;
-  background: var(--tab-accent);
-  color: #14110a;
-  font-size: 0.85rem;
-  font-weight: 700;
-  line-height: 1;
-  white-space: nowrap;
-  transition:
-    filter 0.15s,
-    background-color 0.15s;
-}
-.spotlight-card__filters .search-page__random-btn:hover:not(:disabled) {
-  filter: brightness(1.08);
-}
-.spotlight-card__filters .search-page__random-btn svg {
-  transition: transform 0.3s;
-}
-.spotlight-card__filters .search-page__random-btn:hover:not(:disabled) svg {
-  transform: rotate(180deg);
-}
-
-/* Hızlı seç: ikincil bölüm */
-.spotlight-card__filters .search-page__random-btn--ghost {
-  background: var(--tab-dim);
-  color: var(--tab-accent);
-  border-left: 1px solid var(--tab-accent);
-}
-.spotlight-card__filters .search-page__random-btn--ghost:hover:not(:disabled) {
-  background: var(--tab-glow);
-  filter: none;
-}
-
-.spotlight-card__filters .search-page__random-btn:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
-.search-page__random-error {
-  margin-top: 12px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #d3554f;
-}
-
 @media (max-width: 640px) {
-  .spotlight-card__filters .search-page__random {
+  .search-page__random {
     width: 100%;
     margin-left: 0;
-  }
-  .spotlight-card__filters .search-page__random-btn {
-    flex: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .spotlight-card__filters .search-page__random-btn svg {
-    transition: none;
   }
 }

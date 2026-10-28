@@ -136,9 +136,7 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
           type="button"
           className="picker__mute"
           aria-label={
-            sound.muted
-              ? t("watchlist.picker.unmute")
-              : t("watchlist.picker.mute")
+            sound.muted ? t("random.modal.unmute") : t("random.modal.mute")
           }
           onClick={sound.toggleMuted}
         >
@@ -187,7 +185,7 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
                 className="picker__skip"
                 onClick={() => setSkipped(true)}
               >
-                {t("watchlist.picker.skip")}
+                {t("random.modal.skip")}
               </button>
             )}
           </div>
@@ -197,7 +195,7 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
           <div className="picker__result">
             <img src={winner.posterUrl} alt={winner.title} />
             <div className="picker__result-meta">
-              <p className="picker__eyebrow">{t("watchlist.picker.tonight")}</p>
+              <p className="picker__eyebrow">{t("random.modal.tonight")}</p>
               <h3>{winner.title}</h3>
               <span>{winner.releaseYear}</span>
               <div className="picker__actions">
@@ -206,14 +204,14 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
                   className="picker__primary"
                   onClick={() => navigate(`/movies/${winner.id}`)}
                 >
-                  {t("watchlist.picker.go")}
+                  {t("random.modal.go")}
                 </button>
                 <button
                   type="button"
                   className="btn-secondary"
                   onClick={reroll}
                 >
-                  <Dice5 size={15} /> {t("watchlist.picker.again")}
+                  <Dice5 size={15} /> {t("random.modal.again")}
                 </button>
               </div>
             </div>

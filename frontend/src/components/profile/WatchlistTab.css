@@ -18,44 +18,6 @@
   color: var(--color-text-muted);
 }
 
-.watchlist-tab__random {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 8px 8px 8px 16px;
-  border-radius: var(--radius-md);
-  background: var(--color-accent-muted);
-}
-.watchlist-tab__random-text {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-}
-.watchlist-tab__random-text strong {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--color-accent);
-}
-.watchlist-tab__random-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-  height: 36px;
-  padding: 0 16px;
-  border-radius: var(--radius-pill);
-  background: var(--color-accent);
-  color: #fff;
-  font-size: 0.82rem;
-  font-weight: 700;
-  transition: filter 0.15s;
-}
-.watchlist-tab__random-btn:hover {
-  filter: brightness(1.1);
-}
-
 /* ---------- Araç çubuğu ---------- */
 .watchlist-tab__toolbar {
   display: flex;
@@ -404,9 +366,6 @@
     align-items: stretch;
     gap: 12px;
   }
-  .watchlist-tab__random {
-    justify-content: space-between;
-  }
 
   /* Filtre tam satır; altında sıralama + ⋯ yan yana. */
   .watchlist-tab__filter {
@@ -462,20 +421,4 @@
   .watchlist-tab__confirm-actions {
     justify-content: flex-end;
   }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .watchlist-tab__random-btn,
-  .watchlist-tab__menu-btn {
-    transition: none;
-  }
-}
-.watchlist-tab__random-btns {
-  display: flex;
-  gap: 8px;
-}
-.watchlist-tab__random-btn--ghost {
-  background: transparent;
-  color: var(--color-accent);
-  border: 1px solid var(--color-accent);
 }

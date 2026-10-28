@@ -1,0 +1,159 @@
+/*
+  Görünüm bu dosyada; yerleşim (margin, genişlik) ve tema sayfanın className'iyle gelir.
+  Sayfa şu değişkenleri ezebilir:
+    --picker-height        (varsayılan 44px)
+    --picker-accent        (varsayılan var(--color-accent))
+    --picker-accent-muted  (varsayılan var(--color-accent-muted))
+    --picker-accent-hover  (varsayılan var(--color-bg-elevated))
+    --picker-on-accent     (varsayılan var(--color-on-accent, #fff))
+*/
+.random-picker {
+  --rp-height: var(--picker-height, 44px);
+  --rp-accent: var(--picker-accent, var(--color-accent));
+  --rp-accent-muted: var(--picker-accent-muted, var(--color-accent-muted));
+  --rp-accent-hover: var(--picker-accent-hover, var(--color-bg-elevated));
+  --rp-on-accent: var(--picker-on-accent, var(--color-on-accent, #fff));
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+}
+
+/* ---------- Segmentli buton ---------- */
+.random-picker__seg {
+  display: flex;
+  height: var(--rp-height);
+  border: 1px solid var(--rp-accent);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 18px var(--rp-accent-muted);
+}
+.random-picker__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 0;
+  background: var(--rp-accent);
+  color: var(--rp-on-accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    filter 0.15s,
+    background-color 0.15s;
+}
+.random-picker__btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.random-picker__btn svg {
+  transition: transform 0.3s;
+}
+.random-picker__btn:hover:not(:disabled) svg {
+  transform: rotate(180deg);
+}
+.random-picker__btn--ghost {
+  background: var(--rp-accent-muted);
+  color: var(--rp-accent);
+  border-left: 1px solid var(--rp-accent);
+}
+.random-picker__btn--ghost:hover:not(:disabled) {
+  filter: none;
+  background: var(--rp-accent-hover);
+}
+.random-picker__btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ---------- "İzlediklerimi hariç tut" anahtarı ---------- */
+.random-picker__switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  user-select: none;
+}
+.random-picker__switch:hover {
+  color: var(--color-text-primary);
+}
+.random-picker__switch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.random-picker__track {
+  position: relative;
+  flex-shrink: 0;
+  width: 36px;
+  height: 21px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+.random-picker__track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+  transition:
+    transform 0.2s,
+    background-color 0.2s;
+}
+.random-picker__switch input:checked + .random-picker__track {
+  background: var(--rp-accent-muted);
+  border-color: var(--rp-accent);
+}
+.random-picker__switch input:checked + .random-picker__track::after {
+  transform: translateX(15px);
+  background: var(--rp-accent);
+}
+.random-picker__switch input:focus-visible + .random-picker__track {
+  outline: 2px solid var(--rp-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Bilgi / hata ---------- */
+.random-picker__hint {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+.random-picker__error {
+  flex-basis: 100%;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #d3554f;
+}
+
+@media (max-width: 640px) {
+  .random-picker__seg {
+    flex: 1 1 100%;
+  }
+  .random-picker__btn {
+    flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .random-picker__btn svg,
+  .random-picker__track,
+  .random-picker__track::after {
+    transition: none;
+  }
+}

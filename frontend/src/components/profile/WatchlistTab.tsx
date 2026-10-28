@@ -6,21 +6,18 @@ import type { TFunction } from "i18next";
 import {
   ArrowUpDown,
   Bookmark,
-  Dice5,
   Download,
   MoreHorizontal,
   Search,
   Trash2,
   Upload,
   X,
-  Zap,
 } from "lucide-react";
 import { profileService } from "@/services";
 import MovieCard from "@/components/movie/MovieCard";
 import PagedMovieGrid from "@/components/profile/PagedMovieGrid";
-import RandomPickerModal from "@/components/profile/RandomPickerModal";
 import WatchlistAddSearch from "@/components/profile/WatchlistAddSearch";
-import { unlockAudio } from "@/components/profile/usePickerSound";
+import RandomPicker from "@/components/random/RandomPicker";
 import { EmptyState } from "@/components/common/PageState";
 import Dropdown from "@/components/search/Dropdown";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
@@ -61,7 +58,6 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
   const [sort, setSort] = useState<SortKey>("added");
   const [confirmingClear, setConfirmingClear] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [picker, setPicker] = useState<null | "spin" | "instant">(null);
 
   const exportMutation = useMutation({
     mutationFn: () => profileService.exportWatchlist(),
@@ -90,7 +86,6 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
       setConfirmingClear(false);
       setResult(null);
       setFilter("");
-      setPicker(null);
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
     },
   });
@@ -151,14 +146,8 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
     return list;
   }, [watchlist, filter, sort, i18n.language]);
 
-  // Rastgele seçici: filtre varsa ve eşleşme varsa sadece onlardan, yoksa tüm liste.
-  const pool = shown.length > 0 ? shown : watchlist;
-
-  const openPicker = (mode: "spin" | "instant") => {
-    if (watchlist.length === 0) return;
-    unlockAudio(); // Safari/iOS: ses ancak tıklama anında açılabilir
-    setPicker(mode);
-  };
+  // Rastgele seçici havuzu: filtre varsa ve eşleşme varsa sadece onlar, yoksa tüm liste.
+  const randomPool = shown.length > 0 ? shown : watchlist;
 
   const onFileChosen = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -201,22 +190,7 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
               <strong>{t("watchlist.randomTitle")}</strong>
               <span>{t("watchlist.randomHint")}</span>
             </p>
-            <div className="watchlist-tab__random-btns">
-              <button
-                type="button"
-                className="watchlist-tab__random-btn"
-                onClick={() => openPicker("spin")}
-              >
-                <Dice5 size={15} /> {t("watchlist.random")}
-              </button>
-              <button
-                type="button"
-                className="watchlist-tab__random-btn watchlist-tab__random-btn--ghost"
-                onClick={() => openPicker("instant")}
-              >
-                <Zap size={15} /> {t("watchlist.quickPick")}
-              </button>
-            </div>
+            <RandomPicker source={randomPool} />
           </div>
         )}
       </header>
@@ -410,14 +384,6 @@ export default function WatchlistTab({ watchlist, isOwnProfile }: Props) {
       )}
 
       {isOwnProfile && logModal}
-
-      {picker && hasItems && (
-        <RandomPickerModal
-          pool={pool}
-          mode={picker}
-          onClose={() => setPicker(null)}
-        />
-      )}
     </div>
   );
 }

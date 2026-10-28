@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { listService } from "@/services";
 import { useAppSelector } from "@/store";
+import RandomPicker from "@/components/random/RandomPicker";
 import MovieCard from "@/components/movie/MovieCard";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import { getListTheme } from "@/utils/listTheme";
@@ -336,6 +337,14 @@ export default function ListDetailPage() {
           <p className="text-secondary">{displayDescription}</p>
         )}
       </div>
+
+      {/* Boş listede bileşen kendiliğinden hiçbir şey çizmez. */}
+      <RandomPicker
+        className="list-detail-page__random"
+        source={list.items.map((i) => i.movie)}
+        allowExcludeWatched={isAuthenticated}
+        showHint
+      />
 
       {list.items.length === 0 ? (
         <>
