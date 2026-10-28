@@ -8,7 +8,7 @@
     --picker-on-accent     (varsayılan var(--color-on-accent, #fff))
 */
 .random-picker {
-  --rp-height: var(--picker-height, 44px);
+  --rp-height: var(--picker-height, 36px);
   --rp-accent: var(--picker-accent, var(--color-accent));
   --rp-accent-muted: var(--picker-accent-muted, var(--color-accent-muted));
   --rp-accent-hover: var(--picker-accent-hover, var(--color-bg-elevated));
