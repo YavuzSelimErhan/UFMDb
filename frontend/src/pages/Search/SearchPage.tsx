@@ -158,6 +158,7 @@ export default function SearchPage() {
   // ---- Film state (URL'den) ----
   const filter = filterFromParams(searchParams);
 
+  // ---- Rastgele seçici (aktif filtrelerle) ----
   const [picker, setPicker] = useState<null | {
     mode: "spin" | "instant";
     pool: MovieListItem[];
@@ -339,6 +340,9 @@ export default function SearchPage() {
     "--tab-glow": theme.glow,
   } as React.CSSProperties;
 
+  const randomDisabled =
+    randomMutation.isPending || !data || data.totalCount === 0;
+
   return (
     <div className="container search-page" style={cssVars}>
       <div className="spotlight-card">
@@ -439,6 +443,25 @@ export default function SearchPage() {
                   value: `${o.sortBy}-${o.sortDirection}`,
                 }))}
               />
+
+              <div className="search-page__random">
+                <button
+                  type="button"
+                  className="search-page__random-btn"
+                  disabled={randomDisabled}
+                  onClick={() => startRandom("spin")}
+                >
+                  <Dice5 size={15} /> {t("search.pickRandom")}
+                </button>
+                <button
+                  type="button"
+                  className="search-page__random-btn search-page__random-btn--ghost"
+                  disabled={randomDisabled}
+                  onClick={() => startRandom("instant")}
+                >
+                  <Zap size={15} /> {t("search.quickPick")}
+                </button>
+              </div>
             </div>
           )}
 
@@ -455,38 +478,21 @@ export default function SearchPage() {
               ))}
             </div>
           )}
+
+          {tab === "movies" && randomMutation.isError && (
+            <p className="search-page__random-error" role="alert">
+              {t("search.randomFailed")}
+            </p>
+          )}
         </div>
       </div>
 
       {tab === "movies" && (
         <>
           {data && !isLoading && (
-            <div className="search-page__results-bar">
-              <p className="search-page__results-count">
-                {t("search.resultsCount", { count: data.totalCount })}
-              </p>
-
-              {data.totalCount > 0 && (
-                <div className="search-page__random">
-                  <button
-                    type="button"
-                    className="search-page__random-btn"
-                    disabled={randomMutation.isPending}
-                    onClick={() => startRandom("spin")}
-                  >
-                    <Dice5 size={15} /> {t("search.pickRandom")}
-                  </button>
-                  <button
-                    type="button"
-                    className="search-page__random-btn search-page__random-btn--ghost"
-                    disabled={randomMutation.isPending}
-                    onClick={() => startRandom("instant")}
-                  >
-                    <Zap size={15} /> {t("search.quickPick")}
-                  </button>
-                </div>
-              )}
-            </div>
+            <p className="search-page__results-count">
+              {t("search.resultsCount", { count: data.totalCount })}
+            </p>
           )}
 
           {isLoading && <MovieGridSkeleton count={12} />}
