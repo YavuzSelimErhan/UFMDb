@@ -131,6 +131,7 @@
 
 /* ---------- Bilgi / hata ---------- */
 .random-picker__hint {
+  margin-left: auto;
   font-size: 0.8rem;
   color: var(--color-text-muted);
 }
@@ -147,6 +148,9 @@
   }
   .random-picker__btn {
     flex: 1;
+  }
+  .random-picker__hint {
+    margin-left: 0;
   }
 }
 

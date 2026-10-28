@@ -369,6 +369,15 @@
   line-height: 1.6;
   white-space: pre-line;
 }
+.list-detail-page .list-detail-page__random {
+  margin: 32px 0 44px;
+  padding: 16px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  --picker-accent: var(--list-accent);
+  --picker-accent-muted: var(--list-accent-soft);
+  --picker-accent-hover: var(--list-accent-soft);
+}
 
 @media (max-width: 480px) {
   .list-detail-page__share span {

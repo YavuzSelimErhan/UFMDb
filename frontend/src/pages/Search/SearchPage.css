@@ -264,7 +264,7 @@
 .search-page__random {
   margin-left: auto;
   align-self: center;
-  --picker-height: 48px;
+  --picker-height: 36px;
   --picker-accent: var(--tab-accent);
   --picker-accent-muted: var(--tab-dim);
   --picker-accent-hover: var(--tab-glow);
