@@ -179,10 +179,7 @@
     "resultsCount": "{{count}} sonuç bulundu",
     "changeFilters": "Filtreleri değiştirip tekrar dene",
     "startTyping": "Aramaya başlamak için yazmaya başla",
-    "titlesCount": "başlık",
-    "pickRandom": "Çevir",
-    "quickPick": "Hızlı seç",
-    "randomFailed": "Rastgele seçim yapılamadı, tekrar dene"
+    "titlesCount": "başlık"
   },
   "auth": {
     "email": "E-posta",
@@ -815,7 +812,6 @@
     "count_other": "{{count}} film",
     "totalRuntime": "{{hours}} sa {{minutes}} dk",
     "random": "Rastgele seç",
-    "quickPick": "Hızlı seç",
     "randomTitle": "Ne izlesem?",
     "randomHint": "Listenden rastgele bir film",
     "menu": {
@@ -842,8 +838,16 @@
       "confirm": "{{count}} filmin hepsi watchlist'ten silinsin mi? Bu işlem geri alınamaz.",
       "confirmButton": "Evet, temizle",
       "failed": "Liste temizlenemedi, tekrar dene."
-    },
-    "picker": {
+    }
+  },
+  "random": {
+    "pick": "Çevir",
+    "quick": "Hızlı seç",
+    "excludeWatched": "İzlediklerimi hariç tut",
+    "poolCount": "{{count}} film arasından seçilir",
+    "allWatched": "Bu listedeki tüm filmleri izledin",
+    "failed": "Rastgele seçim yapılamadı, tekrar dene.",
+    "modal": {
       "skip": "Atla",
       "tonight": "Bu akşamın filmi",
       "go": "Filme git",

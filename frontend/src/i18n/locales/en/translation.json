@@ -180,10 +180,7 @@
     "resultsCount_other": "{{count}} results found",
     "changeFilters": "Try changing your filters",
     "startTyping": "Start typing to search",
-    "titlesCount": "titles",
-    "pickRandom": "Spin",
-    "quickPick": "Quick pick",
-    "randomFailed": "Couldn't pick a random movie. Please try again."
+    "titlesCount": "titles"
   },
   "auth": {
     "email": "Email",
@@ -817,8 +814,6 @@
     "count_one": "{{count}} film",
     "count_other": "{{count}} films",
     "totalRuntime": "{{hours}} h {{minutes}} min",
-    "random": "Pick random",
-    "quickPick": "Quick pick",
     "randomTitle": "What should I watch?",
     "randomHint": "A random pick from your list",
     "menu": {
@@ -853,6 +848,23 @@
       "again": "Spin again",
       "mute": "Mute",
       "unmute": "Unmute"
+    }
+  },
+  "random": {
+    "pick": "Spin",
+    "quick": "Quick pick",
+    "excludeWatched": "Hide movies I've watched",
+    "poolCount_one": "Picks from {{count}} movie",
+    "poolCount_other": "Picks from {{count}} movies",
+    "allWatched": "You've watched every movie on this list",
+    "failed": "Couldn't pick a random movie. Please try again.",
+    "modal": {
+      "skip": "Skip",
+      "tonight": "Tonight's pick",
+      "go": "Go to movie",
+      "again": "Spin again",
+      "mute": "Mute sound",
+      "unmute": "Unmute sound"
     }
   }
 }
