@@ -11,7 +11,7 @@ const GAP = 10;
 const STEP = CARD_W + GAP;
 const REEL_LEN = 60;
 const WIN_INDEX = 50;
-const SPIN_MS = 5200;
+const SPIN_MS = 7500;
 const MIN_SPIN_POOL = 3; // bundan az filmde animasyon anlamsız
 
 const rand = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
@@ -90,7 +90,7 @@ export default function RandomPickerModal({ pool, mode, onClose }: Props) {
     const x = vp.clientWidth / 2 - (WIN_INDEX * STEP + CARD_W / 2 + jitter);
 
     const id = requestAnimationFrame(() => {
-      track.style.transition = `transform ${SPIN_MS}ms cubic-bezier(0.1, 0.7, 0.1, 1)`;
+      track.style.transition = `transform ${SPIN_MS}ms cubic-bezier(0.15, 0.6, 0.15, 1)`;
       track.style.transform = `translateX(${x}px)`;
     });
     return () => cancelAnimationFrame(id);
