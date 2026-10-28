@@ -864,7 +864,8 @@
       "go": "Go to movie",
       "again": "Spin again",
       "mute": "Mute sound",
-      "unmute": "Unmute sound"
+      "unmute": "Unmute sound",
+      "loading": "Loading posters…"
     }
   }
 }

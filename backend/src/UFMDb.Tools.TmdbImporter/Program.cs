@@ -48,6 +48,7 @@ const int maxVideosPerMovie = 5;
 const int maxPostersPerMovie = 5;
 const int maxBackdropsPerMovie = 5;
 const int maxLogosPerMovie = 2;
+const int TmdbMaxPage = 500;
 
 // TMDB isteklerinin aynı anda kaç tanesinin paralel gideceği (DB yazımı yine sıralı)
 const int tmdbFetchBatchSize = 8;
@@ -1199,7 +1200,7 @@ async Task<List<int>> DiscoverUniqueMovieIdsAsync(
     var seen = new HashSet<int>();
     var page = 1;
 
-    while (newIds.Count < targetCount && !cts.IsCancellationRequested)
+    while (newIds.Count < targetCount && page <= TmdbMaxPage && !cts.IsCancellationRequested)
     {
         var discoverResult = await tmdb.DiscoverMoviesAsync(
             page,
@@ -1222,6 +1223,10 @@ async Task<List<int>> DiscoverUniqueMovieIdsAsync(
         if (page > discoverResult.TotalPages) break;
         await Task.Delay(150, cts.Token);
     }
+
+    if (page > TmdbMaxPage && newIds.Count < targetCount)
+        Console.WriteLine($"[UYARI] TMDB 500 sayfa sınırına ulaşıldı; {newIds.Count}/{targetCount} yeni film bulunabildi. " +
+                          "Daha fazlası için yıl aralığı (Tmdb:YearFrom/YearTo) daraltın veya MinVoteCount'u düşürün.");
 
     return newIds;
 }

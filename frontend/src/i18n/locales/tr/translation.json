@@ -853,7 +853,8 @@
       "go": "Filme git",
       "again": "Tekrar çevir",
       "mute": "Sesi kapat",
-      "unmute": "Sesi aç"
+      "unmute": "Sesi aç",
+      "loading": "Afişler yükleniyor…"
     }
   }
 }

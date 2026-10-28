@@ -146,6 +146,35 @@
 .picker__mute:hover {
   color: var(--color-text-primary);
 }
+.picker__viewport {
+  contain: layout paint;
+}
+.picker__viewport.is-loading .picker__track {
+  opacity: 0;
+}
+.picker__loading {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  animation: picker-pulse 1.2s ease-in-out infinite;
+}
+.picker__card {
+  backface-visibility: hidden;
+}
+@keyframes picker-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .picker__loading {
+    animation: none;
+  }
+}
 
 @keyframes picker-in {
   from {

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Dice5, Zap } from "lucide-react";
+import { Dice5, Zap, Loader2 } from "lucide-react";
 import type { MovieListItem } from "@/types";
 import RandomPickerModal from "./RandomPickerModal";
 import { unlockAudio } from "./usePickerSound";
@@ -114,7 +114,12 @@ export default function RandomPicker({
           disabled={btnDisabled}
           onClick={() => start("spin")}
         >
-          <Dice5 size={15} /> {t("random.pick")}
+          {loading ? (
+            <Loader2 size={15} className="random-picker__spinner" />
+          ) : (
+            <Dice5 size={15} />
+          )}{" "}
+          {t("random.pick")}
         </button>
         <button
           type="button"
