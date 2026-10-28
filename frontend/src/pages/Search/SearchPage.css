@@ -261,37 +261,64 @@
   font-weight: 600;
   color: var(--tab-accent);
 }
-.search-page__random {
+/* ---------- Rastgele seç: segmentli kontrol ---------- */
+.spotlight-card__filters .search-page__random {
   display: flex;
-  gap: 8px;
   margin-left: auto; /* satırın sağ ucuna yaslar */
   align-self: center;
+  height: 48px; /* dropdown'ların yüksekliğiyle aynı yap */
+  border: 1px solid var(--tab-accent);
+  border-radius: 12px; /* dropdown'ların köşe yuvarlaklığıyla aynı yap */
+  overflow: hidden;
+  box-shadow: 0 0 18px var(--tab-dim);
 }
-.search-page__random-btn {
+
+/* Üst seçici: filtre satırındaki genel button stillerini ezmek için */
+.spotlight-card__filters .search-page__random-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 44px;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
   padding: 0 18px;
-  border-radius: var(--radius-pill);
+  border: 0;
+  border-radius: 0;
   background: var(--tab-accent);
-  color: #000;
+  color: #14110a;
   font-size: 0.85rem;
   font-weight: 700;
-  transition: filter 0.15s;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    filter 0.15s,
+    background-color 0.15s;
 }
-.search-page__random-btn:hover:not(:disabled) {
-  filter: brightness(1.1);
+.spotlight-card__filters .search-page__random-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
 }
-.search-page__random-btn--ghost {
-  background: transparent;
+.spotlight-card__filters .search-page__random-btn svg {
+  transition: transform 0.3s;
+}
+.spotlight-card__filters .search-page__random-btn:hover:not(:disabled) svg {
+  transform: rotate(180deg);
+}
+
+/* Hızlı seç: ikincil bölüm */
+.spotlight-card__filters .search-page__random-btn--ghost {
+  background: var(--tab-dim);
   color: var(--tab-accent);
-  border: 1px solid var(--tab-accent);
+  border-left: 1px solid var(--tab-accent);
 }
-.search-page__random-btn:disabled {
+.spotlight-card__filters .search-page__random-btn--ghost:hover:not(:disabled) {
+  background: var(--tab-glow);
+  filter: none;
+}
+
+.spotlight-card__filters .search-page__random-btn:disabled {
   opacity: 0.45;
   cursor: default;
 }
+
 .search-page__random-error {
   margin-top: 12px;
   font-size: 0.85rem;
@@ -300,11 +327,17 @@
 }
 
 @media (max-width: 640px) {
-  .search-page__random {
+  .spotlight-card__filters .search-page__random {
     width: 100%;
+    margin-left: 0;
   }
-  .search-page__random-btn {
+  .spotlight-card__filters .search-page__random-btn {
     flex: 1;
-    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spotlight-card__filters .search-page__random-btn svg {
+    transition: none;
   }
 }
