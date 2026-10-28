@@ -266,7 +266,7 @@
   display: flex;
   margin-left: auto;
   align-self: center;
-  height: 42px;
+  height: 36px;
   border: 1px solid var(--tab-accent);
   border-radius: var(--radius-md);
   overflow: hidden;
