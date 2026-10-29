@@ -164,8 +164,8 @@ export default function SettingsTab({ diaryVisibility }: SettingsTabProps) {
             <Palette size={16} />
           </span>
           <div>
-            <h2>{t("profile.settingsAppearance")}</h2>
-            <p>{t("profile.settingsAppearanceHint")}</p>
+            <h2>{t("profile.Appearance")}</h2>
+            <p>{t("profile.AppearanceHint")}</p>
           </div>
         </header>
 
@@ -236,8 +236,8 @@ export default function SettingsTab({ diaryVisibility }: SettingsTabProps) {
             <ShieldCheck size={16} />
           </span>
           <div>
-            <h2>{t("profile.settingsPrivacy")}</h2>
-            <p>{t("profile.settingsPrivacyHint")}</p>
+            <h2>{t("profile.Privacy")}</h2>
+            <p>{t("profile.PrivacyHint")}</p>
           </div>
         </header>
 
