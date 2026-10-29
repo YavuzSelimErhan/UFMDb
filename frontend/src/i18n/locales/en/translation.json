@@ -340,9 +340,7 @@
     "deleteAccountConfirm": "Delete My Account",
     "deleteAccountCancel": "Cancel",
     "deleteAccountError": "Something went wrong while deleting your account.",
-    "deleteAccountWrongPassword": "Incorrect password."
-  },
-  "settings": {
+    "deleteAccountWrongPassword": "Incorrect password.",
     "appearance": "Appearance & language",
     "appearanceHint": "Choose the app's color theme and language.",
     "themeDark": "Dark",
