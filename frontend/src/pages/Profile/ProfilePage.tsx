@@ -443,13 +443,15 @@ export default function ProfilePage() {
                 onChange={handleLangChange}
               />
             </div>
-            <div className="profile-page__setting-row">
-              <div>
+            <div className="profile-page__setting-row profile-page__setting-row--stacked">
+              <div className="profile-page__setting-text">
                 <span>{t("profile.diaryVisibility")}</span>
-                <p className="text-muted">{t("profile.diaryVisibilityHint")}</p>
+                <p className="profile-page__setting-hint text-muted">
+                  {t("profile.diaryVisibilityHint")}
+                </p>
               </div>
               <div
-                className="profile-page__toggle-group"
+                className="profile-page__toggle-group profile-page__toggle-group--row"
                 role="group"
                 aria-label={t("profile.diaryVisibility")}
               >

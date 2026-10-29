@@ -413,3 +413,44 @@
   padding-bottom: 6px;
   scroll-snap-type: x proximity;
 }
+/* Seans Defteri gizliliği satırı: metin üstte, seçenekler altta */
+.profile-page__setting-row--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.profile-page__setting-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-page__setting-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.profile-page__toggle-group--row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-self: flex-start;
+}
+
+.profile-page__toggle-group--row button {
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* Dar ekranda üç seçenek satırı tam genişlikte eşit bölünsün */
+@media (max-width: 480px) {
+  .profile-page__toggle-group--row {
+    align-self: stretch;
+  }
+  .profile-page__toggle-group--row button {
+    flex: 1;
+  }
+}
