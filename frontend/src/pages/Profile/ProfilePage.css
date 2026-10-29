@@ -433,24 +433,84 @@
   color: var(--color-text-muted);
 }
 
-.profile-page__toggle-group--row {
+/* Seans Defteri gizliliği: seçilebilir kartlar */
+.diary-visibility {
   display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-self: flex-start;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.profile-page__toggle-group--row button {
+.diary-visibility__option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+.diary-visibility__option:hover:not(:disabled):not(.is-selected) {
+  border-color: var(--color-accent-dim);
+}
+.diary-visibility__option:disabled {
+  cursor: default;
+}
+.diary-visibility__option.is-selected {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-muted);
+}
+
+.diary-visibility__icon {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  white-space: nowrap;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+.diary-visibility__option.is-selected .diary-visibility__icon {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
 }
 
-/* Dar ekranda üç seçenek satırı tam genişlikte eşit bölünsün */
-@media (max-width: 480px) {
-  .profile-page__toggle-group--row {
-    align-self: stretch;
-  }
-  .profile-page__toggle-group--row button {
-    flex: 1;
-  }
+.diary-visibility__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.diary-visibility__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.diary-visibility__desc {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.diary-visibility__check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: var(--color-accent);
 }
