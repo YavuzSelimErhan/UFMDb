@@ -377,12 +377,16 @@ export interface LikedReviewItem {
   createdAtUtc: string;
 }
 
+/** Seans Defteri gizliliği; backend DiaryVisibility enum adlarıyla birebir aynı. */
+export type DiaryVisibility = "Public" | "Followers" | "Private";
+
 export interface ProfileData {
   userId: string;
   userName: string;
   avatarUrl: string | null;
   preferredLanguage: string;
   preferredTheme: string;
+  diaryVisibility: DiaryVisibility;
   fullName: string | null;
   country: string | null;
   birthDate: string | null;
@@ -531,6 +535,7 @@ export interface ScreeningLogEntry {
   rating: number | null;
   reviewContent: string | null;
   reaction?: ReactionType | null;
+  reviewContainsSpoiler?: boolean;
 }
 
 export interface ScreeningLogDay {
@@ -550,6 +555,14 @@ export interface ScreeningLogSummary {
   averageRating: number | null;
   likedFilms: number;
   notForMeFilms: number;
+}
+
+/** Seans Defteri sorgu parametreleri (kendi defterin ve başkasınınki için ortak). */
+export interface ScreeningLogParams {
+  cursor?: string;
+  pageSize?: number;
+  reaction?: ReactionType;
+  search?: string;
 }
 
 export interface RecentlyWatchedItem {
@@ -586,6 +599,9 @@ export interface PublicProfileDto {
   followingCount: number;
   isFollowedByCurrentUser: boolean;
   isCurrentUser: boolean;
+  diaryVisibility: DiaryVisibility;
+  /** Bakan kişi bu kullanıcının Seans Defteri'ni görebilir mi (sahibi / herkese açık / takipçi). */
+  canViewDiary: boolean;
 }
 
 export interface PublicFullProfileDto {
@@ -616,6 +632,9 @@ export interface PublicFullProfileDto {
   listsCount: number;
   isFollowedByCurrentUser: boolean;
   isCurrentUser: boolean;
+  diaryVisibility: DiaryVisibility;
+  /** false ise recentlyWatched backend'de boşaltılır; defter sekmesi kilitli gösterilir. */
+  canViewDiary: boolean;
 }
 
 export type ThemeMode = "dark" | "light";

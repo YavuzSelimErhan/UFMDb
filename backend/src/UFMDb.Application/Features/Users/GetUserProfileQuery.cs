@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UFMDb.Application.Common;
 using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.Common.Services;
@@ -13,7 +14,8 @@ public record PublicProfileDto(
     Guid Id, string UserName, string? FullName, string? AvatarUrl, string? Biography,
     string? Country, Gender Gender,
     int FollowerCount, int FollowingCount,
-    bool IsFollowedByCurrentUser, bool IsCurrentUser
+    bool IsFollowedByCurrentUser, bool IsCurrentUser,
+    string DiaryVisibility, bool CanViewDiary
 );
 
 public record GetUserProfileQuery(string UserName, Guid? CurrentUserId) : IRequest<PublicProfileDto>;
@@ -25,9 +27,11 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, P
 
     public async Task<PublicProfileDto> Handle(GetUserProfileQuery request, CancellationToken ct)
     {
+        // '_' ve '%' ILIKE'ta joker sayılır (örn. "RingoKid_39"); kaçışlayarak tam eşleşme sağlıyoruz.
+        var userName = SqlLike.Escape(request.UserName.Trim());
         var user = await _context.Users.AsNoTracking()
             .FirstOrDefaultAsync(u =>
-                u.IsActive && EF.Functions.ILike(u.UserName, request.UserName), ct)
+                u.IsActive && EF.Functions.ILike(u.UserName, userName), ct)
             ?? throw new NotFoundException(nameof(User), request.UserName);
 
         var followerCount = await _context.Follows.AsNoTracking()
@@ -39,11 +43,14 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, P
             await _context.Follows.AsNoTracking().AnyAsync(f =>
                 f.FollowerId == request.CurrentUserId.Value && f.FollowingId == user.Id, ct);
 
+        var canViewDiary = await DiaryAccess.CanViewAsync(_context, user.Id, user.DiaryVisibility, request.CurrentUserId, ct);
+
         return new PublicProfileDto(
             user.Id, user.UserName, user.FullName, user.AvatarUrl, user.Biography,
             user.Country, user.Gender,
             followerCount, followingCount,
-            isFollowed, request.CurrentUserId == user.Id
+            isFollowed, request.CurrentUserId == user.Id,
+            user.DiaryVisibility.ToString(), canViewDiary
         );
     }
 }
@@ -61,7 +68,8 @@ public record PublicFullProfileDto(
     List<DirectorListItemDto> LikedDirectors,
     int TotalWatchedCount, WatchedFilmsCountsDto WatchedCounts, decimal? AverageGivenRating, int RatingsCount, DateTime MemberSinceUtc,
     int FollowerCount, int FollowingCount, int ListsCount,
-    bool IsFollowedByCurrentUser, bool IsCurrentUser
+    bool IsFollowedByCurrentUser, bool IsCurrentUser,
+    string DiaryVisibility, bool CanViewDiary
 );
 
 public record GetPublicFullProfileQuery(string UserName, Guid? CurrentUserId, string Lang = "en") : IRequest<PublicFullProfileDto>;
@@ -79,9 +87,10 @@ public class GetPublicFullProfileQueryHandler : IRequestHandler<GetPublicFullPro
 
     public async Task<PublicFullProfileDto> Handle(GetPublicFullProfileQuery request, CancellationToken ct)
     {
+        var userName = SqlLike.Escape(request.UserName.Trim());
         var user = await _context.Users.AsNoTracking()
             .FirstOrDefaultAsync(u =>
-                u.IsActive && EF.Functions.ILike(u.UserName, request.UserName), ct)
+                u.IsActive && EF.Functions.ILike(u.UserName, userName), ct)
             ?? throw new NotFoundException(nameof(User), request.UserName);
 
         // Zengin profil verisini mevcut GetProfileQuery'den alıyoruz — mükerrer sorgu yazmıyoruz.
@@ -97,13 +106,18 @@ public class GetPublicFullProfileQueryHandler : IRequestHandler<GetPublicFullPro
         var listsCount = await _context.CuratedLists.AsNoTracking()
             .CountAsync(cl => !cl.IsDeleted && cl.CreatedByUserId == user.Id, ct);
 
+        // "Son izlenenler" Seans Defteri'nin bir parçası: defter gizliyse başkalarına gösterilmez.
+        var canViewDiary = await DiaryAccess.CanViewAsync(_context, user.Id, user.DiaryVisibility, request.CurrentUserId, ct);
+        var recentlyWatched = canViewDiary ? profile.RecentlyWatched : new List<RecentlyWatchedItemDto>();
+
         return new PublicFullProfileDto(
             profile.UserId, profile.UserName, profile.FullName, profile.AvatarUrl, profile.Biography, profile.Country,
             profile.Gender, profile.BirthDate,
-            profile.FavoriteMovies, profile.RecentlyWatched, profile.LikedMovies, profile.Watchlist, profile.Reviews,
+            profile.FavoriteMovies, recentlyWatched, profile.LikedMovies, profile.Watchlist, profile.Reviews,
             profile.FavoriteActors, profile.LikedActors, profile.FavoriteDirectors, profile.LikedDirectors,
             profile.TotalWatchedCount, profile.WatchedCounts, profile.AverageGivenRating, profile.RatingsCount, profile.MemberSinceUtc,
-            followerCount, followingCount, listsCount, isFollowed, request.CurrentUserId == user.Id
+            followerCount, followingCount, listsCount, isFollowed, request.CurrentUserId == user.Id,
+            user.DiaryVisibility.ToString(), canViewDiary
         );
     }
 }

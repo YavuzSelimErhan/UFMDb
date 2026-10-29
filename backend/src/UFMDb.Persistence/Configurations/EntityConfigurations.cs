@@ -219,6 +219,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         b.Property(u => u.FullName).HasMaxLength(100);
         b.Property(u => u.Country).HasMaxLength(100);
         b.Property(u => u.Biography).HasMaxLength(500);
+        b.Property(u => u.DiaryVisibility)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .HasDefaultValue(DiaryVisibility.Public);
     }
 }
 
@@ -314,6 +318,7 @@ public class WatchHistoryConfiguration : IEntityTypeConfiguration<WatchHistory>
         b.Property(w => w.Rating).HasColumnType("decimal(2,1)");
         b.HasOne(w => w.User).WithMany(u => u.WatchHistory).HasForeignKey(w => w.UserId).OnDelete(DeleteBehavior.Cascade);
         b.HasOne(w => w.Movie).WithMany().HasForeignKey(w => w.MovieId).OnDelete(DeleteBehavior.Restrict);
+        b.HasIndex(w => new { w.UserId, w.WatchedAtUtc });
     }
 }
 

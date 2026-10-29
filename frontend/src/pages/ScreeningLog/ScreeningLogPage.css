@@ -773,3 +773,20 @@
   opacity: 0.55;
   transition: opacity var(--transition-fast);
 }
+.screening-log__entry-spoiler {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px dashed currentColor;
+  background: transparent;
+  color: inherit;
+  font-size: 0.8rem;
+  opacity: 0.8;
+  cursor: pointer;
+}
+.screening-log__entry-spoiler:hover {
+  opacity: 1;
+}

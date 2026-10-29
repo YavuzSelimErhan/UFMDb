@@ -60,4 +60,10 @@ public enum ReactionType
 }
 
 public enum ListVisibility { Public = 0, Unlisted = 1, Private = 2 }
+public enum DiaryVisibility
+{
+    Public = 0,     // herkes (misafirler dahil)
+    Followers = 1,  // yalnızca kullanıcıyı takip edenler
+    Private = 2     // yalnızca kullanıcının kendisi
+}
 public enum ListStatus { Published = 0, Draft = 1, Archived = 2 }

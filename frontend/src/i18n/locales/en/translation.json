@@ -324,6 +324,12 @@
     "settings": "Settings",
     "theme": "Theme",
     "language": "Language",
+    "tabDiary": "Screening Log",
+    "diaryVisibility": "Screening Log privacy",
+    "diaryVisibilityHint": "Choose who can see your log. This also applies to \"Recently Watched\" on your profile.",
+    "diaryPublic": "Everyone",
+    "diaryFollowers": "Followers",
+    "diaryPrivate": "Only me",
     "dangerZone": "Danger Zone",
     "deleteAccount": "Delete Account",
     "deleteAccountWarning": "This can't be undone. Your account will be permanently closed and you won't be able to log in again.",
@@ -596,7 +602,13 @@
     "monthCount_one": "{{count}} screening",
     "monthCount_other": "{{count}} screenings",
     "noResults": "No matching screenings",
-    "noResultsHint": "Try changing the filter or the search."
+    "noResultsHint": "Try changing the filter or the search.",
+    "loadMore": "Show more",
+    "spoilerReveal": "Contains spoilers, click to reveal",
+    "userEmpty": "No screenings in this log yet",
+    "lockedPrivateTitle": "This log is private",
+    "lockedFollowersTitle": "This log is only visible to followers",
+    "lockedFollowersHint": "Follow this user to see it."
   },
   "reviews": {
     "title": "Reviews",
@@ -840,14 +852,6 @@
       "confirm": "Remove all {{count}} films from your watchlist? This can't be undone.",
       "confirmButton": "Yes, clear",
       "failed": "Couldn't clear the list. Please try again."
-    },
-    "picker": {
-      "skip": "Skip",
-      "tonight": "The film of tonight",
-      "go": "Go to film",
-      "again": "Spin again",
-      "mute": "Mute",
-      "unmute": "Unmute"
     }
   },
   "random": {

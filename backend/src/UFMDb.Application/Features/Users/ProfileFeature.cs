@@ -41,7 +41,8 @@ public record ProfileDto(
     int RatingsCount,
     DateTime MemberSinceUtc,
     int FollowerCount,
-    int FollowingCount
+    int FollowingCount,
+    string DiaryVisibility = "Public"
 );
 
 public record GetProfileQuery(Guid UserId, string Lang = "en") : IRequest<ProfileDto>;
@@ -190,7 +191,8 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             ratingsCount,
             user.CreatedAtUtc,
             followerCount,
-            followingCount
+            followingCount,
+            user.DiaryVisibility.ToString()
         );
     }
 
@@ -635,7 +637,8 @@ public class RemoveWatchedMovieCommandHandler : IRequestHandler<RemoveWatchedMov
 public record ScreeningLogEntryDto(
     Guid Id, Guid MovieId, string MovieTitle, string PosterUrl, DateTime WatchedAtUtc,
     int ScreeningNumber, decimal? Rating, string? ReviewContent,
-    ReactionType? Reaction = null
+    ReactionType? Reaction = null,
+    bool ReviewContainsSpoiler = false
 );
 public record ScreeningLogDayDto(DateTime Date, List<ScreeningLogEntryDto> Entries);
 

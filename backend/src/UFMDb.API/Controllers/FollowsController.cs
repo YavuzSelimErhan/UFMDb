@@ -5,6 +5,7 @@ using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.Features.Follows;
 using UFMDb.Application.Features.Users;
+using UFMDb.Domain.Enums;
 
 namespace UFMDb.API.Controllers;
 
@@ -57,6 +58,28 @@ public class FollowsController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetFullProfile(string userName, CancellationToken ct) =>
     Ok(await _mediator.Send(new GetPublicFullProfileQuery(userName, _currentUser.UserId, Request.GetLang()), ct));
+
+    /// <summary>
+    /// Bir kullanıcının Seans Defteri (gün bazlı imleçli sayfalama). Görünürlük ayarına göre
+    /// herkese açık / yalnızca takipçilere / gizli; erişim yoksa 403, kullanıcı yoksa 404 döner.
+    /// </summary>
+    [HttpGet("~/api/users/by-username/{userName}/screening-log")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetUserScreeningLog(
+        string userName,
+        [FromQuery] string? cursor,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] ReactionType? reaction = null,
+        [FromQuery] string? search = null,
+        CancellationToken ct = default) =>
+        Ok(await _mediator.Send(new GetUserScreeningLogQuery(
+            userName, _currentUser.UserId, cursor, pageSize, reaction, search, Request.GetLang()), ct));
+
+    /// <summary>Başka bir kullanıcının defter özeti (aynı görünürlük kuralı).</summary>
+    [HttpGet("~/api/users/by-username/{userName}/screening-log/summary")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetUserScreeningLogSummary(string userName, CancellationToken ct) =>
+        Ok(await _mediator.Send(new GetUserScreeningLogSummaryQuery(userName, _currentUser.UserId), ct));
 
     [HttpGet("~/api/users/{userId:guid}/watched-films")]
     [AllowAnonymous]

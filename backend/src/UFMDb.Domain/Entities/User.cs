@@ -19,6 +19,7 @@ public class User : BaseEntity
     public DateTime? BirthDate { get; set; }
     public Gender Gender { get; set; } = Gender.NotSpecified;
     public string? Biography { get; set; }
+    public DiaryVisibility DiaryVisibility { get; set; } = DiaryVisibility.Public;
 
     // Navigation
     public ICollection<Review> Reviews { get; set; } = new List<Review>();

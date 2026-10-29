@@ -36,6 +36,7 @@ import type {
   ActivityFeedPage,
   ReactionType,
   ScreeningLogPage,
+  ScreeningLogParams,
   ScreeningLogSummary,
   WatchedFilmsCounts,
   PagedLists,
@@ -43,6 +44,7 @@ import type {
   ListSort,
   ListMembership,
   WatchlistImportResult,
+  DiaryVisibility,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -279,6 +281,10 @@ export const profileService = {
     (await api.delete(`/profile/favorite-directors/${slot}`)).data,
   updateSettings: async (language: string, theme: string) =>
     (await api.put("/profile/settings", { language, theme })).data,
+  /** Seans Defteri'ni kimlerin görebileceğini değiştirir (Public | FollowersOnly | Private). */
+  updateDiaryVisibility: async (visibility: DiaryVisibility): Promise<void> => {
+    await api.put("/profile/diary-visibility", { visibility });
+  },
   deleteAccount: async (password: string) =>
     (await api.delete("/profile", { data: { password } })).data,
   getWatchedFilms: async (params: {
@@ -417,12 +423,7 @@ export const listService = {
 
 // ---------------- Screening Log (Seans Defteri) ----------------
 export const screeningLogService = {
-  getPage: async (params: {
-    cursor?: string;
-    pageSize?: number;
-    reaction?: ReactionType;
-    search?: string;
-  }): Promise<ScreeningLogPage> =>
+  getPage: async (params: ScreeningLogParams): Promise<ScreeningLogPage> =>
     (await api.get("/screening-log", { params })).data,
   getSummary: async (): Promise<ScreeningLogSummary> =>
     (await api.get("/screening-log/summary")).data,
@@ -508,6 +509,29 @@ export const followService = {
     api
       .get<WatchedFilmsCounts>(`/users/${userId}/watched-films/counts`)
       .then((r) => r.data),
+  /**
+   * Başka bir kullanıcının Seans Defteri (imleçli sayfalama).
+   * Görünürlük kuralı backend'de: erişim yoksa 403, kullanıcı yoksa 404 döner.
+   */
+  getUserScreeningLog: async (
+    userName: string,
+    params: ScreeningLogParams = {},
+  ): Promise<ScreeningLogPage> => {
+    const { data } = await api.get(
+      `/users/by-username/${encodeURIComponent(userName)}/screening-log`,
+      { params },
+    );
+    return data;
+  },
+  /** Başka bir kullanıcının defter özeti (aynı görünürlük kuralı: 403 / 404). */
+  getUserScreeningLogSummary: async (
+    userName: string,
+  ): Promise<ScreeningLogSummary> => {
+    const { data } = await api.get(
+      `/users/by-username/${encodeURIComponent(userName)}/screening-log/summary`,
+    );
+    return data;
+  },
 };
 
 // ---------------- Notifications ----------------

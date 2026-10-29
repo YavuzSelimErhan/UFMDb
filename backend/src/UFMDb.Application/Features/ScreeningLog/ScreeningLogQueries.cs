@@ -105,9 +105,10 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
         var movieIds = entries.Select(e => e.MovieId).Distinct().ToList();
 
         // 3) Sadece bu sayfadaki filmler için inceleme, tepki ve "kaçıncı izleme" bilgisi.
-        var reviews = await _context.Reviews.AsNoTracking()
+        var reviews = (await _context.Reviews.AsNoTracking()
             .Where(r => r.UserId == userId && !r.IsDeleted && movieIds.Contains(r.MovieId))
-            .ToDictionaryAsync(r => r.MovieId, r => r.Content, ct);
+            .Select(r => new { r.MovieId, r.Content, r.ContainsSpoiler })
+            .ToListAsync(ct)).ToDictionary(r => r.MovieId);
 
         var reactions = await _context.Likes.AsNoTracking()
             .Where(l => l.UserId == userId && movieIds.Contains(l.MovieId))
@@ -127,13 +128,17 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
                 screeningNumbers[h.Id] = ++n;
         }
 
-        var dtos = entries.Select(e => new ScreeningLogEntryDto(
-            e.Id, e.MovieId, e.Title, e.PosterUrl, e.WatchedAtUtc,
-            screeningNumbers.TryGetValue(e.Id, out var number) ? number : 1,
-            e.Rating,
-            reviews.TryGetValue(e.MovieId, out var content) ? content : null,
-            reactions.TryGetValue(e.MovieId, out var r) ? r : (ReactionType?)null
-        ));
+        var dtos = entries.Select(e =>
+        {
+            reviews.TryGetValue(e.MovieId, out var review);
+            return new ScreeningLogEntryDto(
+                e.Id, e.MovieId, e.Title, e.PosterUrl, e.WatchedAtUtc,
+                screeningNumbers.TryGetValue(e.Id, out var number) ? number : 1,
+                e.Rating,
+                review?.Content,
+                reactions.TryGetValue(e.MovieId, out var r) ? r : (ReactionType?)null,
+                review?.ContainsSpoiler ?? false);
+        });
 
         var result = dtos
             .GroupBy(e => e.WatchedAtUtc.Date)

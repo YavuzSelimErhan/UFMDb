@@ -13,6 +13,9 @@ import {
   MessageSquare,
   Film,
   ListVideo,
+  Lock,
+  Ticket,
+  ArrowRight,
   User as UserIcon,
 } from "lucide-react";
 import { followService } from "@/services";
@@ -20,6 +23,9 @@ import { pickListText } from "@/utils/listText";
 import MovieCard from "@/components/movie/MovieCard";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import ListCard from "../Lists/ListCard";
+import UserScreeningLog, {
+  DiaryLocked,
+} from "../ScreeningLog/UserScreeningLog";
 import Favorites from "@/components/profile/Favorites";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileContentTabs from "@/components/profile/ProfileContentTabs";
@@ -34,6 +40,7 @@ import "../Profile/ProfilePage.css";
 type ProfileTab =
   | "profile"
   | "films"
+  | "diary"
   | "watchlist"
   | "liked"
   | "reviews"
@@ -104,6 +111,11 @@ export default function UserProfilePage() {
             followerCount: prev.followerCount + (isFollowedNow ? 1 : -1),
           },
       );
+      // Takip durumu defter erişimini değiştirir (canViewDiary, recentlyWatched): profili ve defteri yenile.
+      queryClient.invalidateQueries({ queryKey: ["user-profile", userName] });
+      queryClient.invalidateQueries({
+        queryKey: ["user-screening-log", userName],
+      });
     },
   });
 
@@ -130,6 +142,11 @@ export default function UserProfilePage() {
       label: t("profile.tabFilms"),
       icon: Film,
       count: profile.totalWatchedCount,
+    },
+    {
+      key: "diary",
+      label: t("profile.tabDiary", "Seans Defteri"),
+      icon: profile.canViewDiary ? Ticket : Lock,
     },
     {
       key: "watchlist",
@@ -201,18 +218,30 @@ export default function UserProfilePage() {
                 <Clock size={17} />
                 {t("profile.recentlyWatched")}
               </h2>
-              {profile.recentlyWatched.length > 0 ? (
-                <div className="rw-grid">
-                  {profile.recentlyWatched.map((item) => (
-                    <MovieCard
-                      key={item.movie.id}
-                      movie={item.movie}
-                      userRating={item.userRating}
-                      compact
-                      onLogClick={() => openLog(item.movie)}
-                    />
-                  ))}
-                </div>
+              {!profile.canViewDiary ? (
+                // Backend gizli defterde recentlyWatched'ı boş döner; "boş" yerine kilit göster.
+                <DiaryLocked visibility={profile.diaryVisibility} />
+              ) : profile.recentlyWatched.length > 0 ? (
+                <>
+                  <div className="rw-grid">
+                    {profile.recentlyWatched.map((item) => (
+                      <MovieCard
+                        key={item.movie.id}
+                        movie={item.movie}
+                        userRating={item.userRating}
+                        compact
+                        onLogClick={() => openLog(item.movie)}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    className="profile-page__view-log"
+                    onClick={() => setTab("diary")}
+                  >
+                    {t("log.viewFullLog")} <ArrowRight size={12} />
+                  </button>
+                </>
               ) : (
                 <EmptyState
                   icon={<Clock size={26} />}
@@ -225,6 +254,16 @@ export default function UserProfilePage() {
         )}
 
         {tab === "films" && <FilmsTab userId={profile.id} />}
+
+        {tab === "diary" &&
+          (profile.canViewDiary ? (
+            <UserScreeningLog
+              userName={profile.userName}
+              visibility={profile.diaryVisibility}
+            />
+          ) : (
+            <DiaryLocked visibility={profile.diaryVisibility} />
+          ))}
 
         {(tab === "watchlist" || tab === "liked" || tab === "reviews") && (
           <ProfileContentTabs

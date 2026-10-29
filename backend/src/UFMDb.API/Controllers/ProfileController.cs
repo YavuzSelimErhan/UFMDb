@@ -6,6 +6,7 @@ using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.Features.Reviews;
 using UFMDb.Application.Features.Users;
 using Microsoft.AspNetCore.RateLimiting;
+using UFMDb.Domain.Enums;
 
 namespace UFMDb.API.Controllers
 {
@@ -90,6 +91,15 @@ namespace UFMDb.API.Controllers
             return NoContent();
         }
 
+        [HttpPut("diary-visibility")]
+        public async Task<IActionResult> UpdateDiaryVisibility(UpdateDiaryVisibilityRequest request)
+        {
+            if (!Enum.TryParse<DiaryVisibility>(request.Visibility, true, out var visibility) || !Enum.IsDefined(visibility))
+                throw new ValidationException("Visibility", "Geçersiz gizlilik değeri.");
+            await _mediator.Send(new UpdateDiaryVisibilityCommand(RequireUserId(), visibility));
+            return NoContent();
+        }
+
         [HttpDelete]
         public async Task<IActionResult> DeleteAccount(DeleteAccountRequest request)
         {
@@ -169,4 +179,5 @@ namespace UFMDb.API.Controllers
         string UserName, string? AvatarUrl,
         string? FullName, string? Country, DateTime? BirthDate, string? Gender, string? Biography
     );
+    public record UpdateDiaryVisibilityRequest(string Visibility);
 }

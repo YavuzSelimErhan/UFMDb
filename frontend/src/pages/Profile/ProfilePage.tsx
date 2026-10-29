@@ -1,5 +1,10 @@
 import { useState, type FormEvent } from "react";
-import { useInfiniteQuery, useQuery, useMutation } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -17,6 +22,9 @@ import {
   ListVideo,
   Plus,
   Trash2,
+  Globe,
+  Users,
+  Lock,
 } from "lucide-react";
 import { profileService, listService, authService } from "@/services";
 import { useAppDispatch, useAppSelector } from "@/store";
@@ -27,6 +35,7 @@ import { pickListText } from "@/utils/listText";
 import Dropdown from "@/components/search/Dropdown";
 import MovieCard from "@/components/movie/MovieCard";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
+import { useToast } from "@/components/common/Toast";
 import ListCard from "./../Lists/ListCard";
 import Favorites from "@/components/profile/Favorites";
 import FilmsTab from "@/components/profile/FilmsTab";
@@ -38,6 +47,7 @@ import {
   PageError,
   EmptyState,
 } from "@/components/common/PageState";
+import type { DiaryVisibility, ProfileData } from "@/types";
 import "./ProfilePage.css";
 
 type ProfileTab =
@@ -56,6 +66,8 @@ export default function ProfilePage() {
   const dispatch = useAppDispatch();
   const theme = useAppSelector((s) => s.ui.theme);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = (searchParams.get("tab") as ProfileTab) || "profile";
   const { openLog, logModal } = useScreeningLogModal();
@@ -122,6 +134,19 @@ export default function ProfilePage() {
       profileService.updateSettings(language, theme),
   });
 
+  // Seans Defteri gizliliği: başarılı olunca önbellekteki profili güncelle.
+  const diaryVisibilityMutation = useMutation({
+    mutationFn: (visibility: DiaryVisibility) =>
+      profileService.updateDiaryVisibility(visibility),
+    onSuccess: (_data, visibility) => {
+      queryClient.setQueryData<ProfileData>(
+        ["my-profile"],
+        (prev) => prev && { ...prev, diaryVisibility: visibility },
+      );
+    },
+    onError: () => showToast(t("common.genericError"), "error"),
+  });
+
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -177,6 +202,22 @@ export default function ProfilePage() {
       status === 401 ? t("errors.sessionExpired") : t("errors.profileFailed");
     return <PageError message={message} onRetry={() => refetch()} />;
   }
+
+  // Kaydedilirken seçilen değer anında vurgulanır; hata olursa tekrar eskiye döner.
+  const currentDiaryVisibility: DiaryVisibility =
+    diaryVisibilityMutation.isPending && diaryVisibilityMutation.variables
+      ? diaryVisibilityMutation.variables
+      : (profile.diaryVisibility ?? "Public");
+
+  const diaryVisibilityOptions: {
+    value: DiaryVisibility;
+    label: string;
+    icon: typeof Globe;
+  }[] = [
+    { value: "Public", label: t("profile.diaryPublic"), icon: Globe },
+    { value: "Followers", label: t("profile.diaryFollowers"), icon: Users },
+    { value: "Private", label: t("profile.diaryPrivate"), icon: Lock },
+  ];
 
   const tabs: {
     key: ProfileTab;
@@ -401,6 +442,33 @@ export default function ProfilePage() {
                 options={languageOptions}
                 onChange={handleLangChange}
               />
+            </div>
+            <div className="profile-page__setting-row">
+              <div>
+                <span>{t("profile.diaryVisibility")}</span>
+                <p className="text-muted">{t("profile.diaryVisibilityHint")}</p>
+              </div>
+              <div
+                className="profile-page__toggle-group"
+                role="group"
+                aria-label={t("profile.diaryVisibility")}
+              >
+                {diaryVisibilityOptions.map(({ value, label, icon: Icon }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={currentDiaryVisibility === value ? "active" : ""}
+                    aria-pressed={currentDiaryVisibility === value}
+                    disabled={diaryVisibilityMutation.isPending}
+                    onClick={() => {
+                      if (value !== currentDiaryVisibility)
+                        diaryVisibilityMutation.mutate(value);
+                    }}
+                  >
+                    <Icon size={14} /> {label}
+                  </button>
+                ))}
+              </div>
             </div>
           </section>
         )}
