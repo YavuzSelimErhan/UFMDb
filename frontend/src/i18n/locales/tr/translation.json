@@ -339,7 +339,9 @@
     "deleteAccountConfirm": "Hesabımı Sil",
     "deleteAccountCancel": "Vazgeç",
     "deleteAccountError": "Hesap silinirken bir sorun oluştu.",
-    "deleteAccountWrongPassword": "Şifre hatalı.",
+    "deleteAccountWrongPassword": "Şifre hatalı."
+  },
+  "settings": {
     "appearance": "Görünüm ve dil",
     "appearanceHint": "Uygulamanın renk temasını ve dilini seç.",
     "themeDark": "Koyu",

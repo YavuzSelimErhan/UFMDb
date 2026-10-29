@@ -31,8 +31,8 @@ const THEME_OPTIONS: {
   icon: typeof Moon;
   labelKey: string;
 }[] = [
-  { value: "dark", icon: Moon, labelKey: "themeDark" },
-  { value: "light", icon: Sun, labelKey: "themeLight" },
+  { value: "dark", icon: Moon, labelKey: "profile.themeDark" },
+  { value: "light", icon: Sun, labelKey: "profile.themeLight" },
 ];
 
 const DIARY_OPTIONS: {
@@ -164,8 +164,8 @@ export default function SettingsTab({ diaryVisibility }: SettingsTabProps) {
             <Palette size={16} />
           </span>
           <div>
-            <h2>{t("appearance")}</h2>
-            <p>{t("appearanceHint")}</p>
+            <h2>{t("profile.settingsAppearance")}</h2>
+            <p>{t("profile.settingsAppearanceHint")}</p>
           </div>
         </header>
 
@@ -218,7 +218,7 @@ export default function SettingsTab({ diaryVisibility }: SettingsTabProps) {
             <span className="settings-field__label">
               {t("profile.language")}
             </span>
-            <p className="settings-field__hint">{t("languageHint")}</p>
+            <p className="settings-field__hint">{t("profile.languageHint")}</p>
           </div>
           <Dropdown
             icon={<Languages size={14} />}
@@ -236,8 +236,8 @@ export default function SettingsTab({ diaryVisibility }: SettingsTabProps) {
             <ShieldCheck size={16} />
           </span>
           <div>
-            <h2>{t("privacy")}</h2>
-            <p>{t("privacyHint")}</p>
+            <h2>{t("profile.settingsPrivacy")}</h2>
+            <p>{t("profile.settingsPrivacyHint")}</p>
           </div>
         </header>
 
