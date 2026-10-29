@@ -136,125 +136,7 @@
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
 }
 
-.profile-page__settings {
-  padding: 24px;
-  max-width: 520px;
-  border-radius: var(--radius-lg);
-}
-.profile-page__settings h2 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 18px;
-  font-size: 1.05rem;
-}
-.profile-page__settings h2 svg {
-  color: var(--color-accent);
-}
-
-.profile-page__setting-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-top: 1px solid var(--color-border);
-}
-.profile-page__setting-row:first-of-type {
-  border-top: none;
-}
-
-.profile-page__toggle-group {
-  display: flex;
-  flex-wrap: wrap;
-  border: 1px solid var(--color-border);
-  border-radius: 20px;
-  overflow: hidden;
-}
-.profile-page__toggle-group button {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 7px 16px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  transition:
-    background-color var(--transition-fast),
-    color var(--transition-fast);
-}
-.profile-page__toggle-group button.active {
-  background-color: var(--color-accent);
-  color: #fff;
-}
-
-.profile-page__danger-zone {
-  margin-top: 16px;
-  border: 1px solid rgba(211, 85, 79, 0.35);
-}
-.profile-page__danger-zone h2 svg {
-  color: #e2504a;
-}
-
-.profile-page__setting-row--danger {
-  align-items: flex-start;
-  gap: 16px;
-}
-.profile-page__setting-row--danger strong {
-  display: block;
-  margin-bottom: 4px;
-  font-size: 0.9rem;
-}
-
-.profile-page__danger-hint {
-  margin: 0;
-  max-width: 340px;
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-}
-
-.btn-danger {
-  flex-shrink: 0;
-  padding: 8px 16px;
-  border-radius: var(--radius-sm);
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #fff;
-  background-color: #d3554f;
-  border: 1px solid #d3554f;
-  transition: background-color var(--transition-fast);
-}
-.btn-danger:hover:not(:disabled) {
-  background-color: #c2443e;
-}
-.btn-danger:disabled {
-  opacity: 0.55;
-  cursor: default;
-}
-
-.profile-page__delete-confirm {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.profile-page__delete-confirm label {
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-.profile-page__delete-confirm input {
-  max-width: 320px;
-}
-
-.profile-page__delete-confirm-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 4px;
-}
-
-.profile-page__delete-error {
-  margin: 0;
-  font-size: 0.8rem;
-  color: #d3554f;
-}
+/* Not: Ayarlar sekmesi stilleri artık SettingsTab.css içinde. */
 
 .favorites-tabs__nav {
   display: inline-flex;
@@ -413,104 +295,23 @@
   padding-bottom: 6px;
   scroll-snap-type: x proximity;
 }
-/* Seans Defteri gizliliği satırı: metin üstte, seçenekler altta */
-.profile-page__setting-row--stacked {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-}
 
-.profile-page__setting-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.profile-page__setting-hint {
-  margin: 0;
+/* Başka sayfalarda kullanılıyorsa kalsın; kullanılmıyorsa silinebilir. */
+.btn-danger {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
   font-size: 0.85rem;
-  line-height: 1.5;
-  color: var(--color-text-muted);
-}
-
-/* Seans Defteri gizliliği: seçilebilir kartlar */
-.diary-visibility {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.diary-visibility__option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 14px;
-  text-align: left;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  background-color: var(--color-bg-elevated);
-  color: var(--color-text-primary);
-  cursor: pointer;
-  transition:
-    border-color var(--transition-fast),
-    background-color var(--transition-fast);
-}
-.diary-visibility__option:hover:not(:disabled):not(.is-selected) {
-  border-color: var(--color-accent-dim);
-}
-.diary-visibility__option:disabled {
-  cursor: default;
-}
-.diary-visibility__option.is-selected {
-  border-color: var(--color-accent);
-  background-color: var(--color-accent-muted);
-}
-
-.diary-visibility__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-  transition:
-    background-color var(--transition-fast),
-    color var(--transition-fast),
-    border-color var(--transition-fast);
-}
-.diary-visibility__option.is-selected .diary-visibility__icon {
-  background-color: var(--color-accent);
-  border-color: var(--color-accent);
-  color: #fff;
-}
-
-.diary-visibility__text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  flex: 1;
-}
-.diary-visibility__label {
-  font-size: 0.9rem;
   font-weight: 600;
+  color: #fff;
+  background-color: #d3554f;
+  border: 1px solid #d3554f;
+  transition: background-color var(--transition-fast);
 }
-.diary-visibility__desc {
-  font-size: 0.78rem;
-  color: var(--color-text-muted);
+.btn-danger:hover:not(:disabled) {
+  background-color: #c2443e;
 }
-
-.diary-visibility__check {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  color: var(--color-accent);
+.btn-danger:disabled {
+  opacity: 0.55;
+  cursor: default;
 }

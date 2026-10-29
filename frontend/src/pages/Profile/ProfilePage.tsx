@@ -1,53 +1,34 @@
-import { useState, type FormEvent } from "react";
-import {
-  useInfiniteQuery,
-  useQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Clock,
   Settings2,
-  Moon,
-  Sun,
   Bookmark,
   Pencil,
   Heart,
   MessageSquare,
   Film,
   ArrowRight,
-  Languages,
   ListVideo,
   Plus,
-  Trash2,
-  Globe,
-  Users,
-  Lock,
 } from "lucide-react";
-import { profileService, listService, authService } from "@/services";
-import { useAppDispatch, useAppSelector } from "@/store";
-import { setTheme } from "@/store/uiSlice";
-import { logout } from "@/store/authSlice";
-import { SUPPORTED_LANGUAGES, languageLabel } from "@/i18n/languages";
+import { profileService, listService } from "@/services";
 import { pickListText } from "@/utils/listText";
-import Dropdown from "@/components/search/Dropdown";
 import MovieCard from "@/components/movie/MovieCard";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
-import { useToast } from "@/components/common/Toast";
 import ListCard from "./../Lists/ListCard";
 import Favorites from "@/components/profile/Favorites";
 import FilmsTab from "@/components/profile/FilmsTab";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileContentTabs from "@/components/profile/ProfileContentTabs";
+import SettingsTab from "@/components/profile/SettingsTab";
 import { useWatchedFilmsCounts } from "@/hooks/useWatchedFilmsCounts";
 import {
   PageSpinner,
   PageError,
   EmptyState,
 } from "@/components/common/PageState";
-import type { DiaryVisibility, ProfileData } from "@/types";
 import "./ProfilePage.css";
 
 type ProfileTab =
@@ -63,11 +44,7 @@ const LISTS_PAGE_SIZE = 24;
 
 export default function ProfilePage() {
   const { t, i18n } = useTranslation();
-  const dispatch = useAppDispatch();
-  const theme = useAppSelector((s) => s.ui.theme);
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { showToast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = (searchParams.get("tab") as ProfileTab) || "profile";
   const { openLog, logModal } = useScreeningLogModal();
@@ -129,70 +106,6 @@ export default function ProfilePage() {
   // aynı cache'i okuduğu için ek istek atmıyor.
   const { data: filmsCounts } = useWatchedFilmsCounts();
 
-  const settingsMutation = useMutation({
-    mutationFn: ({ language, theme }: { language: string; theme: string }) =>
-      profileService.updateSettings(language, theme),
-  });
-
-  // Seans Defteri gizliliği: başarılı olunca önbellekteki profili güncelle.
-  const diaryVisibilityMutation = useMutation({
-    mutationFn: (visibility: DiaryVisibility) =>
-      profileService.updateDiaryVisibility(visibility),
-    onSuccess: (_data, visibility) => {
-      queryClient.setQueryData<ProfileData>(
-        ["my-profile"],
-        (prev) => prev && { ...prev, diaryVisibility: visibility },
-      );
-    },
-    onError: () => showToast(t("common.genericError"), "error"),
-  });
-
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deletePassword, setDeletePassword] = useState("");
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-
-  const deleteAccountMutation = useMutation({
-    mutationFn: (password: string) => profileService.deleteAccount(password),
-    onSuccess: async () => {
-      // Backend zaten tüm refresh token'ları iptal etti; /auth/logout
-      // çağrısı sadece httpOnly refresh cookie'sini temizlemek için.
-      await authService.logout().catch(() => {});
-      dispatch(logout());
-      navigate("/");
-    },
-    onError: (err: unknown) => {
-      const status = (err as { response?: { status?: number } })?.response
-        ?.status;
-      setDeleteError(
-        status === 401
-          ? t("profile.deleteAccountWrongPassword")
-          : t("profile.deleteAccountError"),
-      );
-    },
-  });
-
-  const handleDeleteAccount = (e: FormEvent) => {
-    e.preventDefault();
-    setDeleteError(null);
-    deleteAccountMutation.mutate(deletePassword);
-  };
-
-  const handleThemeChange = (value: "dark" | "light") => {
-    dispatch(setTheme(value));
-    settingsMutation.mutate({ language: i18n.language, theme: value });
-  };
-
-  const handleLangChange = (value: string) => {
-    i18n.changeLanguage(value);
-    localStorage.setItem("ufmdb_language", value);
-    settingsMutation.mutate({ language: value, theme });
-  };
-
-  const languageOptions = SUPPORTED_LANGUAGES.map((lng) => ({
-    label: languageLabel(lng),
-    value: lng,
-  }));
-
   if (isLoading) return <PageSpinner label={t("common.loading")} />;
 
   if (isError || !profile) {
@@ -202,22 +115,6 @@ export default function ProfilePage() {
       status === 401 ? t("errors.sessionExpired") : t("errors.profileFailed");
     return <PageError message={message} onRetry={() => refetch()} />;
   }
-
-  // Kaydedilirken seçilen değer anında vurgulanır; hata olursa tekrar eskiye döner.
-  const currentDiaryVisibility: DiaryVisibility =
-    diaryVisibilityMutation.isPending && diaryVisibilityMutation.variables
-      ? diaryVisibilityMutation.variables
-      : (profile.diaryVisibility ?? "Public");
-
-  const diaryVisibilityOptions: {
-    value: DiaryVisibility;
-    label: string;
-    icon: typeof Globe;
-  }[] = [
-    { value: "Public", label: t("profile.diaryPublic"), icon: Globe },
-    { value: "Followers", label: t("profile.diaryFollowers"), icon: Users },
-    { value: "Private", label: t("profile.diaryPrivate"), icon: Lock },
-  ];
 
   const tabs: {
     key: ProfileTab;
@@ -416,139 +313,7 @@ export default function ProfilePage() {
         )}
 
         {tab === "settings" && (
-          <section className="profile-page__settings card">
-            <div className="profile-page__setting-row">
-              <span>{t("profile.theme")}</span>
-              <div className="profile-page__toggle-group">
-                <button
-                  className={theme === "dark" ? "active" : ""}
-                  onClick={() => handleThemeChange("dark")}
-                >
-                  <Moon size={14} /> Dark
-                </button>
-                <button
-                  className={theme === "light" ? "active" : ""}
-                  onClick={() => handleThemeChange("light")}
-                >
-                  <Sun size={14} /> Light
-                </button>
-              </div>
-            </div>
-            <div className="profile-page__setting-row">
-              <span>{t("profile.language")}</span>
-              <Dropdown
-                icon={<Languages size={14} />}
-                value={i18n.language}
-                options={languageOptions}
-                onChange={handleLangChange}
-              />
-            </div>
-            <div className="profile-page__setting-row profile-page__setting-row--stacked">
-              <div className="profile-page__setting-text">
-                <span>{t("profile.diaryVisibility")}</span>
-                <p className="profile-page__setting-hint text-muted">
-                  {t("profile.diaryVisibilityHint")}
-                </p>
-              </div>
-              <div
-                className="profile-page__toggle-group profile-page__toggle-group--row"
-                role="group"
-                aria-label={t("profile.diaryVisibility")}
-              >
-                {diaryVisibilityOptions.map(({ value, label, icon: Icon }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={currentDiaryVisibility === value ? "active" : ""}
-                    aria-pressed={currentDiaryVisibility === value}
-                    disabled={diaryVisibilityMutation.isPending}
-                    onClick={() => {
-                      if (value !== currentDiaryVisibility)
-                        diaryVisibilityMutation.mutate(value);
-                    }}
-                  >
-                    <Icon size={14} /> {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {tab === "settings" && (
-          <section className="profile-page__settings profile-page__danger-zone card">
-            <h2>
-              <Trash2 size={17} />
-              {t("profile.dangerZone")}
-            </h2>
-
-            {!deleteOpen ? (
-              <div className="profile-page__setting-row profile-page__setting-row--danger">
-                <div>
-                  <strong>{t("profile.deleteAccount")}</strong>
-                  <p className="profile-page__danger-hint">
-                    {t("profile.deleteAccountWarning")}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="btn-danger"
-                  onClick={() => setDeleteOpen(true)}
-                >
-                  {t("profile.deleteAccount")}
-                </button>
-              </div>
-            ) : (
-              <form
-                className="profile-page__delete-confirm"
-                onSubmit={handleDeleteAccount}
-              >
-                <p className="profile-page__danger-hint">
-                  {t("profile.deleteAccountWarning")}
-                </p>
-                <label htmlFor="delete-account-password">
-                  {t("profile.deleteAccountConfirmPrompt")}
-                </label>
-                <input
-                  id="delete-account-password"
-                  type="password"
-                  value={deletePassword}
-                  onChange={(e) => setDeletePassword(e.target.value)}
-                  autoComplete="current-password"
-                  autoFocus
-                  required
-                />
-                {deleteError && (
-                  <p className="profile-page__delete-error">{deleteError}</p>
-                )}
-                <div className="profile-page__delete-confirm-actions">
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    disabled={deleteAccountMutation.isPending}
-                    onClick={() => {
-                      setDeleteOpen(false);
-                      setDeletePassword("");
-                      setDeleteError(null);
-                    }}
-                  >
-                    {t("profile.deleteAccountCancel")}
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn-danger"
-                    disabled={
-                      deleteAccountMutation.isPending || !deletePassword
-                    }
-                  >
-                    {deleteAccountMutation.isPending
-                      ? t("common.loading")
-                      : t("profile.deleteAccountConfirm")}
-                  </button>
-                </div>
-              </form>
-            )}
-          </section>
+          <SettingsTab diaryVisibility={profile.diaryVisibility ?? "Public"} />
         )}
       </div>
       {logModal}

@@ -340,7 +340,14 @@
     "deleteAccountConfirm": "Delete My Account",
     "deleteAccountCancel": "Cancel",
     "deleteAccountError": "Something went wrong while deleting your account.",
-    "deleteAccountWrongPassword": "Incorrect password."
+    "deleteAccountWrongPassword": "Incorrect password.",
+    "appearance": "Appearance & language",
+    "appearanceHint": "Choose the app's color theme and language.",
+    "themeDark": "Dark",
+    "themeLight": "Light",
+    "languageHint": "The language the interface is shown in.",
+    "privacy": "Privacy",
+    "privacyHint": "Control who can see the content on your profile."
   },
   "lists": {
     "title": "Lists",

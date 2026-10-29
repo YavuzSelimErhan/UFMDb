@@ -1,0 +1,402 @@
+/* ==========================================================
+   SettingsTab — profil > Ayarlar sekmesi
+   ========================================================== */
+
+.settings-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 680px;
+}
+
+/* ---------- Kart ---------- */
+
+.settings-card {
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.settings-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.settings-card__header h2 {
+  margin: 0 0 2px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+.settings-card__header p {
+  margin: 0;
+  max-width: 460px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+.settings-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background-color: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+/* ---------- Alan (etiket + kontrol) ---------- */
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 22px;
+  border-top: 1px solid var(--color-border);
+}
+.settings-field--inline {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.settings-field__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.settings-field__label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+.settings-field__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Tema seçimi (önizlemeli karolar) ---------- */
+
+.settings-theme {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.settings-theme__tile {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px 8px 10px;
+  text-align: left;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+.settings-theme__tile:hover:not(.is-selected) {
+  border-color: var(--color-accent-dim);
+}
+.settings-theme__tile.is-selected {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-muted);
+  color: var(--color-text-primary);
+}
+
+.settings-theme__preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 84px;
+  padding: 10px;
+  border-radius: 9px;
+  overflow: hidden;
+}
+.settings-theme__nav {
+  display: block;
+  width: 42%;
+  height: 6px;
+  border-radius: 3px;
+}
+.settings-theme__row {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  min-height: 0;
+}
+.settings-theme__poster {
+  flex: 1;
+  border-radius: 4px;
+}
+
+.settings-theme__preview--dark {
+  background-color: #0e1016;
+  border: 1px solid #232838;
+}
+.settings-theme__preview--dark .settings-theme__nav {
+  background-color: var(--color-accent);
+}
+.settings-theme__preview--dark .settings-theme__poster {
+  background-color: #222839;
+}
+
+.settings-theme__preview--light {
+  background-color: #f4f5f9;
+  border: 1px solid #dde1ec;
+}
+.settings-theme__preview--light .settings-theme__nav {
+  background-color: var(--color-accent);
+}
+.settings-theme__preview--light .settings-theme__poster {
+  background-color: #d5daea;
+}
+
+.settings-theme__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.settings-theme__check {
+  margin-left: auto;
+  color: var(--color-accent);
+}
+
+/* ---------- Seçenek kartları (gizlilik) ---------- */
+
+.settings-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-choice__option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background-color: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+.settings-choice__option:hover:not(:disabled):not(.is-selected) {
+  border-color: var(--color-accent-dim);
+  background-color: var(--color-bg-elevated);
+}
+.settings-choice__option:disabled {
+  cursor: default;
+}
+.settings-choice__option.is-selected {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-muted);
+}
+
+.settings-choice__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+.settings-choice__option.is-selected .settings-choice__icon {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.settings-choice__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.settings-choice__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.settings-choice__desc {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+.settings-choice__radio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  color: #fff;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+.settings-choice__option.is-selected .settings-choice__radio {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* ---------- Tehlikeli alan ---------- */
+
+.settings-card--danger {
+  border-color: rgba(211, 85, 79, 0.35);
+}
+.settings-card--danger .settings-card__icon {
+  background-color: rgba(211, 85, 79, 0.14);
+  color: #e2504a;
+}
+
+.settings-danger__actions {
+  display: flex;
+}
+
+.settings-danger__form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 22px;
+  border-top: 1px solid var(--color-border);
+  animation: settings-reveal 0.18s ease;
+}
+.settings-danger__form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.settings-danger__input {
+  width: 100%;
+  max-width: 340px;
+}
+.settings-danger__error {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #e2504a;
+}
+.settings-danger__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+@keyframes settings-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Butonlar ---------- */
+
+.settings-btn {
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+.settings-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.settings-btn--danger {
+  color: #fff;
+  background-color: #d3554f;
+  border-color: #d3554f;
+}
+.settings-btn--danger:hover:not(:disabled) {
+  background-color: #c2443e;
+  border-color: #c2443e;
+}
+.settings-btn--danger-outline {
+  color: #e2504a;
+  border-color: rgba(211, 85, 79, 0.5);
+  background-color: transparent;
+}
+.settings-btn--danger-outline:hover {
+  background-color: rgba(211, 85, 79, 0.12);
+  border-color: #d3554f;
+}
+.settings-btn--ghost {
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+  background-color: transparent;
+}
+.settings-btn--ghost:hover:not(:disabled) {
+  color: var(--color-text-primary);
+  border-color: var(--color-accent-dim);
+}
+
+/* ---------- Erişilebilirlik ---------- */
+
+.settings-theme__tile:focus-visible,
+.settings-choice__option:focus-visible,
+.settings-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-danger__form {
+    animation: none;
+  }
+}
+
+/* ---------- Mobil ---------- */
+
+@media (max-width: 520px) {
+  .settings-card {
+    padding: 18px;
+  }
+  .settings-field--inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .settings-danger__input {
+    max-width: none;
+  }
+  .settings-danger__buttons .settings-btn {
+    flex: 1;
+  }
+}
