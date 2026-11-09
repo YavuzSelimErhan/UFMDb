@@ -637,6 +637,15 @@ export interface PublicFullProfileDto {
   canViewDiary: boolean;
 }
 
+export interface CompatibilityResult {
+  /** 0–100; ortak film sayısı eşiğin altındaysa null */
+  score: number | null;
+  /** İki kullanıcının da puanladığı film sayısı */
+  commonCount: number;
+  /** Skorun hesaplanması için gereken minimum ortak film sayısı */
+  minRequired: number;
+}
+
 export type ThemeMode = "dark" | "light";
 export type LanguageCode = "tr" | "en";
 

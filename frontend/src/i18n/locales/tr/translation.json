@@ -641,6 +641,14 @@
     "noFollowers": "Henüz takipçisi yok",
     "noFollowing": "Henüz kimseyi takip etmiyor"
   },
+  "compatibility": {
+    "title": "Zevk uyumu",
+    "percent": "%{{value}}",
+    "basedOn_one": "{{count}} ortak film üzerinden",
+    "basedOn_other": "{{count}} ortak film üzerinden",
+    "notEnoughTitle": "Henüz yeterli ortak film yok",
+    "notEnoughProgress": "{{current}} / {{required}} ortak film"
+  },
   "notifications": {
     "title": "Bildirimler",
     "empty": "Henüz bildirimin yok.",

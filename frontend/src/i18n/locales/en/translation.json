@@ -644,6 +644,14 @@
     "noFollowers": "No followers yet",
     "noFollowing": "Not following anyone yet"
   },
+  "compatibility": {
+    "title": "Taste match",
+    "percent": "{{value}}%",
+    "basedOn_one": "Based on {{count}} film in common",
+    "basedOn_other": "Based on {{count}} films in common",
+    "notEnoughTitle": "Not enough films in common yet",
+    "notEnoughProgress": "{{current}} / {{required}} films in common"
+  },
   "notifications": {
     "title": "Notifications",
     "empty": "You don't have any notifications yet.",

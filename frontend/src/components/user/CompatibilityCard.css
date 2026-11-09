@@ -1,0 +1,111 @@
+.compat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+}
+
+.compat-card--skeleton {
+  min-height: 94px;
+  background-color: var(--color-bg-elevated);
+  animation: compat-pulse 1.4s ease-in-out infinite;
+}
+
+.compat-card__body {
+  flex: 1;
+  min-width: 0;
+}
+.compat-card__title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+.compat-card__sub {
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+}
+
+/* ---- Halka ---- */
+.compat-card__ring {
+  position: relative;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+}
+.compat-card__ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.compat-card__ring-track,
+.compat-card__ring-fill {
+  fill: none;
+  stroke-width: 6;
+}
+.compat-card__ring-track {
+  stroke: var(--color-bg-elevated);
+}
+.compat-card__ring-fill {
+  stroke: var(--color-accent, #8b5cf6);
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  animation: compat-ring-in 0.9s ease-out;
+}
+.compat-card__ring-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+/* ---- Yetersiz veri durumu ---- */
+.compat-card__icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-elevated);
+  color: var(--color-accent, #8b5cf6);
+}
+.compat-card__bar {
+  height: 6px;
+  margin: 8px 0 6px;
+  border-radius: 999px;
+  background-color: var(--color-bg-elevated);
+  overflow: hidden;
+}
+.compat-card__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background-color: var(--color-accent, #8b5cf6);
+  transition: width var(--transition-fast);
+}
+
+@keyframes compat-ring-in {
+  from {
+    stroke-dashoffset: 100;
+  }
+}
+@keyframes compat-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compat-card__ring-fill,
+  .compat-card--skeleton {
+    animation: none;
+  }
+}

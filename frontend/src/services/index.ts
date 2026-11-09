@@ -45,6 +45,7 @@ import type {
   ListMembership,
   WatchlistImportResult,
   DiaryVisibility,
+  CompatibilityResult,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -532,6 +533,10 @@ export const followService = {
     );
     return data;
   },
+  getCompatibility: (targetUserId: string) =>
+    api
+      .get<CompatibilityResult>(`/users/${targetUserId}/compatibility`)
+      .then((res) => res.data),
 };
 
 // ---------------- Notifications ----------------

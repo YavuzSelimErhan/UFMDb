@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
+using UFMDb.Application.Features.Compatibility;
 using UFMDb.Application.Features.Follows;
 using UFMDb.Application.Features.Users;
 using UFMDb.Domain.Enums;
@@ -93,4 +94,10 @@ public class FollowsController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetUserWatchedFilmsCounts(Guid userId, CancellationToken ct) =>
         Ok(await _mediator.Send(new GetWatchedFilmsCountsQuery(userId), ct));
+
+    /// <summary>Giriş yapan kullanıcı ile hedef kullanıcının zevk uyumu (ortak puanlanan filmlere göre).</summary>
+    [HttpGet("~/api/users/{targetUserId:guid}/compatibility")]
+    [Authorize]
+    public async Task<IActionResult> GetCompatibility(Guid targetUserId, CancellationToken ct) =>
+    Ok(await _mediator.Send(new GetCompatibilityQuery(RequireUserId(), targetUserId), ct));
 }

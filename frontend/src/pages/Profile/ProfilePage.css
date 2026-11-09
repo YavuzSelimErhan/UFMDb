@@ -315,3 +315,7 @@
   opacity: 0.55;
   cursor: default;
 }
+.profile-page__compat {
+  max-width: 420px;
+  margin-bottom: 16px;
+}
