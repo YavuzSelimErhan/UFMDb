@@ -17,6 +17,7 @@ import {
 import type { ProfileData, PublicFullProfileDto } from "@/types";
 import { getImageUrl } from "@/utils/getImageUrl";
 import FollowListModal from "@/components/user/FollowListModal";
+import CompatibilityBadge from "@/components/user/CompatibilityBadge";
 import {
   useWatchedFilmsCounts,
   watchedCountsKey,
@@ -240,6 +241,10 @@ export default function ProfileHeader({
               </button>
             )}
           </div>
+
+          {!isCurrentUser && (
+            <CompatibilityBadge userId={userId} userName={profile.userName} />
+          )}
 
           {(profile.country || age !== null || genderLabel) && (
             <div className="profile-header__badges">

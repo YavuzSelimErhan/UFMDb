@@ -30,7 +30,6 @@ import Favorites from "@/components/profile/Favorites";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileContentTabs from "@/components/profile/ProfileContentTabs";
 import FilmsTab from "@/components/profile/FilmsTab";
-import CompatibilityCard from "@/components/user/CompatibilityCard";
 import {
   PageSpinner,
   PageError,
@@ -189,13 +188,6 @@ export default function UserProfilePage() {
         isFollowLoading={followMutation.isPending}
         listsCount={userListsCount ?? profile.listsCount}
       />
-
-      <div className="profile-page__compat">
-        <CompatibilityCard
-          userId={profile.id}
-          isOwnProfile={profile.isCurrentUser}
-        />
-      </div>
 
       <nav className="profile-page__toptabs">
         {tabs.map(({ key, label, icon: Icon, count }) => (

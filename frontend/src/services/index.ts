@@ -46,6 +46,7 @@ import type {
   WatchlistImportResult,
   DiaryVisibility,
   CompatibilityResult,
+  CompatibilityFilms,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -536,6 +537,10 @@ export const followService = {
   getCompatibility: (targetUserId: string) =>
     api
       .get<CompatibilityResult>(`/users/${targetUserId}/compatibility`)
+      .then((res) => res.data),
+  getCompatibilityFilms: (targetUserId: string) =>
+    api
+      .get<CompatibilityFilms>(`/users/${targetUserId}/compatibility/films`)
       .then((res) => res.data),
 };
 

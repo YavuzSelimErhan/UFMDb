@@ -646,6 +646,24 @@ export interface CompatibilityResult {
   minRequired: number;
 }
 
+export interface CompatibilityFilm {
+  movieId: string;
+  title: string;
+  releaseYear: number;
+  posterUrl: string;
+  myRating: number;
+  theirRating: number;
+  /** |myRating - theirRating|, yıldız cinsinden */
+  difference: number;
+}
+
+export interface CompatibilityFilms {
+  agreements: CompatibilityFilm[];
+  disagreements: CompatibilityFilm[];
+  /** Tüm ortak filmlerde ortalama puan farkı (yıldız); ortak film yoksa null */
+  averageDifference: number | null;
+}
+
 export type ThemeMode = "dark" | "light";
 export type LanguageCode = "tr" | "en";
 

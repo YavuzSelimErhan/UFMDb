@@ -17,18 +17,14 @@ public class GetCompatibilityQueryHandler : IRequestHandler<GetCompatibilityQuer
     public async Task<CompatibilityDto> Handle(GetCompatibilityQuery request, CancellationToken ct)
     {
         var targetExists = await _context.Users.AsNoTracking()
-            .AnyAsync(u => u.Id == request.TargetUserId, ct);
+    .AnyAsync(u => u.Id == request.TargetUserId && u.IsActive, ct);
         if (!targetExists)
             throw new NotFoundException("Kullanıcı", request.TargetUserId);
 
-        var rows = await (
-            from a in _context.MovieRatings
-            join b in _context.MovieRatings on a.MovieId equals b.MovieId
-            where a.UserId == request.ViewerId && b.UserId == request.TargetUserId
-            select new { Mine = a.Value, Theirs = b.Value }
-        ).AsNoTracking().ToListAsync(ct);
-
-        var pairs = rows.Select(r => (r.Mine, r.Theirs)).ToList();
+        var pairs = (await CompatibilityPairsLoader.LoadAsync(
+                _context, request.ViewerId, request.TargetUserId, ct))
+            .Select(p => (p.Mine, p.Theirs))
+            .ToList();
 
         return new CompatibilityDto(
             CompatibilityCalculator.Calculate(pairs),

@@ -100,4 +100,11 @@ public class FollowsController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetCompatibility(Guid targetUserId, CancellationToken ct) =>
     Ok(await _mediator.Send(new GetCompatibilityQuery(RequireUserId(), targetUserId), ct));
+
+    /// <summary>Zevk uyumu detayı: en çok anlaşılan / ayrışılan ortak filmler.</summary>
+    [HttpGet("~/api/users/{targetUserId:guid}/compatibility/films")]
+    [Authorize]
+    public async Task<IActionResult> GetCompatibilityFilms(Guid targetUserId, CancellationToken ct) =>
+        Ok(await _mediator.Send(
+            new GetCompatibilityFilmsQuery(RequireUserId(), targetUserId, Request.GetLang()), ct));
 }
