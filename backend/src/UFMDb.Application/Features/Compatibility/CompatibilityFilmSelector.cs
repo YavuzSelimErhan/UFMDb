@@ -13,9 +13,12 @@ public static class CompatibilityFilmSelector
     public const decimal DisagreementMinDifference = 1.0m;
     public const int MaxPerList = 6;
 
+    private static bool IsAgreement(RatedPair p) => p.Difference <= AgreementMaxDifference;
+    private static bool IsDisagreement(RatedPair p) => p.Difference >= DisagreementMinDifference;
+
     /// <summary>Benzer puan verilen filmler; ikisinin de çok sevdikleri başta.</summary>
     public static List<RatedPair> Agreements(IEnumerable<RatedPair> pairs) =>
-        pairs.Where(p => p.Difference <= AgreementMaxDifference)
+        pairs.Where(IsAgreement)
             .OrderByDescending(p => p.Average)
             .ThenBy(p => p.MovieId)
             .Take(MaxPerList)
@@ -23,11 +26,19 @@ public static class CompatibilityFilmSelector
 
     /// <summary>Puanı belirgin ayrışan filmler; en büyük fark başta.</summary>
     public static List<RatedPair> Disagreements(IEnumerable<RatedPair> pairs) =>
-        pairs.Where(p => p.Difference >= DisagreementMinDifference)
+        pairs.Where(IsDisagreement)
             .OrderByDescending(p => p.Difference)
             .ThenBy(p => p.MovieId)
             .Take(MaxPerList)
             .ToList();
+
+    /// <summary>Kırpılmamış gerçek toplam: benzer puan verilen film sayısı.</summary>
+    public static int AgreementCount(IEnumerable<RatedPair> pairs) =>
+        pairs.Count(IsAgreement);
+
+    /// <summary>Kırpılmamış gerçek toplam: belirgin ayrışan film sayısı.</summary>
+    public static int DisagreementCount(IEnumerable<RatedPair> pairs) =>
+        pairs.Count(IsDisagreement);
 
     /// <summary>Tüm ortak filmlerde ortalama puan farkı (yıldız); ortak film yoksa null.</summary>
     public static decimal? AverageDifference(IReadOnlyCollection<RatedPair> pairs) =>

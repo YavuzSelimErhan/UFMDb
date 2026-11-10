@@ -16,6 +16,8 @@ const RING_SIZE = 104;
 interface CompatibilityModalProps {
   userId: string;
   userName: string;
+  /** Opsiyonel profil resmi. Yoksa baş harf monogramı gösterilir. */
+  avatarUrl?: string | null;
   viewerId: string | null;
   compat: CompatibilityResult;
   onClose: () => void;
@@ -128,6 +130,7 @@ function FilmRow({
 export default function CompatibilityModal({
   userId,
   userName,
+  avatarUrl,
   viewerId,
   compat,
   onClose,
@@ -148,6 +151,10 @@ export default function CompatibilityModal({
   }, [onClose]);
 
   const hasScore = compat.score !== null;
+  // Backend gerçek toplamları dönüyorsa onları kullan; yoksa (eski API) liste uzunluğuna düş.
+  const agreeTotal = data?.agreementCount ?? data?.agreements.length ?? 0;
+  const disagreeTotal =
+    data?.disagreementCount ?? data?.disagreements.length ?? 0;
   const hasHighlights =
     !!data && (data.agreements.length > 0 || data.disagreements.length > 0);
 
@@ -167,9 +174,18 @@ export default function CompatibilityModal({
 
         <div className="compat-modal__header">
           <div className="compat-modal__identity">
-            <span className="compat-modal__monogram" aria-hidden="true">
-              {userName.charAt(0).toUpperCase()}
-            </span>
+            {avatarUrl ? (
+              <img
+                className="compat-modal__avatar"
+                src={avatarUrl}
+                alt=""
+                loading="lazy"
+              />
+            ) : (
+              <span className="compat-modal__monogram" aria-hidden="true">
+                {userName.charAt(0).toUpperCase()}
+              </span>
+            )}
             <h3 id="compat-modal-title">
               <span className="compat-modal__eyebrow">
                 {t("compatibility.title")}
@@ -246,9 +262,7 @@ export default function CompatibilityModal({
                       ?.scrollIntoView({ behavior: "smooth", block: "start" })
                   }
                 >
-                  <span className="compat-modal__stat-count">
-                    {data.agreements.length}
-                  </span>
+                  <span className="compat-modal__stat-count">{agreeTotal}</span>
                   <span className="compat-modal__stat-label">
                     {t("compatibility.agreements")}
                   </span>
@@ -264,7 +278,7 @@ export default function CompatibilityModal({
                   }
                 >
                   <span className="compat-modal__stat-count">
-                    {data.disagreements.length}
+                    {disagreeTotal}
                   </span>
                   <span className="compat-modal__stat-label">
                     {t("compatibility.disagreements")}
@@ -333,7 +347,7 @@ export default function CompatibilityModal({
                     {t("compatibility.disagreements")}
                   </h4>
                   <span className="compat-modal__badge compat-modal__badge--disagree">
-                    Δ ≥ 1.5
+                    Δ ≥ 1.0
                   </span>
                 </div>
                 <ul className="compat-modal__list">

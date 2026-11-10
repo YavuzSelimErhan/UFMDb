@@ -10,11 +10,14 @@ import "./CompatibilityBadge.css";
 interface CompatibilityBadgeProps {
   userId: string;
   userName: string;
+  /** Opsiyonel profil resmi; modal başlığında gösterilir. */
+  avatarUrl?: string | null;
 }
 
 export default function CompatibilityBadge({
   userId,
   userName,
+  avatarUrl,
 }: CompatibilityBadgeProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -98,6 +101,7 @@ export default function CompatibilityBadge({
         <CompatibilityModal
           userId={userId}
           userName={userName}
+          avatarUrl={avatarUrl}
           viewerId={viewerId}
           compat={data}
           onClose={() => setOpen(false)}

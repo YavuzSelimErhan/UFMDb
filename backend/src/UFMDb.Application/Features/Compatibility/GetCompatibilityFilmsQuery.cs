@@ -13,7 +13,9 @@ public record CompatibilityFilmDto(
 public record CompatibilityFilmsDto(
     List<CompatibilityFilmDto> Agreements,
     List<CompatibilityFilmDto> Disagreements,
-    decimal? AverageDifference);
+    decimal? AverageDifference,
+    int AgreementCount,
+    int DisagreementCount);
 
 public record GetCompatibilityFilmsQuery(Guid ViewerId, Guid TargetUserId, string Lang = "en")
     : IRequest<CompatibilityFilmsDto>;
@@ -55,6 +57,8 @@ public class GetCompatibilityFilmsQueryHandler
         return new CompatibilityFilmsDto(
             agreements.Select(ToDto).OfType<CompatibilityFilmDto>().ToList(),
             disagreements.Select(ToDto).OfType<CompatibilityFilmDto>().ToList(),
-            CompatibilityFilmSelector.AverageDifference(pairs));
+            CompatibilityFilmSelector.AverageDifference(pairs),
+            CompatibilityFilmSelector.AgreementCount(pairs),
+            CompatibilityFilmSelector.DisagreementCount(pairs));
     }
 }

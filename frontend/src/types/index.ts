@@ -660,6 +660,9 @@ export interface CompatibilityFilm {
 export interface CompatibilityFilms {
   agreements: CompatibilityFilm[];
   disagreements: CompatibilityFilm[];
+  /** Listeler kırpılmış olabilir; bunlar kırpılmamış gerçek toplamlar. */
+  agreementCount?: number;
+  disagreementCount?: number;
   /** Tüm ortak filmlerde ortalama puan farkı (yıldız); ortak film yoksa null */
   averageDifference: number | null;
 }

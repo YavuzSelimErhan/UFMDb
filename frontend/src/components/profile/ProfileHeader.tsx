@@ -243,7 +243,11 @@ export default function ProfileHeader({
           </div>
 
           {!isCurrentUser && (
-            <CompatibilityBadge userId={userId} userName={profile.userName} />
+            <CompatibilityBadge
+              userId={userId}
+              userName={profile.userName}
+              avatarUrl={profile.avatarUrl}
+            />
           )}
 
           {(profile.country || age !== null || genderLabel) && (
