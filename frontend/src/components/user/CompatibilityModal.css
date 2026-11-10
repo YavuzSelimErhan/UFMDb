@@ -1,59 +1,119 @@
+/* ---------- Tema değişkenleri (Stitch "Swiss Archival" -> site token'ları) ---------- */
+.compat-modal {
+  --cm-accent: var(--color-accent, #4a90e2);
+  --cm-danger: var(--color-error, #e5534b);
+  --cm-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --cm-display: "Syne", var(--font-heading, inherit), system-ui, sans-serif;
+}
+
 .compat-modal__backdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(2px);
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
   padding: 20px;
 }
+
 .compat-modal {
+  position: relative;
   width: 100%;
-  max-width: 460px;
+  max-width: 960px;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  border-radius: var(--radius-lg);
+  border-radius: 4px;
   background-color: var(--color-bg-card);
   border: 1px solid var(--color-border);
   box-shadow: 0 24px 48px var(--color-shadow);
   overflow: hidden;
 }
 
+/* üstteki ince gradyan şerit */
+.compat-modal__accent {
+  flex: none;
+  height: 4px;
+  background: linear-gradient(90deg, var(--cm-accent), #adc6ff, #a4c9ff);
+}
+
+/* mobil tutamaç (sadece küçük ekranda) */
+.compat-modal__handle {
+  display: none;
+  justify-content: center;
+  padding: 8px 0 2px;
+}
+.compat-modal__handle span {
+  width: 48px;
+  height: 4px;
+  border-radius: 999px;
+  background-color: var(--color-border);
+}
+
+/* ---------- Header ---------- */
 .compat-modal__header {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 18px;
+  padding: 14px 20px;
   border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg-elevated);
 }
 .compat-modal__header h3 {
-  font-size: 1rem;
+  font-family: var(--cm-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
 }
 .compat-modal__close {
   color: var(--color-text-muted);
   padding: 4px;
-  border-radius: 50%;
+  border-radius: 4px;
 }
 .compat-modal__close:hover {
   color: var(--color-text-primary);
+  background-color: var(--color-bg-card);
+}
+
+/* ---------- İki panelli gövde ---------- */
+.compat-modal__body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+}
+
+.compat-modal__side {
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-right: 1px solid var(--color-border);
   background-color: var(--color-bg-elevated);
 }
 
-.compat-modal__body {
+.compat-modal__main {
   overflow-y: auto;
-  padding: 18px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 28px;
 }
 
+/* ---------- Sol panel: özet ---------- */
 .compat-modal__summary {
   display: flex;
   align-items: center;
   gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background-color: var(--color-bg-card);
 }
 .compat-modal__icon {
   flex-shrink: 0;
@@ -64,7 +124,7 @@
   align-items: center;
   justify-content: center;
   background-color: var(--color-bg-elevated);
-  color: var(--color-accent, #4a90e2);
+  color: var(--cm-accent);
 }
 .compat-modal__summary-title {
   font-size: 0.95rem;
@@ -72,113 +132,62 @@
   color: var(--color-text-primary);
 }
 .compat-modal__summary-sub {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-}
-
-.compat-modal__heading {
-  margin: 0 0 10px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-}
-.compat-modal__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.compat-modal__film {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.compat-modal__film-link {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.compat-modal__poster {
-  flex: none;
-  width: 36px;
-  height: 54px;
-  border-radius: 6px;
-  object-fit: cover;
-  background-color: var(--color-bg-elevated);
-}
-.compat-modal__film-info {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-.compat-modal__film-title {
-  font-size: 0.86rem;
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.compat-modal__film-link:hover .compat-modal__film-title {
-  text-decoration: underline;
-}
-.compat-modal__film-meta {
+  margin-top: 2px;
+  font-family: var(--cm-mono);
   font-size: 0.72rem;
+  letter-spacing: 0.04em;
   color: var(--color-text-muted);
 }
 
-.compat-modal__ratings {
+.compat-modal__summary-note {
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-left: 2px solid var(--cm-accent);
+  border-radius: 0 4px 4px 0;
+  background-color: var(--color-bg-card);
+}
+.compat-modal__summary-note svg {
   flex: none;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.compat-modal__rating {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.compat-modal__rating-label {
-  width: 56px;
-  text-align: right;
-  font-size: 0.68rem;
-  color: var(--color-text-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  margin-top: 2px;
+  color: var(--cm-accent);
 }
 
-.compat-modal__empty {
-  font-size: 0.82rem;
-  color: var(--color-text-muted);
-}
-
+/* ---------- "Nasıl hesaplanır" ---------- */
 .compat-modal__how {
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: 4px;
+  background-color: var(--color-bg-card);
 }
 .compat-modal__how summary {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 14px;
+  padding: 11px 14px;
   cursor: pointer;
   list-style: none;
-  font-size: 0.82rem;
+  font-family: var(--cm-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--color-text-primary);
 }
 .compat-modal__how summary::-webkit-details-marker {
   display: none;
 }
 .compat-modal__how summary:focus-visible {
-  outline: 2px solid var(--color-accent, #4a90e2);
+  outline: 2px solid var(--cm-accent);
   outline-offset: 2px;
-  border-radius: var(--radius-md);
+  border-radius: 4px;
+}
+.compat-modal__how summary svg:first-child {
+  color: var(--cm-accent);
 }
 .compat-modal__how summary span {
   flex: 1;
@@ -197,8 +206,194 @@
   line-height: 1.5;
   color: var(--color-text-muted);
 }
-.compat-modal__summary-note {
-  margin-top: 4px;
-  font-size: 0.72rem;
+
+/* ---------- Sağ panel: bölüm başlıkları ---------- */
+.compat-modal__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+.compat-modal__heading {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--cm-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+}
+.compat-modal__heading::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background-color: var(--cm-accent);
+}
+.compat-modal__heading--disagree::before {
+  background-color: var(--cm-danger);
+}
+
+.compat-modal__badge,
+.compat-modal__delta {
+  font-family: var(--cm-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.compat-modal__badge--agree,
+.compat-modal__delta--agree {
+  color: var(--cm-accent);
+  border-color: color-mix(in srgb, var(--cm-accent) 35%, transparent);
+  background-color: color-mix(in srgb, var(--cm-accent) 10%, transparent);
+}
+.compat-modal__badge--disagree,
+.compat-modal__delta--disagree {
+  color: var(--cm-danger);
+  border-color: color-mix(in srgb, var(--cm-danger) 35%, transparent);
+  background-color: color-mix(in srgb, var(--cm-danger) 10%, transparent);
+}
+
+/* ---------- Film kartları ---------- */
+.compat-modal__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.compat-modal__film {
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background-color: var(--color-bg-elevated);
+  transition: border-color var(--transition-fast, 0.15s);
+}
+.compat-modal__film:hover {
+  border-color: var(--color-text-muted);
+}
+.compat-modal__film-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.compat-modal__film-link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.compat-modal__poster {
+  flex: none;
+  width: 44px;
+  height: 66px;
+  border-radius: 3px;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-card);
+}
+.compat-modal__film-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.compat-modal__film-meta {
+  font-family: var(--cm-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
   color: var(--color-text-muted);
+}
+.compat-modal__film-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.compat-modal__film-link:hover .compat-modal__film-title {
+  text-decoration: underline;
+}
+
+.compat-modal__ratings {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+}
+.compat-modal__rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.compat-modal__rating-label {
+  width: 56px;
+  flex: none;
+  font-family: var(--cm-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.compat-modal__rating-value {
+  font-family: var(--cm-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.compat-modal__empty {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Mobil: alttan açılan çekmece ---------- */
+@media (max-width: 767px) {
+  .compat-modal__backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .compat-modal {
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 12px 12px 0 0;
+    border-bottom: none;
+  }
+  .compat-modal__handle {
+    display: flex;
+  }
+  .compat-modal__body {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .compat-modal__side,
+  .compat-modal__main {
+    overflow-y: visible;
+  }
+  .compat-modal__side {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .compat-modal__ratings {
+    grid-template-columns: 1fr;
+  }
 }
