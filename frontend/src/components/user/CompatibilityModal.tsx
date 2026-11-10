@@ -166,9 +166,17 @@ export default function CompatibilityModal({
         </div>
 
         <div className="compat-modal__header">
-          <h3 id="compat-modal-title">
-            {t("compatibility.modalTitle", { name: userName })}
-          </h3>
+          <div className="compat-modal__identity">
+            <span className="compat-modal__monogram" aria-hidden="true">
+              {userName.charAt(0).toUpperCase()}
+            </span>
+            <h3 id="compat-modal-title">
+              <span className="compat-modal__eyebrow">
+                {t("compatibility.title")}
+              </span>
+              <span className="compat-modal__username">@{userName}</span>
+            </h3>
+          </div>
           <button
             type="button"
             className="compat-modal__close"
