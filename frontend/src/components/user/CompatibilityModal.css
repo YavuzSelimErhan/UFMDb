@@ -4,6 +4,13 @@
   --cm-danger: var(--color-error, #e5534b);
   --cm-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --cm-display: "Syne", var(--font-heading, inherit), system-ui, sans-serif;
+  /* katmanlar: gömük (sol panel/header) < yüzey (modal) < yükseltilmiş (kartlar) */
+  --cm-sunken: color-mix(in srgb, #000 24%, var(--color-bg-card));
+  --cm-raised: color-mix(
+    in srgb,
+    var(--color-text-primary) 4%,
+    var(--color-bg-card)
+  );
 }
 
 .compat-modal__backdrop {
@@ -60,7 +67,7 @@
   justify-content: space-between;
   padding: 14px 20px;
   border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-bg-elevated);
+  background-color: var(--cm-sunken);
 }
 .compat-modal__header h3 {
   font-family: var(--cm-display);
@@ -93,7 +100,7 @@
   flex-direction: column;
   gap: 16px;
   border-right: 1px solid var(--color-border);
-  background-color: var(--color-bg-elevated);
+  background-color: var(--cm-sunken);
 }
 
 .compat-modal__main {
@@ -112,7 +119,7 @@
   padding: 16px;
   border: 1px solid var(--color-border);
   border-radius: 4px;
-  background-color: var(--color-bg-card);
+  background-color: var(--cm-raised);
 }
 .compat-modal__icon {
   flex-shrink: 0;
@@ -150,7 +157,7 @@
   border: 1px solid var(--color-border);
   border-left: 2px solid var(--cm-accent);
   border-radius: 0 4px 4px 0;
-  background-color: var(--color-bg-card);
+  background-color: var(--cm-raised);
 }
 .compat-modal__summary-note svg {
   flex: none;
@@ -162,7 +169,7 @@
 .compat-modal__how {
   border: 1px solid var(--color-border);
   border-radius: 4px;
-  background-color: var(--color-bg-card);
+  background-color: var(--cm-raised);
 }
 .compat-modal__how summary {
   display: flex;
@@ -272,39 +279,65 @@
   gap: 10px;
 }
 .compat-modal__film {
+  position: relative; /* tüm kartı tıklanabilir yapan link için */
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 14px;
-  padding: 10px 12px;
+  padding: 12px;
   border: 1px solid var(--color-border);
   border-radius: 4px;
-  background-color: var(--color-bg-elevated);
-  transition: border-color var(--transition-fast, 0.15s);
+  background-color: var(--cm-raised);
+  transition:
+    border-color var(--transition-fast, 0.15s),
+    background-color var(--transition-fast, 0.15s);
 }
 .compat-modal__film:hover {
-  border-color: var(--color-text-muted);
+  border-color: color-mix(in srgb, var(--cm-accent) 60%, var(--color-border));
+  background-color: color-mix(in srgb, var(--cm-accent) 6%, var(--cm-raised));
 }
-.compat-modal__film-link {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.compat-modal__film:focus-within {
+  outline: 2px solid var(--cm-accent);
+  outline-offset: 2px;
 }
 .compat-modal__poster {
   flex: none;
-  width: 40px;
-  height: 60px;
+  width: 48px;
+  height: 72px;
   border-radius: 3px;
   object-fit: cover;
   border: 1px solid var(--color-border);
   background-color: var(--color-bg-card);
 }
-.compat-modal__film-info {
+.compat-modal__film-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+}
+.compat-modal__film-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.compat-modal__film-link {
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  text-decoration: none;
+}
+/* linkin alanını tüm karta yay */
+.compat-modal__film-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+}
+.compat-modal__film-link:focus-visible {
+  outline: none;
 }
 .compat-modal__film-meta {
   font-family: var(--cm-mono);
@@ -313,43 +346,47 @@
   color: var(--color-text-muted);
 }
 .compat-modal__film-title {
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   font-weight: 600;
+  line-height: 1.25;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color var(--transition-fast, 0.15s);
 }
-.compat-modal__film-link:hover .compat-modal__film-title {
-  text-decoration: underline;
+.compat-modal__film:hover .compat-modal__film-title {
+  color: var(--cm-accent);
 }
 
 .compat-modal__ratings {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 .compat-modal__rating {
+  min-width: 0;
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  gap: 3px;
 }
 .compat-modal__rating-label {
-  width: 64px;
-  flex: none;
-  text-align: right;
   font-family: var(--cm-mono);
   font-size: 0.62rem;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--color-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.compat-modal__rating-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .compat-modal__rating-value {
-  width: 22px;
   font-family: var(--cm-mono);
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 700;
   color: var(--color-text-primary);
 }
@@ -374,7 +411,7 @@
   text-align: left;
   border: 1px solid var(--color-border);
   border-radius: 4px;
-  background-color: var(--color-bg-card);
+  background-color: var(--cm-raised);
   cursor: pointer;
   transition: border-color var(--transition-fast, 0.15s);
 }
@@ -451,22 +488,5 @@
   .compat-modal__side {
     border-right: none;
     border-bottom: 1px solid var(--color-border);
-  }
-  .compat-modal__film {
-    flex-wrap: wrap;
-  }
-  .compat-modal__film-link {
-    flex-basis: calc(100% - 70px);
-  }
-  .compat-modal__ratings {
-    order: 3;
-    flex-direction: row;
-    flex-basis: 100%;
-    gap: 12px;
-    padding-top: 8px;
-    border-top: 1px solid var(--color-border);
-  }
-  .compat-modal__rating {
-    flex: 1;
   }
 }

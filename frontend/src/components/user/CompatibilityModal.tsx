@@ -49,9 +49,9 @@ function RatingLine({
       >
         {label}
       </span>
-      <StarRating value={value} readOnly size={12} color={STAR_COLOR} />
-      <span className="compat-modal__rating-value" aria-hidden="true">
-        {formatted}
+      <span className="compat-modal__rating-row" aria-hidden="true">
+        <StarRating value={value} readOnly size={12} color={STAR_COLOR} />
+        <span className="compat-modal__rating-value">{formatted}</span>
       </span>
     </div>
   );
@@ -80,41 +80,47 @@ function FilmRow({
 
   return (
     <li className="compat-modal__film">
-      <Link
-        to={`/movies/${film.movieId}`}
-        className="compat-modal__film-link"
-        onClick={onNavigate}
-      >
-        {film.posterUrl ? (
-          <img
-            className="compat-modal__poster"
-            src={film.posterUrl}
-            alt=""
-            loading="lazy"
-          />
-        ) : (
-          <span className="compat-modal__poster" aria-hidden="true" />
-        )}
-        <span className="compat-modal__film-info">
-          <span className="compat-modal__film-meta">{film.releaseYear}</span>
-          <span className="compat-modal__film-title">{film.title}</span>
-        </span>
-      </Link>
-      <div className="compat-modal__ratings">
-        <RatingLine
-          label={t("compatibility.youLabel")}
-          who={t("compatibility.youLabel")}
-          value={film.myRating}
+      {film.posterUrl ? (
+        <img
+          className="compat-modal__poster"
+          src={film.posterUrl}
+          alt=""
+          loading="lazy"
         />
-        <RatingLine label={userName} who={userName} value={film.theirRating} />
+      ) : (
+        <span className="compat-modal__poster" aria-hidden="true" />
+      )}
+      <div className="compat-modal__film-content">
+        <div className="compat-modal__film-head">
+          <Link
+            to={`/movies/${film.movieId}`}
+            className="compat-modal__film-link"
+            onClick={onNavigate}
+          >
+            <span className="compat-modal__film-meta">{film.releaseYear}</span>
+            <span className="compat-modal__film-title">{film.title}</span>
+          </Link>
+          <span
+            className={`compat-modal__delta compat-modal__delta--${variant}`}
+            aria-label={apart}
+            title={apart}
+          >
+            Δ {diff}
+          </span>
+        </div>
+        <div className="compat-modal__ratings">
+          <RatingLine
+            label={t("compatibility.youLabel")}
+            who={t("compatibility.youLabel")}
+            value={film.myRating}
+          />
+          <RatingLine
+            label={userName}
+            who={userName}
+            value={film.theirRating}
+          />
+        </div>
       </div>
-      <span
-        className={`compat-modal__delta compat-modal__delta--${variant}`}
-        aria-label={apart}
-        title={apart}
-      >
-        Δ {diff}
-      </span>
     </li>
   );
 }
