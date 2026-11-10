@@ -6,6 +6,8 @@ interface Props {
   onChange?: (value: number) => void;
   readOnly?: boolean;
   size?: number;
+  /** Yıldız rengi. Varsayılan: sitenin mavisi. */
+  color?: string;
 }
 
 /** Letterboxd tarzı yarım-puan destekli yıldız bileşeni. */
@@ -14,6 +16,7 @@ export default function StarRating({
   onChange,
   readOnly = false,
   size = 22,
+  color = "#4a90e2",
 }: Props) {
   const [hoverValue, setHoverValue] = useState<number | null>(null);
   const displayValue = hoverValue ?? value;
@@ -44,11 +47,7 @@ export default function StarRating({
               height: size,
             }}
           >
-            <Star
-              size={size}
-              stroke="#4a90e2"
-              fill={filled ? "#4a90e2" : "none"}
-            />
+            <Star size={size} stroke={color} fill={filled ? color : "none"} />
             {halfFilled && (
               <div
                 style={{
@@ -59,7 +58,7 @@ export default function StarRating({
                   overflow: "hidden",
                 }}
               >
-                <Star size={size} stroke="#4a90e2" fill="#4a90e2" />
+                <Star size={size} stroke={color} fill={color} />
               </div>
             )}
             {!readOnly && (

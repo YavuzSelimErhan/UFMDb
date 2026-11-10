@@ -10,6 +10,8 @@ import CompatibilityRing from "./CompatibilityRing";
 import "./CompatibilityModal.css";
 
 const LOW_CONFIDENCE_FILMS = 20;
+const STAR_COLOR = "#ffb95f";
+const RING_SIZE = 104;
 
 interface CompatibilityModalProps {
   userId: string;
@@ -47,7 +49,7 @@ function RatingLine({
       >
         {label}
       </span>
-      <StarRating value={value} readOnly size={12} />
+      <StarRating value={value} readOnly size={12} color={STAR_COLOR} />
       <span className="compat-modal__rating-value" aria-hidden="true">
         {formatted}
       </span>
@@ -78,35 +80,26 @@ function FilmRow({
 
   return (
     <li className="compat-modal__film">
-      <div className="compat-modal__film-top">
-        <Link
-          to={`/movies/${film.movieId}`}
-          className="compat-modal__film-link"
-          onClick={onNavigate}
-        >
-          {film.posterUrl ? (
-            <img
-              className="compat-modal__poster"
-              src={film.posterUrl}
-              alt=""
-              loading="lazy"
-            />
-          ) : (
-            <span className="compat-modal__poster" aria-hidden="true" />
-          )}
-          <span className="compat-modal__film-info">
-            <span className="compat-modal__film-meta">{film.releaseYear}</span>
-            <span className="compat-modal__film-title">{film.title}</span>
-          </span>
-        </Link>
-        <span
-          className={`compat-modal__delta compat-modal__delta--${variant}`}
-          aria-label={apart}
-          title={apart}
-        >
-          Δ {diff}
+      <Link
+        to={`/movies/${film.movieId}`}
+        className="compat-modal__film-link"
+        onClick={onNavigate}
+      >
+        {film.posterUrl ? (
+          <img
+            className="compat-modal__poster"
+            src={film.posterUrl}
+            alt=""
+            loading="lazy"
+          />
+        ) : (
+          <span className="compat-modal__poster" aria-hidden="true" />
+        )}
+        <span className="compat-modal__film-info">
+          <span className="compat-modal__film-meta">{film.releaseYear}</span>
+          <span className="compat-modal__film-title">{film.title}</span>
         </span>
-      </div>
+      </Link>
       <div className="compat-modal__ratings">
         <RatingLine
           label={t("compatibility.youLabel")}
@@ -115,6 +108,13 @@ function FilmRow({
         />
         <RatingLine label={userName} who={userName} value={film.theirRating} />
       </div>
+      <span
+        className={`compat-modal__delta compat-modal__delta--${variant}`}
+        aria-label={apart}
+        title={apart}
+      >
+        Δ {diff}
+      </span>
     </li>
   );
 }
@@ -179,7 +179,7 @@ export default function CompatibilityModal({
           <aside className="compat-modal__side">
             <div className="compat-modal__summary">
               {hasScore ? (
-                <CompatibilityRing score={compat.score!} />
+                <CompatibilityRing score={compat.score!} size={RING_SIZE} />
               ) : (
                 <div className="compat-modal__icon">
                   <Sparkles size={22} />
@@ -220,6 +220,45 @@ export default function CompatibilityModal({
               </p>
             )}
 
+            {data && hasHighlights && (
+              <div className="compat-modal__stats">
+                <button
+                  type="button"
+                  className="compat-modal__stat compat-modal__stat--agree"
+                  disabled={data.agreements.length === 0}
+                  onClick={() =>
+                    document
+                      .getElementById("compat-agreements")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                  }
+                >
+                  <span className="compat-modal__stat-count">
+                    {data.agreements.length}
+                  </span>
+                  <span className="compat-modal__stat-label">
+                    {t("compatibility.agreements")}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="compat-modal__stat compat-modal__stat--disagree"
+                  disabled={data.disagreements.length === 0}
+                  onClick={() =>
+                    document
+                      .getElementById("compat-disagreements")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                  }
+                >
+                  <span className="compat-modal__stat-count">
+                    {data.disagreements.length}
+                  </span>
+                  <span className="compat-modal__stat-label">
+                    {t("compatibility.disagreements")}
+                  </span>
+                </button>
+              </div>
+            )}
+
             <details className="compat-modal__how">
               <summary>
                 <Info size={16} aria-hidden="true" />
@@ -250,7 +289,7 @@ export default function CompatibilityModal({
             )}
 
             {data && data.agreements.length > 0 && (
-              <section>
+              <section id="compat-agreements">
                 <div className="compat-modal__section-head">
                   <h4 className="compat-modal__heading compat-modal__heading--agree">
                     {t("compatibility.agreements")}
@@ -274,7 +313,7 @@ export default function CompatibilityModal({
             )}
 
             {data && data.disagreements.length > 0 && (
-              <section>
+              <section id="compat-disagreements">
                 <div className="compat-modal__section-head">
                   <h4 className="compat-modal__heading compat-modal__heading--disagree">
                     {t("compatibility.disagreements")}
