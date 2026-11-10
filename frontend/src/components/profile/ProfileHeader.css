@@ -21,26 +21,53 @@
   background-repeat: repeat-x;
 }
 
-.profile-header__body {
-  display: flex;
-  gap: 28px;
-  padding: 30px 32px 26px;
+/* ---------- Banner: favori filmin arka planı, yoksa düz zemin ---------- */
+.profile-header__banner {
+  height: 104px;
+  background-color: var(--color-bg-card);
+  background-image:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-bg-elevated) 30%, transparent),
+      var(--color-bg-elevated)
+    ),
+    var(--banner-image, none);
+  background-size: cover;
+  background-position: center 25%;
 }
 
-/* ---------- Avatar ---------- */
+/* ---------- Gövde: solda kimlik, sağda aksiyon + taste match ---------- */
+.profile-header__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 20px 32px;
+  padding: 0 32px 26px;
+  align-items: start;
+}
+
+.profile-header__main {
+  display: flex;
+  gap: 24px;
+  min-width: 0;
+}
+
+/* ---------- Avatar (banner'a taşar) ---------- */
 .profile-header__avatar-col {
   flex: 0 0 auto;
+  margin-top: -56px;
+  position: relative;
+  z-index: 1;
 }
 
 .profile-header__avatar {
-  width: 108px;
-  height: 108px;
+  width: 112px;
+  height: 112px;
   border-radius: 50%;
   padding: 0;
   border: 3px solid var(--color-accent);
   box-shadow: 0 8px 22px var(--color-shadow-accent);
   cursor: pointer;
-  background: none;
+  background: var(--color-bg-elevated);
   display: block;
   transition: transform var(--transition-fast);
 }
@@ -74,14 +101,7 @@
 .profile-header__info {
   flex: 1;
   min-width: 0;
-}
-
-.profile-header__top-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  padding-top: 14px;
 }
 
 .profile-header__name-row {
@@ -99,7 +119,7 @@
   margin: 0;
   line-height: 1.1;
   color: var(--color-text-primary);
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 
 .profile-header__rating {
@@ -136,14 +156,6 @@
   opacity: 0.5;
 }
 
-.profile-header__edit-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
 .profile-header__badges {
   display: flex;
   flex-wrap: wrap;
@@ -177,6 +189,44 @@
   max-width: 520px;
   padding-left: 16px;
   border-left: 2px solid var(--color-accent);
+}
+
+/* ---------- Sağ sütun: aksiyon + taste match kartı ---------- */
+.profile-header__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+}
+
+.profile-header__edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+/* CompatibilityBadge'i pill'den kart görünümüne çevir (rozet dosyasına dokunmadan) */
+.profile-header__aside .compat-badge {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 10px 14px 10px 10px;
+  border-radius: var(--radius-md);
+  border-color: color-mix(
+    in srgb,
+    var(--color-accent) 55%,
+    var(--color-border)
+  );
+  background: color-mix(in srgb, var(--color-accent) 6%, var(--color-bg-card));
+}
+.profile-header__aside .compat-badge__text {
+  flex: 1;
+}
+.profile-header__aside .compat-badge--skeleton {
+  height: 66px;
+  padding: 0;
 }
 
 /* ---------- Perf divider between info and stats ---------- */
@@ -299,21 +349,36 @@
   background: rgba(255, 255, 255, 0.18);
 }
 
-@media (max-width: 640px) {
+/* ---------- Tablet: sağ sütun alta düşer ---------- */
+@media (max-width: 900px) {
   .profile-header__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .profile-header__aside {
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .profile-header__banner {
+    height: 84px;
+  }
+  .profile-header__body {
+    padding: 0 20px 20px;
+  }
+  .profile-header__main {
     flex-direction: column;
-    align-items: flex-start;
-    padding: 26px 20px 20px;
+    gap: 0;
+  }
+  .profile-header__avatar-col {
+    margin-top: -42px;
   }
   .profile-header__avatar {
     width: 84px;
     height: 84px;
   }
-  .profile-header__top-row {
-    flex-direction: column;
-  }
-  .profile-header__edit-btn {
-    align-self: flex-start;
+  .profile-header__info {
+    padding-top: 12px;
   }
   .profile-header__bio {
     max-width: 100%;

@@ -112,6 +112,16 @@ export default function ProfileHeader({
 
   const targetUserName = profile.userName;
 
+  // Banner: ilk dolu favori slotun arka plan görseli. Yoksa düz zemin gösterilir.
+  const backdropPath = profile.favoriteMovies?.find(
+    (slot) => slot.movie?.backdropUrl,
+  )?.movie?.backdropUrl;
+  const bannerStyle = backdropPath
+    ? ({
+        "--banner-image": `url(${JSON.stringify(getImageUrl(backdropPath))})`,
+      } as React.CSSProperties)
+    : undefined;
+
   type StatItem = {
     key: string;
     icon: typeof Users;
@@ -171,59 +181,88 @@ export default function ProfileHeader({
   return (
     <div className="profile-header">
       <div className="profile-header__perf" aria-hidden="true" />
+      <div
+        className="profile-header__banner"
+        style={bannerStyle}
+        aria-hidden="true"
+      />
 
       <div className="profile-header__body">
-        <div className="profile-header__avatar-col">
-          <button
-            type="button"
-            className="profile-header__avatar"
-            onClick={() => profile.avatarUrl && setIsAvatarExpanded(true)}
-            aria-label={t("profile.viewAvatar")}
-          >
-            {profile.avatarUrl ? (
-              <img
-                src={getImageUrl(profile.avatarUrl)}
-                alt={profile.userName}
-              />
-            ) : (
-              <span>{profile.userName[0]?.toUpperCase()}</span>
-            )}
-          </button>
-        </div>
+        <div className="profile-header__main">
+          <div className="profile-header__avatar-col">
+            <button
+              type="button"
+              className="profile-header__avatar"
+              onClick={() => profile.avatarUrl && setIsAvatarExpanded(true)}
+              aria-label={t("profile.viewAvatar")}
+            >
+              {profile.avatarUrl ? (
+                <img
+                  src={getImageUrl(profile.avatarUrl)}
+                  alt={profile.userName}
+                />
+              ) : (
+                <span>{profile.userName[0]?.toUpperCase()}</span>
+              )}
+            </button>
+          </div>
 
-        <div className="profile-header__info">
-          <div className="profile-header__top-row">
-            <div>
-              <div className="profile-header__name-row">
-                <h1 className="profile-header__name">
-                  {profile.fullName || profile.userName}
-                </h1>
-                {profile.averageGivenRating !== null && (
-                  <span className="profile-header__rating">
-                    <Star size={13} fill="currentColor" />
-                    {profile.averageGivenRating.toFixed(1)}
+          <div className="profile-header__info">
+            <div className="profile-header__name-row">
+              <h1 className="profile-header__name">
+                {profile.fullName || profile.userName}
+              </h1>
+              {profile.averageGivenRating !== null && (
+                <span className="profile-header__rating">
+                  <Star size={13} fill="currentColor" />
+                  {profile.averageGivenRating.toFixed(1)}
+                </span>
+              )}
+            </div>
+            <p className="profile-header__handle">
+              <strong>@{profile.userName}</strong>
+              {memberSince && (
+                <>
+                  <span className="profile-header__dot">·</span>
+                  {t("profile.member")} {memberSince}
+                </>
+              )}
+            </p>
+
+            {(profile.country || age !== null || genderLabel) && (
+              <div className="profile-header__badges">
+                {profile.country && (
+                  <span className="profile-header__badge">
+                    <MapPin size={13} /> {profile.country}
                   </span>
                 )}
-              </div>
-              <p className="profile-header__handle">
-                <strong>@{profile.userName}</strong>
-                {memberSince && (
-                  <>
-                    <span className="profile-header__dot">·</span>
-                    {t("profile.member")} {memberSince}
-                  </>
+                {age !== null && (
+                  <span className="profile-header__badge">{age}</span>
                 )}
-              </p>
-            </div>
+                {genderLabel && (
+                  <span className="profile-header__badge">{genderLabel}</span>
+                )}
+              </div>
+            )}
 
-            {isCurrentUser ? (
-              <button
-                className="btn-secondary profile-header__edit-btn"
-                onClick={onEditClick}
-              >
-                <Pencil size={14} /> {t("profile.editProfile")}
-              </button>
-            ) : (
+            {profile.biography && (
+              <p className="profile-header__bio">
+                &ldquo;{profile.biography}&rdquo;
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="profile-header__aside">
+          {isCurrentUser ? (
+            <button
+              className="btn-secondary profile-header__edit-btn"
+              onClick={onEditClick}
+            >
+              <Pencil size={14} /> {t("profile.editProfile")}
+            </button>
+          ) : (
+            <>
               <button
                 className="btn-secondary profile-header__edit-btn"
                 onClick={onFollowToggle}
@@ -239,37 +278,12 @@ export default function ProfileHeader({
                   </>
                 )}
               </button>
-            )}
-          </div>
-
-          {!isCurrentUser && (
-            <CompatibilityBadge
-              userId={userId}
-              userName={profile.userName}
-              avatarUrl={profile.avatarUrl}
-            />
-          )}
-
-          {(profile.country || age !== null || genderLabel) && (
-            <div className="profile-header__badges">
-              {profile.country && (
-                <span className="profile-header__badge">
-                  <MapPin size={13} /> {profile.country}
-                </span>
-              )}
-              {age !== null && (
-                <span className="profile-header__badge">{age}</span>
-              )}
-              {genderLabel && (
-                <span className="profile-header__badge">{genderLabel}</span>
-              )}
-            </div>
-          )}
-
-          {profile.biography && (
-            <p className="profile-header__bio">
-              &ldquo;{profile.biography}&rdquo;
-            </p>
+              <CompatibilityBadge
+                userId={userId}
+                userName={profile.userName}
+                avatarUrl={profile.avatarUrl}
+              />
+            </>
           )}
         </div>
       </div>
