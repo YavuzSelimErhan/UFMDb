@@ -346,7 +346,8 @@
     "themeLight": "Açık",
     "languageHint": "Arayüzün görüntüleneceği dil.",
     "privacy": "Gizlilik",
-    "privacyHint": "Profilindeki içeriği kimlerin görebileceğini belirle."
+    "privacyHint": "Profilindeki içeriği kimlerin görebileceğini belirle.",
+    "addBio": "+ Biyografi ekle"
   },
   "lists": {
     "title": "Listeler",

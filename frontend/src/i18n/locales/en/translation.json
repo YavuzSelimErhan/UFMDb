@@ -347,7 +347,8 @@
     "themeLight": "Light",
     "languageHint": "The language the interface is shown in.",
     "privacy": "Privacy",
-    "privacyHint": "Control who can see the content on your profile."
+    "privacyHint": "Control who can see the content on your profile.",
+    "addBio": "+ Add a bio"
   },
   "lists": {
     "title": "Lists",
