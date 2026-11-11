@@ -2,7 +2,18 @@ import { useState, useEffect, useLayoutEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { Pencil, Star, X, UserCheck, UserPlus } from "lucide-react";
+import {
+  Pencil,
+  Star,
+  X,
+  MapPin,
+  Users,
+  UserCheck,
+  UserPlus,
+  Film,
+  MessageSquare,
+  ListVideo,
+} from "lucide-react";
 import type { ProfileData, PublicFullProfileDto } from "@/types";
 import { getImageUrl } from "@/utils/getImageUrl";
 import FollowListModal from "@/components/user/FollowListModal";
@@ -101,19 +112,15 @@ export default function ProfileHeader({
 
   const targetUserName = profile.userName;
 
-  // Banner: ilk dolu favori slotun arka plan görseli. Yoksa banner hiç
-  // render edilmez; avatar ve isim doğrudan kartın üstünden başlar.
-  const backdropPath = profile.favoriteMovies?.find(
-    (slot) => slot.movie?.backdropUrl,
-  )?.movie?.backdropUrl;
-  const bannerStyle = backdropPath
-    ? ({
-        "--banner-image": `url(${JSON.stringify(getImageUrl(backdropPath))})`,
-      } as React.CSSProperties)
-    : undefined;
+  // Poster: ilk dolu favori slottaki film. Yoksa solda sadece büyük avatar gösterilir.
+  const favoriteMovie = profile.favoriteMovies?.find(
+    (slot) => slot.movie,
+  )?.movie;
+  const hasPoster = !!favoriteMovie?.posterUrl;
 
   type StatItem = {
     key: string;
+    icon: typeof Users;
     value: number;
     label: string;
   } & ({ kind: "link"; to: string } | { kind: "button"; onClick: () => void });
@@ -123,6 +130,7 @@ export default function ProfileHeader({
       key: "followers",
       kind: "button",
       onClick: () => setFollowModal("followers"),
+      icon: Users,
       value: profile.followerCount ?? 0,
       label: t("profile.statFollowers"),
     },
@@ -130,6 +138,7 @@ export default function ProfileHeader({
       key: "following",
       kind: "button",
       onClick: () => setFollowModal("following"),
+      icon: UserCheck,
       value: profile.followingCount ?? 0,
       label: t("profile.statFollowing"),
     },
@@ -139,6 +148,7 @@ export default function ProfileHeader({
       to: isCurrentUser
         ? "/profile?tab=films"
         : `/users/${targetUserName}?tab=films`,
+      icon: Film,
       value: counts?.all ?? profile.watchedCounts?.all ?? 0,
       label: t("profile.statFilms"),
     },
@@ -148,6 +158,7 @@ export default function ProfileHeader({
       to: isCurrentUser
         ? "/profile?tab=reviews"
         : `/users/${targetUserName}?tab=reviews`,
+      icon: MessageSquare,
       value: profile.reviews.length,
       label: t("profile.statReviews"),
     },
@@ -157,32 +168,40 @@ export default function ProfileHeader({
       to: isCurrentUser
         ? "/profile?tab=lists"
         : `/users/${targetUserName}?tab=lists`,
+      icon: ListVideo,
       value: listsCount ?? 0,
       label: t("profile.statLists"),
     },
   ];
 
-  const showMetaRow =
-    age !== null ||
-    genderLabel !== null ||
-    (isCurrentUser && !profile.biography);
-
   return (
     <div className="profile-header">
-      {backdropPath && (
-        <div
-          className="profile-header__banner"
-          style={bannerStyle}
-          aria-hidden="true"
-        />
-      )}
-
+      <div className="profile-header__perf" aria-hidden="true" />
       <div
-        className={`profile-header__body${
-          backdropPath ? " profile-header__body--banner" : ""
-        }`}
+        className={`profile-header__body${hasPoster ? " profile-header__body--poster" : ""}`}
       >
-        <div className="profile-header__avatar-col">
+        <div className="profile-header__media">
+          {hasPoster && favoriteMovie && (
+            <Link
+              to={`/movies/${favoriteMovie.id}`}
+              className="profile-header__poster"
+              aria-label={favoriteMovie.title}
+              title={favoriteMovie.title}
+            >
+              <span
+                className="profile-header__poster-perf"
+                aria-hidden="true"
+              />
+              <img
+                src={getImageUrl(favoriteMovie.posterUrl)}
+                alt=""
+                loading="lazy"
+              />
+              <span className="profile-header__poster-caption">
+                {favoriteMovie.title}
+              </span>
+            </Link>
+          )}
           <button
             type="button"
             className="profile-header__avatar"
@@ -200,7 +219,44 @@ export default function ProfileHeader({
           </button>
         </div>
 
-        <div className="profile-header__info">
+        <div className="profile-header__head">
+          <div className="profile-header__head-top">
+            <p className="profile-header__handle">
+              <strong>@{profile.userName}</strong>
+              {memberSince && (
+                <>
+                  <span className="profile-header__dot">·</span>
+                  {t("profile.member")} {memberSince}
+                </>
+              )}
+            </p>
+
+            {isCurrentUser ? (
+              <button
+                className="btn-secondary profile-header__action-btn"
+                onClick={onEditClick}
+              >
+                <Pencil size={14} /> {t("profile.editProfile")}
+              </button>
+            ) : (
+              <button
+                className="btn-secondary profile-header__action-btn"
+                onClick={onFollowToggle}
+                disabled={isFollowLoading}
+              >
+                {isFollowedByCurrentUser ? (
+                  <>
+                    <UserCheck size={14} /> {t("users.following")}
+                  </>
+                ) : (
+                  <>
+                    <UserPlus size={14} /> {t("users.follow")}
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+
           <div className="profile-header__name-row">
             <h1 className="profile-header__name">
               {profile.fullName || profile.userName}
@@ -213,100 +269,50 @@ export default function ProfileHeader({
             )}
           </div>
 
-          <p className="profile-header__handle">
-            <strong>@{profile.userName}</strong>
-            {memberSince && (
-              <>
-                <span className="profile-header__dot">·</span>
-                <span>
-                  {t("profile.member")} {memberSince}
+          {(profile.country || age !== null || genderLabel) && (
+            <div className="profile-header__badges">
+              {profile.country && (
+                <span className="profile-header__badge">
+                  <MapPin size={13} /> {profile.country}
                 </span>
-              </>
-            )}
-            {profile.country && (
-              <>
-                <span className="profile-header__dot">·</span>
-                <span>{profile.country}</span>
-              </>
-            )}
-          </p>
-
-          {showMetaRow && (
-            <div className="profile-header__meta">
+              )}
               {age !== null && (
                 <span className="profile-header__badge">{age}</span>
               )}
               {genderLabel && (
                 <span className="profile-header__badge">{genderLabel}</span>
               )}
-              {isCurrentUser && !profile.biography && (
-                <button
-                  type="button"
-                  className="profile-header__add-bio"
-                  onClick={onEditClick}
-                >
-                  {t("profile.addBio")}
-                </button>
-              )}
             </div>
-          )}
-
-          {profile.biography && (
-            <p className="profile-header__bio">{profile.biography}</p>
           )}
         </div>
 
-        <div className="profile-header__actions">
-          {isCurrentUser ? (
-            <button
-              type="button"
-              className="btn-secondary profile-header__btn profile-header__btn--accent"
-              onClick={onEditClick}
-            >
-              <Pencil size={14} /> {t("profile.editProfile")}
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="btn-secondary profile-header__btn"
-              onClick={onFollowToggle}
-              disabled={isFollowLoading}
-            >
-              {isFollowedByCurrentUser ? (
-                <>
-                  <UserCheck size={14} /> {t("users.following")}
-                </>
-              ) : (
-                <>
-                  <UserPlus size={14} /> {t("users.follow")}
-                </>
-              )}
-            </button>
+        <div className="profile-header__rest">
+          {profile.biography && (
+            <p className="profile-header__bio">
+              &ldquo;{profile.biography}&rdquo;
+            </p>
+          )}
+          {!isCurrentUser && (
+            <CompatibilityBadge
+              userId={userId}
+              userName={profile.userName}
+              avatarUrl={profile.avatarUrl}
+            />
           )}
         </div>
       </div>
 
-      {!isCurrentUser && (
-        <div className="profile-header__compat">
-          <CompatibilityBadge
-            userId={userId}
-            userName={profile.userName}
-            avatarUrl={profile.avatarUrl}
-          />
-        </div>
-      )}
+      <div className="profile-header__perf-divider" aria-hidden="true" />
 
       <div className="profile-header__stats">
-        {stats.map((s) => {
-          const content = (
-            <>
-              <span className="profile-header__stat-value">{s.value}</span>
-              <span className="profile-header__stat-label">{s.label}</span>
-            </>
-          );
-          return s.kind === "link" ? (
+        {stats.map((s) =>
+          s.kind === "link" ? (
             <Link to={s.to} className="profile-header__stat" key={s.key}>
-              {content}
+              <s.icon size={16} className="profile-header__stat-icon" />
+              <span className="profile-header__stat-text">
+                <span className="profile-header__stat-value">{s.value}</span>
+                <span className="profile-header__stat-label">{s.label}</span>
+              </span>
             </Link>
           ) : (
             <button
@@ -315,10 +321,14 @@ export default function ProfileHeader({
               key={s.key}
               onClick={s.onClick}
             >
-              {content}
+              <s.icon size={16} className="profile-header__stat-icon" />
+              <span className="profile-header__stat-text">
+                <span className="profile-header__stat-value">{s.value}</span>
+                <span className="profile-header__stat-label">{s.label}</span>
+              </span>
             </button>
-          );
-        })}
+          ),
+        )}
       </div>
 
       {followModal && (
