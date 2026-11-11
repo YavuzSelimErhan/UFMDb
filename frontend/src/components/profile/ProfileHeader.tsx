@@ -7,12 +7,9 @@ import {
   Star,
   X,
   MapPin,
-  Users,
   UserCheck,
   UserPlus,
-  Film,
-  MessageSquare,
-  ListVideo,
+  ImagePlus,
 } from "lucide-react";
 import type { ProfileData, PublicFullProfileDto } from "@/types";
 import { getImageUrl } from "@/utils/getImageUrl";
@@ -112,25 +109,25 @@ export default function ProfileHeader({
 
   const targetUserName = profile.userName;
 
-  // Poster: ilk dolu favori slottaki film. Yoksa solda sadece büyük avatar gösterilir.
+  // Poster: ilk dolu favori slottaki film.
   const favoriteMovie = profile.favoriteMovies?.find(
     (slot) => slot.movie,
   )?.movie;
   const hasPoster = !!favoriteMovie?.posterUrl;
+  // Kendi profilinde favori yoksa "film seç" kutusu gösterilir; başkasında
+  // favori yoksa solda sadece büyük avatar kalır.
+  const showPosterColumn = hasPoster || isCurrentUser;
 
-  type StatItem = {
-    key: string;
-    icon: typeof Users;
-    value: number;
-    label: string;
-  } & ({ kind: "link"; to: string } | { kind: "button"; onClick: () => void });
+  type StatItem = { key: string; value: number; label: string } & (
+    | { kind: "link"; to: string }
+    | { kind: "button"; onClick: () => void }
+  );
 
   const stats: StatItem[] = [
     {
       key: "followers",
       kind: "button",
       onClick: () => setFollowModal("followers"),
-      icon: Users,
       value: profile.followerCount ?? 0,
       label: t("profile.statFollowers"),
     },
@@ -138,7 +135,6 @@ export default function ProfileHeader({
       key: "following",
       kind: "button",
       onClick: () => setFollowModal("following"),
-      icon: UserCheck,
       value: profile.followingCount ?? 0,
       label: t("profile.statFollowing"),
     },
@@ -148,7 +144,6 @@ export default function ProfileHeader({
       to: isCurrentUser
         ? "/profile?tab=films"
         : `/users/${targetUserName}?tab=films`,
-      icon: Film,
       value: counts?.all ?? profile.watchedCounts?.all ?? 0,
       label: t("profile.statFilms"),
     },
@@ -158,7 +153,6 @@ export default function ProfileHeader({
       to: isCurrentUser
         ? "/profile?tab=reviews"
         : `/users/${targetUserName}?tab=reviews`,
-      icon: MessageSquare,
       value: profile.reviews.length,
       label: t("profile.statReviews"),
     },
@@ -168,7 +162,6 @@ export default function ProfileHeader({
       to: isCurrentUser
         ? "/profile?tab=lists"
         : `/users/${targetUserName}?tab=lists`,
-      icon: ListVideo,
       value: listsCount ?? 0,
       label: t("profile.statLists"),
     },
@@ -176,12 +169,11 @@ export default function ProfileHeader({
 
   return (
     <div className="profile-header">
-      <div className="profile-header__perf" aria-hidden="true" />
       <div
-        className={`profile-header__body${hasPoster ? " profile-header__body--poster" : ""}`}
+        className={`profile-header__body${showPosterColumn ? " profile-header__body--poster" : ""}`}
       >
         <div className="profile-header__media">
-          {hasPoster && favoriteMovie && (
+          {hasPoster && favoriteMovie ? (
             <Link
               to={`/movies/${favoriteMovie.id}`}
               className="profile-header__poster"
@@ -201,6 +193,21 @@ export default function ProfileHeader({
                 {favoriteMovie.title}
               </span>
             </Link>
+          ) : (
+            isCurrentUser && (
+              <button
+                type="button"
+                className="profile-header__poster profile-header__poster--empty"
+                onClick={onEditClick}
+              >
+                <ImagePlus size={24} aria-hidden="true" />
+                <span>
+                  {t("profile.pickFavoriteFilm", {
+                    defaultValue: "Pick a favorite film to feature",
+                  })}
+                </span>
+              </button>
+            )
           )}
           <button
             type="button"
@@ -268,7 +275,9 @@ export default function ProfileHeader({
               </span>
             )}
           </div>
+        </div>
 
+        <div className="profile-header__rest">
           {(profile.country || age !== null || genderLabel) && (
             <div className="profile-header__badges">
               {profile.country && (
@@ -284,51 +293,43 @@ export default function ProfileHeader({
               )}
             </div>
           )}
-        </div>
 
-        <div className="profile-header__rest">
           {profile.biography && (
             <p className="profile-header__bio">
               &ldquo;{profile.biography}&rdquo;
             </p>
           )}
+
           {!isCurrentUser && (
             <CompatibilityBadge
+              variant="card"
               userId={userId}
               userName={profile.userName}
               avatarUrl={profile.avatarUrl}
             />
           )}
+
+          <div className="profile-header__stats">
+            {stats.map((s) =>
+              s.kind === "link" ? (
+                <Link to={s.to} className="profile-header__stat" key={s.key}>
+                  <span className="profile-header__stat-value">{s.value}</span>
+                  <span className="profile-header__stat-label">{s.label}</span>
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  className="profile-header__stat"
+                  key={s.key}
+                  onClick={s.onClick}
+                >
+                  <span className="profile-header__stat-value">{s.value}</span>
+                  <span className="profile-header__stat-label">{s.label}</span>
+                </button>
+              ),
+            )}
+          </div>
         </div>
-      </div>
-
-      <div className="profile-header__perf-divider" aria-hidden="true" />
-
-      <div className="profile-header__stats">
-        {stats.map((s) =>
-          s.kind === "link" ? (
-            <Link to={s.to} className="profile-header__stat" key={s.key}>
-              <s.icon size={16} className="profile-header__stat-icon" />
-              <span className="profile-header__stat-text">
-                <span className="profile-header__stat-value">{s.value}</span>
-                <span className="profile-header__stat-label">{s.label}</span>
-              </span>
-            </Link>
-          ) : (
-            <button
-              type="button"
-              className="profile-header__stat"
-              key={s.key}
-              onClick={s.onClick}
-            >
-              <s.icon size={16} className="profile-header__stat-icon" />
-              <span className="profile-header__stat-text">
-                <span className="profile-header__stat-value">{s.value}</span>
-                <span className="profile-header__stat-label">{s.label}</span>
-              </span>
-            </button>
-          ),
-        )}
       </div>
 
       {followModal && (

@@ -7,21 +7,7 @@
   overflow: hidden;
 }
 
-/* Perforated strip along the top, echoing a film/ticket edge */
-.profile-header__perf {
-  height: 14px;
-  background-color: var(--color-accent);
-  background-image: radial-gradient(
-    circle,
-    var(--color-bg-elevated) 0 3px,
-    transparent 3.2px
-  );
-  background-size: 20px 100%;
-  background-position: 10px center;
-  background-repeat: repeat-x;
-}
-
-/* ---------- Gövde: poster | kimlik / alt blok ---------- */
+/* ---------- Gövde: medya (poster + avatar) | kimlik / alt blok ---------- */
 .profile-header__body {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -31,11 +17,14 @@
     "media rest";
   column-gap: 28px;
   align-items: start;
-  padding: 28px 32px 26px;
+  padding: 28px 32px;
 }
 .profile-header__media {
   grid-area: media;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
 }
 .profile-header__head {
   grid-area: head;
@@ -47,10 +36,10 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  align-self: end;
+  margin-top: 14px;
 }
 
-/* ---------- Medya: avatar tek başına ya da poster + köşede avatar ---------- */
+/* ---------- Poster ---------- */
 .profile-header__poster {
   position: relative;
   display: block;
@@ -72,6 +61,8 @@
 .profile-header__poster:hover img {
   transform: scale(1.04);
 }
+
+/* Posterin üstünde ince, sönük film şeridi (marka rengi değil) */
 .profile-header__poster-perf {
   position: absolute;
   top: 0;
@@ -79,7 +70,7 @@
   right: 0;
   height: 10px;
   z-index: 1;
-  background-color: var(--color-accent);
+  background-color: var(--color-border);
   background-image: radial-gradient(
     circle,
     var(--color-bg-elevated) 0 2.4px,
@@ -88,6 +79,7 @@
   background-size: 14px 100%;
   background-position: 7px center;
   background-repeat: repeat-x;
+  opacity: 0.9;
 }
 .profile-header__poster-caption {
   position: absolute;
@@ -106,6 +98,35 @@
   white-space: nowrap;
 }
 
+/* Kendi profilinde favori film yokken: kesik çizgili davet kutusu */
+.profile-header__poster--empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  text-align: center;
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+  border-style: dashed;
+  box-shadow: none;
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+.profile-header__poster--empty svg {
+  color: var(--color-accent);
+}
+.profile-header__poster--empty:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
+}
+
+/* ---------- Avatar ---------- */
 .profile-header__avatar {
   width: 112px;
   height: 112px;
@@ -121,15 +142,12 @@
 .profile-header__avatar:hover {
   transform: scale(1.03);
 }
-/* poster varsa avatar posterin sağ alt köşesine biner */
+/* Poster sütunu varsa avatar posterin altında küçük durur */
 .profile-header__body--poster .profile-header__avatar {
-  position: absolute;
-  right: -18px;
-  bottom: -18px;
-  width: 72px;
-  height: 72px;
-  border-width: 3px;
-  box-shadow: 0 0 0 4px var(--color-bg-elevated);
+  width: 56px;
+  height: 56px;
+  border-width: 2px;
+  box-shadow: none;
 }
 
 .profile-header__avatar img,
@@ -154,7 +172,7 @@
   color: var(--color-text-primary);
 }
 .profile-header__body--poster .profile-header__avatar span {
-  font-size: 1.6rem;
+  font-size: 1.2rem;
 }
 
 /* ---------- Kimlik ---------- */
@@ -171,7 +189,7 @@
   font-size: 0.76rem;
   letter-spacing: 0.03em;
   color: var(--color-text-muted);
-  margin: 6px 0 0;
+  margin: 8px 0 0;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -198,7 +216,7 @@
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
-  margin-top: 10px;
+  margin-top: 14px;
 }
 
 .profile-header__name {
@@ -232,7 +250,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 14px;
 }
 
 .profile-header__badge {
@@ -252,8 +269,7 @@
 }
 
 .profile-header__bio {
-  position: relative;
-  margin: 18px 0 0;
+  margin: 0;
   font-family: var(--font-display);
   font-style: italic;
   color: var(--color-text-secondary);
@@ -264,93 +280,42 @@
   border-left: 2px solid var(--color-accent);
 }
 
-/* CompatibilityBadge: pill yerine kompakt vurgu kartı (rozet dosyasına dokunmadan) */
-.profile-header__rest .compat-badge {
-  width: 100%;
-  max-width: 440px;
-  margin: 0;
-  padding: 10px 14px 10px 10px;
-  border-radius: var(--radius-md);
-  border-color: color-mix(
-    in srgb,
-    var(--color-accent) 55%,
-    var(--color-border)
-  );
-  background: color-mix(in srgb, var(--color-accent) 6%, var(--color-bg-card));
-}
-.profile-header__rest .compat-badge__text {
-  flex: 1;
-}
-.profile-header__rest .compat-badge--skeleton {
-  height: 66px;
-  padding: 0;
-}
-
-/* ---------- Perf divider between info and stats ---------- */
-.profile-header__perf-divider {
-  height: 10px;
-  margin: 0 32px;
-  border-radius: var(--radius-pill);
-  background-color: var(--color-accent);
-  background-image: radial-gradient(
-    circle,
-    var(--color-bg-elevated) 0 2.6px,
-    transparent 2.8px
-  );
-  background-size: 16px 100%;
-  background-position: 8px center;
-  background-repeat: repeat-x;
-  opacity: 0.9;
-}
-
-/* ---------- Ticket-strip stats ---------- */
+/* ---------- İstatistik kartları ---------- */
 .profile-header__stats {
-  display: flex;
-  margin: 22px 32px 26px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .profile-header__stat {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 14px 10px;
-  border: none;
-  border-right: 1px dashed var(--color-border);
-  background: none;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background-color var(--transition-fast);
-}
-.profile-header__stat:last-child {
-  border-right: none;
-}
-.profile-header__stat:hover {
-  background-color: var(--color-bg-card-hover);
-}
-
-.profile-header__stat-icon {
-  color: var(--color-accent);
-  flex-shrink: 0;
-}
-
-.profile-header__stat-text {
   display: flex;
   flex-direction: column;
-  line-height: 1.2;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+.profile-header__stat:hover {
+  border-color: var(--color-accent);
+  background-color: var(--color-bg-card-hover);
 }
 
 .profile-header__stat-value {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: 1.05rem;
+  font-size: 1.2rem;
   font-weight: 700;
+  line-height: 1.2;
   color: var(--color-text-primary);
 }
 
@@ -360,7 +325,6 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-text-muted);
-  margin-top: 2px;
 }
 
 /* ---------- Avatar lightbox (unchanged behaviour) ---------- */
@@ -406,7 +370,7 @@
   background: rgba(255, 255, 255, 0.18);
 }
 
-/* ---------- Mobil: poster küçülür, bio ve taste match tam genişlikte altta ---------- */
+/* ---------- Mobil: poster küçülür, alt blok tam genişlikte ---------- */
 @media (max-width: 640px) {
   .profile-header__body {
     grid-template-rows: auto auto;
@@ -415,51 +379,34 @@
       "rest rest";
     column-gap: 16px;
     row-gap: 16px;
-    padding: 22px 20px 20px;
+    padding: 20px;
   }
   .profile-header__poster {
     width: 96px;
+  }
+  .profile-header__poster-caption {
+    display: none;
+  }
+  .profile-header__poster--empty {
+    font-size: 0.65rem;
+    padding: 8px;
   }
   .profile-header__avatar {
     width: 84px;
     height: 84px;
   }
   .profile-header__body--poster .profile-header__avatar {
-    width: 48px;
-    height: 48px;
-    right: -10px;
-    bottom: -10px;
-  }
-  .profile-header__body--poster .profile-header__avatar span {
-    font-size: 1.1rem;
-  }
-  .profile-header__poster-caption {
-    display: none;
+    width: 44px;
+    height: 44px;
   }
   .profile-header__rest {
-    align-self: stretch;
-  }
-  .profile-header__rest .compat-badge {
-    max-width: none;
+    margin-top: 0;
   }
   .profile-header__bio {
-    margin-top: 0;
     max-width: 100%;
     font-size: 0.86rem;
   }
-  .profile-header__perf-divider {
-    margin: 0 20px;
-  }
   .profile-header__stats {
-    flex-wrap: wrap;
-    margin: 18px 20px 20px;
-  }
-  .profile-header__stat {
-    flex: 1 1 45%;
-    border-right: none;
-    border-bottom: 1px dashed var(--color-border);
-  }
-  .profile-header__stat-label {
-    font-size: 0.55rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

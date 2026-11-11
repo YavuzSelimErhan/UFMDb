@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronRight, Sparkles } from "lucide-react";
 import { useAppSelector } from "@/store/index"; // typed hook'unun gerçek yoluna göre düzelt
+import { getImageUrl } from "@/utils/getImageUrl";
 import { useCompatibility } from "@/hooks/useCompatibility";
 import CompatibilityRing from "./CompatibilityRing";
 import CompatibilityModal from "./CompatibilityModal";
@@ -10,14 +11,17 @@ import "./CompatibilityBadge.css";
 interface CompatibilityBadgeProps {
   userId: string;
   userName: string;
-  /** Opsiyonel profil resmi; modal başlığında gösterilir. */
+  /** Opsiyonel profil resmi; modal başlığında ve kart görünümünde gösterilir. */
   avatarUrl?: string | null;
+  /** "pill": eski yuvarlak rozet. "card": profil header'ındaki vurgu kartı. */
+  variant?: "pill" | "card";
 }
 
 export default function CompatibilityBadge({
   userId,
   userName,
   avatarUrl,
+  variant = "pill",
 }: CompatibilityBadgeProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -30,9 +34,15 @@ export default function CompatibilityBadge({
 
   if (!enabled || isError) return null;
 
+  const isCard = variant === "card";
+  const rootClass = `compat-badge${isCard ? " compat-badge--card" : ""}`;
+
   if (!data) {
     return (
-      <div className="compat-badge compat-badge--skeleton" aria-hidden="true" />
+      <div
+        className={`${rootClass} compat-badge--skeleton`}
+        aria-hidden="true"
+      />
     );
   }
 
@@ -40,7 +50,51 @@ export default function CompatibilityBadge({
   // Ortak film varsa detay açılır; yoksa gösterilecek bir şey olmadığı için rozet statik kalır.
   const interactive = data.commonCount > 0;
 
-  const content = (
+  const subText = hasScore
+    ? t("compatibility.commonFilms", { count: data.commonCount })
+    : t("compatibility.notEnoughProgress", {
+        current: data.commonCount,
+        required: data.minRequired,
+      });
+
+  const content = isCard ? (
+    <>
+      {hasScore ? (
+        <span className="compat-badge__circles" aria-hidden="true">
+          <span className="compat-badge__circle compat-badge__circle--you">
+            {t("compatibility.youLabel")}
+          </span>
+          <span className="compat-badge__circle">
+            {avatarUrl ? (
+              <img src={getImageUrl(avatarUrl)} alt="" />
+            ) : (
+              userName[0]?.toUpperCase()
+            )}
+          </span>
+        </span>
+      ) : (
+        <span className="compat-badge__icon">
+          <Sparkles size={18} />
+        </span>
+      )}
+      <span className="compat-badge__text">
+        <span className="compat-badge__title compat-badge__title--score">
+          {hasScore
+            ? `${t("compatibility.percent", { value: data.score })} ${t("compatibility.title")}`
+            : t("compatibility.notEnoughTitle")}
+        </span>
+        <span className="compat-badge__sub">{subText}</span>
+      </span>
+      {interactive && (
+        <span className="compat-badge__cta">
+          <span className="compat-badge__cta-label">
+            {t("compatibility.details", { defaultValue: "Details" })}
+          </span>
+          <ChevronRight size={16} aria-hidden="true" />
+        </span>
+      )}
+    </>
+  ) : (
     <>
       {hasScore ? (
         <CompatibilityRing score={data.score!} size={44} />
@@ -55,14 +109,7 @@ export default function CompatibilityBadge({
             ? t("compatibility.title")
             : t("compatibility.notEnoughTitle")}
         </span>
-        <span className="compat-badge__sub">
-          {hasScore
-            ? t("compatibility.commonFilms", { count: data.commonCount })
-            : t("compatibility.notEnoughProgress", {
-                current: data.commonCount,
-                required: data.minRequired,
-              })}
-        </span>
+        <span className="compat-badge__sub">{subText}</span>
       </span>
       {interactive && (
         <ChevronRight
@@ -74,13 +121,13 @@ export default function CompatibilityBadge({
     </>
   );
 
-  if (!interactive) return <div className="compat-badge">{content}</div>;
+  if (!interactive) return <div className={rootClass}>{content}</div>;
 
   return (
     <>
       <button
         type="button"
-        className="compat-badge"
+        className={rootClass}
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-label={
