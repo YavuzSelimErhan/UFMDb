@@ -223,6 +223,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasConversion<string>()
             .HasMaxLength(20)
             .HasDefaultValue(DiaryVisibility.Public);
+        b.HasOne<Movie>().WithMany().HasForeignKey(u => u.CoverMovieId).OnDelete(DeleteBehavior.SetNull);
     }
 }
 

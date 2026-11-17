@@ -42,9 +42,9 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             // Dilden ve aksandan baðýmsýz: Ýngilizce, orijinal ve Türkçe baþlýklarýn hepsinde aranýr.
             // Hem sütun hem desen unaccent'ten geçer ("amelie" -> "Amélie", "cekmece" -> "Çekmece").
             query = query.Where(m =>
-                EF.Functions.ILike(EF.Functions.Unaccent(m.Title), EF.Functions.Unaccent(containsPattern)) ||
-                EF.Functions.ILike(EF.Functions.Unaccent(m.OriginalTitle), EF.Functions.Unaccent(containsPattern)) ||
-                EF.Functions.ILike(EF.Functions.Unaccent(m.TitleTr), EF.Functions.Unaccent(containsPattern)));
+                EF.Functions.ILike(EF.Functions.Unaccent(m.Title), EF.Functions.Unaccent(containsPattern), SqlLike.EscapeCharacter) ||
+                EF.Functions.ILike(EF.Functions.Unaccent(m.OriginalTitle), EF.Functions.Unaccent(containsPattern), SqlLike.EscapeCharacter) ||
+                EF.Functions.ILike(EF.Functions.Unaccent(m.TitleTr), EF.Functions.Unaccent(containsPattern), SqlLike.EscapeCharacter));
         }
 
         if (!string.IsNullOrWhiteSpace(f.Genre))
@@ -80,13 +80,13 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
         if (!string.IsNullOrWhiteSpace(f.ActorName))
         {
             var actorPattern = $"%{SqlLike.Escape(f.ActorName.Trim())}%";
-            query = query.Where(m => m.MovieActors.Any(ma => EF.Functions.ILike(ma.Actor.FullName, actorPattern)));
+            query = query.Where(m => m.MovieActors.Any(ma => EF.Functions.ILike(ma.Actor.FullName, actorPattern, SqlLike.EscapeCharacter)));
         }
 
         if (!string.IsNullOrWhiteSpace(f.DirectorName))
         {
             var directorPattern = $"%{SqlLike.Escape(f.DirectorName.Trim())}%";
-            query = query.Where(m => m.MovieDirectors.Any(md => EF.Functions.ILike(md.Director.FullName, directorPattern)));
+            query = query.Where(m => m.MovieDirectors.Any(md => EF.Functions.ILike(md.Director.FullName, directorPattern, SqlLike.EscapeCharacter)));
         }
 
         if (f.MinRating.HasValue)
@@ -142,12 +142,12 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
                 Score = ((double)m.RatingCount * m.AverageRating + priorWeight) / ((double)m.RatingCount + minVotes),
                 // Baþlýk aramasýnda alaka düzeyi her zaman önce gelir, puan katman içinde uygulanýr.
                 Relevance = !hasTitleSearch ? 2 :
-                    (EF.Functions.ILike(EF.Functions.Unaccent(m.Title), EF.Functions.Unaccent(term)) ||
-                     EF.Functions.ILike(EF.Functions.Unaccent(m.OriginalTitle), EF.Functions.Unaccent(term)) ||
-                     EF.Functions.ILike(EF.Functions.Unaccent(m.TitleTr), EF.Functions.Unaccent(term))) ? 0 :
-                    (EF.Functions.ILike(EF.Functions.Unaccent(m.Title), EF.Functions.Unaccent(startsPattern)) ||
-                     EF.Functions.ILike(EF.Functions.Unaccent(m.OriginalTitle), EF.Functions.Unaccent(startsPattern)) ||
-                     EF.Functions.ILike(EF.Functions.Unaccent(m.TitleTr), EF.Functions.Unaccent(startsPattern))) ? 1 : 2
+                    (EF.Functions.ILike(EF.Functions.Unaccent(m.Title), EF.Functions.Unaccent(term), SqlLike.EscapeCharacter) ||
+                     EF.Functions.ILike(EF.Functions.Unaccent(m.OriginalTitle), EF.Functions.Unaccent(term), SqlLike.EscapeCharacter) ||
+                     EF.Functions.ILike(EF.Functions.Unaccent(m.TitleTr), EF.Functions.Unaccent(term), SqlLike.EscapeCharacter)) ? 0 :
+                    (EF.Functions.ILike(EF.Functions.Unaccent(m.Title), EF.Functions.Unaccent(startsPattern), SqlLike.EscapeCharacter) ||
+                     EF.Functions.ILike(EF.Functions.Unaccent(m.OriginalTitle), EF.Functions.Unaccent(startsPattern), SqlLike.EscapeCharacter) ||
+                     EF.Functions.ILike(EF.Functions.Unaccent(m.TitleTr), EF.Functions.Unaccent(startsPattern), SqlLike.EscapeCharacter)) ? 1 : 2
             });
 
             var ordered = scored.OrderBy(x => x.Relevance);
@@ -176,12 +176,12 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
                 // Alaka düzeyi popülerlikten önce gelir: "ran" aratýldýðýnda "Ran" filmi, içinde "ran"
                 // geçen daha çok oy almýþ filmlerin gerisinde kalýp listeden düþmesin.
                 Expression<Func<Movie, int>> relevance = m =>
-                    (EF.Functions.ILike(EF.Functions.Unaccent(m.Title), EF.Functions.Unaccent(term)) ||
-                     EF.Functions.ILike(EF.Functions.Unaccent(m.OriginalTitle), EF.Functions.Unaccent(term)) ||
-                     EF.Functions.ILike(EF.Functions.Unaccent(m.TitleTr), EF.Functions.Unaccent(term))) ? 0 :
-                    (EF.Functions.ILike(EF.Functions.Unaccent(m.Title), EF.Functions.Unaccent(startsPattern)) ||
-                     EF.Functions.ILike(EF.Functions.Unaccent(m.OriginalTitle), EF.Functions.Unaccent(startsPattern)) ||
-                     EF.Functions.ILike(EF.Functions.Unaccent(m.TitleTr), EF.Functions.Unaccent(startsPattern))) ? 1 : 2;
+                    (EF.Functions.ILike(EF.Functions.Unaccent(m.Title), EF.Functions.Unaccent(term), SqlLike.EscapeCharacter) ||
+                     EF.Functions.ILike(EF.Functions.Unaccent(m.OriginalTitle), EF.Functions.Unaccent(term), SqlLike.EscapeCharacter) ||
+                     EF.Functions.ILike(EF.Functions.Unaccent(m.TitleTr), EF.Functions.Unaccent(term), SqlLike.EscapeCharacter)) ? 0 :
+                    (EF.Functions.ILike(EF.Functions.Unaccent(m.Title), EF.Functions.Unaccent(startsPattern), SqlLike.EscapeCharacter) ||
+                     EF.Functions.ILike(EF.Functions.Unaccent(m.OriginalTitle), EF.Functions.Unaccent(startsPattern), SqlLike.EscapeCharacter) ||
+                     EF.Functions.ILike(EF.Functions.Unaccent(m.TitleTr), EF.Functions.Unaccent(startsPattern), SqlLike.EscapeCharacter)) ? 1 : 2;
 
                 var ordered = query.OrderBy(relevance);
 

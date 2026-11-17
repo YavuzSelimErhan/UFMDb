@@ -1,7 +1,7 @@
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useEffect, useLayoutEffect, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Pencil,
   Star,
@@ -9,12 +9,16 @@ import {
   MapPin,
   UserCheck,
   UserPlus,
+  Share2,
+  Check,
   ImagePlus,
 } from "lucide-react";
 import type { ProfileData, PublicFullProfileDto } from "@/types";
+import { profileService } from "@/services";
 import { getImageUrl } from "@/utils/getImageUrl";
 import FollowListModal from "@/components/user/FollowListModal";
 import CompatibilityBadge from "@/components/user/CompatibilityBadge";
+import CoverPickerModal from "./CoverPickerModal";
 import {
   useWatchedFilmsCounts,
   watchedCountsKey,
@@ -31,6 +35,14 @@ interface Props {
   onFollowToggle?: () => void;
   isFollowLoading?: boolean;
 }
+
+type StatItem = {
+  key: string;
+  value: string | number;
+  label: string;
+  icon?: ReactNode;
+  to?: string;
+};
 
 function calculateAge(birthDate: string): number | null {
   const bd = new Date(birthDate);
@@ -60,6 +72,8 @@ export default function ProfileHeader({
   const [followModal, setFollowModal] = useState<
     "followers" | "following" | null
   >(null);
+  const [isCoverPickerOpen, setIsCoverPickerOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Film sayılarının tek kaynağı: counts cache'i. Profil yanıtıyla gelen
   // değerleri buraya yazıyoruz; böylece header, sekme rozeti ve FilmsTab
@@ -78,6 +92,7 @@ export default function ProfileHeader({
 
   const { data: counts } = useWatchedFilmsCounts(countsUserId);
 
+  // Avatar lightbox: Escape ile kapanır.
   useEffect(() => {
     if (!isAvatarExpanded) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -86,6 +101,43 @@ export default function ProfileHeader({
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isAvatarExpanded]);
+
+  // "Bağlantı kopyalandı" geri bildirimi 2 sn sonra eski haline döner.
+  useEffect(() => {
+    if (!copied) return;
+    const id = window.setTimeout(() => setCopied(false), 2000);
+    return () => window.clearTimeout(id);
+  }, [copied]);
+
+  const coverMutation = useMutation({
+    mutationFn: (movieId: string | null) => profileService.setCover(movieId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      setIsCoverPickerOpen(false);
+    },
+  });
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/users/${profile.userName}`;
+    const isTouch = window.matchMedia?.("(pointer: coarse)").matches;
+    if (isTouch && typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: profile.fullName || profile.userName,
+          url,
+        });
+      } catch {
+        // Kullanıcı paylaşım menüsünü kapattı; yapılacak bir şey yok.
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+    } catch {
+      // Pano erişimi reddedildi; sessizce geç.
+    }
+  };
 
   const memberSinceDate = profile.memberSinceUtc
     ? new Date(profile.memberSinceUtc)
@@ -107,229 +159,240 @@ export default function ProfileHeader({
         ? t("profile.genderFemale")
         : null;
 
+  const metaParts = [
+    profile.country,
+    age !== null ? String(age) : null,
+    genderLabel,
+  ].filter((p): p is string => !!p);
+
   const targetUserName = profile.userName;
+  const tabLink = (tab: string) =>
+    isCurrentUser
+      ? `/profile?tab=${tab}`
+      : `/users/${targetUserName}?tab=${tab}`;
 
-  // Poster: ilk dolu favori slottaki film.
-  const favoriteMovie = profile.favoriteMovies?.find(
-    (slot) => slot.movie,
-  )?.movie;
-  const hasPoster = !!favoriteMovie?.posterUrl;
-  // Kendi profilinde favori yoksa "film seç" kutusu gösterilir; başkasında
-  // favori yoksa solda sadece büyük avatar kalır.
-  const showPosterColumn = hasPoster || isCurrentUser;
+  const coverUrl = profile.coverBackdropUrl
+    ? getImageUrl(profile.coverBackdropUrl)
+    : null;
 
-  type StatItem = { key: string; value: number; label: string } & (
-    | { kind: "link"; to: string }
-    | { kind: "button"; onClick: () => void }
-  );
+  const favoriteMovies = profile.favoriteMovies
+    .map((slot) => slot.movie)
+    .filter((m): m is NonNullable<typeof m> => !!m);
+
+  // null => backend istatistiği gizledi (defter gizli): kutuyu hiç göstermiyoruz.
+  const thisYear = counts?.thisYear ?? profile.watchedCounts?.thisYear;
 
   const stats: StatItem[] = [
     {
-      key: "followers",
-      kind: "button",
-      onClick: () => setFollowModal("followers"),
-      value: profile.followerCount ?? 0,
-      label: t("profile.statFollowers"),
-    },
-    {
-      key: "following",
-      kind: "button",
-      onClick: () => setFollowModal("following"),
-      value: profile.followingCount ?? 0,
-      label: t("profile.statFollowing"),
-    },
-    {
       key: "films",
-      kind: "link",
-      to: isCurrentUser
-        ? "/profile?tab=films"
-        : `/users/${targetUserName}?tab=films`,
+      to: tabLink("films"),
       value: counts?.all ?? profile.watchedCounts?.all ?? 0,
       label: t("profile.statFilms"),
     },
+    ...(thisYear != null
+      ? [
+          {
+            key: "thisYear",
+            to: tabLink("films"),
+            value: thisYear,
+            label: t("profile.statThisYear", { defaultValue: "Bu yıl" }),
+          },
+        ]
+      : []),
     {
       key: "reviews",
-      kind: "link",
-      to: isCurrentUser
-        ? "/profile?tab=reviews"
-        : `/users/${targetUserName}?tab=reviews`,
+      to: tabLink("reviews"),
       value: profile.reviews.length,
       label: t("profile.statReviews"),
     },
     {
       key: "lists",
-      kind: "link",
-      to: isCurrentUser
-        ? "/profile?tab=lists"
-        : `/users/${targetUserName}?tab=lists`,
+      to: tabLink("lists"),
       value: listsCount ?? 0,
       label: t("profile.statLists"),
     },
+    ...(profile.averageGivenRating !== null
+      ? [
+          {
+            key: "rating",
+            value: profile.averageGivenRating.toFixed(1),
+            icon: <Star size={15} fill="currentColor" aria-hidden="true" />,
+            label: t("profile.statAvgRating", { defaultValue: "Ort. puan" }),
+          },
+        ]
+      : []),
   ];
 
+  const shareButton = (
+    <button
+      type="button"
+      className="profile-header__btn"
+      onClick={handleShare}
+      aria-label={t("profile.share", { defaultValue: "Paylaş" })}
+    >
+      {copied ? (
+        <Check size={14} aria-hidden="true" />
+      ) : (
+        <Share2 size={14} aria-hidden="true" />
+      )}
+      <span className="profile-header__btn-label">
+        {copied
+          ? t("profile.linkCopied", { defaultValue: "Bağlantı kopyalandı" })
+          : t("profile.share", { defaultValue: "Paylaş" })}
+      </span>
+    </button>
+  );
+
   return (
-    <div className="profile-header">
+    <header className="profile-header">
       <div
-        className={`profile-header__body${showPosterColumn ? " profile-header__body--poster" : ""}`}
+        className={`profile-header__cover${coverUrl ? "" : " profile-header__cover--empty"}`}
+        style={coverUrl ? { backgroundImage: `url("${coverUrl}")` } : undefined}
       >
-        <div className="profile-header__media">
-          {hasPoster && favoriteMovie ? (
-            <Link
-              to={`/movies/${favoriteMovie.id}`}
-              className="profile-header__poster"
-              aria-label={favoriteMovie.title}
-              title={favoriteMovie.title}
+        <div className="profile-header__cover-actions">
+          {isCurrentUser ? (
+            <button
+              type="button"
+              className="profile-header__btn"
+              onClick={onEditClick}
+              aria-label={t("profile.editProfile")}
             >
-              <span
-                className="profile-header__poster-perf"
-                aria-hidden="true"
-              />
-              <img
-                src={getImageUrl(favoriteMovie.posterUrl)}
-                alt=""
-                loading="lazy"
-              />
-              <span className="profile-header__poster-caption">
-                {favoriteMovie.title}
+              <Pencil size={14} aria-hidden="true" />
+              <span className="profile-header__btn-label">
+                {t("profile.editProfile")}
               </span>
-            </Link>
+            </button>
           ) : (
-            isCurrentUser && (
+            <>
+              <CompatibilityBadge
+                variant="action"
+                userId={userId}
+                userName={profile.userName}
+                avatarUrl={profile.avatarUrl}
+              />
               <button
                 type="button"
-                className="profile-header__poster profile-header__poster--empty"
-                onClick={onEditClick}
-              >
-                <ImagePlus size={24} aria-hidden="true" />
-                <span>
-                  {t("profile.pickFavoriteFilm", {
-                    defaultValue: "Pick a favorite film to feature",
-                  })}
-                </span>
-              </button>
-            )
-          )}
-          <button
-            type="button"
-            className="profile-header__avatar"
-            onClick={() => profile.avatarUrl && setIsAvatarExpanded(true)}
-            aria-label={t("profile.viewAvatar")}
-          >
-            {profile.avatarUrl ? (
-              <img
-                src={getImageUrl(profile.avatarUrl)}
-                alt={profile.userName}
-              />
-            ) : (
-              <span>{profile.userName[0]?.toUpperCase()}</span>
-            )}
-          </button>
-        </div>
-
-        <div className="profile-header__head">
-          <div className="profile-header__head-top">
-            <p className="profile-header__handle">
-              <strong>@{profile.userName}</strong>
-              {memberSince && (
-                <>
-                  <span className="profile-header__dot">·</span>
-                  {t("profile.member")} {memberSince}
-                </>
-              )}
-            </p>
-
-            {isCurrentUser ? (
-              <button
-                className="btn-secondary profile-header__action-btn"
-                onClick={onEditClick}
-              >
-                <Pencil size={14} /> {t("profile.editProfile")}
-              </button>
-            ) : (
-              <button
-                className="btn-secondary profile-header__action-btn"
+                className="profile-header__btn"
                 onClick={onFollowToggle}
                 disabled={isFollowLoading}
+                aria-label={
+                  isFollowedByCurrentUser
+                    ? t("users.following")
+                    : t("users.follow")
+                }
               >
                 {isFollowedByCurrentUser ? (
-                  <>
-                    <UserCheck size={14} /> {t("users.following")}
-                  </>
+                  <UserCheck size={14} aria-hidden="true" />
                 ) : (
-                  <>
-                    <UserPlus size={14} /> {t("users.follow")}
-                  </>
+                  <UserPlus size={14} aria-hidden="true" />
                 )}
+                <span className="profile-header__btn-label">
+                  {isFollowedByCurrentUser
+                    ? t("users.following")
+                    : t("users.follow")}
+                </span>
               </button>
-            )}
-          </div>
+            </>
+          )}
+          {shareButton}
+        </div>
 
-          <div className="profile-header__name-row">
-            <h1 className="profile-header__name">
-              {profile.fullName || profile.userName}
-            </h1>
-            {profile.averageGivenRating !== null && (
-              <span className="profile-header__rating">
-                <Star size={13} fill="currentColor" />
-                {profile.averageGivenRating.toFixed(1)}
+        {isCurrentUser && (
+          <button
+            type="button"
+            className="profile-header__btn profile-header__btn--small profile-header__cover-change"
+            onClick={() => setIsCoverPickerOpen(true)}
+            aria-label={t("profile.changeCover", {
+              defaultValue: "Kapağı değiştir",
+            })}
+          >
+            <ImagePlus size={13} aria-hidden="true" />
+            <span className="profile-header__btn-label">
+              {t("profile.changeCover", { defaultValue: "Kapağı değiştir" })}
+            </span>
+          </button>
+        )}
+      </div>
+
+      <div className="profile-header__main">
+        <button
+          type="button"
+          className="profile-header__avatar"
+          onClick={() => profile.avatarUrl && setIsAvatarExpanded(true)}
+          aria-label={t("profile.viewAvatar")}
+        >
+          {profile.avatarUrl ? (
+            <img src={getImageUrl(profile.avatarUrl)} alt={profile.userName} />
+          ) : (
+            <span>{profile.userName[0]?.toUpperCase()}</span>
+          )}
+        </button>
+
+        <div className="profile-header__identity">
+          <h1 className="profile-header__name">
+            {profile.fullName || profile.userName}
+          </h1>
+
+          <p className="profile-header__handle">
+            @{profile.userName}
+            {memberSince && (
+              <>
+                <span className="profile-header__dot">·</span>
+                {t("profile.member")} {memberSince}
+              </>
+            )}
+          </p>
+
+          <div className="profile-header__line">
+            <span className="profile-header__follow">
+              <button type="button" onClick={() => setFollowModal("followers")}>
+                <b>{profile.followerCount ?? 0}</b> {t("profile.statFollowers")}
+              </button>
+              <span className="profile-header__dot">·</span>
+              <button type="button" onClick={() => setFollowModal("following")}>
+                <b>{profile.followingCount ?? 0}</b>{" "}
+                {t("profile.statFollowing")}
+              </button>
+            </span>
+
+            {metaParts.length > 0 && (
+              <span className="profile-header__meta">
+                {profile.country && <MapPin size={14} aria-hidden="true" />}
+                {metaParts.join(" · ")}
               </span>
             )}
           </div>
-        </div>
-
-        <div className="profile-header__rest">
-          {(profile.country || age !== null || genderLabel) && (
-            <div className="profile-header__badges">
-              {profile.country && (
-                <span className="profile-header__badge">
-                  <MapPin size={13} /> {profile.country}
-                </span>
-              )}
-              {age !== null && (
-                <span className="profile-header__badge">{age}</span>
-              )}
-              {genderLabel && (
-                <span className="profile-header__badge">{genderLabel}</span>
-              )}
-            </div>
-          )}
 
           {profile.biography && (
-            <p className="profile-header__bio">
-              &ldquo;{profile.biography}&rdquo;
-            </p>
+            <p className="profile-header__bio">{profile.biography}</p>
           )}
-
-          {!isCurrentUser && (
-            <CompatibilityBadge
-              variant="card"
-              userId={userId}
-              userName={profile.userName}
-              avatarUrl={profile.avatarUrl}
-            />
-          )}
-
-          <div className="profile-header__stats">
-            {stats.map((s) =>
-              s.kind === "link" ? (
-                <Link to={s.to} className="profile-header__stat" key={s.key}>
-                  <span className="profile-header__stat-value">{s.value}</span>
-                  <span className="profile-header__stat-label">{s.label}</span>
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  className="profile-header__stat"
-                  key={s.key}
-                  onClick={s.onClick}
-                >
-                  <span className="profile-header__stat-value">{s.value}</span>
-                  <span className="profile-header__stat-label">{s.label}</span>
-                </button>
-              ),
-            )}
-          </div>
         </div>
+      </div>
+
+      <div className="profile-header__stats">
+        {stats.map((s) => {
+          const inner = (
+            <>
+              <span className="profile-header__stat-value">
+                {s.icon}
+                {s.value}
+              </span>
+              <span className="profile-header__stat-label">{s.label}</span>
+            </>
+          );
+          return s.to ? (
+            <Link to={s.to} className="profile-header__stat" key={s.key}>
+              {inner}
+            </Link>
+          ) : (
+            <div
+              className="profile-header__stat profile-header__stat--static"
+              key={s.key}
+            >
+              {inner}
+            </div>
+          );
+        })}
       </div>
 
       {followModal && (
@@ -337,6 +400,17 @@ export default function ProfileHeader({
           userId={userId}
           mode={followModal}
           onClose={() => setFollowModal(null)}
+        />
+      )}
+
+      {isCoverPickerOpen && (
+        <CoverPickerModal
+          favorites={favoriteMovies}
+          selectedId={profile.coverMovieId}
+          isSaving={coverMutation.isPending}
+          isError={coverMutation.isError}
+          onSelect={(movieId) => coverMutation.mutate(movieId)}
+          onClose={() => setIsCoverPickerOpen(false)}
         />
       )}
 
@@ -358,6 +432,6 @@ export default function ProfileHeader({
           />
         </div>
       )}
-    </div>
+    </header>
   );
 }

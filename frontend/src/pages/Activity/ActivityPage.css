@@ -9,7 +9,7 @@
 
 /* ---------- Başlık ---------- */
 .activity-page__eyebrow {
-  font-family: "SF Mono", "Fira Code", monospace;
+  font-family: var(--font-mono);
   font-size: 0.76rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -116,7 +116,7 @@
   align-items: center;
   gap: 14px;
   margin: 34px 0 10px;
-  font-family: "SF Mono", "Fira Code", monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.14em;

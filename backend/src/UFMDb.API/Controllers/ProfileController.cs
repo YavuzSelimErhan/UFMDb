@@ -114,7 +114,14 @@ namespace UFMDb.API.Controllers
         // all / rated / unrated sayıları: liste sorgusunu 3 kez çağırmak yerine tek hafif istek.
         [HttpGet("watched-films/counts")]
         public async Task<IActionResult> GetWatchedFilmsCounts()
-            => Ok(await _mediator.Send(new GetWatchedFilmsCountsQuery(RequireUserId())));
+    => Ok(await _mediator.Send(new GetWatchedFilmsCountsQuery(RequireUserId(), RequireUserId())));
+
+        [HttpPut("cover")]
+        public async Task<IActionResult> SetCover(SetCoverRequest request)
+        {
+            await _mediator.Send(new SetProfileCoverCommand(RequireUserId(), request.MovieId));
+            return NoContent();
+        }
 
         [HttpDelete("watched-films/{movieId:guid}")]
         public async Task<IActionResult> RemoveWatchedFilm(Guid movieId)
@@ -180,4 +187,5 @@ namespace UFMDb.API.Controllers
         string? FullName, string? Country, DateTime? BirthDate, string? Gender, string? Biography
     );
     public record UpdateDiaryVisibilityRequest(string Visibility);
+    public record SetCoverRequest(Guid? MovieId);
 }

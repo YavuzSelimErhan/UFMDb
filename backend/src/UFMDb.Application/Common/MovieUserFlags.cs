@@ -43,6 +43,8 @@ public static class MovieUserFlags
 
 public static class SqlLike
 {
+    public const string EscapeCharacter = @"\";
+
     /// <summary>ILIKE desenlerinde kullanıcı girdisindeki % ve _ karakterlerini literal yapar.</summary>
     public static string Escape(string s) =>
         s.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_");

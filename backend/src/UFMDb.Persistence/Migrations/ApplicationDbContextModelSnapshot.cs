@@ -1342,6 +1342,9 @@ namespace UFMDb.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<Guid?>("CoverMovieId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -1398,6 +1401,8 @@ namespace UFMDb.Persistence.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CoverMovieId");
 
                     b.HasIndex("Email")
                         .IsUnique();
@@ -1905,6 +1910,14 @@ namespace UFMDb.Persistence.Migrations
                     b.Navigation("Review");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UFMDb.Domain.Entities.User", b =>
+                {
+                    b.HasOne("UFMDb.Domain.Entities.Movie", null)
+                        .WithMany()
+                        .HasForeignKey("CoverMovieId")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("UFMDb.Domain.Entities.WatchHistory", b =>

@@ -13,8 +13,11 @@ interface CompatibilityBadgeProps {
   userName: string;
   /** Opsiyonel profil resmi; modal başlığında ve kart görünümünde gösterilir. */
   avatarUrl?: string | null;
-  /** "pill": eski yuvarlak rozet. "card": profil header'ındaki vurgu kartı. */
-  variant?: "pill" | "card";
+  /**
+   * "pill": eski yuvarlak rozet. "card": vurgu kartı.
+   * "action": profil header'ının sağ üstündeki kompakt buton (stilleri ProfileHeader.css'te).
+   */
+  variant?: "pill" | "card" | "action";
 }
 
 export default function CompatibilityBadge({
@@ -35,12 +38,17 @@ export default function CompatibilityBadge({
   if (!enabled || isError) return null;
 
   const isCard = variant === "card";
+  const isAction = variant === "action";
   const rootClass = `compat-badge${isCard ? " compat-badge--card" : ""}`;
 
   if (!data) {
     return (
       <div
-        className={`${rootClass} compat-badge--skeleton`}
+        className={
+          isAction
+            ? "profile-header__btn profile-header__btn--skeleton"
+            : `${rootClass} compat-badge--skeleton`
+        }
         aria-hidden="true"
       />
     );
@@ -50,6 +58,71 @@ export default function CompatibilityBadge({
   // Ortak film varsa detay açılır; yoksa gösterilecek bir şey olmadığı için rozet statik kalır.
   const interactive = data.commonCount > 0;
 
+  const ariaLabel = hasScore
+    ? t("compatibility.badgeAria", {
+        score: data.score,
+        count: data.commonCount,
+      })
+    : t("compatibility.badgePendingAria", {
+        current: data.commonCount,
+        required: data.minRequired,
+      });
+
+  const modal = open && (
+    <CompatibilityModal
+      userId={userId}
+      userName={userName}
+      avatarUrl={avatarUrl}
+      viewerId={viewerId}
+      compat={data}
+      onClose={() => setOpen(false)}
+    />
+  );
+
+  // ---------- Header butonu ----------
+  if (isAction) {
+    const actionContent = (
+      <>
+        <Sparkles size={14} aria-hidden="true" />
+        <span>
+          {hasScore
+            ? t("compatibility.percent", { value: data.score })
+            : `${data.commonCount}/${data.minRequired}`}
+        </span>
+        <span className="profile-header__btn-label">
+          {t("compatibility.title")}
+        </span>
+      </>
+    );
+
+    if (!interactive) {
+      return (
+        <div
+          className="profile-header__btn profile-header__btn--compat is-static"
+          aria-label={ariaLabel}
+        >
+          {actionContent}
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <button
+          type="button"
+          className="profile-header__btn profile-header__btn--compat"
+          onClick={() => setOpen(true)}
+          aria-haspopup="dialog"
+          aria-label={ariaLabel}
+        >
+          {actionContent}
+        </button>
+        {modal}
+      </>
+    );
+  }
+
+  // ---------- pill / card (değişmedi) ----------
   const subText = hasScore
     ? t("compatibility.commonFilms", { count: data.commonCount })
     : t("compatibility.notEnoughProgress", {
@@ -130,30 +203,11 @@ export default function CompatibilityBadge({
         className={rootClass}
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
-        aria-label={
-          hasScore
-            ? t("compatibility.badgeAria", {
-                score: data.score,
-                count: data.commonCount,
-              })
-            : t("compatibility.badgePendingAria", {
-                current: data.commonCount,
-                required: data.minRequired,
-              })
-        }
+        aria-label={ariaLabel}
       >
         {content}
       </button>
-      {open && (
-        <CompatibilityModal
-          userId={userId}
-          userName={userName}
-          avatarUrl={avatarUrl}
-          viewerId={viewerId}
-          compat={data}
-          onClose={() => setOpen(false)}
-        />
-      )}
+      {modal}
     </>
   );
 }

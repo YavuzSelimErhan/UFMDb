@@ -93,7 +93,7 @@ public class FollowsController : ControllerBase
     [HttpGet("~/api/users/{userId:guid}/watched-films/counts")]
     [AllowAnonymous]
     public async Task<IActionResult> GetUserWatchedFilmsCounts(Guid userId, CancellationToken ct) =>
-        Ok(await _mediator.Send(new GetWatchedFilmsCountsQuery(userId), ct));
+        Ok(await _mediator.Send(new GetWatchedFilmsCountsQuery(userId, _currentUser.UserId), ct));
 
     /// <summary>Giriş yapan kullanıcı ile hedef kullanıcının zevk uyumu (ortak puanlanan filmlere göre).</summary>
     [HttpGet("~/api/users/{targetUserId:guid}/compatibility")]

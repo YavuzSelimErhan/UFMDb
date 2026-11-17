@@ -332,6 +332,8 @@ export const profileService = {
     );
     return data;
   },
+  setCover: (movieId: string | null) =>
+    api.put("/profile/cover", { movieId }).then((r) => r.data),
 };
 
 // ---------------- Genres ----------------

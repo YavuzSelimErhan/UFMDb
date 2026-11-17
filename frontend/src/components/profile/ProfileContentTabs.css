@@ -279,7 +279,7 @@
   line-height: 1;
 }
 .review-entry__month {
-  font-family: "SF Mono", "Fira Code", monospace;
+  font-family: var(--font-mono);
   font-size: 0.65rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;

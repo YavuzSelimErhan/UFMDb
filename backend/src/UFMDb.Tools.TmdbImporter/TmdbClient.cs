@@ -17,17 +17,23 @@ public class TmdbClient
 
     public const string ImageBaseUrl = "https://image.tmdb.org/t/p/";
 
-    public TmdbClient(string apiKey)
-    {
-        _apiKey = apiKey;
+    public TmdbClient(string apiKey) : this(apiKey, CreateHttpClient()) { }
 
+    public TmdbClient(string apiKey, HttpClient httpClient)
+    {
+        _http = httpClient;
+        _apiKey = apiKey;
+    }
+
+    private static HttpClient CreateHttpClient()
+    {
         var handler = new SocketsHttpHandler
         {
             AutomaticDecompression = DecompressionMethods.All,
             EnableMultipleHttp2Connections = true,
             PooledConnectionLifetime = TimeSpan.FromMinutes(5)
         };
-        _http = new HttpClient(handler)
+        return new HttpClient(handler)
         {
             BaseAddress = new Uri("https://api.themoviedb.org/3/"),
             DefaultRequestVersion = HttpVersion.Version20,

@@ -1,333 +1,281 @@
 .profile-header {
+  /* Sayfa zemin rengi: kapağın altta bu renge karışması ve avatar çerçevesi için.
+     Projedeki gerçek değişken adı farklıysa SADECE bu satırı düzelt. */
+  --ph-bg: var(--color-bg, var(--color-bg-primary, #0b0e13));
+  --font-profile:
+    "Plus Jakarta Sans", var(--font-display), system-ui, sans-serif;
   position: relative;
   margin-bottom: 20px;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
+  font-family: var(--font-profile);
+}
+
+/* ---------- Kapak: film backdrop'u + hafif accent katmanı + alta doğru solma ---------- */
+.profile-header__cover {
+  position: relative;
+  height: 220px;
   border-radius: var(--radius-lg);
   overflow: hidden;
+  background-color: var(--color-bg-card);
+  background-size: cover;
+  background-position: center 30%;
 }
-
-/* ---------- Gövde: medya (poster + avatar) | kimlik / alt blok ---------- */
-.profile-header__body {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  grid-template-rows: auto 1fr;
-  grid-template-areas:
-    "media head"
-    "media rest";
-  column-gap: 28px;
-  align-items: start;
-  padding: 28px 32px;
-}
-.profile-header__media {
-  grid-area: media;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 14px;
-}
-.profile-header__head {
-  grid-area: head;
-  min-width: 0;
-}
-.profile-header__rest {
-  grid-area: rest;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 14px;
-}
-
-/* ---------- Poster ---------- */
-.profile-header__poster {
-  position: relative;
-  display: block;
-  width: 164px;
-  aspect-ratio: 2 / 3;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-card);
-  overflow: hidden;
-  box-shadow: 0 14px 32px var(--color-shadow);
-}
-.profile-header__poster img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.4s ease;
-}
-.profile-header__poster:hover img {
-  transform: scale(1.04);
-}
-
-/* Posterin üstünde ince, sönük film şeridi (marka rengi değil) */
-.profile-header__poster-perf {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 10px;
-  z-index: 1;
-  background-color: var(--color-border);
-  background-image: radial-gradient(
-    circle,
-    var(--color-bg-elevated) 0 2.4px,
-    transparent 2.6px
+.profile-header__cover--empty {
+  background-color: color-mix(
+    in srgb,
+    var(--color-accent) 14%,
+    var(--color-bg-card)
   );
-  background-size: 14px 100%;
-  background-position: 7px center;
-  background-repeat: repeat-x;
-  opacity: 0.9;
 }
-.profile-header__poster-caption {
+.profile-header__cover::before {
+  content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 22px 10px 8px;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 0.78rem;
-  line-height: 1.25;
-  color: #fff;
-  background: linear-gradient(to top, rgba(5, 7, 10, 0.85), transparent);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-accent) 24%, transparent);
+}
+.profile-header__cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 35%, var(--ph-bg) 100%);
 }
 
-/* Kendi profilinde favori film yokken: kesik çizgili davet kutusu */
-.profile-header__poster--empty {
+.profile-header__cover-actions {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
   display: flex;
-  flex-direction: column;
+  gap: 8px;
+}
+.profile-header__cover-change {
+  position: absolute;
+  right: 14px;
+  bottom: 22px;
+  z-index: 2;
+}
+
+/* Kapağın üstündeki butonlar: backdrop ne olursa olsun okunur kalsın diye koyu cam zemin */
+.profile-header__btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 14px;
-  text-align: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 14px;
   font: inherit;
-  font-size: 0.8rem;
-  line-height: 1.4;
-  color: var(--color-text-secondary);
-  border-style: dashed;
-  box-shadow: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: #fff;
+  background: rgba(5, 7, 10, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   cursor: pointer;
   transition:
-    border-color var(--transition-fast),
-    color var(--transition-fast);
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
 }
-.profile-header__poster--empty svg {
-  color: var(--color-accent);
-}
-.profile-header__poster--empty:hover {
+.profile-header__btn:hover:not(:disabled) {
+  background: rgba(5, 7, 10, 0.75);
   border-color: var(--color-accent);
-  color: var(--color-text-primary);
+}
+.profile-header__btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.profile-header__btn--small {
+  height: 30px;
+  padding: 0 11px;
+  font-size: 0.76rem;
+}
+.profile-header__btn--compat {
+  border-color: var(--color-accent);
+}
+.profile-header__btn--compat.is-static {
+  cursor: default;
+}
+.profile-header__btn--skeleton {
+  width: 120px;
+  padding: 0;
+  border-color: transparent;
+  animation: pulse 1.4s ease-in-out infinite;
 }
 
-/* ---------- Avatar ---------- */
+/* ---------- Avatar + kimlik ---------- */
+.profile-header__main {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 22px;
+  padding: 0 8px;
+  margin-top: -56px;
+}
+
 .profile-header__avatar {
+  flex-shrink: 0;
+  display: block;
   width: 112px;
   height: 112px;
-  border-radius: 50%;
   padding: 0;
-  border: 3px solid var(--color-accent);
-  box-shadow: 0 8px 22px var(--color-shadow-accent);
+  border-radius: 50%;
+  border: 4px solid var(--ph-bg);
+  background: var(--color-bg-card);
+  overflow: hidden;
   cursor: pointer;
-  background: var(--color-bg-elevated);
-  display: block;
   transition: transform var(--transition-fast);
 }
 .profile-header__avatar:hover {
   transform: scale(1.03);
 }
-/* Poster sütunu varsa avatar posterin altında küçük durur */
-.profile-header__body--poster .profile-header__avatar {
-  width: 56px;
-  height: 56px;
-  border-width: 2px;
-  box-shadow: none;
-}
-
 .profile-header__avatar img,
 .profile-header__avatar span {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
   display: block;
 }
 .profile-header__avatar img {
   object-fit: cover;
 }
 .profile-header__avatar span {
-  background: var(--color-bg-card);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-display);
-  font-style: italic;
   font-size: 2.4rem;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--color-text-primary);
 }
-.profile-header__body--poster .profile-header__avatar span {
-  font-size: 1.2rem;
-}
 
-/* ---------- Kimlik ---------- */
-.profile-header__head-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.profile-header__handle {
-  font-family: "SF Mono", "Fira Code", monospace;
-  font-size: 0.76rem;
-  letter-spacing: 0.03em;
-  color: var(--color-text-muted);
-  margin: 8px 0 0;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.profile-header__handle strong {
-  color: var(--color-text-secondary);
-  font-weight: 500;
-}
-.profile-header__dot {
-  margin: 0 8px;
-  opacity: 0.5;
-}
-
-.profile-header__action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.profile-header__name-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-  margin-top: 14px;
+/* Kapağın alt kenarının hemen altından başlar; avatar yanında yarı yarıya taşar */
+.profile-header__identity {
+  min-width: 0;
+  padding-top: 62px;
 }
 
 .profile-header__name {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 800;
-  font-size: clamp(1.9rem, 4vw, 2.7rem);
-  letter-spacing: -0.02em;
   margin: 0;
-  line-height: 1.05;
+  font-size: clamp(1.6rem, 3.4vw, 2rem);
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
   color: var(--color-text-primary);
   overflow-wrap: anywhere;
 }
 
-.profile-header__rating {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: "SF Mono", "Fira Code", monospace;
+.profile-header__handle {
+  margin: 6px 0 0;
   font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--color-accent);
-  background: var(--color-accent-muted);
-  border: 1px solid var(--color-accent);
-  padding: 3px 10px 3px 8px;
-  border-radius: var(--radius-pill);
-  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+.profile-header__dot {
+  margin: 0 7px;
+  opacity: 0.6;
 }
 
-.profile-header__badges {
+.profile-header__line {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  gap: 6px 18px;
+  margin-top: 10px;
+  font-size: 0.86rem;
 }
-
-.profile-header__badge {
+.profile-header__follow {
+  display: inline-flex;
+  align-items: center;
+}
+.profile-header__follow button {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+.profile-header__follow button b {
+  font-weight: 700;
+  color: var(--color-text-primary);
+  transition: color var(--transition-fast);
+}
+.profile-header__follow button:hover,
+.profile-header__follow button:hover b {
+  color: var(--color-accent);
+}
+.profile-header__meta {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.76rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
-  padding: 4px 12px;
-  border-radius: var(--radius-pill);
-  background: var(--color-bg-card);
-}
-.profile-header__badge svg {
-  opacity: 0.7;
+  color: var(--color-text-muted);
 }
 
+/* Biyografi: süssüz, okunaklı paragraf */
 .profile-header__bio {
-  margin: 0;
-  font-family: var(--font-display);
-  font-style: italic;
-  color: var(--color-text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.6;
+  margin: 12px 0 0;
   max-width: 560px;
-  padding-left: 16px;
-  border-left: 2px solid var(--color-accent);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
 }
 
-/* ---------- İstatistik kartları ---------- */
+/* ---------- İstatistikler: kutusuz, ince ayraçlı satır ---------- */
 .profile-header__stats {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  margin: 18px 8px 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
 }
 
 .profile-header__stat {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: 2px;
-  padding: 10px 14px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-card);
-  font: inherit;
+  padding: 6px 18px 6px 0;
+  margin-right: 18px;
+  border-right: 1px solid var(--color-border);
   color: inherit;
-  text-align: left;
   text-decoration: none;
   cursor: pointer;
-  transition:
-    border-color var(--transition-fast),
-    background-color var(--transition-fast);
 }
-.profile-header__stat:hover {
-  border-color: var(--color-accent);
-  background-color: var(--color-bg-card-hover);
+.profile-header__stat:last-child {
+  margin-right: 0;
+  padding-right: 0;
+  border-right: none;
+}
+.profile-header__stat--static {
+  cursor: default;
 }
 
 .profile-header__stat-value {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 1.25rem;
   font-weight: 700;
   line-height: 1.2;
   color: var(--color-text-primary);
+  transition: color var(--transition-fast);
 }
-
 .profile-header__stat-label {
-  font-family: "SF Mono", "Fira Code", monospace;
-  font-size: 0.6rem;
+  font-size: 0.68rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-text-muted);
+  transition: color var(--transition-fast);
+}
+.profile-header__stat:not(.profile-header__stat--static):hover
+  .profile-header__stat-value,
+.profile-header__stat:not(.profile-header__stat--static):hover
+  .profile-header__stat-label {
+  color: var(--color-accent);
 }
 
-/* ---------- Avatar lightbox (unchanged behaviour) ---------- */
+/* ---------- Avatar lightbox (değişmedi) ---------- */
 .avatar-lightbox {
   position: fixed;
   inset: 0;
@@ -340,7 +288,6 @@
   animation: fade-in-up 0.2s ease;
   cursor: zoom-out;
 }
-
 .avatar-lightbox img {
   max-width: min(80vw, 480px);
   max-height: 80vh;
@@ -350,7 +297,6 @@
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
   cursor: default;
 }
-
 .avatar-lightbox__close {
   position: absolute;
   top: 24px;
@@ -370,43 +316,70 @@
   background: rgba(255, 255, 255, 0.18);
 }
 
-/* ---------- Mobil: poster küçülür, alt blok tam genişlikte ---------- */
+/* ---------- Mobil ---------- */
 @media (max-width: 640px) {
-  .profile-header__body {
-    grid-template-rows: auto auto;
-    grid-template-areas:
-      "media head"
-      "rest rest";
-    column-gap: 16px;
-    row-gap: 16px;
-    padding: 20px;
+  .profile-header__cover {
+    height: 130px;
   }
-  .profile-header__poster {
-    width: 96px;
+  .profile-header__cover-actions {
+    top: 10px;
+    right: 10px;
+    gap: 6px;
   }
-  .profile-header__poster-caption {
+  .profile-header__cover-change {
+    right: 10px;
+    bottom: 14px;
+  }
+  /* Butonlar ikon-only: etiketler gizlenir (aria-label zaten var) */
+  .profile-header__btn {
+    width: 34px;
+    padding: 0;
+  }
+  .profile-header__btn--small {
+    width: 30px;
+  }
+  .profile-header__btn-label {
     display: none;
   }
-  .profile-header__poster--empty {
-    font-size: 0.65rem;
-    padding: 8px;
+  /* Uyum butonu skoru gösterdiği için genişliğini korur, sadece uzun etiket gizlenir */
+  .profile-header__btn--compat {
+    width: auto;
+    padding: 0 10px;
+  }
+
+  .profile-header__main {
+    flex-direction: column;
+    gap: 0;
+    padding: 0 4px;
+    margin-top: -40px;
   }
   .profile-header__avatar {
-    width: 84px;
-    height: 84px;
+    width: 80px;
+    height: 80px;
   }
-  .profile-header__body--poster .profile-header__avatar {
-    width: 44px;
-    height: 44px;
+  .profile-header__avatar span {
+    font-size: 1.8rem;
   }
-  .profile-header__rest {
-    margin-top: 0;
+  .profile-header__identity {
+    padding-top: 10px;
+  }
+  .profile-header__name {
+    font-size: 1.4rem;
   }
   .profile-header__bio {
     max-width: 100%;
     font-size: 0.86rem;
   }
+
   .profile-header__stats {
+    display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px 0;
+    margin: 16px 4px 0;
+  }
+  .profile-header__stat {
+    margin: 0;
+    padding: 6px 0;
+    border-right: none;
   }
 }

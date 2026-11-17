@@ -28,8 +28,8 @@ public class SearchFollowableUsersQueryHandler : IRequestHandler<SearchFollowabl
         {
             var search = $"%{SqlLike.Escape(request.Search.Trim())}%";
             query = query.Where(u =>
-                EF.Functions.ILike(u.UserName, search) ||
-                (u.FullName != null && EF.Functions.ILike(u.FullName, search)));
+                EF.Functions.ILike(u.UserName, search, SqlLike.EscapeCharacter) ||
+                (u.FullName != null && EF.Functions.ILike(u.FullName, search, SqlLike.EscapeCharacter)));
         }
 
         var totalCount = await query.CountAsync(ct);

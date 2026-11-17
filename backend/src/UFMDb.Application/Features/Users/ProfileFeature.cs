@@ -42,6 +42,8 @@ public record ProfileDto(
     DateTime MemberSinceUtc,
     int FollowerCount,
     int FollowingCount,
+    Guid? CoverMovieId,
+    string? CoverBackdropUrl,
     string DiaryVisibility = "Public"
 );
 
@@ -93,8 +95,12 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             .ToDictionaryAsync(l => l.MovieId, l => l.Reaction, ct);
         var watchlistMovieIds = watchlist.Select(w => w.MovieId).ToHashSet();
 
-        var watchedMovieIds = (await _context.WatchHistory.AsNoTracking()
-            .Where(w => w.UserId == request.UserId).Select(w => w.MovieId).ToListAsync(ct)).ToHashSet();
+        // YENİ: tarihleriyle birlikte çekiyoruz ("bu yıl" sayısı için).
+        var watchEntries = await _context.WatchHistory.AsNoTracking()
+            .Where(w => w.UserId == request.UserId)
+            .Select(w => new { w.MovieId, w.WatchedAtUtc })
+            .ToListAsync(ct);
+        var watchedMovieIds = watchEntries.Select(w => w.MovieId).ToHashSet();
 
         // Puanlar: "izlenmiş film" tanımı (logu VEYA puanı olan) için de gerekli, bu yüzden
         // izlenmiş bayrağı üreten her ToListItem çağrısından ÖNCE yüklenmeli.
@@ -107,7 +113,11 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
         var ratingsCount = userRatings.Count;
 
         // Sayılar ve "izlendi" bayrağı aynı tanımı kullanır: logu VEYA puanı olan distinct film.
-        var watchedCounts = WatchedFilmsCounter.From(watchedMovieIds, userRatingsLookup.Keys);
+        var thisYear = WatchedFilmsCounter.CountThisYear(
+            watchEntries.Select(w => (w.MovieId, w.WatchedAtUtc)),
+            userRatings.Select(r => (r.MovieId, r.CreatedAtUtc)),
+            DateTime.UtcNow.Year);
+        var watchedCounts = WatchedFilmsCounter.From(watchedMovieIds, userRatingsLookup.Keys, thisYear);
         watchedMovieIds.UnionWith(userRatingsLookup.Keys);
 
         // Her zaman 4 sabit slot döndürülür (1-4); dolu olmayan slotlar Movie=null olarak gelir.
@@ -118,6 +128,15 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
                 return new FavoriteSlotDto(slot, match is null ? null : ToListItem(match.Movie, reactions, watchlistMovieIds, watchedMovieIds, isTr));
             })
             .ToList();
+
+        // YENİ: kapak görseli. Seçilen film -> yoksa ilk dolu favorinin backdrop'u -> yoksa null.
+        string? coverBackdrop = null;
+        if (user.CoverMovieId is Guid coverId)
+            coverBackdrop = await _context.Movies.AsNoTracking()
+                .Where(m => m.Id == coverId).Select(m => m.BackdropUrl).FirstOrDefaultAsync(ct);
+        if (string.IsNullOrWhiteSpace(coverBackdrop))
+            coverBackdrop = favorites.Select(f => f.Movie?.BackdropUrl)
+                .FirstOrDefault(u => !string.IsNullOrWhiteSpace(u));
 
         var recentlyWatched = recent.Select(w => new RecentlyWatchedItemDto(
             ToListItem(w.Movie, reactions, watchlistMovieIds, watchedMovieIds, isTr), w.Rating
@@ -192,6 +211,8 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             user.CreatedAtUtc,
             followerCount,
             followingCount,
+            user.CoverMovieId,
+            coverBackdrop,
             user.DiaryVisibility.ToString()
         );
     }
@@ -589,8 +610,7 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
 }
 
 // ---------- İzlenen film sayıları (all / rated / unrated): hafif, tek sorgu ----------
-// Liste sorgusunu 3 kez çağırmak yerine kullanılır; "izlenen film" tanımı WatchedFilmsCounter'da.
-public record GetWatchedFilmsCountsQuery(Guid UserId) : IRequest<WatchedFilmsCountsDto>;
+public record GetWatchedFilmsCountsQuery(Guid UserId, Guid? ViewerId) : IRequest<WatchedFilmsCountsDto>;
 
 public class GetWatchedFilmsCountsQueryHandler : IRequestHandler<GetWatchedFilmsCountsQuery, WatchedFilmsCountsDto>
 {
@@ -599,12 +619,37 @@ public class GetWatchedFilmsCountsQueryHandler : IRequestHandler<GetWatchedFilms
 
     public async Task<WatchedFilmsCountsDto> Handle(GetWatchedFilmsCountsQuery request, CancellationToken ct)
     {
-        var watched = await _context.WatchHistory.AsNoTracking()
-            .Where(w => w.UserId == request.UserId).Select(w => w.MovieId).Distinct().ToListAsync(ct);
-        var rated = await _context.MovieRatings.AsNoTracking()
-            .Where(r => r.UserId == request.UserId).Select(r => r.MovieId).ToListAsync(ct);
+        var watch = await _context.WatchHistory.AsNoTracking()
+            .Where(w => w.UserId == request.UserId)
+            .Select(w => new { w.MovieId, w.WatchedAtUtc })
+            .ToListAsync(ct);
+        var ratings = await _context.MovieRatings.AsNoTracking()
+            .Where(r => r.UserId == request.UserId)
+            .Select(r => new { r.MovieId, r.CreatedAtUtc })
+            .ToListAsync(ct);
 
-        return WatchedFilmsCounter.From(watched, rated);
+        var thisYear = WatchedFilmsCounter.CountThisYear(
+            watch.Select(w => (w.MovieId, w.WatchedAtUtc)),
+            ratings.Select(r => (r.MovieId, r.CreatedAtUtc)),
+            DateTime.UtcNow.Year);
+
+        var counts = WatchedFilmsCounter.From(
+            watch.Select(w => w.MovieId).Distinct(),
+            ratings.Select(r => r.MovieId),
+            thisYear);
+
+        if (request.ViewerId != request.UserId)
+        {
+            var visibility = await _context.Users.AsNoTracking()
+                .Where(u => u.Id == request.UserId)
+                .Select(u => u.DiaryVisibility)
+                .FirstOrDefaultAsync(ct);
+
+            if (!await DiaryAccess.CanViewAsync(_context, request.UserId, visibility, request.ViewerId, ct))
+                counts = counts with { ThisYear = null };
+        }
+
+        return counts;
     }
 }
 
@@ -778,5 +823,36 @@ public class DeleteScreeningLogEntryCommandHandler : IRequestHandler<DeleteScree
         {
             await MovieRatingRecalculator.RecalculateAsync(_context, movie, ct);
         }
+    }
+}
+
+// ---------- Profil kapağını seç (film backdrop'u); MovieId null ise varsayılana döner ----------
+public record SetProfileCoverCommand(Guid UserId, Guid? MovieId) : IRequest;
+
+public class SetProfileCoverCommandHandler : IRequestHandler<SetProfileCoverCommand>
+{
+    private readonly IApplicationDbContext _context;
+    public SetProfileCoverCommandHandler(IApplicationDbContext context) => _context = context;
+
+    public async Task Handle(SetProfileCoverCommand request, CancellationToken ct)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == request.UserId && u.IsActive, ct)
+            ?? throw new NotFoundException(nameof(User), request.UserId);
+
+        if (request.MovieId is Guid movieId)
+        {
+            var movie = await _context.Movies.AsNoTracking()
+                .Where(m => m.Id == movieId)
+                .Select(m => new { m.BackdropUrl })
+                .FirstOrDefaultAsync(ct)
+                ?? throw new NotFoundException(nameof(Movie), movieId);
+
+            if (string.IsNullOrWhiteSpace(movie.BackdropUrl))
+                throw new Common.Exceptions.ValidationException("MovieId", "Bu filmin kapak görseli yok.");
+        }
+
+        user.CoverMovieId = request.MovieId;
+        user.UpdatedAtUtc = DateTime.UtcNow;
+        await _context.SaveChangesAsync(ct);
     }
 }

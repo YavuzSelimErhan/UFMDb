@@ -4,6 +4,7 @@ export type WatchedFilmsCounts = {
   all: number;
   rated: number;
   unrated: number;
+  thisYear?: number | null;
 };
 
 export interface MovieReactionResult {
@@ -408,6 +409,8 @@ export interface ProfileData {
   memberSinceUtc: string;
   followerCount: number;
   followingCount: number;
+  coverMovieId: string | null;
+  coverBackdropUrl: string | null;
 }
 
 export type ListVisibility = "Public" | "Unlisted" | "Private";
@@ -635,6 +638,8 @@ export interface PublicFullProfileDto {
   diaryVisibility: DiaryVisibility;
   /** false ise recentlyWatched backend'de boşaltılır; defter sekmesi kilitli gösterilir. */
   canViewDiary: boolean;
+  coverMovieId: string | null;
+  coverBackdropUrl: string | null;
 }
 
 export interface CompatibilityResult {

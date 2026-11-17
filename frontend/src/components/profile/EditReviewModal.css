@@ -29,7 +29,7 @@
   margin-bottom: 18px;
 }
 .edit-review-modal__eyebrow {
-  font-family: "SF Mono", "Fira Code", monospace;
+  font-family: var(--font-mono);
   font-size: 0.65rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;

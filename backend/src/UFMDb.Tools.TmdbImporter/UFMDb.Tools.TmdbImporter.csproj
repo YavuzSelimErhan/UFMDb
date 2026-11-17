@@ -14,7 +14,7 @@
     <ProjectReference Include="..\UFMDb.Persistence\UFMDb.Persistence.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="appsettings.json">
+    <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

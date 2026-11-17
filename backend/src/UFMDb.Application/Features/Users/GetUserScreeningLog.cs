@@ -32,7 +32,7 @@ public static class DiaryAccess
         // '_' ve '%' ILIKE'ta joker sayılır ("RingoKid_39" başka bir kullanıcıyla eşleşebilirdi) → kaçışlıyoruz.
         var name = SqlLike.Escape(userName.Trim());
         var owner = await context.Users.AsNoTracking()
-            .Where(u => u.IsActive && EF.Functions.ILike(u.UserName, name))
+            .Where(u => u.IsActive && EF.Functions.ILike(u.UserName, name, SqlLike.EscapeCharacter))
             .Select(u => new { u.Id, u.DiaryVisibility })
             .FirstOrDefaultAsync(ct)
             ?? throw new NotFoundException(nameof(User), userName);

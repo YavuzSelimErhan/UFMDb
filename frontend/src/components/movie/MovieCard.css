@@ -236,7 +236,7 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 1;
-  font-family: "SF Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 800;
   color: var(--card-accent, var(--color-accent));

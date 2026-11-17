@@ -2,8 +2,8 @@
 .compat-modal {
   --cm-accent: var(--color-accent, #4a90e2);
   --cm-danger: var(--color-error, #e5534b);
-  --cm-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --cm-display: "Syne", var(--font-heading, inherit), system-ui, sans-serif;
+  --cm-mono: var(--font-mono);
+  --cm-display: var(--font-display);
   /* katmanlar: gömük (sol panel/header) < yüzey (modal) < yükseltilmiş (kartlar) */
   --cm-sunken: color-mix(in srgb, #000 24%, var(--color-bg-card));
   --cm-raised: color-mix(

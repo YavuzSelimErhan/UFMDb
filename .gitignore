@@ -22,3 +22,8 @@ frontend/.vite/
 # OS
 .DS_Store
 Thumbs.db
+
+# Playwright run output
+frontend/test-results/
+frontend/playwright-report/
+frontend/dist-e2e/

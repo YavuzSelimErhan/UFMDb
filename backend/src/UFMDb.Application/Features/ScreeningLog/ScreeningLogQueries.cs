@@ -54,9 +54,9 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
             var pattern = $"%{SqlLike.Escape(term)}%";
             // Dilden ve aksandan bağımsız: İngilizce, orijinal ve Türkçe başlıkların hepsinde aranır.
             query = query.Where(w =>
-                EF.Functions.ILike(EF.Functions.Unaccent(w.Movie.Title), EF.Functions.Unaccent(pattern)) ||
-                EF.Functions.ILike(EF.Functions.Unaccent(w.Movie.OriginalTitle), EF.Functions.Unaccent(pattern)) ||
-                EF.Functions.ILike(EF.Functions.Unaccent(w.Movie.TitleTr), EF.Functions.Unaccent(pattern)));
+                EF.Functions.ILike(EF.Functions.Unaccent(w.Movie.Title), EF.Functions.Unaccent(pattern), SqlLike.EscapeCharacter) ||
+                EF.Functions.ILike(EF.Functions.Unaccent(w.Movie.OriginalTitle), EF.Functions.Unaccent(pattern), SqlLike.EscapeCharacter) ||
+                EF.Functions.ILike(EF.Functions.Unaccent(w.Movie.TitleTr), EF.Functions.Unaccent(pattern), SqlLike.EscapeCharacter));
         }
 
         if (!string.IsNullOrWhiteSpace(request.Cursor))

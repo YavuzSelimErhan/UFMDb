@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿// KONUM: public profil dosyası (PublicProfileDto / GetUserProfileQuery / PublicFullProfileDto) -> TAMAMINI bununla değiştir
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UFMDb.Application.Common;
 using UFMDb.Application.Common.Exceptions;
@@ -31,7 +32,7 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, P
         var userName = SqlLike.Escape(request.UserName.Trim());
         var user = await _context.Users.AsNoTracking()
             .FirstOrDefaultAsync(u =>
-                u.IsActive && EF.Functions.ILike(u.UserName, userName), ct)
+                u.IsActive && EF.Functions.ILike(u.UserName, userName, SqlLike.EscapeCharacter), ct)
             ?? throw new NotFoundException(nameof(User), request.UserName);
 
         var followerCount = await _context.Follows.AsNoTracking()
@@ -69,6 +70,7 @@ public record PublicFullProfileDto(
     int TotalWatchedCount, WatchedFilmsCountsDto WatchedCounts, decimal? AverageGivenRating, int RatingsCount, DateTime MemberSinceUtc,
     int FollowerCount, int FollowingCount, int ListsCount,
     bool IsFollowedByCurrentUser, bool IsCurrentUser,
+    Guid? CoverMovieId, string? CoverBackdropUrl,
     string DiaryVisibility, bool CanViewDiary
 );
 
@@ -90,7 +92,7 @@ public class GetPublicFullProfileQueryHandler : IRequestHandler<GetPublicFullPro
         var userName = SqlLike.Escape(request.UserName.Trim());
         var user = await _context.Users.AsNoTracking()
             .FirstOrDefaultAsync(u =>
-                u.IsActive && EF.Functions.ILike(u.UserName, userName), ct)
+                u.IsActive && EF.Functions.ILike(u.UserName, userName, SqlLike.EscapeCharacter), ct)
             ?? throw new NotFoundException(nameof(User), request.UserName);
 
         // Zengin profil verisini mevcut GetProfileQuery'den alıyoruz — mükerrer sorgu yazmıyoruz.
@@ -106,17 +108,23 @@ public class GetPublicFullProfileQueryHandler : IRequestHandler<GetPublicFullPro
         var listsCount = await _context.CuratedLists.AsNoTracking()
             .CountAsync(cl => !cl.IsDeleted && cl.CreatedByUserId == user.Id, ct);
 
-        // "Son izlenenler" Seans Defteri'nin bir parçası: defter gizliyse başkalarına gösterilmez.
+        // "Son izlenenler" ve "bu yıl izlenen" Seans Defteri'nin bir parçası:
+        // defter gizliyse başkalarına gösterilmez.
         var canViewDiary = await DiaryAccess.CanViewAsync(_context, user.Id, user.DiaryVisibility, request.CurrentUserId, ct);
         var recentlyWatched = canViewDiary ? profile.RecentlyWatched : new List<RecentlyWatchedItemDto>();
+        var watchedCounts = profile.WatchedCounts with
+        {
+            ThisYear = canViewDiary ? profile.WatchedCounts.ThisYear : null
+        };
 
         return new PublicFullProfileDto(
             profile.UserId, profile.UserName, profile.FullName, profile.AvatarUrl, profile.Biography, profile.Country,
             profile.Gender, profile.BirthDate,
             profile.FavoriteMovies, recentlyWatched, profile.LikedMovies, profile.Watchlist, profile.Reviews,
             profile.FavoriteActors, profile.LikedActors, profile.FavoriteDirectors, profile.LikedDirectors,
-            profile.TotalWatchedCount, profile.WatchedCounts, profile.AverageGivenRating, profile.RatingsCount, profile.MemberSinceUtc,
+            profile.TotalWatchedCount, watchedCounts, profile.AverageGivenRating, profile.RatingsCount, profile.MemberSinceUtc,
             followerCount, followingCount, listsCount, isFollowed, request.CurrentUserId == user.Id,
+            profile.CoverMovieId, profile.CoverBackdropUrl,
             user.DiaryVisibility.ToString(), canViewDiary
         );
     }

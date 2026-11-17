@@ -247,7 +247,7 @@
 }
 .import-summary__row {
   min-width: 36px;
-  font-family: "SF Mono", "Fira Code", monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
   color: var(--color-text-muted);
 }

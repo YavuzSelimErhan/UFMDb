@@ -163,7 +163,7 @@
 
 .home-search__group-label {
   padding: 6px 14px 4px;
-  font-family: "SF Mono", "Fira Code", monospace;
+  font-family: var(--font-mono);
   font-size: 0.62rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
