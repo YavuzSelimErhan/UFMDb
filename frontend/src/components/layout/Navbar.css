@@ -26,7 +26,7 @@
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 1.2rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   flex-shrink: 0;
   transition: opacity var(--transition-fast);
 }
