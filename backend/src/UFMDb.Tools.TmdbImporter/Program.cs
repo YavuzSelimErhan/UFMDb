@@ -332,6 +332,53 @@ async Task CleanupDemoDataAsync(DbContextOptions<ApplicationDbContext> options)
 using var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (_, e) => { e.Cancel = true; cts.Cancel(); Console.WriteLine("\nDurduruluyor... (mevcut kayıt tamamlanınca çıkılacak)"); };
 
+if (args.FirstOrDefault() == "backfill-credits-archive")
+{
+    try
+    {
+        Environment.ExitCode = await ArchiveCreditBackfill.RunAsync(
+            dbOptions, tmdb.GetCreditDetailAsync, args.Skip(1).ToArray(), cts.Token);
+    }
+    catch (OperationCanceledException) when (cts.IsCancellationRequested)
+    {
+        Console.WriteLine("Durduruldu. Aynı komutla devam edebilirsin.");
+        Environment.ExitCode = 130;
+    }
+    return;
+}
+
+if (args.FirstOrDefault() == "backfill-credits")
+{
+    var selected = new List<int>();
+    foreach (var value in args.Skip(1))
+    {
+        if (!int.TryParse(value, out var id) || id < 1)
+            throw new ArgumentException("backfill-credits yalnızca pozitif TMDB film kimlikleri alır.");
+        if (!selected.Contains(id)) selected.Add(id);
+    }
+    if (selected.Count == 0)
+    {
+        await using var catalog = new ApplicationDbContext(dbOptions);
+        selected = await catalog.Movies.Where(m => m.TmdbId > 0)
+            .OrderBy(m => m.TmdbId).Select(m => m.TmdbId!.Value).Take(3).ToListAsync(cts.Token);
+    }
+    Console.WriteLine($"Pilot TMDB film kimlikleri: {string.Join(", ", selected)}");
+    if (selected.Count == 0) throw new InvalidOperationException("Pilot için TMDB kimlikli film bulunamadı.");
+    foreach (var tmdbId in selected)
+    {
+        var detail = await tmdb.GetMovieDetailAsync(tmdbId, cts.Token);
+        if (detail?.Id != tmdbId) throw new InvalidDataException($"TMDB {tmdbId}: film alınamadı.");
+        await using var db = new ApplicationDbContext(dbOptions);
+        await using var tx = await db.Database.BeginTransactionAsync(cts.Token);
+        await MovieCreditImport.LockAsync(db, cts.Token);
+        var movie = await db.Movies.SingleAsync(m => m.TmdbId == tmdbId, cts.Token);
+        var inserted = await MovieCreditImport.MergeAsync(db, movie.Id, detail.Credits, cts.Token);
+        await tx.CommitAsync(cts.Token);
+        Console.WriteLine($"{movie.Title} (TMDB {tmdbId}): {inserted} yeni kredi.");
+    }
+    return;
+}
+
 if (args.Contains("enrich-people"))
 {
     await EnrichPeopleAsync(dbOptions);
@@ -1235,12 +1282,12 @@ async Task<List<int>> DiscoverUniqueMovieIdsAsync(
 // Hız notları:
 //  - TMDB istekleri tmdbFetchBatchSize'lık gruplar halinde PARALEL çekilir; DB yazımı sıralı kalır.
 //  - Oyuncu/yönetmenler tek sorguyla toplu yüklenir, film başına tek SaveChanges yapılır.
-//  - DB'de olmayan (yeni) filmler için Include'lu sorgu atlanır.
+//  - Eski ve yeni kredi tabloları aynı film transaction’ında yazılır.
 async Task ImportMoviesAsync(List<int> movieIds, Dictionary<int, Guid> genreMapping)
 {
     int processed = 0, created = 0, updated = 0, failed = 0;
 
-    var knownTmdbIds = await GetAllTmdbIdsIncludingDeletedAsync(dbOptions);
+
 
     foreach (var chunk in movieIds.Chunk(tmdbFetchBatchSize))
     {
@@ -1266,9 +1313,12 @@ async Task ImportMoviesAsync(List<int> movieIds, Dictionary<int, Guid> genreMapp
 
             try
             {
-                if (detail is null) { failed++; continue; }
+                if (detail?.Id != tmdbId) { failed++; continue; }
 
                 await using var db = new ApplicationDbContext(dbOptions);
+
+                await using var importTransaction = await db.Database.BeginTransactionAsync(cts.Token);
+                await MovieCreditImport.LockAsync(db, cts.Token);
 
                 // NOT: IgnoreQueryFilters() şart — "IX_Movies_TmdbId" unique index'i IsDeleted'a göre
                 // partial değil (sadece "TmdbId IS NOT NULL" filtreli), yani admin panelinden
@@ -1277,23 +1327,19 @@ async Task ImportMoviesAsync(List<int> movieIds, Dictionary<int, Guid> genreMapp
                 // ve INSERT "duplicate key value violates unique constraint IX_Movies_TmdbId" ile patlar.
                 // IgnoreQueryFilters ile soft-delete edilmiş satırı da buluyoruz; TMDB'de hâlâ varsa
                 // (importer'ın amacı zaten bu) IsDeleted'ı geri açıp üzerine güncelliyoruz.
-                Movie? movie = null;
-                if (knownTmdbIds.Contains(tmdbId))
-                {
-                    movie = await db.Movies
-                        .IgnoreQueryFilters()
-                        .Include(m => m.MovieGenres)
-                        .Include(m => m.MovieActors)
-                        .Include(m => m.MovieDirectors)
-                        .Include(m => m.Videos)
-                        .Include(m => m.Images)
-                        .Include(m => m.MovieKeywords)
-                        .Include(m => m.MovieProductionCompanies)
-                        .Include(m => m.MovieCountries)
-                        .Include(m => m.Collection)
-                        .AsSplitQuery()
-                        .FirstOrDefaultAsync(m => m.TmdbId == tmdbId, cts.Token);
-                }
+                var movie = await db.Movies
+                    .IgnoreQueryFilters()
+                    .Include(m => m.MovieGenres)
+                    .Include(m => m.MovieActors)
+                    .Include(m => m.MovieDirectors)
+                    .Include(m => m.Videos)
+                    .Include(m => m.Images)
+                    .Include(m => m.MovieKeywords)
+                    .Include(m => m.MovieProductionCompanies)
+                    .Include(m => m.MovieCountries)
+                    .Include(m => m.Collection)
+                    .AsSplitQuery()
+                    .FirstOrDefaultAsync(m => m.TmdbId == tmdbId, cts.Token);
 
                 var isNew = movie is null;
                 var wasSoftDeleted = movie?.IsDeleted ?? false;
@@ -1350,15 +1396,15 @@ async Task ImportMoviesAsync(List<int> movieIds, Dictionary<int, Guid> genreMapp
                         movie.MovieGenres.Add(new MovieGenre { GenreId = localGenreId });
                 }
 
-                // ---- Oyuncu kadrosu (toplu yükle + temizle + yeniden kur) ----
-                movie.MovieActors.Clear();
+                // ---- Mevcut oyuncu bağlantılarını koruyarak güncelle ----
+
                 var castMembers = (detail.Credits?.Cast ?? new())
                     .OrderBy(c => c.Order)
                     .DistinctBy(c => c.Id)
                     .Take(castLimit)
                     .ToList();
                 var castIds = castMembers.Select(c => c.Id).ToList();
-                var actorsByTmdbId = await db.Actors
+                var actorsByTmdbId = await db.Actors.IgnoreQueryFilters()
                     .Where(a => a.TmdbId != null && castIds.Contains(a.TmdbId.Value))
                     .ToDictionaryAsync(a => a.TmdbId!.Value, cts.Token);
 
@@ -1376,23 +1422,24 @@ async Task ImportMoviesAsync(List<int> movieIds, Dictionary<int, Guid> genreMapp
                         actorsByTmdbId[cast.Id] = actor;
                     }
 
-                    // Navigation üzerinden bağlıyoruz: yeni aktörün Id'si SaveChanges'te fixup ile gelir.
-                    movie.MovieActors.Add(new MovieActor
+                    var link = movie.MovieActors.FirstOrDefault(x => x.ActorId == actor.Id);
+                    if (link is null)
                     {
-                        Actor = actor,
-                        CharacterName = cast.Character ?? string.Empty,
-                        Order = cast.Order
-                    });
+                        link = new MovieActor { Actor = actor };
+                        movie.MovieActors.Add(link);
+                    }
+                    link.CharacterName = cast.Character ?? string.Empty;
+                    link.Order = cast.Order;
                 }
 
-                // ---- Yönetmenler (toplu yükle + temizle + yeniden kur) ----
-                movie.MovieDirectors.Clear();
+                // ---- Mevcut yönetmen bağlantılarını koruyarak güncelle ----
+
                 var directingCrew = (detail.Credits?.Crew ?? new())
                     .Where(c => c.Job == "Director")
                     .DistinctBy(c => c.Id)
                     .ToList();
                 var directorIds = directingCrew.Select(c => c.Id).ToList();
-                var directorsByTmdbId = await db.Directors
+                var directorsByTmdbId = await db.Directors.IgnoreQueryFilters()
                     .Where(d => d.TmdbId != null && directorIds.Contains(d.TmdbId.Value))
                     .ToDictionaryAsync(d => d.TmdbId!.Value, cts.Token);
 
@@ -1411,17 +1458,20 @@ async Task ImportMoviesAsync(List<int> movieIds, Dictionary<int, Guid> genreMapp
                         directorsByTmdbId[crewMember.Id] = director;
                     }
 
-                    movie.MovieDirectors.Add(new MovieDirector
+                    var link = movie.MovieDirectors.FirstOrDefault(x => x.DirectorId == director.Id);
+                    if (link is null)
                     {
-                        Director = director,
-                        Order = directorOrder++
-                    });
+                        link = new MovieDirector { Director = director };
+                        movie.MovieDirectors.Add(link);
+                    }
+                    link.Order = directorOrder++;
                 }
 
-                // Film başına TEK SaveChanges
+                // Yeni Actor/Director kimlikleri kredi eşleştirmesinde kullanılacak.
                 await db.SaveChangesAsync(cts.Token);
 
-                knownTmdbIds.Add(tmdbId);
+                await MovieCreditImport.MergeAsync(db, movie.Id, detail.Credits, cts.Token);
+                await importTransaction.CommitAsync(cts.Token);
                 if (isNew) created++; else updated++;
 
                 if (processed % 20 == 0 || processed == movieIds.Count)

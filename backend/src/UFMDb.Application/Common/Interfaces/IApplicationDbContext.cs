@@ -11,6 +11,8 @@ namespace UFMDb.Application.Common.Interfaces;
 /// </summary>
 public interface IApplicationDbContext
 {
+    DbSet<Person> People { get; }
+    DbSet<MovieCredit> MovieCredits { get; }
     DbSet<Movie> Movies { get; }
     DbSet<Genre> Genres { get; }
     DbSet<MovieRating> MovieRatings { get; }

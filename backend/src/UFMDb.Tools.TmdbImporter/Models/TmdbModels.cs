@@ -87,12 +87,13 @@ public class TmdbProductionCountry
 
 public class TmdbCredits
 {
-    public List<TmdbCastMember> Cast { get; set; } = new();
-    public List<TmdbCrewMember> Crew { get; set; } = new();
+    public List<TmdbCastMember>? Cast { get; set; }
+    public List<TmdbCrewMember>? Crew { get; set; }
 }
 
 public class TmdbCastMember
 {
+    public string CreditId { get; set; } = string.Empty;
     public int Id { get; set; }
     public string Name { get; set; } = default!;
     public string? Character { get; set; }
@@ -102,6 +103,7 @@ public class TmdbCastMember
 
 public class TmdbCrewMember
 {
+    public string CreditId { get; set; } = string.Empty;
     public int Id { get; set; }
     public string Name { get; set; } = default!;
     public string? Job { get; set; }

@@ -88,16 +88,20 @@ public class TmdbClient
         return result ?? new TmdbDiscoverResponse();
     }
 
-    public async Task<TmdbMovieDetail?> GetMovieDetailAsync(int tmdbMovieId, CancellationToken ct)
+    public Task<TmdbMovieDetail?> GetMovieDetailAsync(int tmdbMovieId, CancellationToken ct) =>
+        FetchDetailAsync(tmdbMovieId, "credits,keywords,images,release_dates,videos,translations", ct);
+
+    public Task<TmdbMovieDetail?> GetCreditDetailAsync(int tmdbMovieId, CancellationToken ct) =>
+        FetchDetailAsync(tmdbMovieId, "credits", ct);
+
+    private async Task<TmdbMovieDetail?> FetchDetailAsync(int tmdbMovieId, string append, CancellationToken ct)
     {
-        var url = $"movie/{tmdbMovieId}?api_key={_apiKey}&language=en-US" +
-                  "&append_to_response=credits,keywords,images,release_dates,videos,translations" +
-                  "&include_image_language=en,tr,null" +
-                  "&include_video_language=en,tr,null";
+        var url = $"movie/{tmdbMovieId}?api_key={_apiKey}&language=en-US&append_to_response={append}" +
+                  "&include_image_language=en,tr,null&include_video_language=en,tr,null";
 
         for (var attempt = 0; attempt < 4; attempt++)
         {
-            var response = await _http.GetAsync(url, ct);
+            using var response = await _http.GetAsync(url, ct);
 
             if ((int)response.StatusCode == 429 || (int)response.StatusCode >= 500)
             {

@@ -347,7 +347,19 @@
     "languageHint": "Arayüzün görüntüleneceği dil.",
     "privacy": "Gizlilik",
     "privacyHint": "Profilindeki içeriği kimlerin görebileceğini belirle.",
-    "addBio": "+ Biyografi ekle"
+    "addBio": "+ Biyografi ekle",
+    "statThisYear": "Bu yıl",
+    "statAvgRating": "Ort. puan",
+    "share": "Paylaş",
+    "linkCopied": "Bağlantı kopyalandı",
+    "changeCover": "Kapağı değiştir",
+    "coverPickerTitle": "Bir film kapağı seç",
+    "coverFromFavorites": "Favori filmlerin",
+    "coverSearch": "Başka film ara",
+    "coverSearchPlaceholder": "Film adı yaz",
+    "coverNoResults": "Kapak görseli olan film bulunamadı.",
+    "coverSaveFailed": "Kapak kaydedilemedi. Tekrar dene.",
+    "coverReset": "Varsayılana dön (ilk favori film)"
   },
   "lists": {
     "title": "Listeler",

@@ -11,6 +11,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
+    public DbSet<Person> People => Set<Person>();
+    public DbSet<MovieCredit> MovieCredits => Set<MovieCredit>();
     public DbSet<Movie> Movies => Set<Movie>();
     public DbSet<Genre> Genres => Set<Genre>();
     public DbSet<MovieRating> MovieRatings => Set<MovieRating>();
