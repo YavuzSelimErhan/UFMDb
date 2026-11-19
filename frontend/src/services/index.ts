@@ -575,6 +575,9 @@ export const feedService = {
   getActivity: async (params: {
     type: ActivityFilter;
     before?: string;
+    beforeUser?: string;
+    beforeMovie?: string;
+    timeZone?: string;
     pageSize: number;
   }): Promise<ActivityFeedPage> => {
     const { data } = await api.get("/feed/activity", { params });

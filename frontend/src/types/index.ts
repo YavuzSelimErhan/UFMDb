@@ -524,7 +524,7 @@ export interface ListMembership {
 export interface WatchedMovie {
   movieId: string;
   movie: MovieListItem;
-  watchedAtUtc: string;
+  watchedAtUtc: string | null;
   userRating: number | null;
 }
 

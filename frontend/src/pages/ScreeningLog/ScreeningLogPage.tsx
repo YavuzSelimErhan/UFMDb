@@ -1,3 +1,4 @@
+import { localScreeningTime } from "@/utils/screeningTime";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -26,7 +27,6 @@ import {
   SCREENING_LOG_PAGE_SIZE,
   apiErrorMessage,
   reactionFromFilter,
-  todayLocalDateString,
   useDebouncedValue,
   type ReactionFilter,
 } from "./ScreeningLogTimeline";
@@ -45,7 +45,7 @@ export default function ScreeningLogPage() {
     title: string;
     posterUrl: string;
   } | null>(null);
-  const [watchedDate, setWatchedDate] = useState(todayLocalDateString());
+  const [watchedDate, setWatchedDate] = useState(localScreeningTime());
   const [addRating, setAddRating] = useState(0);
   // undefined = kullanıcı dokunmadı (önceki tepki geçerli), null = bilerek temizledi
   const [addReaction, setAddReaction] = useState<
@@ -116,7 +116,7 @@ export default function ScreeningLogPage() {
     mutationFn: async () => {
       await screeningLogService.log(
         selectedMovie!.id,
-        `${watchedDate}T12:00:00.000Z`,
+        new Date(watchedDate).toISOString(),
         addRating > 0 ? addRating : null,
       );
       // Seans yazıldıktan sonra tepkiyi uygula; hata olursa seansı geri almıyoruz
@@ -136,7 +136,7 @@ export default function ScreeningLogPage() {
       invalidateAll();
       if (reactionFailed) showToast(t("log.reactionSaveError"), "error");
       setSelectedMovie(null);
-      setWatchedDate(todayLocalDateString());
+      setWatchedDate(localScreeningTime());
       setAddRating(0);
       setAddReaction(undefined);
       setIsAdding(false);
@@ -263,10 +263,10 @@ export default function ScreeningLogPage() {
             <div className="screening-log__add-date-slot">
               <label>{t("log.addEntryDate")}</label>
               <input
-                type="date"
+                type="datetime-local"
                 value={watchedDate}
                 onChange={(e) => setWatchedDate(e.target.value)}
-                max={todayLocalDateString()}
+                max={localScreeningTime()}
               />
             </div>
 

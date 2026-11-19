@@ -223,6 +223,7 @@ function ActivityRow({ item }: { item: ActivityFeedItem }) {
 /* ---------- sayfa ---------- */
 
 export default function ActivityPage() {
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
   const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const filter = parseFilter(searchParams.get("type"));
@@ -238,16 +239,20 @@ export default function ActivityPage() {
     fetchNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ["activity-feed", filter],
+    queryKey: ["activity-feed", filter, timeZone],
     queryFn: ({ pageParam }) =>
       feedService.getActivity({
         type: filter,
-        before: pageParam,
+        ...pageParam,
+        timeZone,
         pageSize: PAGE_SIZE,
       }),
-    initialPageParam: undefined as string | undefined,
+    initialPageParam: undefined as { before: string; beforeUser: string; beforeMovie: string } | undefined,
     getNextPageParam: (last) =>
-      last.hasMore && last.nextBefore ? last.nextBefore : undefined,
+      last.hasMore && last.nextBefore && last.items.length
+        ? { before: last.nextBefore, beforeUser: last.items[last.items.length - 1].user.id,
+            beforeMovie: last.items[last.items.length - 1].movie.id }
+        : undefined,
     staleTime: 30_000,
     placeholderData: keepPreviousData,
   });

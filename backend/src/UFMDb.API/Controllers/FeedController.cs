@@ -29,9 +29,12 @@ public class FeedController : ControllerBase
         [FromQuery] DateTime? before,
         [FromQuery] string? type,
         [FromQuery] int pageSize = 20,
+        [FromQuery] Guid? beforeUser = null,
+        [FromQuery] Guid? beforeMovie = null,
+        [FromQuery] string timeZone = "UTC",
         CancellationToken ct = default) =>
         Ok(await _mediator.Send(
-            new GetActivityFeedQuery(_currentUser.UserId!.Value, before, type, pageSize, Request.GetLang()), ct));
+            new GetActivityFeedQuery(_currentUser.UserId!.Value, before, type, pageSize, Request.GetLang(), beforeUser, beforeMovie, timeZone), ct));
 
     /// <summary>Takip edilen kullanıcıların son 7 günlük film aktivitesi (ana sayfa bölümü).</summary>
     [HttpGet("friends")]

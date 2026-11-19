@@ -38,7 +38,7 @@ public record ActivityFeedPageDto(
 );
 
 /// <summary>Type: all | reviews | ratings | diary | reactions (bilinmeyen değer "all" sayılır).</summary>
-public record GetActivityFeedQuery(Guid UserId, DateTime? Before, string? Type, int PageSize, string Lang = "en")
+public record GetActivityFeedQuery(Guid UserId, DateTime? Before, string? Type, int PageSize, string Lang = "en", Guid? BeforeUser = null, Guid? BeforeMovie = null, string TimeZone = "UTC")
     : IRequest<ActivityFeedPageDto>;
 
 public class GetActivityFeedQueryHandler : IRequestHandler<GetActivityFeedQuery, ActivityFeedPageDto>
@@ -48,18 +48,6 @@ public class GetActivityFeedQueryHandler : IRequestHandler<GetActivityFeedQuery,
     private const int ReviewTextLength = 600;
 
     private enum Kind { Rating, Watch, Reaction, Review }
-
-    private sealed class Ev
-    {
-        public Guid UserId;
-        public Guid MovieId;
-        public Kind Kind;
-        public DateTime At;
-        public decimal? Rating;
-        public ReactionType? Reaction;
-        public string? Content;
-        public bool Spoiler;
-    }
 
     private sealed class Row
     {
@@ -94,123 +82,81 @@ public class GetActivityFeedQueryHandler : IRequestHandler<GetActivityFeedQuery,
         // Kendi aktivitesi de akışta (arayüz IsCurrentUser ile "Sen" etiketi gösterir).
         var userIds = new List<Guid>(friendIds) { request.UserId };
 
-        // Her kaynaktan pageSize + 1 satır: birleşik listede pageSize'dan fazla öğe varsa
-        // arkada daha eski hareket var demektir (HasMore tam doğru hesaplanır, fazladan sorgu gerekmez).
-        var limit = pageSize + 1;
-        var events = new List<Ev>();
+        var ratingsEvents = _context.MovieRatings.AsNoTracking()
+            .Where(x => userIds.Contains(x.UserId) && !x.Movie.IsDeleted)
+            .Select(x => new
+            {
+                x.UserId, x.MovieId, At = x.UpdatedAtUtc ?? x.CreatedAtUtc, Kind = Kind.Rating,
+                Rating = (decimal?)x.Value, Reaction = (ReactionType?)null,
+                Content = (string?)null, Spoiler = false, x.Id, x.CreatedAtUtc
+            });
 
-        // Zaman damgası: puan/tepki/yorum için son değişiklik (UpdatedAtUtc ?? CreatedAtUtc),
-        // günlük için kaydın oluşturulma zamanı (kullanıcı izleme tarihini geçmişe alabildiği için).
-        // DbContext paralel çalışmaz: sorgular sırayla.
-        if (type is "all" or "ratings")
+        var diaryEvents = _context.WatchHistory.AsNoTracking()
+            .Where(x => userIds.Contains(x.UserId) && !x.Movie.IsDeleted && (x.UserId == request.UserId || x.User.DiaryVisibility != DiaryVisibility.Private))
+            .Select(x => new
+            {
+                x.UserId, x.MovieId, At = x.WatchedAtUtc, Kind = Kind.Watch,
+                Rating = (decimal?)x.Rating, Reaction = (ReactionType?)null,
+                Content = (string?)null, Spoiler = false, x.Id, x.CreatedAtUtc
+            });
+
+        var reactionsEvents = _context.Likes.AsNoTracking()
+            .Where(x => userIds.Contains(x.UserId) && !x.Movie.IsDeleted)
+            .Select(x => new
+            {
+                x.UserId, x.MovieId, At = x.UpdatedAtUtc ?? x.CreatedAtUtc, Kind = Kind.Reaction,
+                Rating = (decimal?)null, Reaction = (ReactionType?)x.Reaction,
+                Content = (string?)null, Spoiler = false, x.Id, x.CreatedAtUtc
+            });
+
+        var reviewsEvents = _context.Reviews.AsNoTracking()
+            .Where(x => userIds.Contains(x.UserId) && !x.Movie.IsDeleted && !x.IsDeleted)
+            .Select(x => new
+            {
+                x.UserId, x.MovieId, At = x.UpdatedAtUtc ?? x.CreatedAtUtc, Kind = Kind.Review,
+                Rating = (decimal?)null, Reaction = (ReactionType?)null,
+                Content = (string?)x.Content, Spoiler = x.ContainsSpoiler, x.Id, x.CreatedAtUtc
+            });
+
+        var events = type switch
         {
-            // Puanın tek kaynağı MovieRatings (Review'da puan alanı yok).
-            var q = _context.MovieRatings.AsNoTracking().Where(r => userIds.Contains(r.UserId));
-            if (before.HasValue)
+            "ratings" => ratingsEvents,
+            "diary" => diaryEvents,
+            "reactions" => reactionsEvents,
+            "reviews" => reviewsEvents,
+            _ => ratingsEvents.Concat(diaryEvents).Concat(reactionsEvents).Concat(reviewsEvents)
+        };
+
+        var zone = request.TimeZone;
+        if (!TimeZoneInfo.TryFindSystemTimeZoneById(zone, out var info) || (zone != "UTC" && !info.HasIanaId))
+            throw new UFMDb.Application.Common.Exceptions.ValidationException(new Dictionary<string, string[]>
             {
-                var b = before.Value;
-                q = q.Where(r => (r.UpdatedAtUtc ?? r.CreatedAtUtc) < b);
-            }
-            var rows = await q
-                .OrderByDescending(r => r.UpdatedAtUtc ?? r.CreatedAtUtc)
-                .Take(limit)
-                .Select(r => new { r.UserId, r.MovieId, r.Value, At = r.UpdatedAtUtc ?? r.CreatedAtUtc })
-                .ToListAsync(ct);
-            events.AddRange(rows.Select(r => new Ev
-            {
-                UserId = r.UserId,
-                MovieId = r.MovieId,
-                Kind = Kind.Rating,
-                At = r.At,
-                Rating = r.Value
-            }));
+                ["timeZone"] = new[] { "Geçersiz saat dilimi." }
+            });
+        var cards = events.GroupBy(e => new { e.UserId, e.MovieId, Day = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(e.At, zone).Date })
+            .Select(g => new { g.Key.UserId, g.Key.MovieId, g.Key.Day, Last = g.Max(e => e.At) });
+        if (before is DateTime boundary)
+        {
+            if (request.BeforeUser is Guid user && request.BeforeMovie is Guid movie)
+                cards = cards.Where(c => c.Last < boundary || (c.Last == boundary &&
+                    (c.UserId.CompareTo(user) > 0 || (c.UserId == user && c.MovieId.CompareTo(movie) > 0))));
+            else
+                cards = cards.Where(c => c.Last < boundary);
         }
 
-        if (type is "all" or "diary")
-        {
-            var q = _context.WatchHistory.AsNoTracking().Where(w => userIds.Contains(w.UserId));
-            if (before.HasValue)
-            {
-                var b = before.Value;
-                q = q.Where(w => w.CreatedAtUtc < b);
-            }
-            var rows = await q
-                .OrderByDescending(w => w.CreatedAtUtc)
-                .Take(limit)
-                .Select(w => new { w.UserId, w.MovieId, w.Rating, At = w.CreatedAtUtc })
-                .ToListAsync(ct);
-            events.AddRange(rows.Select(w => new Ev
-            {
-                UserId = w.UserId,
-                MovieId = w.MovieId,
-                Kind = Kind.Watch,
-                At = w.At,
-                Rating = w.Rating
-            }));
-        }
+        var keys = cards.OrderByDescending(c => c.Last).ThenBy(c => c.UserId).ThenBy(c => c.MovieId)
+            .Take(pageSize + 1);
+        var page = await (from e in events
+                          join k in keys on new { e.UserId, e.MovieId, Day = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(e.At, zone).Date }
+                              equals new { k.UserId, k.MovieId, k.Day }
+                          orderby e.At descending, e.CreatedAtUtc descending, e.Id descending
+                          select new { Event = e, k.Day }).ToListAsync(ct);
 
-        if (type is "all" or "reactions")
-        {
-            var q = _context.Likes.AsNoTracking().Where(l => userIds.Contains(l.UserId));
-            if (before.HasValue)
-            {
-                var b = before.Value;
-                q = q.Where(l => (l.UpdatedAtUtc ?? l.CreatedAtUtc) < b);
-            }
-            var rows = await q
-                .OrderByDescending(l => l.UpdatedAtUtc ?? l.CreatedAtUtc)
-                .Take(limit)
-                .Select(l => new { l.UserId, l.MovieId, l.Reaction, At = l.UpdatedAtUtc ?? l.CreatedAtUtc })
-                .ToListAsync(ct);
-            events.AddRange(rows.Select(l => new Ev
-            {
-                UserId = l.UserId,
-                MovieId = l.MovieId,
-                Kind = Kind.Reaction,
-                At = l.At,
-                Reaction = l.Reaction
-            }));
-        }
-
-        if (type is "all" or "reviews")
-        {
-            var q = _context.Reviews.AsNoTracking().Where(r => userIds.Contains(r.UserId) && !r.IsDeleted);
-            if (before.HasValue)
-            {
-                var b = before.Value;
-                q = q.Where(r => (r.UpdatedAtUtc ?? r.CreatedAtUtc) < b);
-            }
-            var rows = await q
-                .OrderByDescending(r => r.UpdatedAtUtc ?? r.CreatedAtUtc)
-                .Take(limit)
-                .Select(r => new { r.UserId, r.MovieId, r.Content, r.ContainsSpoiler, At = r.UpdatedAtUtc ?? r.CreatedAtUtc })
-                .ToListAsync(ct);
-            events.AddRange(rows.Select(r => new Ev
-            {
-                UserId = r.UserId,
-                MovieId = r.MovieId,
-                Kind = Kind.Review,
-                At = r.At,
-                Content = r.Content,
-                Spoiler = r.ContainsSpoiler
-            }));
-        }
-
-        var ordered = events.OrderByDescending(e => e.At).ToList();
-        var hasMore = ordered.Count > pageSize;
-        var page = ordered.Take(pageSize).ToList();
-        DateTime? nextBefore = hasMore ? page[^1].At : null;
-
-        if (page.Count == 0)
-            return new ActivityFeedPageDto(friendIds.Count, new List<ActivityFeedItemDto>(), null, false);
-
-        // Sayfa içinde (kullanıcı, film, gün) bazında tek satır. Sayfa sınırı olayların tam
-        // ortasından geçerse aynı günün iki parçası iki sayfaya bölünebilir (nadir ve zararsız);
-        // buna karşılık hiçbir olay kaybolmaz ya da iki kez gelmez.
         var merged = new Dictionary<(Guid UserId, Guid MovieId, DateTime Day), Row>();
-        foreach (var e in page)
+        foreach (var item in page)
         {
-            var key = (e.UserId, e.MovieId, e.At.Date);
+            var e = item.Event;
+            var key = (e.UserId, e.MovieId, item.Day);
             if (!merged.TryGetValue(key, out var row))
             {
                 row = new Row { UserId = e.UserId, MovieId = e.MovieId };
@@ -237,8 +183,12 @@ public class GetActivityFeedQueryHandler : IRequestHandler<GetActivityFeedQuery,
             if (e.At > row.Last) row.Last = e.At;
         }
 
-        var movieIds = merged.Values.Select(r => r.MovieId).Distinct().ToList();
-        var rowUserIds = merged.Values.Select(r => r.UserId).Distinct().ToList();
+        var sorted = merged.Values.OrderByDescending(r => r.Last).ThenBy(r => r.UserId).ThenBy(r => r.MovieId).ToList();
+        var hasMore = sorted.Count > pageSize;
+        var selected = sorted.Take(pageSize).ToList();
+        DateTime? nextBefore = hasMore ? selected[^1].Last : null;
+        var movieIds = selected.Select(r => r.MovieId).Distinct().ToList();
+        var rowUserIds = selected.Select(r => r.UserId).Distinct().ToList();
 
         var movies = await _context.Movies.AsNoTracking()
             .Where(m => !m.IsDeleted && movieIds.Contains(m.Id))
@@ -259,7 +209,7 @@ public class GetActivityFeedQueryHandler : IRequestHandler<GetActivityFeedQuery,
             .Select(u => new { u.Id, u.UserName, u.FullName, u.AvatarUrl })
             .ToDictionaryAsync(u => u.Id, ct);
 
-        var items = merged.Values
+        var items = selected
             .Where(r => movies.ContainsKey(r.MovieId) && users.ContainsKey(r.UserId))
             .OrderByDescending(r => r.Last)
             .Select(r =>

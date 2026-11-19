@@ -90,7 +90,7 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
         // 2) Yalnızca bu günlerin seansları, düz projeksiyonla (Include yok).
         var entries = await query
             .Where(w => w.WatchedAtUtc >= lower && w.WatchedAtUtc < upper)
-            .OrderBy(w => w.WatchedAtUtc).ThenBy(w => w.Id)
+            .OrderByDescending(w => w.WatchedAtUtc).ThenByDescending(w => w.CreatedAtUtc).ThenByDescending(w => w.Id)
             .Select(w => new
             {
                 w.Id,
@@ -117,14 +117,14 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
         // Rewatch numarası tüm geçmişe göre hesaplanır (filtre/sayfa ne olursa olsun tutarlı kalır).
         var history = await _context.WatchHistory.AsNoTracking()
             .Where(w => w.UserId == userId && movieIds.Contains(w.MovieId))
-            .Select(w => new { w.Id, w.MovieId, w.WatchedAtUtc })
+            .Select(w => new { w.Id, w.MovieId, w.WatchedAtUtc, w.CreatedAtUtc })
             .ToListAsync(ct);
 
         var screeningNumbers = new Dictionary<Guid, int>();
         foreach (var group in history.GroupBy(h => h.MovieId))
         {
             var n = 0;
-            foreach (var h in group.OrderBy(h => h.WatchedAtUtc).ThenBy(h => h.Id))
+            foreach (var h in group.OrderBy(h => h.WatchedAtUtc).ThenBy(h => h.CreatedAtUtc).ThenBy(h => h.Id))
                 screeningNumbers[h.Id] = ++n;
         }
 
@@ -143,7 +143,7 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
         var result = dtos
             .GroupBy(e => e.WatchedAtUtc.Date)
             .OrderByDescending(g => g.Key)
-            .Select(g => new ScreeningLogDayDto(g.Key, g.OrderBy(e => e.WatchedAtUtc).ToList()))
+            .Select(g => new ScreeningLogDayDto(g.Key, g.ToList()))
             .ToList();
 
         var nextCursor = hasMore ? days[^1].ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) : null;

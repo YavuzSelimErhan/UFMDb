@@ -114,7 +114,7 @@ public class PostgresCatalogTests : IAsyncLifetime
         var first = await handler.Handle(query, default);
         Assert.Equal("2020-04-02", first.NextCursor);
         var entries = Assert.Single(first.Days).Entries;
-        Assert.Equal(new[] { 2, 3 }, entries.Select(e => e.ScreeningNumber).Order());
+        Assert.Equal(new[] { 3, 2 }, entries.Select(e => e.ScreeningNumber));
         Assert.All(entries, e => Assert.Equal("Umut", e.MovieTitle));
         var last = await handler.Handle(query with { Cursor = first.NextCursor }, default);
         Assert.Null(last.NextCursor);
@@ -168,6 +168,62 @@ public class PostgresCatalogTests : IAsyncLifetime
         Assert.Equal(friend.Id, friends.Spotlight.User.Id);
         Assert.True(friends.Spotlight.ContainsSpoiler);
         Assert.Null(friends.Spotlight.ReviewExcerpt);
+    }
+
+    [PostgresFact]
+    public async Task Activity_PagesWholeCardsAcrossEqualTimestamps_AndRespectsPrivateDiary()
+    {
+        var viewer = NewUser("viewer");
+        var friend = NewUser("friend");
+        friend.DiaryVisibility = UFMDb.Domain.Enums.DiaryVisibility.Private;
+        var films = Enumerable.Range(1, 3).Select(i => new Movie { Title = $"Film {i}", OriginalTitle = $"Film {i}" }).ToList();
+        db.AddRange(viewer, friend);
+        db.Movies.AddRange(films);
+        db.Follows.Add(new Follow { FollowerId = viewer.Id, FollowingId = friend.Id });
+        var at = new DateTime(2020, 4, 2, 20, 0, 0, DateTimeKind.Utc);
+        foreach (var film in films)
+        {
+            db.WatchHistory.Add(new WatchHistory { UserId = viewer.Id, MovieId = film.Id, WatchedAtUtc = at });
+            db.Reviews.Add(new Review { UserId = viewer.Id, MovieId = film.Id, Content = "Earlier", UpdatedAtUtc = at.AddHours(-1) });
+        }
+        db.WatchHistory.Add(new WatchHistory { UserId = friend.Id, MovieId = films[0].Id, WatchedAtUtc = at.AddDays(1) });
+        await db.SaveChangesAsync();
+
+        var handler = new GetActivityFeedQueryHandler(db);
+        var query = new GetActivityFeedQuery(viewer.Id, null, "all", 1);
+        var seen = new HashSet<Guid>();
+        for (var i = 0; i < films.Count; i++)
+        {
+            var result = await handler.Handle(query, default);
+            var row = Assert.Single(result.Items);
+            Assert.True(seen.Add(row.Movie.Id));
+            Assert.Equal(viewer.Id, row.User.Id);
+            Assert.True(row.Watched && row.HasReview);
+            Assert.Equal(at, row.LastActivityAtUtc);
+            Assert.Equal(i + 1 < films.Count, result.HasMore);
+            query = query with { Before = result.NextBefore, BeforeUser = row.User.Id, BeforeMovie = row.Movie.Id };
+        }
+    }
+
+    [PostgresFact]
+    public async Task Activity_GroupsAcrossUtcMidnightInViewersTimeZone()
+    {
+        var viewer = NewUser("viewer");
+        var film = new Movie { Title = "Film", OriginalTitle = "Film" };
+        db.AddRange(viewer, film);
+        var at = new DateTime(2026, 11, 18, 22, 30, 0, DateTimeKind.Utc);
+        db.WatchHistory.Add(new WatchHistory { UserId = viewer.Id, MovieId = film.Id, WatchedAtUtc = at });
+        db.Reviews.Add(new Review { UserId = viewer.Id, MovieId = film.Id, Content = "Review", UpdatedAtUtc = at.AddHours(2) });
+        await db.SaveChangesAsync();
+        var handler = new GetActivityFeedQueryHandler(db);
+        var query = new GetActivityFeedQuery(viewer.Id, null, "all", 1, TimeZone: "Europe/Istanbul");
+        var local = await handler.Handle(query, default);
+        var card = Assert.Single(local.Items);
+        Assert.True(card.Watched && card.HasReview);
+        Assert.False(local.HasMore);
+        var utc = await handler.Handle(query with { TimeZone = "UTC" }, default);
+        Assert.True(utc.HasMore);
+        Assert.False(Assert.Single(utc.Items).Watched);
     }
 
     private static User NewUser(string name) => new()

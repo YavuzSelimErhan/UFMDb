@@ -1,3 +1,4 @@
+import { localScreeningTime } from "@/utils/screeningTime";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -9,11 +10,6 @@ import StarRating from "./StarRating";
 import type { MovieListItem, ReactionType } from "@/types";
 import "./LogScreeningModal.css";
 
-function todayLocalDateString(): string {
-  const d = new Date();
-  const offsetMs = d.getTimezoneOffset() * 60000;
-  return new Date(d.getTime() - offsetMs).toISOString().slice(0, 10);
-}
 
 export type LoggableMovie = Pick<MovieListItem, "id" | "title"> &
   Partial<Pick<MovieListItem, "currentUserReaction" | "isLikedByCurrentUser">>;
@@ -33,7 +29,7 @@ export default function LogScreeningModal({ movie, onClose }: Props) {
   const { t } = useTranslation();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
-  const [logDate, setLogDate] = useState(todayLocalDateString());
+  const [logDate, setLogDate] = useState(localScreeningTime());
   const [logRating, setLogRating] = useState(0);
 
   // Önceki tepki: sunucudaki güncel değer (film detayı cache'i); o gelene kadar
@@ -59,7 +55,7 @@ export default function LogScreeningModal({ movie, onClose }: Props) {
     mutationFn: async () => {
       await screeningLogService.log(
         movie.id,
-        `${logDate}T12:00:00.000Z`,
+        new Date(logDate).toISOString(),
         logRating > 0 ? logRating : null,
       );
       // Log yazıldıktan sonra tepkiyi uygula. Hata olursa log'u geri almıyoruz
@@ -112,10 +108,10 @@ export default function LogScreeningModal({ movie, onClose }: Props) {
           <div className="log-screening-modal__field">
             <label>{t("log.addEntryDate")}</label>
             <input
-              type="date"
+              type="datetime-local"
               value={logDate}
               onChange={(e) => setLogDate(e.target.value)}
-              max={todayLocalDateString()}
+              max={localScreeningTime()}
             />
           </div>
           <div className="log-screening-modal__field">

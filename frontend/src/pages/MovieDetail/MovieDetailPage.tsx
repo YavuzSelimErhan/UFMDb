@@ -1,3 +1,4 @@
+import { localScreeningTime } from "@/utils/screeningTime";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -26,11 +27,6 @@ import PersonAvatar from "@/components/common/PersonAvatar";
 import { PageSpinner, PageError } from "@/components/common/PageState";
 import "./MovieDetailPage.css";
 
-function todayLocalDateString(): string {
-  const d = new Date();
-  const offsetMs = d.getTimezoneOffset() * 60000;
-  return new Date(d.getTime() - offsetMs).toISOString().slice(0, 10);
-}
 
 export default function MovieDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -40,7 +36,7 @@ export default function MovieDetailPage() {
   const [reviewText, setReviewText] = useState("");
   const [myRating, setMyRating] = useState(0);
   const [isLogging, setIsLogging] = useState(false);
-  const [logDate, setLogDate] = useState(todayLocalDateString());
+  const [logDate, setLogDate] = useState(localScreeningTime());
   const [logRating, setLogRating] = useState(0);
   const { showToast } = useToast();
   // undefined = kullanıcı dokunmadı (güncel tepki geçerli), null = bilerek temizledi
@@ -170,7 +166,7 @@ export default function MovieDetailPage() {
     mutationFn: async () => {
       await screeningLogService.log(
         id!,
-        `${logDate}T12:00:00.000Z`,
+        new Date(logDate).toISOString(),
         logRating > 0 ? logRating : null,
       );
       // Seans yazıldıktan sonra tepkiyi uygula; hata olursa seansı geri almıyoruz
@@ -192,7 +188,7 @@ export default function MovieDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["home-feed"] });
       queryClient.invalidateQueries({ queryKey: ["list"] });
       if (reactionFailed) showToast(t("log.reactionSaveError"), "error");
-      setLogDate(todayLocalDateString());
+      setLogDate(localScreeningTime());
       setLogRating(0);
       setIsLogging(false);
     },
@@ -442,10 +438,10 @@ export default function MovieDetailPage() {
                 <div className="movie-detail__log-form-field">
                   <label>{t("log.addEntryDate")}</label>
                   <input
-                    type="date"
+                    type="datetime-local"
                     value={logDate}
                     onChange={(e) => setLogDate(e.target.value)}
-                    max={todayLocalDateString()}
+                    max={localScreeningTime()}
                   />
                 </div>
                 <div className="movie-detail__log-form-field">

@@ -89,10 +89,6 @@ public class GetFriendsActivityQueryHandler : IRequestHandler<GetFriendsActivity
         if (friendIds.Count == 0)
             return new FriendsActivityDto(0, 0, 0, null, new List<FriendActivityDto>());
 
-        // Zaman damgası: puan/tepki/yorum için "son değişiklik" (UpdatedAtUtc ?? CreatedAtUtc),
-        // günlük için kaydın OLUŞTURULMA zamanı. Günlükte kullanıcı izleme tarihini kendisi seçip
-        // geçmişe dönük kayıt ekleyebildiği için WatchedAtUtc kullanılsaydı, dün eklenen
-        // ama 2023 tarihli bir kayıt feed'e hiç girmezdi.
         // DbContext paralel çalışmaz: sorgular sırayla.
         var ratings = await _context.MovieRatings.AsNoTracking()
             .Where(r => friendIds.Contains(r.UserId) && (r.UpdatedAtUtc ?? r.CreatedAtUtc) >= since)
@@ -102,10 +98,11 @@ public class GetFriendsActivityQueryHandler : IRequestHandler<GetFriendsActivity
             .ToListAsync(ct);
 
         var watches = await _context.WatchHistory.AsNoTracking()
-            .Where(w => friendIds.Contains(w.UserId) && w.CreatedAtUtc >= since)
-            .OrderByDescending(w => w.CreatedAtUtc)
+            .Where(w => w.User.DiaryVisibility != DiaryVisibility.Private)
+            .Where(w => friendIds.Contains(w.UserId) && w.WatchedAtUtc >= since)
+            .OrderByDescending(w => w.WatchedAtUtc).ThenByDescending(w => w.CreatedAtUtc).ThenByDescending(w => w.Id)
             .Take(PerSourceLimit)
-            .Select(w => new { w.UserId, w.MovieId, w.Rating, At = w.CreatedAtUtc })
+            .Select(w => new { w.UserId, w.MovieId, w.Rating, At = w.WatchedAtUtc })
             .ToListAsync(ct);
 
         var reactions = await _context.Likes.AsNoTracking()

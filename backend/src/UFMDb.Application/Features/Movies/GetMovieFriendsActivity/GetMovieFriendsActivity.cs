@@ -75,8 +75,10 @@ public class GetMovieFriendsActivityQueryHandler
             .ToListAsync(ct);
 
         var watches = await _context.WatchHistory.AsNoTracking()
+            .Where(w => w.User.DiaryVisibility != DiaryVisibility.Private)
             .Where(w => w.MovieId == request.MovieId && friendIds.Contains(w.UserId))
-            .Select(w => new { w.UserId, w.Rating, At = w.CreatedAtUtc })
+            .OrderByDescending(w => w.WatchedAtUtc).ThenByDescending(w => w.CreatedAtUtc).ThenByDescending(w => w.Id)
+            .Select(w => new { w.UserId, w.Rating, At = w.WatchedAtUtc })
             .ToListAsync(ct);
 
         var reactions = await _context.Likes.AsNoTracking()
@@ -104,7 +106,6 @@ public class GetMovieFriendsActivityQueryHandler
         {
             var a = Get(r.UserId);
             a.Rating = r.Value;
-            a.Watched = true; // puanı olan film "izlenmiş" sayılır (profil ve film sayfasıyla aynı tanım)
             a.Touch(r.At);
         }
         foreach (var w in watches)

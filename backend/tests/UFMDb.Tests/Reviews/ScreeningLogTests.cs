@@ -9,6 +9,54 @@ namespace UFMDb.Tests.Reviews;
 
 public class ScreeningLogTests
 {
+    [Fact]
+    public async Task EditingUnratedScreeningTime_PreservesQuickRating()
+    {
+        await using var db = TestDbContextFactory.Create();
+        var film = new Movie { Title = "Film", OriginalTitle = "Film" };
+        var user = Guid.NewGuid();
+        db.Movies.Add(film);
+        db.MovieRatings.Add(new MovieRating { UserId = user, MovieId = film.Id, Value = 4 });
+        await db.SaveChangesAsync();
+        var day = DateTime.UtcNow.AddDays(-2);
+        var id = await new LogScreeningCommandHandler(db).Handle(new(user, film.Id, day, null), default);
+        await new UpdateScreeningLogEntryCommandHandler(db).Handle(new(user, id, day.AddHours(1), null), default);
+        Assert.Equal(4m, (await db.MovieRatings.AsNoTracking().SingleAsync()).Value);
+    }
+
+    [Fact]
+    public async Task BackfilledScreeningAndItsEdits_PreserveNewerRatingAndActivityTimestamp()
+    {
+        await using var db = TestDbContextFactory.Create();
+        var film = new Movie { Title = "Film", OriginalTitle = "Film" };
+        var user = Guid.NewGuid();
+        db.Movies.Add(film);
+        await db.SaveChangesAsync();
+        var day = DateTime.UtcNow.AddDays(-10);
+        var log = new LogScreeningCommandHandler(db);
+        await log.Handle(new(user, film.Id, day, 5), default);
+        var initial = await db.MovieRatings.AsNoTracking().SingleAsync();
+        var old = await log.Handle(new(user, film.Id, day.AddYears(-1), 3), default);
+        var edit = new UpdateScreeningLogEntryCommandHandler(db);
+        await edit.Handle(new(user, old, day.AddYears(-1).AddHours(1), 3), default);
+        await edit.Handle(new(user, old, day.AddYears(-1), 2), default);
+        var rating = await db.MovieRatings.AsNoTracking().SingleAsync();
+        Assert.Equal(5m, rating.Value);
+        Assert.Equal(initial.UpdatedAtUtc, rating.UpdatedAtUtc);
+    }
+
+    [Theory]
+    [InlineData(-6, true)]
+    [InlineData(6, false)]
+    public void ScreeningTimeValidation_AgreesForAddAndEdit(int hours, bool valid)
+    {
+        var at = DateTime.UtcNow.AddHours(hours);
+        var user = Guid.NewGuid();
+        var id = Guid.NewGuid();
+        Assert.Equal(valid, new LogScreeningCommandValidator().Validate(new LogScreeningCommand(user, id, at, null)).IsValid);
+        Assert.Equal(valid, new UpdateScreeningLogEntryCommandValidator().Validate(new UpdateScreeningLogEntryCommand(user, id, at, null)).IsValid);
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]

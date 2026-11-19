@@ -36,7 +36,7 @@ public class MovieInteractionTests
         var cleared = await db.Movies.AsNoTracking().SingleAsync();
         Assert.Equal((4.0, 2), (cleared.AverageRating, cleared.RatingCount));
         Assert.Empty(await db.MovieRatings.ToListAsync());
-        Assert.Equal(owner, (await db.WatchHistory.AsNoTracking().SingleAsync()).UserId);
+        Assert.Empty(await db.WatchHistory.AsNoTracking().ToListAsync());
     }
 
     [Fact]
