@@ -82,13 +82,22 @@
   font-weight: 600;
   color: var(--color-text-secondary);
 }
-.log-screening-modal__field input[type="date"] {
+.log-screening-modal__field input[type="date"],
+.log-screening-modal__field input[type="datetime-local"] {
   padding: 8px 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
   background-color: var(--color-bg);
   color: var(--color-text-primary);
   height: 38px;
+  font: inherit;
+  font-size: 0.85rem;
+  color-scheme: dark; /* takvim ikonu ve popup koyu olur */
+  min-width: 0;
+}
+.log-screening-modal__field input[type="datetime-local"]:focus {
+  outline: none;
+  border-color: var(--color-accent);
 }
 
 .log-screening-modal__reaction {

@@ -491,13 +491,16 @@
   font-weight: 600;
   color: var(--color-text-secondary);
 }
-.movie-detail__log-form-field input[type="date"] {
+.movie-detail__log-form-field input[type="date"],
+.movie-detail__log-form-field input[type="datetime-local"] {
   padding: 8px 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
   background-color: var(--color-bg);
   color: var(--color-text-primary);
   height: 38px;
+  font-size: 0.85rem;
+  min-width: 0;
 }
 
 .movie-detail__log-form-submit {

@@ -28,6 +28,7 @@
 
 /* ---------- DARK THEME (varsayılan) ---------- */
 [data-theme="dark"] {
+  color-scheme: dark;
   --color-bg: #0b0d12;
   --color-bg-elevated: #12151c;
   --color-bg-card: #171b24;
@@ -47,6 +48,7 @@
 
 /* ---------- LIGHT THEME ---------- */
 [data-theme="light"] {
+  color-scheme: light;
   --color-bg: #f6f7f9;
   --color-bg-elevated: #ffffff;
   --color-bg-card: #ffffff;

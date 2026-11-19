@@ -250,18 +250,21 @@
 }
 
 .screening-log__add-date-slot {
-  flex: 0 0 150px;
+  flex: 0 0 210px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-.screening-log__add-date-slot input {
+.screening-log__add-date-slot input[type="date"],
+.screening-log__add-date-slot input[type="datetime-local"] {
   padding: 8px 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
   background-color: var(--color-bg);
   color: var(--color-text-primary);
   height: 38px;
+  font-size: 0.85rem;
+  min-width: 0;
 }
 
 .screening-log__add-submit {
@@ -573,13 +576,16 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.screening-log__entry-edit-body input[type="date"] {
+.screening-log__entry-edit-body input[type="date"],
+.screening-log__entry-edit-body input[type="datetime-local"] {
   padding: 7px 9px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
   background-color: var(--color-bg);
   color: var(--color-text-primary);
   width: fit-content;
+  max-width: 100%;
+  font-size: 0.85rem;
 }
 .screening-log__entry-edit-actions {
   display: flex;
