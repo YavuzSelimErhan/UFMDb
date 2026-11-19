@@ -226,25 +226,33 @@ export default function ProfileHeader({
       : []),
   ];
 
+  const shareLabel = t("profile.share", { defaultValue: "Paylaş" });
+
+  // Paylaş: sadece ikon; kopyalanınca kısa süre "Bağlantı kopyalandı" yazar.
   const shareButton = (
     <button
       type="button"
-      className="profile-header__btn"
+      className={`profile-header__btn${copied ? "" : " profile-header__btn--icon"}`}
       onClick={handleShare}
-      aria-label={t("profile.share", { defaultValue: "Paylaş" })}
+      aria-label={shareLabel}
+      title={shareLabel}
     >
       {copied ? (
-        <Check size={14} aria-hidden="true" />
+        <Check size={15} aria-hidden="true" />
       ) : (
-        <Share2 size={14} aria-hidden="true" />
+        <Share2 size={15} aria-hidden="true" />
       )}
-      <span className="profile-header__btn-label">
-        {copied
-          ? t("profile.linkCopied", { defaultValue: "Bağlantı kopyalandı" })
-          : t("profile.share", { defaultValue: "Paylaş" })}
-      </span>
+      {copied && (
+        <span>
+          {t("profile.linkCopied", { defaultValue: "Bağlantı kopyalandı" })}
+        </span>
+      )}
     </button>
   );
+
+  const changeCoverLabel = t("profile.changeCover", {
+    defaultValue: "Kapağı değiştir",
+  });
 
   return (
     <header className="profile-header">
@@ -252,67 +260,15 @@ export default function ProfileHeader({
         className={`profile-header__cover${coverUrl ? "" : " profile-header__cover--empty"}`}
         style={coverUrl ? { backgroundImage: `url("${coverUrl}")` } : undefined}
       >
-        <div className="profile-header__cover-actions">
-          {isCurrentUser ? (
-            <button
-              type="button"
-              className="profile-header__btn"
-              onClick={onEditClick}
-              aria-label={t("profile.editProfile")}
-            >
-              <Pencil size={14} aria-hidden="true" />
-              <span className="profile-header__btn-label">
-                {t("profile.editProfile")}
-              </span>
-            </button>
-          ) : (
-            <>
-              <CompatibilityBadge
-                variant="action"
-                userId={userId}
-                userName={profile.userName}
-                avatarUrl={profile.avatarUrl}
-              />
-              <button
-                type="button"
-                className="profile-header__btn"
-                onClick={onFollowToggle}
-                disabled={isFollowLoading}
-                aria-label={
-                  isFollowedByCurrentUser
-                    ? t("users.following")
-                    : t("users.follow")
-                }
-              >
-                {isFollowedByCurrentUser ? (
-                  <UserCheck size={14} aria-hidden="true" />
-                ) : (
-                  <UserPlus size={14} aria-hidden="true" />
-                )}
-                <span className="profile-header__btn-label">
-                  {isFollowedByCurrentUser
-                    ? t("users.following")
-                    : t("users.follow")}
-                </span>
-              </button>
-            </>
-          )}
-          {shareButton}
-        </div>
-
         {isCurrentUser && (
           <button
             type="button"
-            className="profile-header__btn profile-header__btn--small profile-header__cover-change"
+            className="profile-header__cover-btn"
             onClick={() => setIsCoverPickerOpen(true)}
-            aria-label={t("profile.changeCover", {
-              defaultValue: "Kapağı değiştir",
-            })}
+            aria-label={changeCoverLabel}
+            title={changeCoverLabel}
           >
-            <ImagePlus size={13} aria-hidden="true" />
-            <span className="profile-header__btn-label">
-              {t("profile.changeCover", { defaultValue: "Kapağı değiştir" })}
-            </span>
+            <ImagePlus size={16} aria-hidden="true" />
           </button>
         )}
       </div>
@@ -332,19 +288,63 @@ export default function ProfileHeader({
         </button>
 
         <div className="profile-header__identity">
-          <h1 className="profile-header__name">
-            {profile.fullName || profile.userName}
-          </h1>
+          <div className="profile-header__head">
+            <div className="profile-header__head-text">
+              <h1 className="profile-header__name">
+                {profile.fullName || profile.userName}
+              </h1>
+              <p className="profile-header__handle">
+                @{profile.userName}
+                {memberSince && (
+                  <>
+                    <span className="profile-header__dot">·</span>
+                    {t("profile.member")} {memberSince}
+                  </>
+                )}
+              </p>
+            </div>
 
-          <p className="profile-header__handle">
-            @{profile.userName}
-            {memberSince && (
-              <>
-                <span className="profile-header__dot">·</span>
-                {t("profile.member")} {memberSince}
-              </>
-            )}
-          </p>
+            <div className="profile-header__actions">
+              {isCurrentUser ? (
+                <button
+                  type="button"
+                  className="profile-header__btn"
+                  onClick={onEditClick}
+                >
+                  <Pencil size={15} aria-hidden="true" />
+                  {t("profile.editProfile")}
+                </button>
+              ) : (
+                <>
+                  <CompatibilityBadge
+                    variant="action"
+                    userId={userId}
+                    userName={profile.userName}
+                    avatarUrl={profile.avatarUrl}
+                  />
+                  <button
+                    type="button"
+                    className={`profile-header__btn${isFollowedByCurrentUser ? "" : " profile-header__btn--primary"}`}
+                    onClick={onFollowToggle}
+                    disabled={isFollowLoading}
+                  >
+                    {isFollowedByCurrentUser ? (
+                      <>
+                        <UserCheck size={15} aria-hidden="true" />
+                        {t("users.following")}
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus size={15} aria-hidden="true" />
+                        {t("users.follow")}
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
+              {shareButton}
+            </div>
+          </div>
 
           <div className="profile-header__line">
             <span className="profile-header__follow">
