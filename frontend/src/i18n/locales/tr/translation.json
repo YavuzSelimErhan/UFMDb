@@ -359,7 +359,8 @@
     "coverSearchPlaceholder": "Film adı yaz",
     "coverNoResults": "Kapak görseli olan film bulunamadı.",
     "coverSaveFailed": "Kapak kaydedilemedi. Tekrar dene.",
-    "coverReset": "Varsayılana dön (ilk favori film)"
+    "coverReset": "Varsayılana dön (ilk favori film)",
+    "ageYears": "{{age}} yaşında"
   },
   "lists": {
     "title": "Listeler",

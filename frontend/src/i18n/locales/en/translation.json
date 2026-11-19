@@ -360,7 +360,8 @@
     "languageHint": "The language the interface is shown in.",
     "privacy": "Privacy",
     "privacyHint": "Control who can see the content on your profile.",
-    "addBio": "+ Add a bio"
+    "addBio": "+ Add a bio",
+    "ageYears": "{{age}} years old"
   },
   "lists": {
     "title": "Lists",

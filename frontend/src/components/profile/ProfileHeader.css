@@ -1,19 +1,21 @@
+/* KONUM: components/profile/ProfileHeader.css  -> TAMAMINI bununla değiştir */
+
 .profile-header {
   /* Sayfa zemin rengi: kapağın altta bu renge karışması ve avatar çerçevesi için.
      Projedeki gerçek değişken adı farklıysa SADECE bu satırı düzelt. */
   --ph-bg: var(--color-bg, var(--color-bg-primary, #0b0e13));
-  --font-profile:
-    "Plus Jakarta Sans", var(--font-display), system-ui, sans-serif;
+  /* Başlık fontu sadece isim, sayılar ve avatar harfinde; geri kalan metin
+     sitenin gövde fontunu kullanır. */
+  --font-profile: var(--font-display), system-ui, sans-serif;
   position: relative;
   margin-bottom: 20px;
-  font-family: var(--font-profile);
 }
 
 /* ---------- Kapak: film backdrop'u + hafif accent katmanı + alta doğru solma ---------- */
 .profile-header__cover {
   position: relative;
   height: 220px;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   overflow: hidden;
   background-color: var(--color-bg-card);
   background-size: cover;
@@ -36,7 +38,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 35%, var(--ph-bg) 100%);
+  background: linear-gradient(to bottom, transparent 30%, var(--ph-bg) 97%);
 }
 
 .profile-header__cover-actions {
@@ -109,7 +111,6 @@
   z-index: 1;
   display: flex;
   gap: 22px;
-  padding: 0 8px;
   margin-top: -56px;
 }
 
@@ -139,6 +140,7 @@
   object-fit: cover;
 }
 .profile-header__avatar span {
+  font-family: var(--font-profile);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -155,18 +157,19 @@
 
 .profile-header__name {
   margin: 0;
+  font-family: var(--font-profile);
   font-size: clamp(1.6rem, 3.4vw, 2rem);
   font-weight: 700;
   font-style: normal;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
   color: var(--color-text-primary);
   overflow-wrap: anywhere;
 }
 
 .profile-header__handle {
-  margin: 6px 0 0;
-  font-size: 0.82rem;
+  margin: 7px 0 0;
+  font-size: 0.88rem;
   color: var(--color-text-muted);
 }
 .profile-header__dot {
@@ -179,8 +182,8 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 6px 18px;
-  margin-top: 10px;
-  font-size: 0.86rem;
+  margin-top: 12px;
+  font-size: 0.92rem;
 }
 .profile-header__follow {
   display: inline-flex;
@@ -215,8 +218,8 @@
 .profile-header__bio {
   margin: 12px 0 0;
   max-width: 560px;
-  font-size: 0.92rem;
-  line-height: 1.6;
+  font-size: 0.96rem;
+  line-height: 1.7;
   color: var(--color-text-secondary);
   white-space: pre-line;
   overflow-wrap: anywhere;
@@ -226,7 +229,7 @@
 .profile-header__stats {
   display: flex;
   flex-wrap: wrap;
-  margin: 18px 8px 0;
+  margin: 18px 0 0;
   padding-top: 12px;
   border-top: 1px solid var(--color-border);
 }
@@ -252,6 +255,7 @@
 }
 
 .profile-header__stat-value {
+  font-family: var(--font-profile);
   display: flex;
   align-items: center;
   gap: 5px;
@@ -262,8 +266,8 @@
   transition: color var(--transition-fast);
 }
 .profile-header__stat-label {
-  font-size: 0.68rem;
-  letter-spacing: 0.06em;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-text-muted);
   transition: color var(--transition-fast);
@@ -350,7 +354,6 @@
   .profile-header__main {
     flex-direction: column;
     gap: 0;
-    padding: 0 4px;
     margin-top: -40px;
   }
   .profile-header__avatar {
@@ -375,7 +378,7 @@
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 4px 0;
-    margin: 16px 4px 0;
+    margin: 16px 0 0;
   }
   .profile-header__stat {
     margin: 0;

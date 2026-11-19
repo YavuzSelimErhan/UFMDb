@@ -1,3 +1,4 @@
+// KONUM: components/profile/ProfileHeader.tsx  -> TAMAMINI bununla değiştir
 import { useState, useEffect, useLayoutEffect, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -161,7 +162,9 @@ export default function ProfileHeader({
 
   const metaParts = [
     profile.country,
-    age !== null ? String(age) : null,
+    age !== null
+      ? t("profile.ageYears", { age, defaultValue: "{{age}} years old" })
+      : null,
     genderLabel,
   ].filter((p): p is string => !!p);
 
