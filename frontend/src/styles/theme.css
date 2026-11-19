@@ -1,5 +1,7 @@
 /* ==================== UFMDb Tema Sistemi ==================== */
 /* Ana vurgu rengi #4a90e2 etrafında kurulu, dark varsayılan tema */
+/* Fontlar index.html içinde yüklenir (Inter + JetBrains Mono). */
+
 :root {
   --color-accent: #4a90e2;
   --color-accent-hover: #63a2ec;
@@ -16,9 +18,10 @@
   --transition-base: 260ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 420ms cubic-bezier(0.16, 1, 0.3, 1);
 
+  /* Tek ana font: Inter (gövde + başlık). Mono sadece küçük etiketler için. */
   --font-sans:
     "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-display: "Plus Jakarta Sans", var(--font-sans);
+  --font-display: var(--font-sans);
   --font-mono:
     "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
@@ -75,7 +78,6 @@ body,
 
 body {
   font-family: var(--font-sans);
-  font-synthesis: none;
   background-color: var(--color-bg);
   color: var(--color-text-primary);
   transition:
@@ -83,13 +85,15 @@ body {
     color var(--transition-base);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Sahte italik / sahte kalın üretmesin: fontta olmayan stil dik görünür. */
+  font-synthesis: none;
 }
 
 h1,
 h2,
 h3 {
   font-family: var(--font-display);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 h1 {
   margin-bottom: 14px;

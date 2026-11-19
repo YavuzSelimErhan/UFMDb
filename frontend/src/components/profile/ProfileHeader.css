@@ -69,7 +69,7 @@
   font-weight: 600;
   white-space: nowrap;
   color: #fff;
-  background: rgba(5, 7, 10, 0.55);
+  background: rgba(5, 7, 10, 0.64);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: var(--radius-md);
   backdrop-filter: blur(8px);
@@ -217,7 +217,8 @@
 /* Biyografi: süssüz, okunaklı paragraf */
 .profile-header__bio {
   margin: 12px 0 0;
-  max-width: 560px;
+  max-width: 600px;
+  text-wrap: pretty;
   font-size: 0.96rem;
   line-height: 1.7;
   color: var(--color-text-secondary);
