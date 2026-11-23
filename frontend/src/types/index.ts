@@ -31,6 +31,7 @@ export interface MovieListItem {
 }
 
 export interface MovieCast {
+  personId?: string | null;
   actorId: string;
   fullName: string;
   photoUrl: string;
@@ -39,6 +40,7 @@ export interface MovieCast {
 }
 
 export interface MovieDirectorItem {
+  personId?: string | null;
   id: string;
   fullName: string;
   photoUrl: string;

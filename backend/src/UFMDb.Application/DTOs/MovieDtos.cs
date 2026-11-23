@@ -11,7 +11,7 @@ public record MovieListItemDto(
     ReactionType? CurrentUserReaction = null
 );
 
-public record MovieDirectorDto(Guid Id, string FullName, string PhotoUrl);
+public record MovieDirectorDto(Guid Id, string FullName, string PhotoUrl, Guid? PersonId = null);
 
 public record MyReviewDto(string Content, bool ContainsSpoiler);
 
@@ -45,7 +45,7 @@ public record MovieDetailDto(
     List<MovieCrewDto>? Crew = null
 );
 
-public record MovieCastDto(Guid ActorId, string FullName, string PhotoUrl, string CharacterName, int Order);
+public record MovieCastDto(Guid ActorId, string FullName, string PhotoUrl, string CharacterName, int Order, Guid? PersonId = null);
 public record DirectorListItemDto(Guid Id, string FullName, string PhotoUrl, string Nationality);
 
 

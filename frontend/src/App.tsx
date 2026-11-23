@@ -5,6 +5,7 @@ import ProtectedRoute from "@/components/common/ProtectedRoute";
 import HomePage from "@/pages/Home/HomePage";
 import MovieDetailPage from "@/pages/MovieDetail/MovieDetailPage";
 import SearchPage from "@/pages/Search/SearchPage";
+import PersonPage from "@/pages/Person/PersonPage";
 import ActorDetailPage from "@/pages/ActorDetail/ActorDetailPage";
 import DirectorDetailPage from "@/pages/DirectorDetail/DirectorDetailPage";
 import ListsPage from "@/pages/Lists/ListsPage";
@@ -42,6 +43,7 @@ function AppShell() {
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/movies/:id" element={<MovieDetailPage />} />
+          <Route path="/people/:id" element={<PersonPage />} />
           <Route path="/actors/:id" element={<ActorDetailPage />} />
           <Route path="/directors/:id" element={<DirectorDetailPage />} />
           <Route path="/lists" element={<ListsPage />} />

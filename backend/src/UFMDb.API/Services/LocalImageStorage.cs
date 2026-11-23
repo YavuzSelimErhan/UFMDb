@@ -1,10 +1,5 @@
 ﻿using System.Text.RegularExpressions;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats;
-using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.Formats.Webp;
-using SixLabors.ImageSharp.Processing;
+using ImageMagick;
 using UFMDb.Application.Common.Interfaces;
 using ValidationException = UFMDb.Application.Common.Exceptions.ValidationException;
 
@@ -16,11 +11,6 @@ public sealed class LocalImageStorage : IImageStorage
     private const long MaxPixels = 40_000_000;   // decompression bomb koruması
     private const int MaxCoverSide = 1600;
     private const int AvatarSide = 512;
-
-    // Sadece bu üç formatın decoder'ı yüklü. İçerik (magic byte) üzerinden tanınır;
-    // uzantı/Content-Type'a güvenilmez. SVG, GIF, BMP, TIFF vb. tanınmaz ve reddedilir.
-    private static readonly Configuration DecodeConfig = new(
-        new JpegConfigurationModule(), new PngConfigurationModule(), new WebpConfigurationModule());
 
     // Sadece kendi ürettiğimiz dosya adı biçimi silinebilir; eski dosyalara ve dış URL'lere dokunulmaz.
     private static readonly Regex ManagedUrl = new(
@@ -38,39 +28,33 @@ public sealed class LocalImageStorage : IImageStorage
     public async Task<string> SaveAsync(Stream source, ImageKind kind, CancellationToken ct = default)
     {
         using var buffer = await ReadLimitedAsync(source, ct);
-        var options = new DecoderOptions { Configuration = DecodeConfig, MaxFrames = 1 };
+        var settings = new MagickReadSettings { Format = DetectFormat(buffer), FrameCount = 1 };
 
         try
         {
-            var info = await Image.IdentifyAsync(options, buffer, ct);
-            if ((long)info.Width * info.Height > MaxPixels)
+            var info = new MagickImageInfo(buffer, settings);
+            if ((ulong)info.Width * info.Height > MaxPixels)
                 throw Invalid("Görselin çözünürlüğü çok yüksek.");
 
+            ct.ThrowIfCancellationRequested();
             buffer.Position = 0;
-            using var image = await Image.LoadAsync(options, buffer, ct);
-
-            image.Mutate(x => x.AutoOrient());          // EXIF yönünü uygula, sonra metadata'yı sil
-            image.Metadata.ExifProfile = null;           // GPS dahil
-            image.Metadata.IccProfile = null;
-            image.Metadata.IptcProfile = null;
-            image.Metadata.XmpProfile = null;
+            using var image = new MagickImage(buffer, settings);
+            image.AutoOrient();
+            image.Strip();
 
             if (kind == ImageKind.Avatar)
             {
-                image.Mutate(x => x.Resize(new ResizeOptions
-                {
-                    Size = new Size(AvatarSide, AvatarSide),
-                    Mode = ResizeMode.Crop
-                }));
+                var side = Math.Min(image.Width, image.Height);
+                image.Crop(side, side, Gravity.Center);
+                image.ResetPage();
+                image.Resize(AvatarSide, AvatarSide);
             }
             else if (image.Width > MaxCoverSide || image.Height > MaxCoverSide)
             {
-                image.Mutate(x => x.Resize(new ResizeOptions
-                {
-                    Size = new Size(MaxCoverSide, MaxCoverSide),
-                    Mode = ResizeMode.Max
-                }));
+                image.Resize(MaxCoverSide, MaxCoverSide);
             }
+            image.Quality = 82;
+            ct.ThrowIfCancellationRequested();
 
             var dir = kind == ImageKind.Avatar ? "avatars" : "covers";
             var folder = Path.Combine(_root, dir);
@@ -83,7 +67,8 @@ public sealed class LocalImageStorage : IImageStorage
             {
                 await using (var fs = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                 {
-                    await image.SaveAsWebpAsync(fs, new WebpEncoder { Quality = 82, FileFormat = WebpFileFormatType.Lossy }, ct);
+                    image.Write(fs, MagickFormat.WebP);
+                    ct.ThrowIfCancellationRequested();
                 }
             }
             catch
@@ -95,10 +80,20 @@ public sealed class LocalImageStorage : IImageStorage
 
             return $"/api/uploads/{dir}/{fileName}";
         }
-        catch (Exception ex) when (ex is ImageFormatException or ImageProcessingException or NotSupportedException)
+        catch (MagickException)
         {
             throw Invalid("Geçersiz veya desteklenmeyen görsel. Sadece JPG, PNG ve WebP yüklenebilir.");
         }
+    }
+
+    private static MagickFormat DetectFormat(MemoryStream buffer)
+    {
+        var bytes = buffer.GetBuffer().AsSpan(0, (int)buffer.Length);
+        if (bytes.StartsWith((ReadOnlySpan<byte>)[0xff, 0xd8, 0xff])) return MagickFormat.Jpeg;
+        if (bytes.StartsWith((ReadOnlySpan<byte>)[0x89, 0x50, 0x4e, 0x47, 13, 10, 26, 10])) return MagickFormat.Png;
+        if (bytes.Length >= 12 && bytes.StartsWith("RIFF"u8) && bytes.Slice(8, 4).SequenceEqual("WEBP"u8))
+            return MagickFormat.WebP;
+        throw Invalid("Sadece JPG, PNG ve WebP yüklenebilir.");
     }
 
     public void Delete(string? url)

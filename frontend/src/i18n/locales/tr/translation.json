@@ -70,6 +70,20 @@
     "searchActors": "Oyuncular",
     "searchDirectors": "Yönetmenler"
   },
+  "personFilmography": {
+    "heading": "Filmografi",
+    "role": "Görev",
+    "all": "Tüm görevler",
+    "sort": "Sıralama",
+    "popular": "Popülerlik",
+    "date": "Vizyon tarihi (en yeni)",
+    "more": "Daha fazla göster",
+    "empty": "Henüz film yok",
+    "actor": "Oyuncu profili",
+    "director": "Yönetmen profili",
+    "error": "Kişi bilgileri yüklenemedi.",
+    "retry": "Tekrar dene"
+  },
   "movie": {
     "crew": "Film ekibi",
     "jobs": {

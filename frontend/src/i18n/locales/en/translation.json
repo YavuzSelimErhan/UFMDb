@@ -70,6 +70,20 @@
     "searchActors": "Actors",
     "searchDirectors": "Directors"
   },
+  "personFilmography": {
+    "heading": "Filmography",
+    "role": "Role",
+    "all": "All roles",
+    "sort": "Sort",
+    "popular": "Popularity",
+    "date": "Release date (newest)",
+    "more": "Show more",
+    "empty": "No films yet",
+    "actor": "Actor profile",
+    "director": "Director profile",
+    "error": "Could not load this person.",
+    "retry": "Retry"
+  },
   "movie": {
     "crew": "Crew",
     "jobs": {

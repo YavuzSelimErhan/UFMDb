@@ -1,0 +1,10 @@
+.person-profile { max-width: 72rem; margin: auto; padding: 2rem 1rem; }
+.person-profile header, .person-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; }
+.person-profile header a { margin-inline-end: 1rem; }
+.person-profile p { max-width: 76ch; white-space: pre-line; }
+.person-profile h2 { margin-block: 2rem 1rem; }
+.person-controls select { font: inherit; padding: .35rem; }
+.person-profile ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(9rem, 100%), 1fr)); gap: 1.5rem 1rem; list-style: none; padding: 0; }
+.person-profile li { display: grid; align-content: start; gap: .35rem; }
+.person-film-poster { display: block; aspect-ratio: 2/3; overflow: hidden; border-radius: .5rem; }
+.person-film-poster img { width: 100%; height: 100%; object-fit: cover; }

@@ -218,13 +218,13 @@ export default function MovieDetailPage() {
     quickRateMutation.mutate(rating);
   };
 
-  const team = new Map<string, { id: string; name: string; photo?: string; directorId?: string; roles: string[] }>();
+  const team = new Map<string, { id: string; name: string; photo?: string; href: string; roles: string[] }>();
   for (const d of movie.directors) {
-    team.set(d.id, { id: d.id, name: d.fullName, photo: d.photoUrl, directorId: d.id, roles: [t("movie.director")] });
+    team.set(d.id, { id: d.id, name: d.fullName, photo: d.photoUrl, href: d.personId ? `/people/${d.personId}` : `/directors/${d.id}`, roles: [t("movie.director")] });
   }
   for (const c of movie.crew ?? []) {
     const key = c.directorId && team.has(c.directorId) ? c.directorId : c.personId;
-    const card = team.get(key) ?? { id: c.personId, name: c.fullName, photo: c.photoUrl, roles: [] as string[] };
+    const card = team.get(key) ?? { id: c.personId, name: c.fullName, photo: c.photoUrl, href: `/people/${c.personId}`, roles: [] as string[] };
     card.roles.push(t(`movie.jobs.${c.job}`, { defaultValue: c.job }));
     team.set(key, card);
   }
@@ -522,10 +522,8 @@ export default function MovieDetailPage() {
                     <span>{person.name}</span>
                     <small>{person.roles.join(" · ")}</small>
                   </>;
-                  return person.directorId ? (
-                    <Link className="movie-detail__director-card" key={person.id} to={`/directors/${person.directorId}`}>{body}</Link>
-                  ) : (
-                    <div className="movie-detail__director-card" key={person.id}>{body}</div>
+                  return (
+                    <Link className="movie-detail__director-card" key={person.id} to={person.href}>{body}</Link>
                   );
                 })}
               </div>
@@ -538,7 +536,7 @@ export default function MovieDetailPage() {
               {movie.cast.map((c) => (
                 <Link
                   key={c.actorId}
-                  to={`/actors/${c.actorId}`}
+                  to={c.personId ? `/people/${c.personId}` : `/actors/${c.actorId}`}
                   className="movie-detail__cast-item"
                 >
                   <PersonAvatar

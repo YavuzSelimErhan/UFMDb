@@ -1,0 +1,941 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="e9273a8d-31d3-450c-8356-19e9e6072866" name="11yav@YAVUZ 2026-11-23 15:44:33" runUser="YAVUZ\11yav" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-23T15:44:33.1939193+03:00" queuing="2026-11-23T15:44:33.1939195+03:00" start="2026-11-23T15:44:31.4866496+03:00" finish="2026-11-23T15:44:36.1335257+03:00" />
+  <TestSettings name="default" id="1f02be0b-2b71-4c27-b2fc-fb94d35b37c5">
+    <Deployment runDeploymentRoot="11yav_YAVUZ_2026-11-23_15_44_33" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="d121741e-67c8-4ad9-8c82-310203ff05da" testId="87341d59-555c-71c6-6687-5a1e0af5dcab" testName="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_RecognizesSupportedHeadersAndSeparators(csv: &quot;Name,Year\nSolaris,1972&quot;)" computerName="YAVUZ" duration="00:00:00.4474245" startTime="2026-11-23T15:44:33.6039173+03:00" endTime="2026-11-23T15:44:33.6039175+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d121741e-67c8-4ad9-8c82-310203ff05da" />
+    <UnitTestResult executionId="f30533d9-7c4d-47f3-97f2-b8ad840230a4" testId="676dd76f-500e-bb5f-116e-57a2ea15ab5d" testName="UFMDb.Tests.Auth.RegisterCommandHandlerTests.Handle_RefreshTokenVeritabaninaKaydedilir" computerName="YAVUZ" duration="00:00:00.0844285" startTime="2026-11-23T15:44:34.9327468+03:00" endTime="2026-11-23T15:44:34.9327471+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f30533d9-7c4d-47f3-97f2-b8ad840230a4" />
+    <UnitTestResult executionId="4936ff18-e806-4d44-b580-ddc4b9dd9d52" testId="5c858656-6079-a8be-c005-b9c2e709cbcf" testName="UFMDb.Tests.Auth.RefreshTokenCommandHandlerTests.Handle_SuresiDolmusToken_UnauthorizedExceptionFirlatir" computerName="YAVUZ" duration="00:00:00.0028038" startTime="2026-11-23T15:44:34.9359402+03:00" endTime="2026-11-23T15:44:34.9359403+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4936ff18-e806-4d44-b580-ddc4b9dd9d52" />
+    <UnitTestResult executionId="b8b6f0b0-285d-4368-b9fe-162ff94b6b2a" testId="2a59d8fc-1ff3-14e5-b17a-581754d917e1" testName="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_IdenticalRatings_FollowsConfidenceCurve(count: 5, expected: 75)" computerName="YAVUZ" duration="00:00:00.0002829" startTime="2026-11-23T15:44:33.5889829+03:00" endTime="2026-11-23T15:44:33.5889831+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b8b6f0b0-285d-4368-b9fe-162ff94b6b2a" />
+    <UnitTestResult executionId="fe43fc56-126c-4f7d-9f06-3eb01d6ede81" testId="909b8343-be35-bcdb-34ba-6735ae6a7a63" testName="UFMDb.Tests.Auth.LoginCommandHandlerTests.Handle_DogruBilgiler_TokenDoner" computerName="YAVUZ" duration="00:00:00.0609901" startTime="2026-11-23T15:44:35.0182814+03:00" endTime="2026-11-23T15:44:35.0182816+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fe43fc56-126c-4f7d-9f06-3eb01d6ede81" />
+    <UnitTestResult executionId="d2c53486-133e-4054-9d08-fb430e98cf4c" testId="9db5e9cd-b6d7-06de-0232-4273e700d421" testName="UFMDb.Tests.Community.CommunityTests.Follow_GrantsOneWayDiaryAccess_AndUnfollowRevokesIt" computerName="YAVUZ" duration="00:00:00.1308615" startTime="2026-11-23T15:44:34.9939789+03:00" endTime="2026-11-23T15:44:34.9939791+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d2c53486-133e-4054-9d08-fb430e98cf4c" />
+    <UnitTestResult executionId="6b713115-1e09-47e5-b403-fab85166c74c" testId="a99c6f25-1506-6a6d-c836-be5db940adb9" testName="UFMDb.Tests.Api.AuthRateLimitingTests.LimitiAsanIstegiReddeder" computerName="YAVUZ" duration="00:00:00.0810817" startTime="2026-11-23T15:44:33.7052711+03:00" endTime="2026-11-23T15:44:33.7052714+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6b713115-1e09-47e5-b403-fab85166c74c" />
+    <UnitTestResult executionId="f65ed777-615e-4ffa-8fbd-b5ae4d27dd20" testId="592c3c95-e539-8667-8073-9fa53cba75d3" testName="UFMDb.Tests.Api.ExceptionHandlingMiddlewareTests.BilinmeyenHata_500DonerVeIcDetayiSizdirmaz" computerName="YAVUZ" duration="00:00:00.0006016" startTime="2026-11-23T15:44:33.7449992+03:00" endTime="2026-11-23T15:44:33.7449993+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f65ed777-615e-4ffa-8fbd-b5ae4d27dd20" />
+    <UnitTestResult executionId="f09695b6-96be-41de-b664-cc00ae9eab44" testId="9831223e-3d44-343e-4c0c-6f1dbef81fd9" testName="UFMDb.Tests.Auth.RegisterCommandHandlerTests.Handle_SifreDuzMetinOlarakSaklanmaz" computerName="YAVUZ" duration="00:00:01.6916714" startTime="2026-11-23T15:44:34.8481332+03:00" endTime="2026-11-23T15:44:34.8481336+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f09695b6-96be-41de-b664-cc00ae9eab44" />
+    <UnitTestResult executionId="bc1f071f-d472-44e2-aa33-5b7d6ec8ff6e" testId="2888afeb-21b9-5436-6765-1d8a487d5e59" testName="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_SingleHalfPointDifference_LowersScoreSlightly" computerName="YAVUZ" duration="00:00:00.0001432" startTime="2026-11-23T15:44:33.5886167+03:00" endTime="2026-11-23T15:44:33.5886169+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bc1f071f-d472-44e2-aa33-5b7d6ec8ff6e" />
+    <UnitTestResult executionId="e5c39ea1-f5c9-49a2-ae69-01abe2d1e222" testId="e44cd5e3-d8be-f5dc-2540-f47484a2a795" testName="UFMDb.Tests.Auth.LoginCommandHandlerTests.Handle_BasariliGiris_RefreshTokenVeritabaninaKaydedilir" computerName="YAVUZ" duration="00:00:00.0419663" startTime="2026-11-23T15:44:35.0617184+03:00" endTime="2026-11-23T15:44:35.0617186+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e5c39ea1-f5c9-49a2-ae69-01abe2d1e222" />
+    <UnitTestResult executionId="deed0e7b-e24a-4180-9488-b4fdf5dc7e22" testId="64c4324d-a115-043a-8da4-acbf448d8076" testName="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_RecognizesSupportedHeadersAndSeparators(csv: &quot;Title\tRelease Year\nSolaris\t1972&quot;)" computerName="YAVUZ" duration="00:00:00.0004971" startTime="2026-11-23T15:44:33.6044080+03:00" endTime="2026-11-23T15:44:33.6044081+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="deed0e7b-e24a-4180-9488-b4fdf5dc7e22" />
+    <UnitTestResult executionId="1ce68c6f-9846-4d0e-8a45-c3c406b8710b" testId="bc65cf9b-cd25-ddda-f054-764dfaf2785a" testName="UFMDb.Tests.Reviews.ScreeningLogTests.EditingUnratedScreeningTime_PreservesQuickRating" computerName="YAVUZ" duration="00:00:01.8093217" startTime="2026-11-23T15:44:34.9657427+03:00" endTime="2026-11-23T15:44:34.9657430+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1ce68c6f-9846-4d0e-8a45-c3c406b8710b" />
+    <UnitTestResult executionId="16e341e6-e17c-4a18-b242-1798a5066adb" testId="5724a906-1629-c8f7-e9d8-cb01baa10107" testName="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_BelowMinimum_ReturnsNull(count: 4)" computerName="YAVUZ" duration="00:00:00.0001372" startTime="2026-11-23T15:44:33.5900874+03:00" endTime="2026-11-23T15:44:33.5900875+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="16e341e6-e17c-4a18-b242-1798a5066adb" />
+    <UnitTestResult executionId="0893d8b8-be28-4af0-9c53-7fca89db5712" testId="af58853e-9271-312f-bc00-7a2470304ec5" testName="UFMDb.Tests.Catalog.PeopleTests.DirectorDetails_ReflectEditsAndLikes_AndHideDeletedDirector" computerName="YAVUZ" duration="00:00:01.5119146" startTime="2026-11-23T15:44:34.9920762+03:00" endTime="2026-11-23T15:44:34.9920765+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0893d8b8-be28-4af0-9c53-7fca89db5712" />
+    <UnitTestResult executionId="e6df0812-a510-4cde-9d3d-72e80fa00b0b" testId="c53bde03-e365-45cd-4131-f4465ac910aa" testName="UFMDb.Tests.Catalog.MovieManagementTests.CatalogEdit_ReplacesCredits_PreservesLocalVotes_AndDistinguishesMissingFromEmptyText" computerName="YAVUZ" duration="00:00:01.3465179" startTime="2026-11-23T15:44:35.0585779+03:00" endTime="2026-11-23T15:44:35.0585782+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e6df0812-a510-4cde-9d3d-72e80fa00b0b" />
+    <UnitTestResult executionId="42031f62-3f4a-4c76-acc3-1549380b9b11" testId="78e52981-b4b6-8251-409a-3d46297a1342" testName="UFMDb.Tests.Catalog.PersonCreditMigrationTests.Migration_MergesSharedIdentity_PreservesBothCreditsAndUnmatchedNames" computerName="YAVUZ" duration="00:00:00.0010000" startTime="2026-11-23T15:44:33.1676585+03:00" endTime="2026-11-23T15:44:33.1676587+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="42031f62-3f4a-4c76-acc3-1549380b9b11">
+      <Output>
+        <ErrorInfo>
+          <Message>Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="fb9c0799-cfda-4c0f-abc1-ecf89144a58b" testId="71a98cb8-88cc-3f7b-5ac4-a0ddb58f2cd4" testName="UFMDb.Tests.Auth.JwtTokenServiceTests.GenerateRefreshToken_HerCagridaFarkliDegerUretir" computerName="YAVUZ" duration="00:00:00.0005493" startTime="2026-11-23T15:44:33.7401425+03:00" endTime="2026-11-23T15:44:33.7401425+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fb9c0799-cfda-4c0f-abc1-ecf89144a58b" />
+    <UnitTestResult executionId="2929c258-1d70-44df-8ca3-7c63cacefe20" testId="7ab8fe7a-eec3-2a87-f6c6-16580ab2673e" testName="UFMDb.Tests.Auth.RegisterCommandHandlerTests.Handle_EmailZatenKayitli_ConflictExceptionFirlatir" computerName="YAVUZ" duration="00:00:00.0027750" startTime="2026-11-23T15:44:34.9356551+03:00" endTime="2026-11-23T15:44:34.9356554+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2929c258-1d70-44df-8ca3-7c63cacefe20" />
+    <UnitTestResult executionId="5a47a149-1a31-41ec-9393-0ed4fcad32ae" testId="109d28f0-1c3f-d96c-7976-0f8a4ab84e0c" testName="UFMDb.Tests.Api.ExceptionHandlingMiddlewareTests.ValidationException_400DonerVeErrorsAlaniniTasir" computerName="YAVUZ" duration="00:00:00.0057164" startTime="2026-11-23T15:44:33.7443797+03:00" endTime="2026-11-23T15:44:33.7443798+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5a47a149-1a31-41ec-9393-0ed4fcad32ae" />
+    <UnitTestResult executionId="f239b16c-7c4a-4fab-a645-28de8127e39f" testId="a5d97bae-5368-fd03-d19e-2ef1d2a766f4" testName="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_IdenticalRatings_FollowsConfidenceCurve(count: 10, expected: 83)" computerName="YAVUZ" duration="00:00:00.0000135" startTime="2026-11-23T15:44:33.5890693+03:00" endTime="2026-11-23T15:44:33.5890694+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f239b16c-7c4a-4fab-a645-28de8127e39f" />
+    <UnitTestResult executionId="136d251b-b5c3-42fd-8a39-ef858fcc6d3e" testId="3f4081f9-e5a1-601a-9795-77680339927d" testName="UFMDb.Tests.Auth.RefreshTokenCommandHandlerTests.Handle_GecerliToken_YeniTokenUretipEskisiniIptalEder" computerName="YAVUZ" duration="00:00:00.0654255" startTime="2026-11-23T15:44:34.9338853+03:00" endTime="2026-11-23T15:44:34.9338855+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="136d251b-b5c3-42fd-8a39-ef858fcc6d3e" />
+    <UnitTestResult executionId="328ef2f8-3066-4450-9062-c3502cc9e86d" testId="8f393627-ef04-2728-ffdc-0b15972a75ee" testName="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_EnforcesRowLimitIncludingInvalidRows" computerName="YAVUZ" duration="00:00:00.0019465" startTime="2026-11-23T15:44:33.6260571+03:00" endTime="2026-11-23T15:44:33.6260572+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="328ef2f8-3066-4450-9062-c3502cc9e86d" />
+    <UnitTestResult executionId="905431dd-f393-40e6-82b2-3b0691dd7467" testId="82ad0e93-34be-a4ad-c0e0-2bc25aea9ed2" testName="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests.Disagreements_IncludesOnlyOneStarOrMore_LargestFirst" computerName="YAVUZ" duration="00:00:00.0004594" startTime="2026-11-23T15:44:33.6236460+03:00" endTime="2026-11-23T15:44:33.6236461+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="905431dd-f393-40e6-82b2-3b0691dd7467" />
+    <UnitTestResult executionId="17cc39f7-e591-4a74-9c2c-294ac481c813" testId="327cfa4f-f698-5a30-2679-0be7a05a7030" testName="UFMDb.Tests.Api.LocalImageStorageTests.Save_ConvertsPngToWebpWithExpectedDimensions_AndDeletesManagedFile(kind: Cover, folder: &quot;covers&quot;, width: 1600, height: 800)" computerName="YAVUZ" duration="00:00:01.8563368" startTime="2026-11-23T15:44:35.7412165+03:00" endTime="2026-11-23T15:44:35.7412169+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="17cc39f7-e591-4a74-9c2c-294ac481c813" />
+    <UnitTestResult executionId="5eb32766-0afe-45a9-a919-61d7fb053ef2" testId="dbadb5ff-55fb-09af-1be1-86956e803de5" testName="UFMDb.Tests.Api.LocalImageStorageTests.RejectedInputLeavesNoFile(length: 0)" computerName="YAVUZ" duration="00:00:00.0034129" startTime="2026-11-23T15:44:33.8415669+03:00" endTime="2026-11-23T15:44:33.8415672+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5eb32766-0afe-45a9-a919-61d7fb053ef2" />
+    <UnitTestResult executionId="84dfbf75-b76f-41c3-9d4c-96d643e2b049" testId="c9db4cca-fbd6-8011-b2ae-249e5919290f" testName="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_BelowMinimum_ReturnsNull(count: 0)" computerName="YAVUZ" duration="00:00:00.0007272" startTime="2026-11-23T15:44:33.5899038+03:00" endTime="2026-11-23T15:44:33.5899039+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="84dfbf75-b76f-41c3-9d4c-96d643e2b049" />
+    <UnitTestResult executionId="569f5855-5e41-42ca-94f3-2b3f71b1bc1a" testId="2e6effc8-ddf5-57c9-b53d-15b3cb009efd" testName="UFMDb.Tests.Reviews.ScreeningLogTests.ScreeningDateValidation_AgreesForAddAndEdit(daysFromLatest: 1, hour: 0, valid: False)" computerName="YAVUZ" duration="00:00:00.0017760" startTime="2026-11-23T15:44:34.9993095+03:00" endTime="2026-11-23T15:44:34.9993096+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="569f5855-5e41-42ca-94f3-2b3f71b1bc1a" />
+    <UnitTestResult executionId="cce0015a-d3ff-42fd-8f69-079dd23c6d04" testId="915f83a9-b847-7f1d-3d6d-bb538d1ec6a9" testName="UFMDb.Tests.Api.HttpSessionTests.Registration_IssuesSession_ProfileAcceptsBearer_AndRefreshCookieRotates" computerName="YAVUZ" duration="00:00:00.0010000" startTime="2026-11-23T15:44:33.7121983+03:00" endTime="2026-11-23T15:44:33.7121983+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cce0015a-d3ff-42fd-8f69-079dd23c6d04">
+      <Output>
+        <ErrorInfo>
+          <Message>Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9e895ec1-1dda-42c4-bf91-629915e456b2" testId="eb61aff7-881c-3c4f-cbe4-ed805c5255f9" testName="UFMDb.Tests.Reviews.MovieInteractionTests.Reactions_SwitchAndUndoWithoutChangingAnotherUsersLike" computerName="YAVUZ" duration="00:00:00.2375075" startTime="2026-11-23T15:44:34.8888092+03:00" endTime="2026-11-23T15:44:34.8888096+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9e895ec1-1dda-42c4-bf91-629915e456b2" />
+    <UnitTestResult executionId="e6159183-5a12-41a5-aa93-0afb5c22f185" testId="822093bc-aab1-5db9-2f2f-5aa9de3ebd03" testName="UFMDb.Tests.Catalog.PostgresCatalogTests.Activity_GroupsAcrossUtcMidnightInViewersTimeZone" computerName="YAVUZ" duration="00:00:00.0010000" startTime="2026-11-23T15:44:33.1770783+03:00" endTime="2026-11-23T15:44:33.1770784+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e6159183-5a12-41a5-aa93-0afb5c22f185">
+      <Output>
+        <ErrorInfo>
+          <Message>Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="17fc2949-6032-4fba-8db7-826158c10187" testId="fe6fc0ff-6e52-0bc2-c778-ebca72496a1d" testName="UFMDb.Tests.Reviews.ScreeningLogTests.ScreeningDateValidation_AgreesForAddAndEdit(daysFromLatest: -1, hour: 0, valid: True)" computerName="YAVUZ" duration="00:00:00.0302604" startTime="2026-11-23T15:44:34.9966706+03:00" endTime="2026-11-23T15:44:34.9966706+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="17fc2949-6032-4fba-8db7-826158c10187" />
+    <UnitTestResult executionId="fe9747a7-353f-4920-a6e9-37e841a64f6f" testId="8a443de0-3dcb-bdbb-40a9-4386cb7e49b5" testName="UFMDb.Tests.Auth.LoginCommandHandlerTests.Handle_PasifKullanici_UnauthorizedExceptionFirlatir" computerName="YAVUZ" duration="00:00:01.6277576" startTime="2026-11-23T15:44:34.7841630+03:00" endTime="2026-11-23T15:44:34.7841636+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fe9747a7-353f-4920-a6e9-37e841a64f6f" />
+    <UnitTestResult executionId="2e6aa532-5d50-4e71-936d-85c4d1616fee" testId="ab17d0e7-ddd6-2651-129d-9c5c66fee754" testName="UFMDb.Tests.Auth.RefreshTokenCommandHandlerTests.Handle_IptalEdilmisToken_UnauthorizedExceptionFirlatir" computerName="YAVUZ" duration="00:00:01.2765321" startTime="2026-11-23T15:44:34.8674919+03:00" endTime="2026-11-23T15:44:34.8674924+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2e6aa532-5d50-4e71-936d-85c4d1616fee" />
+    <UnitTestResult executionId="c544450b-1350-4691-8392-8862a7abf61c" testId="7886afe2-315f-6ce6-1ba8-8350bdb15482" testName="UFMDb.Tests.Api.ExceptionHandlingMiddlewareTests.UnauthorizedException_401Doner" computerName="YAVUZ" duration="00:00:00.0004323" startTime="2026-11-23T15:44:33.7384840+03:00" endTime="2026-11-23T15:44:33.7384841+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c544450b-1350-4691-8392-8862a7abf61c" />
+    <UnitTestResult executionId="a11764a1-f62e-4a59-9ebe-cd863dbf21b6" testId="6c9579e6-7269-a9fa-7127-d64e7b93cd26" testName="UFMDb.Tests.Auth.RegisterCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(userName: &quot;ab&quot;, email: &quot;yavuz@example.com&quot;, password: &quot;Sifre123&quot;)" computerName="YAVUZ" duration="00:00:00.0000769" startTime="2026-11-23T15:44:33.4795579+03:00" endTime="2026-11-23T15:44:33.4795579+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a11764a1-f62e-4a59-9ebe-cd863dbf21b6" />
+    <UnitTestResult executionId="dbb95153-cc5e-4514-b81f-4a6a98e7b7f3" testId="844ccd9c-76a5-5b03-8401-57b22e88b626" testName="UFMDb.Tests.Catalog.PostgresCatalogTests.ClearWatchlist_DeletesOnlyTheRequestedUsersRows_AndIsRepeatable" computerName="YAVUZ" duration="00:00:00.0010000" startTime="2026-11-23T15:44:33.1773843+03:00" endTime="2026-11-23T15:44:33.1773844+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dbb95153-cc5e-4514-b81f-4a6a98e7b7f3">
+      <Output>
+        <ErrorInfo>
+          <Message>Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="afe73ae1-4684-4ef1-b9b2-631838bd0754" testId="0f9486b3-becb-b898-220d-89aba931e243" testName="UFMDb.Tests.Auth.LoginCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(email: &quot;&quot;, password: &quot;sifre&quot;)" computerName="YAVUZ" duration="00:00:00.0000880" startTime="2026-11-23T15:44:33.4802070+03:00" endTime="2026-11-23T15:44:33.4802071+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="afe73ae1-4684-4ef1-b9b2-631838bd0754" />
+    <UnitTestResult executionId="f5fdb8f1-c654-4611-8fa2-90ca82a9d98d" testId="5e24096c-dff7-b7a8-22b8-77d85c463701" testName="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_IdenticalRatings_FollowsConfidenceCurve(count: 50, expected: 95)" computerName="YAVUZ" duration="00:00:00.0000126" startTime="2026-11-23T15:44:33.5891386+03:00" endTime="2026-11-23T15:44:33.5891387+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f5fdb8f1-c654-4611-8fa2-90ca82a9d98d" />
+    <UnitTestResult executionId="022a4b63-7caa-45a4-aceb-8d614c823ae3" testId="467991c0-dcfa-7667-bdd4-a4473dafba4d" testName="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_RejectsUnreadableInput(csv: &quot;&quot;)" computerName="YAVUZ" duration="00:00:00.0000233" startTime="2026-11-23T15:44:33.6061141+03:00" endTime="2026-11-23T15:44:33.6061142+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="022a4b63-7caa-45a4-aceb-8d614c823ae3" />
+    <UnitTestResult executionId="d4ac8359-d675-47ee-af2e-6477ca34bf27" testId="24639f4f-07ec-bb22-3d5b-c6dca72eafef" testName="UFMDb.Tests.Auth.RegisterCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(userName: &quot;yavuz&quot;, email: &quot;yavuz@example.com&quot;, password: &quot;sifresiz&quot;)" computerName="YAVUZ" duration="00:00:00.3215846" startTime="2026-11-23T15:44:33.4743267+03:00" endTime="2026-11-23T15:44:33.4743270+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d4ac8359-d675-47ee-af2e-6477ca34bf27" />
+    <UnitTestResult executionId="1533394f-8c0a-44de-b82d-0fe0ff6539ae" testId="ca55541b-51d3-eb97-b422-5759cd6f2ded" testName="UFMDb.Tests.Api.AuthRateLimitingTests.ReddedilenIstek_Kuyruga_Alinmaz" computerName="YAVUZ" duration="00:00:00.0024673" startTime="2026-11-23T15:44:33.7086370+03:00" endTime="2026-11-23T15:44:33.7086372+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1533394f-8c0a-44de-b82d-0fe0ff6539ae" />
+    <UnitTestResult executionId="69c7728e-0113-4dc7-9d08-3c31fd7e5647" testId="1389e893-c837-e679-c3ae-ce35d8d40ae1" testName="UFMDb.Tests.Compatibility.GetCompatibilityFilmsQueryHandlerTests.Handle_ReturnsAgreementsAndDisagreements_WithLocalizedTitles" computerName="YAVUZ" duration="00:00:00.1269830" startTime="2026-11-23T15:44:34.9002100+03:00" endTime="2026-11-23T15:44:34.9002103+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="69c7728e-0113-4dc7-9d08-3c31fd7e5647" />
+    <UnitTestResult executionId="eacf775b-110c-4588-8552-0006bd53eec1" testId="a380bc19-64f0-bb9d-648e-95cb676173bf" testName="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_MoreCommonFilms_RaisesScoreForPerfectMatch" computerName="YAVUZ" duration="00:00:00.0002152" startTime="2026-11-23T15:44:33.5879199+03:00" endTime="2026-11-23T15:44:33.5879200+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="eacf775b-110c-4588-8552-0006bd53eec1" />
+    <UnitTestResult executionId="36dd4f6d-1505-4af9-b576-dd27f7cf9897" testId="2f1d5930-d1ec-3532-86ef-ab1405d7783c" testName="UFMDb.Tests.Reviews.MovieInteractionTests.UnreleasedFilm_RejectsRatingAndReviewWithoutWritingHistory" computerName="YAVUZ" duration="00:00:00.0134178" startTime="2026-11-23T15:44:35.0976552+03:00" endTime="2026-11-23T15:44:35.0976554+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="36dd4f6d-1505-4af9-b576-dd27f7cf9897" />
+    <UnitTestResult executionId="e2627e65-44e3-4772-a62d-c8db3f074bd5" testId="40d8f910-c0a9-4053-6c7d-ebec5189228a" testName="UFMDb.Tests.Watchlists.WatchlistCsvTests.Import_ResolvesIdsBeforeTitle_AccountsForEveryRow_AndCanBeRetried" computerName="YAVUZ" duration="00:00:01.3140793" startTime="2026-11-23T15:44:34.9402026+03:00" endTime="2026-11-23T15:44:34.9402028+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e2627e65-44e3-4772-a62d-c8db3f074bd5" />
+    <UnitTestResult executionId="0691c628-2864-4b55-8c21-4afce2800f3b" testId="30cbbd40-405b-9f66-4029-3c52a4885036" testName="UFMDb.Tests.Compatibility.GetCompatibilityFilmsQueryHandlerTests.Handle_InactiveTarget_ThrowsNotFound" computerName="YAVUZ" duration="00:00:00.0195296" startTime="2026-11-23T15:44:34.9199426+03:00" endTime="2026-11-23T15:44:34.9199430+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0691c628-2864-4b55-8c21-4afce2800f3b" />
+    <UnitTestResult executionId="442181c3-e1c7-49aa-a17d-dcf36824fb71" testId="a4c80754-d581-4a1e-5b8b-12d7f167b324" testName="UFMDb.Tests.Catalog.PostgresCatalogTests.ScreeningPages_KeepWholeDaysAndCountEarlierRewatches" computerName="YAVUZ" duration="00:00:00.0010000" startTime="2026-11-23T15:44:33.1767565+03:00" endTime="2026-11-23T15:44:33.1767566+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="442181c3-e1c7-49aa-a17d-dcf36824fb71">
+      <Output>
+        <ErrorInfo>
+          <Message>Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="b5e64b1e-5b78-4592-b333-a42124bf6247" testId="08cbaf4f-2d4e-83ef-bfad-486e471fce12" testName="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_IsSymmetric" computerName="YAVUZ" duration="00:00:00.1272089" startTime="2026-11-23T15:44:33.5872943+03:00" endTime="2026-11-23T15:44:33.5872948+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b5e64b1e-5b78-4592-b333-a42124bf6247" />
+    <UnitTestResult executionId="121f9c95-291f-4faa-bc3b-58183516ed9d" testId="9d1c151a-ccd8-b0f6-6688-2f609126588d" testName="UFMDb.Tests.Auth.PasswordResetTests.Reset_ChangesPasswordOnce_AndRevokesOnlyThatUsersSessions" computerName="YAVUZ" duration="00:00:01.5732837" startTime="2026-11-23T15:44:35.0538010+03:00" endTime="2026-11-23T15:44:35.0538012+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="121f9c95-291f-4faa-bc3b-58183516ed9d" />
+    <UnitTestResult executionId="6b98dde8-e044-43dd-bcff-04406a663960" testId="25a97591-d4ed-fa2b-548a-f1228862a648" testName="UFMDb.Tests.Auth.LoginCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(email: &quot;yavuz@example.com&quot;, password: &quot;&quot;)" computerName="YAVUZ" duration="00:00:00.3262747" startTime="2026-11-23T15:44:33.4790530+03:00" endTime="2026-11-23T15:44:33.4790534+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6b98dde8-e044-43dd-bcff-04406a663960" />
+    <UnitTestResult executionId="5dbac89c-fa8f-4757-bf30-6d0b1a7a66ce" testId="d9332ba3-e2f5-77ab-2964-ed9349b585ca" testName="UFMDb.Tests.Reviews.MovieInteractionTests.Rating_UpdatesOneVote_PreservesSeedAndHistory_AndRemovesOnlyOwnersWatchlistItem" computerName="YAVUZ" duration="00:00:00.0118858" startTime="2026-11-23T15:44:35.1095972+03:00" endTime="2026-11-23T15:44:35.1095974+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5dbac89c-fa8f-4757-bf30-6d0b1a7a66ce" />
+    <UnitTestResult executionId="af62f76d-bdc3-4c7b-b103-abe018750756" testId="45ca2102-45d4-b46d-c322-1258b51825c4" testName="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_MixedDifferences_MatchesHandComputedValue" computerName="YAVUZ" duration="00:00:00.0002542" startTime="2026-11-23T15:44:33.5906862+03:00" endTime="2026-11-23T15:44:33.5906863+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="af62f76d-bdc3-4c7b-b103-abe018750756" />
+    <UnitTestResult executionId="7a7a5e77-fb26-4f83-9982-c24bc5bb2e43" testId="9fd25885-101c-6bed-40cd-e4465eb18ce9" testName="UFMDb.Tests.Auth.RegisterCommandValidatorTests.Valid_GecerliKomut_HataYok" computerName="YAVUZ" duration="00:00:00.0001488" startTime="2026-11-23T15:44:33.4803881+03:00" endTime="2026-11-23T15:44:33.4803881+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7a7a5e77-fb26-4f83-9982-c24bc5bb2e43" />
+    <UnitTestResult executionId="99ba2ded-477b-47de-be57-058451ac9c7d" testId="b769411e-4155-cdf4-ba11-a966c926b244" testName="UFMDb.Tests.Catalog.MovieCreditImportTests.RepeatImport_ReusesMigratedRowsAndPreservesMissingCredits" computerName="YAVUZ" duration="00:00:01.3500646" startTime="2026-11-23T15:44:35.0952496+03:00" endTime="2026-11-23T15:44:35.0952497+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="99ba2ded-477b-47de-be57-058451ac9c7d" />
+    <UnitTestResult executionId="9438e7db-1a02-41a5-8937-84b1ba83fdc0" testId="8b9e842a-11bb-a6d7-b4ee-4b45b5e72140" testName="UFMDb.Tests.Catalog.PostgresCatalogTests.DiaryOwnerLookup_ResolvesLiteralUnderscoreInUserName" computerName="YAVUZ" duration="00:00:00.0010000" startTime="2026-11-23T15:44:33.1777073+03:00" endTime="2026-11-23T15:44:33.1777073+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9438e7db-1a02-41a5-8937-84b1ba83fdc0">
+      <Output>
+        <ErrorInfo>
+          <Message>Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="ba0f6b2e-69e4-4619-8653-f5e4011bf50c" testId="e24d60b9-be65-09f0-fd29-f9aca3e5510c" testName="UFMDb.Tests.Catalog.PostgresCatalogTests.Search_NormalizesAccents_RanksExactFirst_AndPaginatesAfterFiltering" computerName="YAVUZ" duration="00:00:00.0010000" startTime="2026-11-23T15:44:33.1772374+03:00" endTime="2026-11-23T15:44:33.1772374+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ba0f6b2e-69e4-4619-8653-f5e4011bf50c">
+      <Output>
+        <ErrorInfo>
+          <Message>Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="570b638c-b59d-4876-a507-e6650f6b42c0" testId="69ceb3c4-df95-705c-d12b-204d0f3299b7" testName="UFMDb.Tests.Auth.PasswordHasherTests.VerifyPassword_YanlisSifre_FalseDoner" computerName="YAVUZ" duration="00:00:00.0335508" startTime="2026-11-23T15:44:33.6529473+03:00" endTime="2026-11-23T15:44:33.6529478+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="570b638c-b59d-4876-a507-e6650f6b42c0" />
+    <UnitTestResult executionId="edcc5d8a-a29f-4cd2-a7d4-11c1184a684e" testId="8bb95a16-1356-4c03-cbb0-5136cf6b558e" testName="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests.Lists_NeverOverlap" computerName="YAVUZ" duration="00:00:00.0033221" startTime="2026-11-23T15:44:33.6012481+03:00" endTime="2026-11-23T15:44:33.6012484+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="edcc5d8a-a29f-4cd2-a7d4-11c1184a684e" />
+    <UnitTestResult executionId="32424695-cbce-4c17-8872-db76e3c3783f" testId="0764d077-ef0c-472d-93c6-e296ed26b83b" testName="UFMDb.Tests.Catalog.PostgresCatalogTests.FollowedReview_AppearsInActivityButSpotlightOmitsSpoilerText" computerName="YAVUZ" duration="00:00:00.0010000" startTime="2026-11-23T15:44:33.1680921+03:00" endTime="2026-11-23T15:44:33.1680923+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="32424695-cbce-4c17-8872-db76e3c3783f">
+      <Output>
+        <ErrorInfo>
+          <Message>Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="2fb2e816-5533-432d-8d12-7b444034cd8b" testId="25419400-df82-c4c1-99dd-bd3a2289e562" testName="UFMDb.Tests.Community.CommunityTests.Diary_AnonymousAndOwnerAccess(visibility: Private, anonymousAllowed: False)" computerName="YAVUZ" duration="00:00:00.0010987" startTime="2026-11-23T15:44:34.9951843+03:00" endTime="2026-11-23T15:44:34.9951845+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2fb2e816-5533-432d-8d12-7b444034cd8b" />
+    <UnitTestResult executionId="98e8c3fd-5121-4832-914a-bc51bed4e264" testId="f6e1a187-5ab0-ea56-360f-e3174caafc2a" testName="UFMDb.Tests.Api.AuthRateLimitingTests.Limit_Icindeki_IstekleriKabulEder" computerName="YAVUZ" duration="00:00:00.0009026" startTime="2026-11-23T15:44:33.7116120+03:00" endTime="2026-11-23T15:44:33.7116121+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="98e8c3fd-5121-4832-914a-bc51bed4e264" />
+    <UnitTestResult executionId="319b6506-5784-4ce2-ac3f-6ddf96b866f9" testId="898ceb58-19dd-efb3-7594-9aadfff43cae" testName="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_ExactlyAtMinimum_ReturnsScore" computerName="YAVUZ" duration="00:00:00.3014193" startTime="2026-11-23T15:44:33.4606389+03:00" endTime="2026-11-23T15:44:33.4606395+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="319b6506-5784-4ce2-ac3f-6ddf96b866f9" />
+    <UnitTestResult executionId="9242b10c-95c1-48a6-92ac-f8c83a1e58cf" testId="5294e13e-fdba-de13-9aed-7a3719ced106" testName="UFMDb.Tests.Reviews.ScreeningLogTests.ScreeningDateValidation_AgreesForAddAndEdit(daysFromLatest: 0, hour: 23, valid: True)" computerName="YAVUZ" duration="00:00:00.0012894" startTime="2026-11-23T15:44:34.9974647+03:00" endTime="2026-11-23T15:44:34.9974649+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9242b10c-95c1-48a6-92ac-f8c83a1e58cf" />
+    <UnitTestResult executionId="71288ac8-93b6-44c2-b796-3849636b853a" testId="192bf2f5-d99e-03a5-a41e-765c708a9e2c" testName="UFMDb.Tests.Reviews.ScreeningLogTests.ScreeningDateValidation_AgreesForAddAndEdit(daysFromLatest: 0, hour: 0, valid: True)" computerName="YAVUZ" duration="00:00:00.0007973" startTime="2026-11-23T15:44:35.0001851+03:00" endTime="2026-11-23T15:44:35.0001853+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="71288ac8-93b6-44c2-b796-3849636b853a" />
+    <UnitTestResult executionId="63a04c10-ca06-4eb8-baa7-2143de435b1a" testId="c56e3385-7c1e-76aa-ddeb-a69d32330682" testName="UFMDb.Tests.Api.LocalImageStorageTests.RejectedInputLeavesNoFile(length: 5242881)" computerName="YAVUZ" duration="00:00:00.6850934" startTime="2026-11-23T15:44:33.8379965+03:00" endTime="2026-11-23T15:44:33.8379969+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="63a04c10-ca06-4eb8-baa7-2143de435b1a" />
+    <UnitTestResult executionId="090e12a3-9772-4c09-9da5-f26b516b1462" testId="52b6fc9f-1bd6-e16f-4cd3-f1749acf9b6d" testName="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests.AverageDifference_RoundsToOneDecimal" computerName="YAVUZ" duration="00:00:00.0174757" startTime="2026-11-23T15:44:33.6193040+03:00" endTime="2026-11-23T15:44:33.6193043+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="090e12a3-9772-4c09-9da5-f26b516b1462" />
+    <UnitTestResult executionId="641a9b01-1a48-4d3c-8700-279401d4b8b8" testId="76343946-b8d9-7c2a-1fc7-8a1244e849fb" testName="UFMDb.Tests.Catalog.PostgresCatalogTests.FilmDetail_ReadsMyRatingAndSpoilerReview_AndLocalizesTheTitle" computerName="YAVUZ" duration="00:00:00.0010000" startTime="2026-11-23T15:44:33.1775191+03:00" endTime="2026-11-23T15:44:33.1775191+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="641a9b01-1a48-4d3c-8700-279401d4b8b8">
+      <Output>
+        <ErrorInfo>
+          <Message>Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3a550e5e-fb10-4f18-a85e-c7ce7a80ab41" testId="4e30e33d-85bc-294e-dff9-25b7b7754dce" testName="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests.Agreements_IncludesOnlyDifferencesUpToHalfStar" computerName="YAVUZ" duration="00:00:00.4321722" startTime="2026-11-23T15:44:33.5886567+03:00" endTime="2026-11-23T15:44:33.5886567+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3a550e5e-fb10-4f18-a85e-c7ce7a80ab41" />
+    <UnitTestResult executionId="57a942f4-d109-4af2-a7a9-9ac03424920e" testId="26bb034d-c778-579a-ee29-e303e99128a2" testName="UFMDb.Tests.Auth.RegisterCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(userName: &quot;yavuz&quot;, email: &quot;gecersiz-email&quot;, password: &quot;Sifre123&quot;)" computerName="YAVUZ" duration="00:00:00.0000766" startTime="2026-11-23T15:44:33.4803170+03:00" endTime="2026-11-23T15:44:33.4803170+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="57a942f4-d109-4af2-a7a9-9ac03424920e" />
+    <UnitTestResult executionId="6232d78c-d2b2-4bce-940f-bdd7a260c3be" testId="43b6a61d-54a7-35fe-6436-869c55814640" testName="UFMDb.Tests.Auth.RegisterCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(userName: &quot;yavuz&quot;, email: &quot;yavuz@example.com&quot;, password: &quot;SIFREBUYUK&quot;)" computerName="YAVUZ" duration="00:00:00.0000679" startTime="2026-11-23T15:44:33.4802571+03:00" endTime="2026-11-23T15:44:33.4802571+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6232d78c-d2b2-4bce-940f-bdd7a260c3be" />
+    <UnitTestResult executionId="bc9e5b43-287a-4ae5-808d-8770bfa25018" testId="2707c56b-56b0-06dd-33d5-0d9e4f4fd4e8" testName="UFMDb.Tests.Community.AdminUserTests.Admin_CanManageAnotherAccount_AndCannotDemoteOrDeactivateSelf" computerName="YAVUZ" duration="00:00:01.6905082" startTime="2026-11-23T15:44:34.8469360+03:00" endTime="2026-11-23T15:44:34.8469363+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bc9e5b43-287a-4ae5-808d-8770bfa25018" />
+    <UnitTestResult executionId="cf7f40f2-7de1-4969-ab8e-d62bed7e728b" testId="7bba03c7-3a23-7861-7ccb-81a475b38ed3" testName="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_RecognizesSupportedHeadersAndSeparators(csv: &quot;﻿sep=;\r\nFilm Adı;Yıl\r\nSolaris;1972&quot;)" computerName="YAVUZ" duration="00:00:00.0006859" startTime="2026-11-23T15:44:33.6051616+03:00" endTime="2026-11-23T15:44:33.6051618+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cf7f40f2-7de1-4969-ab8e-d62bed7e728b" />
+    <UnitTestResult executionId="dadf4bbe-65a1-450d-a7bd-f159bd9af1a2" testId="c5ebbf46-aaf5-6c68-30c1-89a309178b60" testName="UFMDb.Tests.Auth.RegisterCommandHandlerTests.Handle_KullaniciAdiZatenKullaniliyor_ConflictExceptionFirlatir" computerName="YAVUZ" duration="00:00:00.0024189" startTime="2026-11-23T15:44:34.9381841+03:00" endTime="2026-11-23T15:44:34.9381843+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dadf4bbe-65a1-450d-a7bd-f159bd9af1a2" />
+    <UnitTestResult executionId="564bcfcc-7a8a-4a79-a552-17906d98e38b" testId="1c07bb47-882c-3421-a8b9-391e12cb9921" testName="UFMDb.Tests.Auth.PasswordHasherTests.HashPassword_AyniSifreIcinFarkliHashVeSaltUretir" computerName="YAVUZ" duration="00:00:00.4278395" startTime="2026-11-23T15:44:33.5807248+03:00" endTime="2026-11-23T15:44:33.5807253+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="564bcfcc-7a8a-4a79-a552-17906d98e38b" />
+    <UnitTestResult executionId="5f200fbd-a44f-499e-98a1-49cefdc7aabf" testId="511cbcde-122e-5b27-5ab1-53cffd647234" testName="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests.AverageDifference_NoPairs_ReturnsNull" computerName="YAVUZ" duration="00:00:00.0002127" startTime="2026-11-23T15:44:33.6231585+03:00" endTime="2026-11-23T15:44:33.6231586+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5f200fbd-a44f-499e-98a1-49cefdc7aabf" />
+    <UnitTestResult executionId="38f1b483-3ab1-4a10-9bb2-48865510f29d" testId="c28ee7bf-39a5-43dc-4766-46107758951b" testName="UFMDb.Tests.Api.ExceptionHandlingMiddlewareTests.NotFoundException_404DonerVeMesajTasir" computerName="YAVUZ" duration="00:00:00.0548046" startTime="2026-11-23T15:44:33.7372459+03:00" endTime="2026-11-23T15:44:33.7372461+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="38f1b483-3ab1-4a10-9bb2-48865510f29d" />
+    <UnitTestResult executionId="2137fb16-af54-4434-ba7b-6fce2df01bc9" testId="0bafc8ac-783f-ecdc-4526-9d961e0a6fdc" testName="UFMDb.Tests.Auth.RefreshTokenCommandHandlerTests.Handle_BilinmeyenToken_UnauthorizedExceptionFirlatir" computerName="YAVUZ" duration="00:00:00.0016485" startTime="2026-11-23T15:44:34.9377232+03:00" endTime="2026-11-23T15:44:34.9377236+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2137fb16-af54-4434-ba7b-6fce2df01bc9" />
+    <UnitTestResult executionId="6bbde1e7-6f9d-48c9-afdf-d962fb5c0831" testId="33977758-c404-c1b1-7bfe-8426302521b4" testName="UFMDb.Tests.Reviews.ScreeningLogTests.BackfilledScreeningAndItsEdits_PreserveNewerRatingAndActivityTimestamp" computerName="YAVUZ" duration="00:00:00.0084232" startTime="2026-11-23T15:44:35.1027098+03:00" endTime="2026-11-23T15:44:35.1027100+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6bbde1e7-6f9d-48c9-afdf-d962fb5c0831" />
+    <UnitTestResult executionId="96708b3d-654d-404b-99d6-bdfefd4cca9a" testId="ccb8c355-7247-a09c-f820-7b1710d21711" testName="UFMDb.Tests.Api.ExceptionHandlingMiddlewareTests.ConflictException_409Doner" computerName="YAVUZ" duration="00:00:00.0006689" startTime="2026-11-23T15:44:33.7380110+03:00" endTime="2026-11-23T15:44:33.7380111+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="96708b3d-654d-404b-99d6-bdfefd4cca9a" />
+    <UnitTestResult executionId="9a0df1d6-e1c6-4f5a-addb-6ddd0d003cf0" testId="19d3218b-f619-7dd6-277c-58295ec7567d" testName="UFMDb.Tests.Catalog.PostgresCatalogTests.Search_TreatsPercentAndUnderscoreInTitlesAsLiteral" computerName="YAVUZ" duration="00:00:00.0010000" startTime="2026-11-23T15:44:33.1689150+03:00" endTime="2026-11-23T15:44:33.1689151+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9a0df1d6-e1c6-4f5a-addb-6ddd0d003cf0">
+      <Output>
+        <ErrorInfo>
+          <Message>Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="2dfb5229-67c5-4ef0-984a-18cd7b1fc8d9" testId="fefd6697-9ee7-1222-6b12-2a0ed38ea61a" testName="UFMDb.Tests.Auth.LoginCommandHandlerTests.Handle_YanlisSifre_UnauthorizedExceptionFirlatir" computerName="YAVUZ" duration="00:00:00.1030415" startTime="2026-11-23T15:44:34.9570946+03:00" endTime="2026-11-23T15:44:34.9570949+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2dfb5229-67c5-4ef0-984a-18cd7b1fc8d9" />
+    <UnitTestResult executionId="76b3c9d2-5b94-4ea8-af1b-5b1761619747" testId="239e8ce5-e6aa-faf7-0139-3ed97757cdd0" testName="UFMDb.Tests.Community.CommunityTests.RankedList_ChecksOwnership_DeduplicatesAndCompactsOrderOnRemoval" computerName="YAVUZ" duration="00:00:00.1703635" startTime="2026-11-23T15:44:35.1662604+03:00" endTime="2026-11-23T15:44:35.1662606+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="76b3c9d2-5b94-4ea8-af1b-5b1761619747" />
+    <UnitTestResult executionId="5cba4511-e74b-4ce6-938d-33f800f127e1" testId="86c968b3-e0bf-b019-b74a-f1a3920425f1" testName="UFMDb.Tests.Api.LocalImageStorageTests.RejectedInputLeavesNoFile(length: 16)" computerName="YAVUZ" duration="00:00:00.0405751" startTime="2026-11-23T15:44:33.8822726+03:00" endTime="2026-11-23T15:44:33.8822731+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5cba4511-e74b-4ce6-938d-33f800f127e1" />
+    <UnitTestResult executionId="be7dc103-efb8-4c04-b635-78062b11718f" testId="d712f69f-af04-64c2-3855-e017e3a6caa2" testName="UFMDb.Tests.Api.AuthRateLimitingTests.FarkliIpAdresleriBirbirindenBagimsizSinirlanir" computerName="YAVUZ" duration="00:00:00.0008141" startTime="2026-11-23T15:44:33.7061008+03:00" endTime="2026-11-23T15:44:33.7061009+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="be7dc103-efb8-4c04-b635-78062b11718f" />
+    <UnitTestResult executionId="bfb28837-30fb-404a-8258-72de7cfaa733" testId="a6a1c764-3565-9f42-fdf5-e70c63259388" testName="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_RejectsUnreadableInput(csv: &quot;Year\n1972&quot;)" computerName="YAVUZ" duration="00:00:00.0001791" startTime="2026-11-23T15:44:33.6060359+03:00" endTime="2026-11-23T15:44:33.6060360+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bfb28837-30fb-404a-8258-72de7cfaa733" />
+    <UnitTestResult executionId="c45058ef-1b02-4695-bdd8-c08df3783bfc" testId="93b88368-7fb6-8ea3-1e42-aacfcf89b148" testName="UFMDb.Tests.Community.CommunityTests.Notifications_MarkOneAndMarkAllAreScopedToRecipient" computerName="YAVUZ" duration="00:00:01.0990357" startTime="2026-11-23T15:44:34.8629712+03:00" endTime="2026-11-23T15:44:34.8629715+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c45058ef-1b02-4695-bdd8-c08df3783bfc" />
+    <UnitTestResult executionId="2c315ae3-2805-45ec-bdde-e4188b889be9" testId="1ac5a2e7-7298-b107-b3f5-db372165c448" testName="UFMDb.Tests.Importer.TmdbClientTests.Detail_ReturnsNullAfterBoundedRetries(status: ServiceUnavailable, expectedCalls: 4)" computerName="YAVUZ" duration="00:00:00.4375437" startTime="2026-11-23T15:44:33.5939382+03:00" endTime="2026-11-23T15:44:33.5939384+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2c315ae3-2805-45ec-bdde-e4188b889be9" />
+    <UnitTestResult executionId="861b9056-7286-4daa-a47d-82a8c2837a0f" testId="0b820ec0-7f9b-0b19-626d-a51e0f44c984" testName="UFMDb.Tests.Auth.LoginCommandHandlerTests.Handle_HataliGiris_HataMesajiBilgiSizintisiYapmaz" computerName="YAVUZ" duration="00:00:00.0696205" startTime="2026-11-23T15:44:34.8539018+03:00" endTime="2026-11-23T15:44:34.8539019+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="861b9056-7286-4daa-a47d-82a8c2837a0f" />
+    <UnitTestResult executionId="86787e08-0ffb-4c5f-989e-08449fc1478a" testId="d00041f4-beef-edd3-3e7a-f2d7836bfc0e" testName="UFMDb.Tests.Reviews.ScreeningLogTests.RemovingLatestRating_FallsBackToEarlierScreening(deleteEntry: True)" computerName="YAVUZ" duration="00:00:00.0185120" startTime="2026-11-23T15:44:35.0942190+03:00" endTime="2026-11-23T15:44:35.0942192+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="86787e08-0ffb-4c5f-989e-08449fc1478a" />
+    <UnitTestResult executionId="7d349091-ade3-42ad-809f-cd350341e259" testId="b05dd72e-e2c7-ef23-8515-96141b514a35" testName="UFMDb.Tests.Catalog.PeopleTests.ActorDetails_SortCreditsAndShowOnlyViewersPersonalFlags" computerName="YAVUZ" duration="00:00:00.1325436" startTime="2026-11-23T15:44:35.1247224+03:00" endTime="2026-11-23T15:44:35.1247226+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7d349091-ade3-42ad-809f-cd350341e259" />
+    <UnitTestResult executionId="ad54740e-1455-4bcb-a2c1-0d3c33b282d6" testId="80b60197-ee29-c9ba-62a5-893620ea5ea9" testName="UFMDb.Tests.Importer.TmdbClientTests.Detail_ReturnsNullAfterBoundedRetries(status: NotFound, expectedCalls: 1)" computerName="YAVUZ" duration="00:00:00.0000377" startTime="2026-11-23T15:44:33.5943876+03:00" endTime="2026-11-23T15:44:33.5943877+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ad54740e-1455-4bcb-a2c1-0d3c33b282d6" />
+    <UnitTestResult executionId="5c2a2ce4-b83b-4288-978d-52c5fcf586b7" testId="bb524990-1e8a-cab2-ae13-e69d27f02b57" testName="UFMDb.Tests.Catalog.PostgresCatalogTests.RatingSort_WeightsVoteCount_AndReturnsLocalizedTitlesInRankOrder" computerName="YAVUZ" duration="00:00:00.0010000" startTime="2026-11-23T15:44:33.1687857+03:00" endTime="2026-11-23T15:44:33.1687857+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5c2a2ce4-b83b-4288-978d-52c5fcf586b7">
+      <Output>
+        <ErrorInfo>
+          <Message>Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="8bc3b84b-fb14-4362-b94a-ac8f7008a2de" testId="7b92cec6-70ef-a0a3-8468-e62244b55374" testName="UFMDb.Tests.Community.CommunityTests.Diary_AnonymousAndOwnerAccess(visibility: Followers, anonymousAllowed: False)" computerName="YAVUZ" duration="00:00:00.0003113" startTime="2026-11-23T15:44:34.9955827+03:00" endTime="2026-11-23T15:44:34.9955830+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8bc3b84b-fb14-4362-b94a-ac8f7008a2de" />
+    <UnitTestResult executionId="dd5e1642-6dc0-413d-ac18-903f1b1d5cc5" testId="54adeeec-6ac2-d027-6509-98815483a4e9" testName="UFMDb.Tests.Auth.LogoutCommandHandlerTests.Handle_GecerliToken_IptalEdilir" computerName="YAVUZ" duration="00:00:01.6749628" startTime="2026-11-23T15:44:34.8313304+03:00" endTime="2026-11-23T15:44:34.8313307+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dd5e1642-6dc0-413d-ac18-903f1b1d5cc5" />
+    <UnitTestResult executionId="e44170ad-1fba-4d7e-a8cf-4623dd6916ad" testId="a4fa5e79-4a24-f2fd-a6a6-f35f131fe881" testName="UFMDb.Tests.Reviews.ScreeningLogTests.RemovingLatestRating_FallsBackToEarlierScreening(deleteEntry: False)" computerName="YAVUZ" duration="00:00:00.0752546" startTime="2026-11-23T15:44:35.0755655+03:00" endTime="2026-11-23T15:44:35.0755657+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e44170ad-1fba-4d7e-a8cf-4623dd6916ad" />
+    <UnitTestResult executionId="aa254467-3f39-4926-a752-5652189cd563" testId="6ecaddec-c529-ed40-0e18-cb8a53e7c463" testName="UFMDb.Tests.Compatibility.GetCompatibilityFilmsQueryHandlerTests.Handle_UnknownTarget_ThrowsNotFound" computerName="YAVUZ" duration="00:00:01.6167073" startTime="2026-11-23T15:44:34.7731323+03:00" endTime="2026-11-23T15:44:34.7731326+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="aa254467-3f39-4926-a752-5652189cd563" />
+    <UnitTestResult executionId="69c85f30-c70f-49d1-a9f7-bbf1b9319301" testId="ec0215dd-d714-ca31-05e2-3e3ddada61bb" testName="UFMDb.Tests.Catalog.ArchiveCreditBackfillTests.BatchResumeAndRetry_VisitOnlyEligibleFilms" computerName="YAVUZ" duration="00:00:00.0010000" startTime="2026-11-23T15:44:33.1654587+03:00" endTime="2026-11-23T15:44:33.1654739+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="69c85f30-c70f-49d1-a9f7-bbf1b9319301">
+      <Output>
+        <ErrorInfo>
+          <Message>Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="eb81a40d-6b2e-4d3c-93b4-464527601dde" testId="6d24a1e0-a511-1277-db31-7d71eb85c2dc" testName="UFMDb.Tests.Auth.PasswordHasherTests.HashPassword_DuzMetinSifreyiIcermez" computerName="YAVUZ" duration="00:00:00.0289221" startTime="2026-11-23T15:44:33.6820989+03:00" endTime="2026-11-23T15:44:33.6820993+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="eb81a40d-6b2e-4d3c-93b4-464527601dde" />
+    <UnitTestResult executionId="338be48d-3257-4e87-96e6-208f8710ed65" testId="238688e1-56ea-8d78-9f43-5f2d74edb023" testName="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_IdenticalRatings_FollowsConfidenceCurve(count: 20, expected: 90)" computerName="YAVUZ" duration="00:00:00.0000933" startTime="2026-11-23T15:44:33.5887046+03:00" endTime="2026-11-23T15:44:33.5887047+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="338be48d-3257-4e87-96e6-208f8710ed65" />
+    <UnitTestResult executionId="4bcce2b9-21c6-43f3-8d29-3963dd1f4665" testId="17449ef9-7fc4-3421-0676-9e1e855283e6" testName="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_AlwaysStaysWithinZeroAndHundred" computerName="YAVUZ" duration="00:00:00.0006957" startTime="2026-11-23T15:44:33.5883386+03:00" endTime="2026-11-23T15:44:33.5883387+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4bcce2b9-21c6-43f3-8d29-3963dd1f4665" />
+    <UnitTestResult executionId="a1356ae8-d3a3-481e-ac94-a82794c21bf1" testId="9fc9612d-3a90-9a55-f965-6e4be6134840" testName="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests.Agreements_PutsSharedFavouritesFirst" computerName="YAVUZ" duration="00:00:00.0091804" startTime="2026-11-23T15:44:33.5978495+03:00" endTime="2026-11-23T15:44:33.5978496+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a1356ae8-d3a3-481e-ac94-a82794c21bf1" />
+    <UnitTestResult executionId="2cece9e5-0bd5-4ba4-8024-c121705f79b9" testId="44e5ef20-e05e-4a96-0583-6ea1ab509381" testName="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_ReadsTurkishExcelEncoding" computerName="YAVUZ" duration="00:00:00.0179053" startTime="2026-11-23T15:44:33.6240904+03:00" endTime="2026-11-23T15:44:33.6240905+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2cece9e5-0bd5-4ba4-8024-c121705f79b9" />
+    <UnitTestResult executionId="f8f53bbc-5842-40bf-a2c5-a6d5f7d56621" testId="fa207b4c-d118-d2e6-e7ad-c9f6c7f4d82d" testName="UFMDb.Tests.Compatibility.GetCompatibilityFilmsQueryHandlerTests.Handle_OwnProfile_ThrowsValidationException" computerName="YAVUZ" duration="00:00:00.0014147" startTime="2026-11-23T15:44:34.9214270+03:00" endTime="2026-11-23T15:44:34.9214275+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f8f53bbc-5842-40bf-a2c5-a6d5f7d56621" />
+    <UnitTestResult executionId="bd39b348-b9d0-4732-8016-4c65e3d94065" testId="0b67832a-dd61-c40a-c106-19f651d8babb" testName="UFMDb.Tests.Auth.RegisterCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(userName: &quot;&quot;, email: &quot;yavuz@example.com&quot;, password: &quot;Sifre123&quot;)" computerName="YAVUZ" duration="00:00:00.0048488" startTime="2026-11-23T15:44:33.4792614+03:00" endTime="2026-11-23T15:44:33.4792616+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bd39b348-b9d0-4732-8016-4c65e3d94065" />
+    <UnitTestResult executionId="a83f1721-1d98-4a43-81f3-50149d42c2e6" testId="8280a7d9-4ac4-f780-8f05-12ef1714f9d6" testName="UFMDb.Tests.Importer.TmdbClientTests.Detail_ReturnsNullAfterBoundedRetries(status: TooManyRequests, expectedCalls: 4)" computerName="YAVUZ" duration="00:00:00.0002856" startTime="2026-11-23T15:44:33.5942908+03:00" endTime="2026-11-23T15:44:33.5942910+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a83f1721-1d98-4a43-81f3-50149d42c2e6" />
+    <UnitTestResult executionId="5b3e7125-ad4e-4bd6-97c2-6ab29a497752" testId="94eb432c-d139-4487-4e64-2f647ad88c5f" testName="UFMDb.Tests.Api.AuthRateLimitingTests.PolitikaAyarlari_KullanicininOnayladigiDegerlerdir" computerName="YAVUZ" duration="00:00:00.0019398" startTime="2026-11-23T15:44:33.7106472+03:00" endTime="2026-11-23T15:44:33.7106474+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5b3e7125-ad4e-4bd6-97c2-6ab29a497752" />
+    <UnitTestResult executionId="b77f0582-b8d8-483e-9ebc-8f1f2f6e6bfc" testId="c5cd7f2c-897b-c000-0451-47d3c6631a88" testName="UFMDb.Tests.Catalog.PostgresCatalogTests.Activity_PagesWholeCardsAcrossEqualTimestamps_AndRespectsPrivateDiary" computerName="YAVUZ" duration="00:00:00.0010000" startTime="2026-11-23T15:44:33.1769288+03:00" endTime="2026-11-23T15:44:33.1769288+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b77f0582-b8d8-483e-9ebc-8f1f2f6e6bfc">
+      <Output>
+        <ErrorInfo>
+          <Message>Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="6ffcf5af-c0d6-451f-8e06-15ac72f1d86c" testId="0c243d0e-de4a-b93b-d36e-cbd0e3d577c5" testName="UFMDb.Tests.Auth.LoginCommandHandlerTests.Handle_BilinmeyenEmail_UnauthorizedExceptionFirlatir" computerName="YAVUZ" duration="00:00:00.0013256" startTime="2026-11-23T15:44:35.0196306+03:00" endTime="2026-11-23T15:44:35.0196308+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6ffcf5af-c0d6-451f-8e06-15ac72f1d86c" />
+    <UnitTestResult executionId="2ceadb6e-085a-4fab-9567-de5afd9f5d5a" testId="253a87b2-d15e-7403-0516-1a32e2af5174" testName="UFMDb.Tests.Auth.JwtTokenServiceTests.GenerateAccessToken_HerCagridaFarkliJtiUretir" computerName="YAVUZ" duration="00:00:00.0008126" startTime="2026-11-23T15:44:33.7410083+03:00" endTime="2026-11-23T15:44:33.7410084+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2ceadb6e-085a-4fab-9567-de5afd9f5d5a" />
+    <UnitTestResult executionId="cf1522a4-767e-4f28-9bf6-1fb99fed0c2a" testId="6d9ca20f-33b8-4060-52f0-0c1187a70508" testName="UFMDb.Tests.Catalog.HomeFeedTests.SharedCache_SeparatesLanguagesAndNeverLeaksPersonalFlags" computerName="YAVUZ" duration="00:00:01.4130191" startTime="2026-11-23T15:44:35.1542809+03:00" endTime="2026-11-23T15:44:35.1542811+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cf1522a4-767e-4f28-9bf6-1fb99fed0c2a" />
+    <UnitTestResult executionId="bcdb5957-baa6-49ca-9f2d-015b02bf1859" testId="e3ad73ce-88e7-633d-5009-55e7fe57270d" testName="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_MaximumDisagreement_FollowsConfidenceCurve(count: 5, expected: 25)" computerName="YAVUZ" duration="00:00:00.0001027" startTime="2026-11-23T15:44:33.5901652+03:00" endTime="2026-11-23T15:44:33.5901653+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bcdb5957-baa6-49ca-9f2d-015b02bf1859" />
+    <UnitTestResult executionId="31c3febd-3cda-48ce-9c3d-a2086c7f829a" testId="5fd74be3-1d22-898a-32c1-6240c13869c6" testName="UFMDb.Tests.Auth.LoginCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(email: &quot;gecersiz-email&quot;, password: &quot;sifre&quot;)" computerName="YAVUZ" duration="00:00:00.0003618" startTime="2026-11-23T15:44:33.4795082+03:00" endTime="2026-11-23T15:44:33.4795083+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="31c3febd-3cda-48ce-9c3d-a2086c7f829a" />
+    <UnitTestResult executionId="beb46572-8da9-46bc-b7fd-d7d7ab4ae2b0" testId="6355c288-bc30-9c9c-7c4f-5e8db1154e64" testName="UFMDb.Tests.Importer.TmdbClientTests.Discover_SendsCountryVoteAndDateFilters_AndReadsSnakeCaseFields" computerName="YAVUZ" duration="00:00:00.1471574" startTime="2026-11-23T15:44:33.7416111+03:00" endTime="2026-11-23T15:44:33.7416112+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="beb46572-8da9-46bc-b7fd-d7d7ab4ae2b0" />
+    <UnitTestResult executionId="b4b879f7-e5a7-41d7-adc3-73b12dee5073" testId="1bbc58ed-3774-69b5-5614-818807bd6058" testName="UFMDb.Tests.Importer.TmdbClientTests.Detail_RecoversOnNextAttempt" computerName="YAVUZ" duration="00:00:00.0219246" startTime="2026-11-23T15:44:33.7636290+03:00" endTime="2026-11-23T15:44:33.7636292+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b4b879f7-e5a7-41d7-adc3-73b12dee5073" />
+    <UnitTestResult executionId="483e51ba-de4d-44be-b910-adc0021d4172" testId="4c7c94ab-a772-2de0-23da-6ca734a693d8" testName="UFMDb.Tests.Reviews.MovieInteractionTests.Review_EditKeepsId_DeleteHidesReviewAndCleansLikeNotification" computerName="YAVUZ" duration="00:00:00.1951216" startTime="2026-11-23T15:44:35.0840847+03:00" endTime="2026-11-23T15:44:35.0840851+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="483e51ba-de4d-44be-b910-adc0021d4172" />
+    <UnitTestResult executionId="5dc69334-8066-4015-85ad-3c23e726ae25" testId="8e76f531-6c0a-1cc0-dc63-9564c8ed55db" testName="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_MaximumDisagreement_FollowsConfidenceCurve(count: 50, expected: 5)" computerName="YAVUZ" duration="00:00:00.0001660" startTime="2026-11-23T15:44:33.5903843+03:00" endTime="2026-11-23T15:44:33.5903845+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5dc69334-8066-4015-85ad-3c23e726ae25" />
+    <UnitTestResult executionId="63fa1ae8-584c-4e9c-b323-51011c3e0ad7" testId="1d2037c7-8145-70c0-d8f5-d0e7c8f318d1" testName="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_RejectsUnreadableInput(csv: &quot;Title\nA\0B&quot;)" computerName="YAVUZ" duration="00:00:00.0005478" startTime="2026-11-23T15:44:33.6058264+03:00" endTime="2026-11-23T15:44:33.6058265+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="63fa1ae8-584c-4e9c-b323-51011c3e0ad7" />
+    <UnitTestResult executionId="83fc7365-e1db-4ec0-94d1-8b2e0c375532" testId="d6837f21-daff-58ea-2ef9-eb863c4ffb5f" testName="UFMDb.Tests.Auth.RegisterCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(userName: &quot;yavuz&quot;, email: &quot;yavuz@example.com&quot;, password: &quot;kisa1&quot;)" computerName="YAVUZ" duration="00:00:00.0001402" startTime="2026-11-23T15:44:33.4794460+03:00" endTime="2026-11-23T15:44:33.4794462+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="83fc7365-e1db-4ec0-94d1-8b2e0c375532" />
+    <UnitTestResult executionId="2ea41dd6-6787-45e9-9284-d67deb8e31b6" testId="6f06b12b-b200-f43a-87b4-084ce8be62f7" testName="UFMDb.Tests.Auth.LogoutCommandHandlerTests.Handle_BilinmeyenToken_HataFirlatmaz" computerName="YAVUZ" duration="00:00:00.0069850" startTime="2026-11-23T15:44:34.8384258+03:00" endTime="2026-11-23T15:44:34.8384260+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2ea41dd6-6787-45e9-9284-d67deb8e31b6" />
+    <UnitTestResult executionId="f213c0ec-1f36-4dc1-bb54-134bcc68e570" testId="19fba11c-7f4a-eaed-a6af-6c1774a52c94" testName="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests.Lists_AreCappedAtSix" computerName="YAVUZ" duration="00:00:00.0035170" startTime="2026-11-23T15:44:33.6228633+03:00" endTime="2026-11-23T15:44:33.6228634+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f213c0ec-1f36-4dc1-bb54-134bcc68e570" />
+    <UnitTestResult executionId="8fbf8261-e024-4ea2-8dd5-ddab28e3e32b" testId="ff8dfdfc-75ae-ec99-308c-8d6773892c33" testName="UFMDb.Tests.Watchlists.WatchlistCsvTests.Export_RoundTripsQuotedTitleAndIds_AndExcludesOtherUsers" computerName="YAVUZ" duration="00:00:00.0464675" startTime="2026-11-23T15:44:34.9867952+03:00" endTime="2026-11-23T15:44:34.9867957+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8fbf8261-e024-4ea2-8dd5-ddab28e3e32b" />
+    <UnitTestResult executionId="44768c92-7f2c-432b-9604-10a081a58e48" testId="68e1d650-74f8-7d44-e4c4-a57b1f577ce7" testName="UFMDb.Tests.Auth.LoginCommandValidatorTests.Validate_GecerliKomut_HataYok" computerName="YAVUZ" duration="00:00:00.0002271" startTime="2026-11-23T15:44:33.4803604+03:00" endTime="2026-11-23T15:44:33.4803604+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="44768c92-7f2c-432b-9604-10a081a58e48" />
+    <UnitTestResult executionId="028b09fc-19e7-4b60-b6a9-d47ef8039c8e" testId="c845a60b-47be-0e52-34b6-25c925c16fcd" testName="UFMDb.Tests.Auth.RegisterCommandHandlerTests.Handle_YeniKullanici_KullaniciOlusturupTokenDoner" computerName="YAVUZ" duration="00:00:00.0264517" startTime="2026-11-23T15:44:34.9647531+03:00" endTime="2026-11-23T15:44:34.9647533+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="028b09fc-19e7-4b60-b6a9-d47ef8039c8e" />
+    <UnitTestResult executionId="f8139b27-d6f0-4a64-a43a-a8d9a8908d8d" testId="a78e8e0d-129e-0819-4c76-08e37f95b8de" testName="UFMDb.Tests.Auth.JwtTokenServiceTests.GenerateAccessToken_BeklenenClaimleriIcerir" computerName="YAVUZ" duration="00:00:00.5832006" startTime="2026-11-23T15:44:33.7395389+03:00" endTime="2026-11-23T15:44:33.7395391+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f8139b27-d6f0-4a64-a43a-a8d9a8908d8d" />
+    <UnitTestResult executionId="fa7d197f-f160-4b11-8200-84d89b33f325" testId="b306cba5-12bb-76b5-26cf-ae08ec1244e2" testName="UFMDb.Tests.Auth.PasswordHasherTests.VerifyPassword_DogruSifre_TrueDoner" computerName="YAVUZ" duration="00:00:00.0381138" startTime="2026-11-23T15:44:33.6193633+03:00" endTime="2026-11-23T15:44:33.6193633+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fa7d197f-f160-4b11-8200-84d89b33f325" />
+    <UnitTestResult executionId="86045cf9-164e-444f-9c07-0b72833549bf" testId="e6716dc7-c160-49ee-ee71-d4fc698257e2" testName="UFMDb.Tests.Api.LocalImageStorageTests.Save_ConvertsPngToWebpWithExpectedDimensions_AndDeletesManagedFile(kind: Avatar, folder: &quot;avatars&quot;, width: 512, height: 512)" computerName="YAVUZ" duration="00:00:00.3124874" startTime="2026-11-23T15:44:36.0551114+03:00" endTime="2026-11-23T15:44:36.0551118+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="86045cf9-164e-444f-9c07-0b72833549bf" />
+    <UnitTestResult executionId="6507206e-8301-4b44-9275-2697f605d4be" testId="6ee33dc5-db53-1f75-9e15-b7bb1c79a949" testName="UFMDb.Tests.Community.CommunityTests.Diary_AnonymousAndOwnerAccess(visibility: Public, anonymousAllowed: True)" computerName="YAVUZ" duration="00:00:00.0000974" startTime="2026-11-23T15:44:34.9965557+03:00" endTime="2026-11-23T15:44:34.9965558+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6507206e-8301-4b44-9275-2697f605d4be" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="UFMDb.Tests.Api.AuthRateLimitingTests.Limit_Icindeki_IstekleriKabulEder" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="f6e1a187-5ab0-ea56-360f-e3174caafc2a">
+      <Execution id="98e8c3fd-5121-4832-914a-bc51bed4e264" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.AuthRateLimitingTests" name="Limit_Icindeki_IstekleriKabulEder" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Importer.TmdbClientTests.Detail_ReturnsNullAfterBoundedRetries(status: ServiceUnavailable, expectedCalls: 4)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="1ac5a2e7-7298-b107-b3f5-db372165c448">
+      <Execution id="2c315ae3-2805-45ec-bdde-e4188b889be9" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Importer.TmdbClientTests" name="Detail_ReturnsNullAfterBoundedRetries" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.ArchiveCreditBackfillTests.BatchResumeAndRetry_VisitOnlyEligibleFilms" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="ec0215dd-d714-ca31-05e2-3e3ddada61bb">
+      <Execution id="69c85f30-c70f-49d1-a9f7-bbf1b9319301" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.ArchiveCreditBackfillTests" name="BatchResumeAndRetry_VisitOnlyEligibleFilms" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.LoginCommandHandlerTests.Handle_YanlisSifre_UnauthorizedExceptionFirlatir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="fefd6697-9ee7-1222-6b12-2a0ed38ea61a">
+      <Execution id="2dfb5229-67c5-4ef0-984a-18cd7b1fc8d9" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.LoginCommandHandlerTests" name="Handle_YanlisSifre_UnauthorizedExceptionFirlatir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RegisterCommandValidatorTests.Valid_GecerliKomut_HataYok" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="9fd25885-101c-6bed-40cd-e4465eb18ce9">
+      <Execution id="7a7a5e77-fb26-4f83-9982-c24bc5bb2e43" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RegisterCommandValidatorTests" name="Valid_GecerliKomut_HataYok" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.PostgresCatalogTests.ScreeningPages_KeepWholeDaysAndCountEarlierRewatches" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="a4c80754-d581-4a1e-5b8b-12d7f167b324">
+      <Execution id="442181c3-e1c7-49aa-a17d-dcf36824fb71" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.PostgresCatalogTests" name="ScreeningPages_KeepWholeDaysAndCountEarlierRewatches" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.HomeFeedTests.SharedCache_SeparatesLanguagesAndNeverLeaksPersonalFlags" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="6d9ca20f-33b8-4060-52f0-0c1187a70508">
+      <Execution id="cf1522a4-767e-4f28-9bf6-1fb99fed0c2a" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.HomeFeedTests" name="SharedCache_SeparatesLanguagesAndNeverLeaksPersonalFlags" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Importer.TmdbClientTests.Detail_ReturnsNullAfterBoundedRetries(status: NotFound, expectedCalls: 1)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="80b60197-ee29-c9ba-62a5-893620ea5ea9">
+      <Execution id="ad54740e-1455-4bcb-a2c1-0d3c33b282d6" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Importer.TmdbClientTests" name="Detail_ReturnsNullAfterBoundedRetries" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests.Agreements_PutsSharedFavouritesFirst" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="9fc9612d-3a90-9a55-f965-6e4be6134840">
+      <Execution id="a1356ae8-d3a3-481e-ac94-a82794c21bf1" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests" name="Agreements_PutsSharedFavouritesFirst" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Community.AdminUserTests.Admin_CanManageAnotherAccount_AndCannotDemoteOrDeactivateSelf" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="2707c56b-56b0-06dd-33d5-0d9e4f4fd4e8">
+      <Execution id="bc9e5b43-287a-4ae5-808d-8770bfa25018" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Community.AdminUserTests" name="Admin_CanManageAnotherAccount_AndCannotDemoteOrDeactivateSelf" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Reviews.ScreeningLogTests.RemovingLatestRating_FallsBackToEarlierScreening(deleteEntry: False)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="a4fa5e79-4a24-f2fd-a6a6-f35f131fe881">
+      <Execution id="e44170ad-1fba-4d7e-a8cf-4623dd6916ad" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Reviews.ScreeningLogTests" name="RemovingLatestRating_FallsBackToEarlierScreening" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Community.CommunityTests.Diary_AnonymousAndOwnerAccess(visibility: Public, anonymousAllowed: True)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="6ee33dc5-db53-1f75-9e15-b7bb1c79a949">
+      <Execution id="6507206e-8301-4b44-9275-2697f605d4be" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Community.CommunityTests" name="Diary_AnonymousAndOwnerAccess" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.JwtTokenServiceTests.GenerateAccessToken_BeklenenClaimleriIcerir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="a78e8e0d-129e-0819-4c76-08e37f95b8de">
+      <Execution id="f8139b27-d6f0-4a64-a43a-a8d9a8908d8d" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.JwtTokenServiceTests" name="GenerateAccessToken_BeklenenClaimleriIcerir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_BelowMinimum_ReturnsNull(count: 4)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="5724a906-1629-c8f7-e9d8-cb01baa10107">
+      <Execution id="16e341e6-e17c-4a18-b242-1798a5066adb" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests" name="Calculate_BelowMinimum_ReturnsNull" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Watchlists.WatchlistCsvTests.Export_RoundTripsQuotedTitleAndIds_AndExcludesOtherUsers" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="ff8dfdfc-75ae-ec99-308c-8d6773892c33">
+      <Execution id="8fbf8261-e024-4ea2-8dd5-ddab28e3e32b" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Watchlists.WatchlistCsvTests" name="Export_RoundTripsQuotedTitleAndIds_AndExcludesOtherUsers" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests.AverageDifference_RoundsToOneDecimal" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="52b6fc9f-1bd6-e16f-4cd3-f1749acf9b6d">
+      <Execution id="090e12a3-9772-4c09-9da5-f26b516b1462" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests" name="AverageDifference_RoundsToOneDecimal" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_AlwaysStaysWithinZeroAndHundred" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="17449ef9-7fc4-3421-0676-9e1e855283e6">
+      <Execution id="4bcce2b9-21c6-43f3-8d29-3963dd1f4665" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests" name="Calculate_AlwaysStaysWithinZeroAndHundred" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_BelowMinimum_ReturnsNull(count: 0)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="c9db4cca-fbd6-8011-b2ae-249e5919290f">
+      <Execution id="84dfbf75-b76f-41c3-9d4c-96d643e2b049" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests" name="Calculate_BelowMinimum_ReturnsNull" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_MaximumDisagreement_FollowsConfidenceCurve(count: 5, expected: 25)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="e3ad73ce-88e7-633d-5009-55e7fe57270d">
+      <Execution id="bcdb5957-baa6-49ca-9f2d-015b02bf1859" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests" name="Calculate_MaximumDisagreement_FollowsConfidenceCurve" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Community.CommunityTests.Follow_GrantsOneWayDiaryAccess_AndUnfollowRevokesIt" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="9db5e9cd-b6d7-06de-0232-4273e700d421">
+      <Execution id="d2c53486-133e-4054-9d08-fb430e98cf4c" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Community.CommunityTests" name="Follow_GrantsOneWayDiaryAccess_AndUnfollowRevokesIt" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Api.AuthRateLimitingTests.FarkliIpAdresleriBirbirindenBagimsizSinirlanir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="d712f69f-af04-64c2-3855-e017e3a6caa2">
+      <Execution id="be7dc103-efb8-4c04-b635-78062b11718f" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.AuthRateLimitingTests" name="FarkliIpAdresleriBirbirindenBagimsizSinirlanir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.LoginCommandHandlerTests.Handle_BilinmeyenEmail_UnauthorizedExceptionFirlatir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="0c243d0e-de4a-b93b-d36e-cbd0e3d577c5">
+      <Execution id="6ffcf5af-c0d6-451f-8e06-15ac72f1d86c" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.LoginCommandHandlerTests" name="Handle_BilinmeyenEmail_UnauthorizedExceptionFirlatir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_ExactlyAtMinimum_ReturnsScore" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="898ceb58-19dd-efb3-7594-9aadfff43cae">
+      <Execution id="319b6506-5784-4ce2-ac3f-6ddf96b866f9" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests" name="Calculate_ExactlyAtMinimum_ReturnsScore" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests.Lists_AreCappedAtSix" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="19fba11c-7f4a-eaed-a6af-6c1774a52c94">
+      <Execution id="f213c0ec-1f36-4dc1-bb54-134bcc68e570" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests" name="Lists_AreCappedAtSix" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.PasswordResetTests.Reset_ChangesPasswordOnce_AndRevokesOnlyThatUsersSessions" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="9d1c151a-ccd8-b0f6-6688-2f609126588d">
+      <Execution id="121f9c95-291f-4faa-bc3b-58183516ed9d" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.PasswordResetTests" name="Reset_ChangesPasswordOnce_AndRevokesOnlyThatUsersSessions" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.LoginCommandHandlerTests.Handle_BasariliGiris_RefreshTokenVeritabaninaKaydedilir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="e44cd5e3-d8be-f5dc-2540-f47484a2a795">
+      <Execution id="e5c39ea1-f5c9-49a2-ae69-01abe2d1e222" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.LoginCommandHandlerTests" name="Handle_BasariliGiris_RefreshTokenVeritabaninaKaydedilir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_RejectsUnreadableInput(csv: &quot;&quot;)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="467991c0-dcfa-7667-bdd4-a4473dafba4d">
+      <Execution id="022a4b63-7caa-45a4-aceb-8d614c823ae3" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Watchlists.WatchlistCsvTests" name="Parse_RejectsUnreadableInput" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Reviews.MovieInteractionTests.UnreleasedFilm_RejectsRatingAndReviewWithoutWritingHistory" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="2f1d5930-d1ec-3532-86ef-ab1405d7783c">
+      <Execution id="36dd4f6d-1505-4af9-b576-dd27f7cf9897" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Reviews.MovieInteractionTests" name="UnreleasedFilm_RejectsRatingAndReviewWithoutWritingHistory" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RegisterCommandHandlerTests.Handle_KullaniciAdiZatenKullaniliyor_ConflictExceptionFirlatir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="c5ebbf46-aaf5-6c68-30c1-89a309178b60">
+      <Execution id="dadf4bbe-65a1-450d-a7bd-f159bd9af1a2" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RegisterCommandHandlerTests" name="Handle_KullaniciAdiZatenKullaniliyor_ConflictExceptionFirlatir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Api.AuthRateLimitingTests.PolitikaAyarlari_KullanicininOnayladigiDegerlerdir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="94eb432c-d139-4487-4e64-2f647ad88c5f">
+      <Execution id="5b3e7125-ad4e-4bd6-97c2-6ab29a497752" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.AuthRateLimitingTests" name="PolitikaAyarlari_KullanicininOnayladigiDegerlerdir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Api.LocalImageStorageTests.RejectedInputLeavesNoFile(length: 16)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="86c968b3-e0bf-b019-b74a-f1a3920425f1">
+      <Execution id="5cba4511-e74b-4ce6-938d-33f800f127e1" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.LocalImageStorageTests" name="RejectedInputLeavesNoFile" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.GetCompatibilityFilmsQueryHandlerTests.Handle_OwnProfile_ThrowsValidationException" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="fa207b4c-d118-d2e6-e7ad-c9f6c7f4d82d">
+      <Execution id="f8f53bbc-5842-40bf-a2c5-a6d5f7d56621" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.GetCompatibilityFilmsQueryHandlerTests" name="Handle_OwnProfile_ThrowsValidationException" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.PostgresCatalogTests.Search_TreatsPercentAndUnderscoreInTitlesAsLiteral" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="19d3218b-f619-7dd6-277c-58295ec7567d">
+      <Execution id="9a0df1d6-e1c6-4f5a-addb-6ddd0d003cf0" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.PostgresCatalogTests" name="Search_TreatsPercentAndUnderscoreInTitlesAsLiteral" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests.Disagreements_IncludesOnlyOneStarOrMore_LargestFirst" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="82ad0e93-34be-a4ad-c0e0-2bc25aea9ed2">
+      <Execution id="905431dd-f393-40e6-82b2-3b0691dd7467" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests" name="Disagreements_IncludesOnlyOneStarOrMore_LargestFirst" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Reviews.ScreeningLogTests.ScreeningDateValidation_AgreesForAddAndEdit(daysFromLatest: -1, hour: 0, valid: True)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="fe6fc0ff-6e52-0bc2-c778-ebca72496a1d">
+      <Execution id="17fc2949-6032-4fba-8db7-826158c10187" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Reviews.ScreeningLogTests" name="ScreeningDateValidation_AgreesForAddAndEdit" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Reviews.MovieInteractionTests.Reactions_SwitchAndUndoWithoutChangingAnotherUsersLike" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="eb61aff7-881c-3c4f-cbe4-ed805c5255f9">
+      <Execution id="9e895ec1-1dda-42c4-bf91-629915e456b2" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Reviews.MovieInteractionTests" name="Reactions_SwitchAndUndoWithoutChangingAnotherUsersLike" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Community.CommunityTests.Notifications_MarkOneAndMarkAllAreScopedToRecipient" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="93b88368-7fb6-8ea3-1e42-aacfcf89b148">
+      <Execution id="c45058ef-1b02-4695-bdd8-c08df3783bfc" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Community.CommunityTests" name="Notifications_MarkOneAndMarkAllAreScopedToRecipient" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.PeopleTests.DirectorDetails_ReflectEditsAndLikes_AndHideDeletedDirector" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="af58853e-9271-312f-bc00-7a2470304ec5">
+      <Execution id="0893d8b8-be28-4af0-9c53-7fca89db5712" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.PeopleTests" name="DirectorDetails_ReflectEditsAndLikes_AndHideDeletedDirector" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.LoginCommandValidatorTests.Validate_GecerliKomut_HataYok" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="68e1d650-74f8-7d44-e4c4-a57b1f577ce7">
+      <Execution id="44768c92-7f2c-432b-9604-10a081a58e48" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.LoginCommandValidatorTests" name="Validate_GecerliKomut_HataYok" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.PasswordHasherTests.VerifyPassword_YanlisSifre_FalseDoner" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="69ceb3c4-df95-705c-d12b-204d0f3299b7">
+      <Execution id="570b638c-b59d-4876-a507-e6650f6b42c0" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.PasswordHasherTests" name="VerifyPassword_YanlisSifre_FalseDoner" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_MoreCommonFilms_RaisesScoreForPerfectMatch" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="a380bc19-64f0-bb9d-648e-95cb676173bf">
+      <Execution id="eacf775b-110c-4588-8552-0006bd53eec1" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests" name="Calculate_MoreCommonFilms_RaisesScoreForPerfectMatch" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_IsSymmetric" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="08cbaf4f-2d4e-83ef-bfad-486e471fce12">
+      <Execution id="b5e64b1e-5b78-4592-b333-a42124bf6247" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests" name="Calculate_IsSymmetric" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Importer.TmdbClientTests.Detail_RecoversOnNextAttempt" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="1bbc58ed-3774-69b5-5614-818807bd6058">
+      <Execution id="b4b879f7-e5a7-41d7-adc3-73b12dee5073" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Importer.TmdbClientTests" name="Detail_RecoversOnNextAttempt" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.LoginCommandHandlerTests.Handle_PasifKullanici_UnauthorizedExceptionFirlatir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="8a443de0-3dcb-bdbb-40a9-4386cb7e49b5">
+      <Execution id="fe9747a7-353f-4920-a6e9-37e841a64f6f" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.LoginCommandHandlerTests" name="Handle_PasifKullanici_UnauthorizedExceptionFirlatir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Api.LocalImageStorageTests.RejectedInputLeavesNoFile(length: 0)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="dbadb5ff-55fb-09af-1be1-86956e803de5">
+      <Execution id="5eb32766-0afe-45a9-a919-61d7fb053ef2" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.LocalImageStorageTests" name="RejectedInputLeavesNoFile" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Api.LocalImageStorageTests.Save_ConvertsPngToWebpWithExpectedDimensions_AndDeletesManagedFile(kind: Cover, folder: &quot;covers&quot;, width: 1600, height: 800)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="327cfa4f-f698-5a30-2679-0be7a05a7030">
+      <Execution id="17cc39f7-e591-4a74-9c2c-294ac481c813" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.LocalImageStorageTests" name="Save_ConvertsPngToWebpWithExpectedDimensions_AndDeletesManagedFile" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_IdenticalRatings_FollowsConfidenceCurve(count: 20, expected: 90)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="238688e1-56ea-8d78-9f43-5f2d74edb023">
+      <Execution id="338be48d-3257-4e87-96e6-208f8710ed65" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests" name="Calculate_IdenticalRatings_FollowsConfidenceCurve" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Community.CommunityTests.RankedList_ChecksOwnership_DeduplicatesAndCompactsOrderOnRemoval" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="239e8ce5-e6aa-faf7-0139-3ed97757cdd0">
+      <Execution id="76b3c9d2-5b94-4ea8-af1b-5b1761619747" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Community.CommunityTests" name="RankedList_ChecksOwnership_DeduplicatesAndCompactsOrderOnRemoval" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Reviews.ScreeningLogTests.ScreeningDateValidation_AgreesForAddAndEdit(daysFromLatest: 0, hour: 23, valid: True)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="5294e13e-fdba-de13-9aed-7a3719ced106">
+      <Execution id="9242b10c-95c1-48a6-92ac-f8c83a1e58cf" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Reviews.ScreeningLogTests" name="ScreeningDateValidation_AgreesForAddAndEdit" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Api.LocalImageStorageTests.RejectedInputLeavesNoFile(length: 5242881)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="c56e3385-7c1e-76aa-ddeb-a69d32330682">
+      <Execution id="63a04c10-ca06-4eb8-baa7-2143de435b1a" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.LocalImageStorageTests" name="RejectedInputLeavesNoFile" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RegisterCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(userName: &quot;&quot;, email: &quot;yavuz@example.com&quot;, password: &quot;Sifre123&quot;)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="0b67832a-dd61-c40a-c106-19f651d8babb">
+      <Execution id="bd39b348-b9d0-4732-8016-4c65e3d94065" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RegisterCommandValidatorTests" name="Validate_GecersizGirdiler_HataDoner" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Api.ExceptionHandlingMiddlewareTests.UnauthorizedException_401Doner" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="7886afe2-315f-6ce6-1ba8-8350bdb15482">
+      <Execution id="c544450b-1350-4691-8392-8862a7abf61c" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.ExceptionHandlingMiddlewareTests" name="UnauthorizedException_401Doner" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.LogoutCommandHandlerTests.Handle_GecerliToken_IptalEdilir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="54adeeec-6ac2-d027-6509-98815483a4e9">
+      <Execution id="dd5e1642-6dc0-413d-ac18-903f1b1d5cc5" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.LogoutCommandHandlerTests" name="Handle_GecerliToken_IptalEdilir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests.Lists_NeverOverlap" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="8bb95a16-1356-4c03-cbb0-5136cf6b558e">
+      <Execution id="edcc5d8a-a29f-4cd2-a7d4-11c1184a684e" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests" name="Lists_NeverOverlap" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_ReadsTurkishExcelEncoding" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="44e5ef20-e05e-4a96-0583-6ea1ab509381">
+      <Execution id="2cece9e5-0bd5-4ba4-8024-c121705f79b9" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Watchlists.WatchlistCsvTests" name="Parse_ReadsTurkishExcelEncoding" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.PostgresCatalogTests.DiaryOwnerLookup_ResolvesLiteralUnderscoreInUserName" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="8b9e842a-11bb-a6d7-b4ee-4b45b5e72140">
+      <Execution id="9438e7db-1a02-41a5-8937-84b1ba83fdc0" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.PostgresCatalogTests" name="DiaryOwnerLookup_ResolvesLiteralUnderscoreInUserName" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RegisterCommandHandlerTests.Handle_EmailZatenKayitli_ConflictExceptionFirlatir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="7ab8fe7a-eec3-2a87-f6c6-16580ab2673e">
+      <Execution id="2929c258-1d70-44df-8ca3-7c63cacefe20" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RegisterCommandHandlerTests" name="Handle_EmailZatenKayitli_ConflictExceptionFirlatir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.LoginCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(email: &quot;gecersiz-email&quot;, password: &quot;sifre&quot;)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="5fd74be3-1d22-898a-32c1-6240c13869c6">
+      <Execution id="31c3febd-3cda-48ce-9c3d-a2086c7f829a" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.LoginCommandValidatorTests" name="Validate_GecersizGirdiler_HataDoner" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Community.CommunityTests.Diary_AnonymousAndOwnerAccess(visibility: Private, anonymousAllowed: False)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="25419400-df82-c4c1-99dd-bd3a2289e562">
+      <Execution id="2fb2e816-5533-432d-8d12-7b444034cd8b" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Community.CommunityTests" name="Diary_AnonymousAndOwnerAccess" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_EnforcesRowLimitIncludingInvalidRows" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="8f393627-ef04-2728-ffdc-0b15972a75ee">
+      <Execution id="328ef2f8-3066-4450-9062-c3502cc9e86d" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Watchlists.WatchlistCsvTests" name="Parse_EnforcesRowLimitIncludingInvalidRows" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.PostgresCatalogTests.ClearWatchlist_DeletesOnlyTheRequestedUsersRows_AndIsRepeatable" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="844ccd9c-76a5-5b03-8401-57b22e88b626">
+      <Execution id="dbb95153-cc5e-4514-b81f-4a6a98e7b7f3" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.PostgresCatalogTests" name="ClearWatchlist_DeletesOnlyTheRequestedUsersRows_AndIsRepeatable" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_RecognizesSupportedHeadersAndSeparators(csv: &quot;﻿sep=;\r\nFilm Adı;Yıl\r\nSolaris;1972&quot;)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="7bba03c7-3a23-7861-7ccb-81a475b38ed3">
+      <Execution id="cf7f40f2-7de1-4969-ab8e-d62bed7e728b" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Watchlists.WatchlistCsvTests" name="Parse_RecognizesSupportedHeadersAndSeparators" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.GetCompatibilityFilmsQueryHandlerTests.Handle_UnknownTarget_ThrowsNotFound" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="6ecaddec-c529-ed40-0e18-cb8a53e7c463">
+      <Execution id="aa254467-3f39-4926-a752-5652189cd563" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.GetCompatibilityFilmsQueryHandlerTests" name="Handle_UnknownTarget_ThrowsNotFound" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Api.ExceptionHandlingMiddlewareTests.NotFoundException_404DonerVeMesajTasir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="c28ee7bf-39a5-43dc-4766-46107758951b">
+      <Execution id="38f1b483-3ab1-4a10-9bb2-48865510f29d" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.ExceptionHandlingMiddlewareTests" name="NotFoundException_404DonerVeMesajTasir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Watchlists.WatchlistCsvTests.Import_ResolvesIdsBeforeTitle_AccountsForEveryRow_AndCanBeRetried" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="40d8f910-c0a9-4053-6c7d-ebec5189228a">
+      <Execution id="e2627e65-44e3-4772-a62d-c8db3f074bd5" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Watchlists.WatchlistCsvTests" name="Import_ResolvesIdsBeforeTitle_AccountsForEveryRow_AndCanBeRetried" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RegisterCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(userName: &quot;ab&quot;, email: &quot;yavuz@example.com&quot;, password: &quot;Sifre123&quot;)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="6c9579e6-7269-a9fa-7127-d64e7b93cd26">
+      <Execution id="a11764a1-f62e-4a59-9ebe-cd863dbf21b6" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RegisterCommandValidatorTests" name="Validate_GecersizGirdiler_HataDoner" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_IdenticalRatings_FollowsConfidenceCurve(count: 5, expected: 75)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="2a59d8fc-1ff3-14e5-b17a-581754d917e1">
+      <Execution id="b8b6f0b0-285d-4368-b9fe-162ff94b6b2a" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests" name="Calculate_IdenticalRatings_FollowsConfidenceCurve" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.LoginCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(email: &quot;yavuz@example.com&quot;, password: &quot;&quot;)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="25a97591-d4ed-fa2b-548a-f1228862a648">
+      <Execution id="6b98dde8-e044-43dd-bcff-04406a663960" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.LoginCommandValidatorTests" name="Validate_GecersizGirdiler_HataDoner" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.GetCompatibilityFilmsQueryHandlerTests.Handle_InactiveTarget_ThrowsNotFound" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="30cbbd40-405b-9f66-4029-3c52a4885036">
+      <Execution id="0691c628-2864-4b55-8c21-4afce2800f3b" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.GetCompatibilityFilmsQueryHandlerTests" name="Handle_InactiveTarget_ThrowsNotFound" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Reviews.ScreeningLogTests.ScreeningDateValidation_AgreesForAddAndEdit(daysFromLatest: 1, hour: 0, valid: False)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="2e6effc8-ddf5-57c9-b53d-15b3cb009efd">
+      <Execution id="569f5855-5e41-42ca-94f3-2b3f71b1bc1a" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Reviews.ScreeningLogTests" name="ScreeningDateValidation_AgreesForAddAndEdit" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Reviews.MovieInteractionTests.Review_EditKeepsId_DeleteHidesReviewAndCleansLikeNotification" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="4c7c94ab-a772-2de0-23da-6ca734a693d8">
+      <Execution id="483e51ba-de4d-44be-b910-adc0021d4172" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Reviews.MovieInteractionTests" name="Review_EditKeepsId_DeleteHidesReviewAndCleansLikeNotification" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.LoginCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(email: &quot;&quot;, password: &quot;sifre&quot;)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="0f9486b3-becb-b898-220d-89aba931e243">
+      <Execution id="afe73ae1-4684-4ef1-b9b2-631838bd0754" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.LoginCommandValidatorTests" name="Validate_GecersizGirdiler_HataDoner" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.PostgresCatalogTests.RatingSort_WeightsVoteCount_AndReturnsLocalizedTitlesInRankOrder" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="bb524990-1e8a-cab2-ae13-e69d27f02b57">
+      <Execution id="5c2a2ce4-b83b-4288-978d-52c5fcf586b7" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.PostgresCatalogTests" name="RatingSort_WeightsVoteCount_AndReturnsLocalizedTitlesInRankOrder" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Reviews.ScreeningLogTests.RemovingLatestRating_FallsBackToEarlierScreening(deleteEntry: True)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="d00041f4-beef-edd3-3e7a-f2d7836bfc0e">
+      <Execution id="86787e08-0ffb-4c5f-989e-08449fc1478a" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Reviews.ScreeningLogTests" name="RemovingLatestRating_FallsBackToEarlierScreening" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RegisterCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(userName: &quot;yavuz&quot;, email: &quot;yavuz@example.com&quot;, password: &quot;sifresiz&quot;)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="24639f4f-07ec-bb22-3d5b-c6dca72eafef">
+      <Execution id="d4ac8359-d675-47ee-af2e-6477ca34bf27" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RegisterCommandValidatorTests" name="Validate_GecersizGirdiler_HataDoner" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_IdenticalRatings_FollowsConfidenceCurve(count: 50, expected: 95)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="5e24096c-dff7-b7a8-22b8-77d85c463701">
+      <Execution id="f5fdb8f1-c654-4611-8fa2-90ca82a9d98d" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests" name="Calculate_IdenticalRatings_FollowsConfidenceCurve" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.PeopleTests.ActorDetails_SortCreditsAndShowOnlyViewersPersonalFlags" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="b05dd72e-e2c7-ef23-8515-96141b514a35">
+      <Execution id="7d349091-ade3-42ad-809f-cd350341e259" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.PeopleTests" name="ActorDetails_SortCreditsAndShowOnlyViewersPersonalFlags" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.MovieCreditImportTests.RepeatImport_ReusesMigratedRowsAndPreservesMissingCredits" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="b769411e-4155-cdf4-ba11-a966c926b244">
+      <Execution id="99ba2ded-477b-47de-be57-058451ac9c7d" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.MovieCreditImportTests" name="RepeatImport_ReusesMigratedRowsAndPreservesMissingCredits" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_MixedDifferences_MatchesHandComputedValue" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="45ca2102-45d4-b46d-c322-1258b51825c4">
+      <Execution id="af62f76d-bdc3-4c7b-b103-abe018750756" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests" name="Calculate_MixedDifferences_MatchesHandComputedValue" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.PostgresCatalogTests.Activity_GroupsAcrossUtcMidnightInViewersTimeZone" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="822093bc-aab1-5db9-2f2f-5aa9de3ebd03">
+      <Execution id="e6159183-5a12-41a5-aa93-0afb5c22f185" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.PostgresCatalogTests" name="Activity_GroupsAcrossUtcMidnightInViewersTimeZone" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.LoginCommandHandlerTests.Handle_HataliGiris_HataMesajiBilgiSizintisiYapmaz" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="0b820ec0-7f9b-0b19-626d-a51e0f44c984">
+      <Execution id="861b9056-7286-4daa-a47d-82a8c2837a0f" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.LoginCommandHandlerTests" name="Handle_HataliGiris_HataMesajiBilgiSizintisiYapmaz" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.PostgresCatalogTests.FollowedReview_AppearsInActivityButSpotlightOmitsSpoilerText" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="0764d077-ef0c-472d-93c6-e296ed26b83b">
+      <Execution id="32424695-cbce-4c17-8872-db76e3c3783f" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.PostgresCatalogTests" name="FollowedReview_AppearsInActivityButSpotlightOmitsSpoilerText" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.PasswordHasherTests.VerifyPassword_DogruSifre_TrueDoner" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="b306cba5-12bb-76b5-26cf-ae08ec1244e2">
+      <Execution id="fa7d197f-f160-4b11-8200-84d89b33f325" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.PasswordHasherTests" name="VerifyPassword_DogruSifre_TrueDoner" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_IdenticalRatings_FollowsConfidenceCurve(count: 10, expected: 83)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="a5d97bae-5368-fd03-d19e-2ef1d2a766f4">
+      <Execution id="f239b16c-7c4a-4fab-a645-28de8127e39f" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests" name="Calculate_IdenticalRatings_FollowsConfidenceCurve" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Community.CommunityTests.Diary_AnonymousAndOwnerAccess(visibility: Followers, anonymousAllowed: False)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="7b92cec6-70ef-a0a3-8468-e62244b55374">
+      <Execution id="8bc3b84b-fb14-4362-b94a-ac8f7008a2de" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Community.CommunityTests" name="Diary_AnonymousAndOwnerAccess" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RefreshTokenCommandHandlerTests.Handle_GecerliToken_YeniTokenUretipEskisiniIptalEder" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="3f4081f9-e5a1-601a-9795-77680339927d">
+      <Execution id="136d251b-b5c3-42fd-8a39-ef858fcc6d3e" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RefreshTokenCommandHandlerTests" name="Handle_GecerliToken_YeniTokenUretipEskisiniIptalEder" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_RecognizesSupportedHeadersAndSeparators(csv: &quot;Title\tRelease Year\nSolaris\t1972&quot;)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="64c4324d-a115-043a-8da4-acbf448d8076">
+      <Execution id="deed0e7b-e24a-4180-9488-b4fdf5dc7e22" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Watchlists.WatchlistCsvTests" name="Parse_RecognizesSupportedHeadersAndSeparators" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Reviews.ScreeningLogTests.ScreeningDateValidation_AgreesForAddAndEdit(daysFromLatest: 0, hour: 0, valid: True)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="192bf2f5-d99e-03a5-a41e-765c708a9e2c">
+      <Execution id="71288ac8-93b6-44c2-b796-3849636b853a" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Reviews.ScreeningLogTests" name="ScreeningDateValidation_AgreesForAddAndEdit" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests.Agreements_IncludesOnlyDifferencesUpToHalfStar" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="4e30e33d-85bc-294e-dff9-25b7b7754dce">
+      <Execution id="3a550e5e-fb10-4f18-a85e-c7ce7a80ab41" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests" name="Agreements_IncludesOnlyDifferencesUpToHalfStar" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.PersonCreditMigrationTests.Migration_MergesSharedIdentity_PreservesBothCreditsAndUnmatchedNames" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="78e52981-b4b6-8251-409a-3d46297a1342">
+      <Execution id="42031f62-3f4a-4c76-acc3-1549380b9b11" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.PersonCreditMigrationTests" name="Migration_MergesSharedIdentity_PreservesBothCreditsAndUnmatchedNames" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Api.ExceptionHandlingMiddlewareTests.ValidationException_400DonerVeErrorsAlaniniTasir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="109d28f0-1c3f-d96c-7976-0f8a4ab84e0c">
+      <Execution id="5a47a149-1a31-41ec-9393-0ed4fcad32ae" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.ExceptionHandlingMiddlewareTests" name="ValidationException_400DonerVeErrorsAlaniniTasir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RegisterCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(userName: &quot;yavuz&quot;, email: &quot;yavuz@example.com&quot;, password: &quot;kisa1&quot;)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="d6837f21-daff-58ea-2ef9-eb863c4ffb5f">
+      <Execution id="83fc7365-e1db-4ec0-94d1-8b2e0c375532" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RegisterCommandValidatorTests" name="Validate_GecersizGirdiler_HataDoner" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Importer.TmdbClientTests.Detail_ReturnsNullAfterBoundedRetries(status: TooManyRequests, expectedCalls: 4)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="8280a7d9-4ac4-f780-8f05-12ef1714f9d6">
+      <Execution id="a83f1721-1d98-4a43-81f3-50149d42c2e6" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Importer.TmdbClientTests" name="Detail_ReturnsNullAfterBoundedRetries" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.LogoutCommandHandlerTests.Handle_BilinmeyenToken_HataFirlatmaz" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="6f06b12b-b200-f43a-87b4-084ce8be62f7">
+      <Execution id="2ea41dd6-6787-45e9-9284-d67deb8e31b6" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.LogoutCommandHandlerTests" name="Handle_BilinmeyenToken_HataFirlatmaz" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Importer.TmdbClientTests.Discover_SendsCountryVoteAndDateFilters_AndReadsSnakeCaseFields" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="6355c288-bc30-9c9c-7c4f-5e8db1154e64">
+      <Execution id="beb46572-8da9-46bc-b7fd-d7d7ab4ae2b0" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Importer.TmdbClientTests" name="Discover_SendsCountryVoteAndDateFilters_AndReadsSnakeCaseFields" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Api.HttpSessionTests.Registration_IssuesSession_ProfileAcceptsBearer_AndRefreshCookieRotates" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="915f83a9-b847-7f1d-3d6d-bb538d1ec6a9">
+      <Execution id="cce0015a-d3ff-42fd-8f69-079dd23c6d04" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.HttpSessionTests" name="Registration_IssuesSession_ProfileAcceptsBearer_AndRefreshCookieRotates" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_SingleHalfPointDifference_LowersScoreSlightly" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="2888afeb-21b9-5436-6765-1d8a487d5e59">
+      <Execution id="bc1f071f-d472-44e2-aa33-5b7d6ec8ff6e" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests" name="Calculate_SingleHalfPointDifference_LowersScoreSlightly" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Reviews.MovieInteractionTests.Rating_UpdatesOneVote_PreservesSeedAndHistory_AndRemovesOnlyOwnersWatchlistItem" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="d9332ba3-e2f5-77ab-2964-ed9349b585ca">
+      <Execution id="5dbac89c-fa8f-4757-bf30-6d0b1a7a66ce" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Reviews.MovieInteractionTests" name="Rating_UpdatesOneVote_PreservesSeedAndHistory_AndRemovesOnlyOwnersWatchlistItem" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.GetCompatibilityFilmsQueryHandlerTests.Handle_ReturnsAgreementsAndDisagreements_WithLocalizedTitles" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="1389e893-c837-e679-c3ae-ce35d8d40ae1">
+      <Execution id="69c7728e-0113-4dc7-9d08-3c31fd7e5647" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.GetCompatibilityFilmsQueryHandlerTests" name="Handle_ReturnsAgreementsAndDisagreements_WithLocalizedTitles" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.PostgresCatalogTests.Search_NormalizesAccents_RanksExactFirst_AndPaginatesAfterFiltering" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="e24d60b9-be65-09f0-fd29-f9aca3e5510c">
+      <Execution id="ba0f6b2e-69e4-4619-8653-f5e4011bf50c" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.PostgresCatalogTests" name="Search_NormalizesAccents_RanksExactFirst_AndPaginatesAfterFiltering" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RegisterCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(userName: &quot;yavuz&quot;, email: &quot;gecersiz-email&quot;, password: &quot;Sifre123&quot;)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="26bb034d-c778-579a-ee29-e303e99128a2">
+      <Execution id="57a942f4-d109-4af2-a7a9-9ac03424920e" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RegisterCommandValidatorTests" name="Validate_GecersizGirdiler_HataDoner" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RefreshTokenCommandHandlerTests.Handle_IptalEdilmisToken_UnauthorizedExceptionFirlatir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="ab17d0e7-ddd6-2651-129d-9c5c66fee754">
+      <Execution id="2e6aa532-5d50-4e71-936d-85c4d1616fee" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RefreshTokenCommandHandlerTests" name="Handle_IptalEdilmisToken_UnauthorizedExceptionFirlatir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.PostgresCatalogTests.Activity_PagesWholeCardsAcrossEqualTimestamps_AndRespectsPrivateDiary" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="c5cd7f2c-897b-c000-0451-47d3c6631a88">
+      <Execution id="b77f0582-b8d8-483e-9ebc-8f1f2f6e6bfc" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.PostgresCatalogTests" name="Activity_PagesWholeCardsAcrossEqualTimestamps_AndRespectsPrivateDiary" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.JwtTokenServiceTests.GenerateRefreshToken_HerCagridaFarkliDegerUretir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="71a98cb8-88cc-3f7b-5ac4-a0ddb58f2cd4">
+      <Execution id="fb9c0799-cfda-4c0f-abc1-ecf89144a58b" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.JwtTokenServiceTests" name="GenerateRefreshToken_HerCagridaFarkliDegerUretir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RegisterCommandHandlerTests.Handle_SifreDuzMetinOlarakSaklanmaz" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="9831223e-3d44-343e-4c0c-6f1dbef81fd9">
+      <Execution id="f09695b6-96be-41de-b664-cc00ae9eab44" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RegisterCommandHandlerTests" name="Handle_SifreDuzMetinOlarakSaklanmaz" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.PostgresCatalogTests.FilmDetail_ReadsMyRatingAndSpoilerReview_AndLocalizesTheTitle" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="76343946-b8d9-7c2a-1fc7-8a1244e849fb">
+      <Execution id="641a9b01-1a48-4d3c-8700-279401d4b8b8" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.PostgresCatalogTests" name="FilmDetail_ReadsMyRatingAndSpoilerReview_AndLocalizesTheTitle" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RegisterCommandHandlerTests.Handle_RefreshTokenVeritabaninaKaydedilir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="676dd76f-500e-bb5f-116e-57a2ea15ab5d">
+      <Execution id="f30533d9-7c4d-47f3-97f2-b8ad840230a4" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RegisterCommandHandlerTests" name="Handle_RefreshTokenVeritabaninaKaydedilir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RegisterCommandHandlerTests.Handle_YeniKullanici_KullaniciOlusturupTokenDoner" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="c845a60b-47be-0e52-34b6-25c925c16fcd">
+      <Execution id="028b09fc-19e7-4b60-b6a9-d47ef8039c8e" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RegisterCommandHandlerTests" name="Handle_YeniKullanici_KullaniciOlusturupTokenDoner" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Api.ExceptionHandlingMiddlewareTests.ConflictException_409Doner" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="ccb8c355-7247-a09c-f820-7b1710d21711">
+      <Execution id="96708b3d-654d-404b-99d6-bdfefd4cca9a" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.ExceptionHandlingMiddlewareTests" name="ConflictException_409Doner" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests.AverageDifference_NoPairs_ReturnsNull" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="511cbcde-122e-5b27-5ab1-53cffd647234">
+      <Execution id="5f200fbd-a44f-499e-98a1-49cefdc7aabf" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityFilmSelectorTests" name="AverageDifference_NoPairs_ReturnsNull" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Reviews.ScreeningLogTests.BackfilledScreeningAndItsEdits_PreserveNewerRatingAndActivityTimestamp" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="33977758-c404-c1b1-7bfe-8426302521b4">
+      <Execution id="6bbde1e7-6f9d-48c9-afdf-d962fb5c0831" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Reviews.ScreeningLogTests" name="BackfilledScreeningAndItsEdits_PreserveNewerRatingAndActivityTimestamp" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RefreshTokenCommandHandlerTests.Handle_BilinmeyenToken_UnauthorizedExceptionFirlatir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="0bafc8ac-783f-ecdc-4526-9d961e0a6fdc">
+      <Execution id="2137fb16-af54-4434-ba7b-6fce2df01bc9" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RefreshTokenCommandHandlerTests" name="Handle_BilinmeyenToken_UnauthorizedExceptionFirlatir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_RejectsUnreadableInput(csv: &quot;Title\nA\0B&quot;)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="1d2037c7-8145-70c0-d8f5-d0e7c8f318d1">
+      <Execution id="63fa1ae8-584c-4e9c-b323-51011c3e0ad7" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Watchlists.WatchlistCsvTests" name="Parse_RejectsUnreadableInput" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Api.ExceptionHandlingMiddlewareTests.BilinmeyenHata_500DonerVeIcDetayiSizdirmaz" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="592c3c95-e539-8667-8073-9fa53cba75d3">
+      <Execution id="f65ed777-615e-4ffa-8fbd-b5ae4d27dd20" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.ExceptionHandlingMiddlewareTests" name="BilinmeyenHata_500DonerVeIcDetayiSizdirmaz" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Api.AuthRateLimitingTests.ReddedilenIstek_Kuyruga_Alinmaz" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="ca55541b-51d3-eb97-b422-5759cd6f2ded">
+      <Execution id="1533394f-8c0a-44de-b82d-0fe0ff6539ae" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.AuthRateLimitingTests" name="ReddedilenIstek_Kuyruga_Alinmaz" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_RejectsUnreadableInput(csv: &quot;Year\n1972&quot;)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="a6a1c764-3565-9f42-fdf5-e70c63259388">
+      <Execution id="bfb28837-30fb-404a-8258-72de7cfaa733" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Watchlists.WatchlistCsvTests" name="Parse_RejectsUnreadableInput" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.LoginCommandHandlerTests.Handle_DogruBilgiler_TokenDoner" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="909b8343-be35-bcdb-34ba-6735ae6a7a63">
+      <Execution id="fe43fc56-126c-4f7d-9f06-3eb01d6ede81" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.LoginCommandHandlerTests" name="Handle_DogruBilgiler_TokenDoner" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests.Calculate_MaximumDisagreement_FollowsConfidenceCurve(count: 50, expected: 5)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="8e76f531-6c0a-1cc0-dc63-9564c8ed55db">
+      <Execution id="5dc69334-8066-4015-85ad-3c23e726ae25" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Compatibility.CompatibilityCalculatorTests" name="Calculate_MaximumDisagreement_FollowsConfidenceCurve" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RegisterCommandValidatorTests.Validate_GecersizGirdiler_HataDoner(userName: &quot;yavuz&quot;, email: &quot;yavuz@example.com&quot;, password: &quot;SIFREBUYUK&quot;)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="43b6a61d-54a7-35fe-6436-869c55814640">
+      <Execution id="6232d78c-d2b2-4bce-940f-bdd7a260c3be" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RegisterCommandValidatorTests" name="Validate_GecersizGirdiler_HataDoner" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.PasswordHasherTests.HashPassword_DuzMetinSifreyiIcermez" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="6d24a1e0-a511-1277-db31-7d71eb85c2dc">
+      <Execution id="eb81a40d-6b2e-4d3c-93b4-464527601dde" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.PasswordHasherTests" name="HashPassword_DuzMetinSifreyiIcermez" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Api.AuthRateLimitingTests.LimitiAsanIstegiReddeder" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="a99c6f25-1506-6a6d-c836-be5db940adb9">
+      <Execution id="6b713115-1e09-47e5-b403-fab85166c74c" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.AuthRateLimitingTests" name="LimitiAsanIstegiReddeder" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.PasswordHasherTests.HashPassword_AyniSifreIcinFarkliHashVeSaltUretir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="1c07bb47-882c-3421-a8b9-391e12cb9921">
+      <Execution id="564bcfcc-7a8a-4a79-a552-17906d98e38b" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.PasswordHasherTests" name="HashPassword_AyniSifreIcinFarkliHashVeSaltUretir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.RefreshTokenCommandHandlerTests.Handle_SuresiDolmusToken_UnauthorizedExceptionFirlatir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="5c858656-6079-a8be-c005-b9c2e709cbcf">
+      <Execution id="4936ff18-e806-4d44-b580-ddc4b9dd9d52" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.RefreshTokenCommandHandlerTests" name="Handle_SuresiDolmusToken_UnauthorizedExceptionFirlatir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Auth.JwtTokenServiceTests.GenerateAccessToken_HerCagridaFarkliJtiUretir" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="253a87b2-d15e-7403-0516-1a32e2af5174">
+      <Execution id="2ceadb6e-085a-4fab-9567-de5afd9f5d5a" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Auth.JwtTokenServiceTests" name="GenerateAccessToken_HerCagridaFarkliJtiUretir" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Catalog.MovieManagementTests.CatalogEdit_ReplacesCredits_PreservesLocalVotes_AndDistinguishesMissingFromEmptyText" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="c53bde03-e365-45cd-4131-f4465ac910aa">
+      <Execution id="e6df0812-a510-4cde-9d3d-72e80fa00b0b" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Catalog.MovieManagementTests" name="CatalogEdit_ReplacesCredits_PreservesLocalVotes_AndDistinguishesMissingFromEmptyText" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Reviews.ScreeningLogTests.EditingUnratedScreeningTime_PreservesQuickRating" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="bc65cf9b-cd25-ddda-f054-764dfaf2785a">
+      <Execution id="1ce68c6f-9846-4d0e-8a45-c3c406b8710b" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Reviews.ScreeningLogTests" name="EditingUnratedScreeningTime_PreservesQuickRating" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Api.LocalImageStorageTests.Save_ConvertsPngToWebpWithExpectedDimensions_AndDeletesManagedFile(kind: Avatar, folder: &quot;avatars&quot;, width: 512, height: 512)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="e6716dc7-c160-49ee-ee71-d4fc698257e2">
+      <Execution id="86045cf9-164e-444f-9c07-0b72833549bf" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Api.LocalImageStorageTests" name="Save_ConvertsPngToWebpWithExpectedDimensions_AndDeletesManagedFile" />
+    </UnitTest>
+    <UnitTest name="UFMDb.Tests.Watchlists.WatchlistCsvTests.Parse_RecognizesSupportedHeadersAndSeparators(csv: &quot;Name,Year\nSolaris,1972&quot;)" storage="c:\ufmdb\backend\tests\ufmdb.tests\bin\release\net8.0\ufmdb.tests.dll" id="87341d59-555c-71c6-6687-5a1e0af5dcab">
+      <Execution id="d121741e-67c8-4ad9-8c82-310203ff05da" />
+      <TestMethod codeBase="C:\UFMDb\backend\tests\UFMDb.Tests\bin\Release\net8.0\UFMDb.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="UFMDb.Tests.Watchlists.WatchlistCsvTests" name="Parse_RecognizesSupportedHeadersAndSeparators" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="87341d59-555c-71c6-6687-5a1e0af5dcab" executionId="d121741e-67c8-4ad9-8c82-310203ff05da" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="676dd76f-500e-bb5f-116e-57a2ea15ab5d" executionId="f30533d9-7c4d-47f3-97f2-b8ad840230a4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5c858656-6079-a8be-c005-b9c2e709cbcf" executionId="4936ff18-e806-4d44-b580-ddc4b9dd9d52" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2a59d8fc-1ff3-14e5-b17a-581754d917e1" executionId="b8b6f0b0-285d-4368-b9fe-162ff94b6b2a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="909b8343-be35-bcdb-34ba-6735ae6a7a63" executionId="fe43fc56-126c-4f7d-9f06-3eb01d6ede81" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9db5e9cd-b6d7-06de-0232-4273e700d421" executionId="d2c53486-133e-4054-9d08-fb430e98cf4c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a99c6f25-1506-6a6d-c836-be5db940adb9" executionId="6b713115-1e09-47e5-b403-fab85166c74c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="592c3c95-e539-8667-8073-9fa53cba75d3" executionId="f65ed777-615e-4ffa-8fbd-b5ae4d27dd20" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9831223e-3d44-343e-4c0c-6f1dbef81fd9" executionId="f09695b6-96be-41de-b664-cc00ae9eab44" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2888afeb-21b9-5436-6765-1d8a487d5e59" executionId="bc1f071f-d472-44e2-aa33-5b7d6ec8ff6e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e44cd5e3-d8be-f5dc-2540-f47484a2a795" executionId="e5c39ea1-f5c9-49a2-ae69-01abe2d1e222" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="64c4324d-a115-043a-8da4-acbf448d8076" executionId="deed0e7b-e24a-4180-9488-b4fdf5dc7e22" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bc65cf9b-cd25-ddda-f054-764dfaf2785a" executionId="1ce68c6f-9846-4d0e-8a45-c3c406b8710b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5724a906-1629-c8f7-e9d8-cb01baa10107" executionId="16e341e6-e17c-4a18-b242-1798a5066adb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="af58853e-9271-312f-bc00-7a2470304ec5" executionId="0893d8b8-be28-4af0-9c53-7fca89db5712" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c53bde03-e365-45cd-4131-f4465ac910aa" executionId="e6df0812-a510-4cde-9d3d-72e80fa00b0b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="78e52981-b4b6-8251-409a-3d46297a1342" executionId="42031f62-3f4a-4c76-acc3-1549380b9b11" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="71a98cb8-88cc-3f7b-5ac4-a0ddb58f2cd4" executionId="fb9c0799-cfda-4c0f-abc1-ecf89144a58b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7ab8fe7a-eec3-2a87-f6c6-16580ab2673e" executionId="2929c258-1d70-44df-8ca3-7c63cacefe20" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="109d28f0-1c3f-d96c-7976-0f8a4ab84e0c" executionId="5a47a149-1a31-41ec-9393-0ed4fcad32ae" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a5d97bae-5368-fd03-d19e-2ef1d2a766f4" executionId="f239b16c-7c4a-4fab-a645-28de8127e39f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3f4081f9-e5a1-601a-9795-77680339927d" executionId="136d251b-b5c3-42fd-8a39-ef858fcc6d3e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8f393627-ef04-2728-ffdc-0b15972a75ee" executionId="328ef2f8-3066-4450-9062-c3502cc9e86d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="82ad0e93-34be-a4ad-c0e0-2bc25aea9ed2" executionId="905431dd-f393-40e6-82b2-3b0691dd7467" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="327cfa4f-f698-5a30-2679-0be7a05a7030" executionId="17cc39f7-e591-4a74-9c2c-294ac481c813" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dbadb5ff-55fb-09af-1be1-86956e803de5" executionId="5eb32766-0afe-45a9-a919-61d7fb053ef2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c9db4cca-fbd6-8011-b2ae-249e5919290f" executionId="84dfbf75-b76f-41c3-9d4c-96d643e2b049" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2e6effc8-ddf5-57c9-b53d-15b3cb009efd" executionId="569f5855-5e41-42ca-94f3-2b3f71b1bc1a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="915f83a9-b847-7f1d-3d6d-bb538d1ec6a9" executionId="cce0015a-d3ff-42fd-8f69-079dd23c6d04" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eb61aff7-881c-3c4f-cbe4-ed805c5255f9" executionId="9e895ec1-1dda-42c4-bf91-629915e456b2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="822093bc-aab1-5db9-2f2f-5aa9de3ebd03" executionId="e6159183-5a12-41a5-aa93-0afb5c22f185" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fe6fc0ff-6e52-0bc2-c778-ebca72496a1d" executionId="17fc2949-6032-4fba-8db7-826158c10187" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8a443de0-3dcb-bdbb-40a9-4386cb7e49b5" executionId="fe9747a7-353f-4920-a6e9-37e841a64f6f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ab17d0e7-ddd6-2651-129d-9c5c66fee754" executionId="2e6aa532-5d50-4e71-936d-85c4d1616fee" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7886afe2-315f-6ce6-1ba8-8350bdb15482" executionId="c544450b-1350-4691-8392-8862a7abf61c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6c9579e6-7269-a9fa-7127-d64e7b93cd26" executionId="a11764a1-f62e-4a59-9ebe-cd863dbf21b6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="844ccd9c-76a5-5b03-8401-57b22e88b626" executionId="dbb95153-cc5e-4514-b81f-4a6a98e7b7f3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0f9486b3-becb-b898-220d-89aba931e243" executionId="afe73ae1-4684-4ef1-b9b2-631838bd0754" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5e24096c-dff7-b7a8-22b8-77d85c463701" executionId="f5fdb8f1-c654-4611-8fa2-90ca82a9d98d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="467991c0-dcfa-7667-bdd4-a4473dafba4d" executionId="022a4b63-7caa-45a4-aceb-8d614c823ae3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="24639f4f-07ec-bb22-3d5b-c6dca72eafef" executionId="d4ac8359-d675-47ee-af2e-6477ca34bf27" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ca55541b-51d3-eb97-b422-5759cd6f2ded" executionId="1533394f-8c0a-44de-b82d-0fe0ff6539ae" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1389e893-c837-e679-c3ae-ce35d8d40ae1" executionId="69c7728e-0113-4dc7-9d08-3c31fd7e5647" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a380bc19-64f0-bb9d-648e-95cb676173bf" executionId="eacf775b-110c-4588-8552-0006bd53eec1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2f1d5930-d1ec-3532-86ef-ab1405d7783c" executionId="36dd4f6d-1505-4af9-b576-dd27f7cf9897" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="40d8f910-c0a9-4053-6c7d-ebec5189228a" executionId="e2627e65-44e3-4772-a62d-c8db3f074bd5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="30cbbd40-405b-9f66-4029-3c52a4885036" executionId="0691c628-2864-4b55-8c21-4afce2800f3b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a4c80754-d581-4a1e-5b8b-12d7f167b324" executionId="442181c3-e1c7-49aa-a17d-dcf36824fb71" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="08cbaf4f-2d4e-83ef-bfad-486e471fce12" executionId="b5e64b1e-5b78-4592-b333-a42124bf6247" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9d1c151a-ccd8-b0f6-6688-2f609126588d" executionId="121f9c95-291f-4faa-bc3b-58183516ed9d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="25a97591-d4ed-fa2b-548a-f1228862a648" executionId="6b98dde8-e044-43dd-bcff-04406a663960" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d9332ba3-e2f5-77ab-2964-ed9349b585ca" executionId="5dbac89c-fa8f-4757-bf30-6d0b1a7a66ce" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="45ca2102-45d4-b46d-c322-1258b51825c4" executionId="af62f76d-bdc3-4c7b-b103-abe018750756" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9fd25885-101c-6bed-40cd-e4465eb18ce9" executionId="7a7a5e77-fb26-4f83-9982-c24bc5bb2e43" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b769411e-4155-cdf4-ba11-a966c926b244" executionId="99ba2ded-477b-47de-be57-058451ac9c7d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8b9e842a-11bb-a6d7-b4ee-4b45b5e72140" executionId="9438e7db-1a02-41a5-8937-84b1ba83fdc0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e24d60b9-be65-09f0-fd29-f9aca3e5510c" executionId="ba0f6b2e-69e4-4619-8653-f5e4011bf50c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="69ceb3c4-df95-705c-d12b-204d0f3299b7" executionId="570b638c-b59d-4876-a507-e6650f6b42c0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8bb95a16-1356-4c03-cbb0-5136cf6b558e" executionId="edcc5d8a-a29f-4cd2-a7d4-11c1184a684e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0764d077-ef0c-472d-93c6-e296ed26b83b" executionId="32424695-cbce-4c17-8872-db76e3c3783f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="25419400-df82-c4c1-99dd-bd3a2289e562" executionId="2fb2e816-5533-432d-8d12-7b444034cd8b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f6e1a187-5ab0-ea56-360f-e3174caafc2a" executionId="98e8c3fd-5121-4832-914a-bc51bed4e264" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="898ceb58-19dd-efb3-7594-9aadfff43cae" executionId="319b6506-5784-4ce2-ac3f-6ddf96b866f9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5294e13e-fdba-de13-9aed-7a3719ced106" executionId="9242b10c-95c1-48a6-92ac-f8c83a1e58cf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="192bf2f5-d99e-03a5-a41e-765c708a9e2c" executionId="71288ac8-93b6-44c2-b796-3849636b853a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c56e3385-7c1e-76aa-ddeb-a69d32330682" executionId="63a04c10-ca06-4eb8-baa7-2143de435b1a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="52b6fc9f-1bd6-e16f-4cd3-f1749acf9b6d" executionId="090e12a3-9772-4c09-9da5-f26b516b1462" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="76343946-b8d9-7c2a-1fc7-8a1244e849fb" executionId="641a9b01-1a48-4d3c-8700-279401d4b8b8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4e30e33d-85bc-294e-dff9-25b7b7754dce" executionId="3a550e5e-fb10-4f18-a85e-c7ce7a80ab41" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="26bb034d-c778-579a-ee29-e303e99128a2" executionId="57a942f4-d109-4af2-a7a9-9ac03424920e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="43b6a61d-54a7-35fe-6436-869c55814640" executionId="6232d78c-d2b2-4bce-940f-bdd7a260c3be" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2707c56b-56b0-06dd-33d5-0d9e4f4fd4e8" executionId="bc9e5b43-287a-4ae5-808d-8770bfa25018" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7bba03c7-3a23-7861-7ccb-81a475b38ed3" executionId="cf7f40f2-7de1-4969-ab8e-d62bed7e728b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c5ebbf46-aaf5-6c68-30c1-89a309178b60" executionId="dadf4bbe-65a1-450d-a7bd-f159bd9af1a2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1c07bb47-882c-3421-a8b9-391e12cb9921" executionId="564bcfcc-7a8a-4a79-a552-17906d98e38b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="511cbcde-122e-5b27-5ab1-53cffd647234" executionId="5f200fbd-a44f-499e-98a1-49cefdc7aabf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c28ee7bf-39a5-43dc-4766-46107758951b" executionId="38f1b483-3ab1-4a10-9bb2-48865510f29d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0bafc8ac-783f-ecdc-4526-9d961e0a6fdc" executionId="2137fb16-af54-4434-ba7b-6fce2df01bc9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="33977758-c404-c1b1-7bfe-8426302521b4" executionId="6bbde1e7-6f9d-48c9-afdf-d962fb5c0831" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ccb8c355-7247-a09c-f820-7b1710d21711" executionId="96708b3d-654d-404b-99d6-bdfefd4cca9a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="19d3218b-f619-7dd6-277c-58295ec7567d" executionId="9a0df1d6-e1c6-4f5a-addb-6ddd0d003cf0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fefd6697-9ee7-1222-6b12-2a0ed38ea61a" executionId="2dfb5229-67c5-4ef0-984a-18cd7b1fc8d9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="239e8ce5-e6aa-faf7-0139-3ed97757cdd0" executionId="76b3c9d2-5b94-4ea8-af1b-5b1761619747" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="86c968b3-e0bf-b019-b74a-f1a3920425f1" executionId="5cba4511-e74b-4ce6-938d-33f800f127e1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d712f69f-af04-64c2-3855-e017e3a6caa2" executionId="be7dc103-efb8-4c04-b635-78062b11718f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a6a1c764-3565-9f42-fdf5-e70c63259388" executionId="bfb28837-30fb-404a-8258-72de7cfaa733" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="93b88368-7fb6-8ea3-1e42-aacfcf89b148" executionId="c45058ef-1b02-4695-bdd8-c08df3783bfc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1ac5a2e7-7298-b107-b3f5-db372165c448" executionId="2c315ae3-2805-45ec-bdde-e4188b889be9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0b820ec0-7f9b-0b19-626d-a51e0f44c984" executionId="861b9056-7286-4daa-a47d-82a8c2837a0f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d00041f4-beef-edd3-3e7a-f2d7836bfc0e" executionId="86787e08-0ffb-4c5f-989e-08449fc1478a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b05dd72e-e2c7-ef23-8515-96141b514a35" executionId="7d349091-ade3-42ad-809f-cd350341e259" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="80b60197-ee29-c9ba-62a5-893620ea5ea9" executionId="ad54740e-1455-4bcb-a2c1-0d3c33b282d6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bb524990-1e8a-cab2-ae13-e69d27f02b57" executionId="5c2a2ce4-b83b-4288-978d-52c5fcf586b7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7b92cec6-70ef-a0a3-8468-e62244b55374" executionId="8bc3b84b-fb14-4362-b94a-ac8f7008a2de" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="54adeeec-6ac2-d027-6509-98815483a4e9" executionId="dd5e1642-6dc0-413d-ac18-903f1b1d5cc5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a4fa5e79-4a24-f2fd-a6a6-f35f131fe881" executionId="e44170ad-1fba-4d7e-a8cf-4623dd6916ad" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6ecaddec-c529-ed40-0e18-cb8a53e7c463" executionId="aa254467-3f39-4926-a752-5652189cd563" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ec0215dd-d714-ca31-05e2-3e3ddada61bb" executionId="69c85f30-c70f-49d1-a9f7-bbf1b9319301" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6d24a1e0-a511-1277-db31-7d71eb85c2dc" executionId="eb81a40d-6b2e-4d3c-93b4-464527601dde" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="238688e1-56ea-8d78-9f43-5f2d74edb023" executionId="338be48d-3257-4e87-96e6-208f8710ed65" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="17449ef9-7fc4-3421-0676-9e1e855283e6" executionId="4bcce2b9-21c6-43f3-8d29-3963dd1f4665" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9fc9612d-3a90-9a55-f965-6e4be6134840" executionId="a1356ae8-d3a3-481e-ac94-a82794c21bf1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="44e5ef20-e05e-4a96-0583-6ea1ab509381" executionId="2cece9e5-0bd5-4ba4-8024-c121705f79b9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fa207b4c-d118-d2e6-e7ad-c9f6c7f4d82d" executionId="f8f53bbc-5842-40bf-a2c5-a6d5f7d56621" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0b67832a-dd61-c40a-c106-19f651d8babb" executionId="bd39b348-b9d0-4732-8016-4c65e3d94065" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8280a7d9-4ac4-f780-8f05-12ef1714f9d6" executionId="a83f1721-1d98-4a43-81f3-50149d42c2e6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="94eb432c-d139-4487-4e64-2f647ad88c5f" executionId="5b3e7125-ad4e-4bd6-97c2-6ab29a497752" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c5cd7f2c-897b-c000-0451-47d3c6631a88" executionId="b77f0582-b8d8-483e-9ebc-8f1f2f6e6bfc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0c243d0e-de4a-b93b-d36e-cbd0e3d577c5" executionId="6ffcf5af-c0d6-451f-8e06-15ac72f1d86c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="253a87b2-d15e-7403-0516-1a32e2af5174" executionId="2ceadb6e-085a-4fab-9567-de5afd9f5d5a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6d9ca20f-33b8-4060-52f0-0c1187a70508" executionId="cf1522a4-767e-4f28-9bf6-1fb99fed0c2a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e3ad73ce-88e7-633d-5009-55e7fe57270d" executionId="bcdb5957-baa6-49ca-9f2d-015b02bf1859" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5fd74be3-1d22-898a-32c1-6240c13869c6" executionId="31c3febd-3cda-48ce-9c3d-a2086c7f829a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6355c288-bc30-9c9c-7c4f-5e8db1154e64" executionId="beb46572-8da9-46bc-b7fd-d7d7ab4ae2b0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1bbc58ed-3774-69b5-5614-818807bd6058" executionId="b4b879f7-e5a7-41d7-adc3-73b12dee5073" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4c7c94ab-a772-2de0-23da-6ca734a693d8" executionId="483e51ba-de4d-44be-b910-adc0021d4172" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8e76f531-6c0a-1cc0-dc63-9564c8ed55db" executionId="5dc69334-8066-4015-85ad-3c23e726ae25" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1d2037c7-8145-70c0-d8f5-d0e7c8f318d1" executionId="63fa1ae8-584c-4e9c-b323-51011c3e0ad7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d6837f21-daff-58ea-2ef9-eb863c4ffb5f" executionId="83fc7365-e1db-4ec0-94d1-8b2e0c375532" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6f06b12b-b200-f43a-87b4-084ce8be62f7" executionId="2ea41dd6-6787-45e9-9284-d67deb8e31b6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="19fba11c-7f4a-eaed-a6af-6c1774a52c94" executionId="f213c0ec-1f36-4dc1-bb54-134bcc68e570" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ff8dfdfc-75ae-ec99-308c-8d6773892c33" executionId="8fbf8261-e024-4ea2-8dd5-ddab28e3e32b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="68e1d650-74f8-7d44-e4c4-a57b1f577ce7" executionId="44768c92-7f2c-432b-9604-10a081a58e48" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c845a60b-47be-0e52-34b6-25c925c16fcd" executionId="028b09fc-19e7-4b60-b6a9-d47ef8039c8e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a78e8e0d-129e-0819-4c76-08e37f95b8de" executionId="f8139b27-d6f0-4a64-a43a-a8d9a8908d8d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b306cba5-12bb-76b5-26cf-ae08ec1244e2" executionId="fa7d197f-f160-4b11-8200-84d89b33f325" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e6716dc7-c160-49ee-ee71-d4fc698257e2" executionId="86045cf9-164e-444f-9c07-0b72833549bf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6ee33dc5-db53-1f75-9e15-b7bb1c79a949" executionId="6507206e-8301-4b44-9275-2697f605d4be" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Bir Listede Olmayan Sonuçlar" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="Yüklenen Tüm Sonuçlar" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="128" executed="115" passed="115" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.8.2+699d445a1a (64-bit .NET 8.0.17)&#xD;
+[xUnit.net 00:00:00.82]   Discovering: UFMDb.Tests&#xD;
+[xUnit.net 00:00:00.87]   Discovered:  UFMDb.Tests&#xD;
+[xUnit.net 00:00:00.88]   Starting:    UFMDb.Tests&#xD;
+[xUnit.net 00:00:00.93]       Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.&#xD;
+[xUnit.net 00:00:00.93]       Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.&#xD;
+[xUnit.net 00:00:00.93]       Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.&#xD;
+[xUnit.net 00:00:00.93]       Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.&#xD;
+[xUnit.net 00:00:00.93]       Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.&#xD;
+Test çalıştırmasında 'UFMDb.Tests.Catalog.ArchiveCreditBackfillTests.BatchResumeAndRetry_VisitOnlyEligibleFilms' testi atlandı.&#xD;
+Test çalıştırmasında 'UFMDb.Tests.Catalog.PersonCreditMigrationTests.Migration_MergesSharedIdentity_PreservesBothCreditsAndUnmatchedNames' testi atlandı.&#xD;
+Test çalıştırmasında 'UFMDb.Tests.Catalog.PostgresCatalogTests.FollowedReview_AppearsInActivityButSpotlightOmitsSpoilerText' testi atlandı.&#xD;
+Test çalıştırmasında 'UFMDb.Tests.Catalog.PostgresCatalogTests.RatingSort_WeightsVoteCount_AndReturnsLocalizedTitlesInRankOrder' testi atlandı.&#xD;
+Test çalıştırmasında 'UFMDb.Tests.Catalog.PostgresCatalogTests.Search_TreatsPercentAndUnderscoreInTitlesAsLiteral' testi atlandı.&#xD;
+[xUnit.net 00:00:00.94]       Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.&#xD;
+[xUnit.net 00:00:00.94]       Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.&#xD;
+[xUnit.net 00:00:00.94]       Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.&#xD;
+[xUnit.net 00:00:00.94]       Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.&#xD;
+[xUnit.net 00:00:00.94]       Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.&#xD;
+[xUnit.net 00:00:00.94]       Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.&#xD;
+[xUnit.net 00:00:00.94]       Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.&#xD;
+Test çalıştırmasında 'UFMDb.Tests.Catalog.PostgresCatalogTests.ScreeningPages_KeepWholeDaysAndCountEarlierRewatches' testi atlandı.&#xD;
+Test çalıştırmasında 'UFMDb.Tests.Catalog.PostgresCatalogTests.Activity_PagesWholeCardsAcrossEqualTimestamps_AndRespectsPrivateDiary' testi atlandı.&#xD;
+Test çalıştırmasında 'UFMDb.Tests.Catalog.PostgresCatalogTests.Activity_GroupsAcrossUtcMidnightInViewersTimeZone' testi atlandı.&#xD;
+Test çalıştırmasında 'UFMDb.Tests.Catalog.PostgresCatalogTests.Search_NormalizesAccents_RanksExactFirst_AndPaginatesAfterFiltering' testi atlandı.&#xD;
+Test çalıştırmasında 'UFMDb.Tests.Catalog.PostgresCatalogTests.ClearWatchlist_DeletesOnlyTheRequestedUsersRows_AndIsRepeatable' testi atlandı.&#xD;
+Test çalıştırmasında 'UFMDb.Tests.Catalog.PostgresCatalogTests.FilmDetail_ReadsMyRatingAndSpoilerReview_AndLocalizesTheTitle' testi atlandı.&#xD;
+Test çalıştırmasında 'UFMDb.Tests.Catalog.PostgresCatalogTests.DiaryOwnerLookup_ResolvesLiteralUnderscoreInUserName' testi atlandı.&#xD;
+[xUnit.net 00:00:01.47]       Set UFMDB_TEST_POSTGRES to run with a disposable PostgreSQL instance.&#xD;
+Test çalıştırmasında 'UFMDb.Tests.Api.HttpSessionTests.Registration_IssuesSession_ProfileAcceptsBearer_AndRefreshCookieRotates' testi atlandı.&#xD;
+[xUnit.net 00:00:03.82]   Finished:    UFMDb.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="YAVUZ" outcome="Warning" timestamp="2026-11-23T15:44:33.1774755+03:00">
+        <Text>[xUnit.net 00:00:00.93]     UFMDb.Tests.Catalog.ArchiveCreditBackfillTests.BatchResumeAndRetry_VisitOnlyEligibleFilms [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="YAVUZ" outcome="Warning" timestamp="2026-11-23T15:44:33.1777271+03:00">
+        <Text>[xUnit.net 00:00:00.93]     UFMDb.Tests.Catalog.PersonCreditMigrationTests.Migration_MergesSharedIdentity_PreservesBothCreditsAndUnmatchedNames [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="YAVUZ" outcome="Warning" timestamp="2026-11-23T15:44:33.1777714+03:00">
+        <Text>[xUnit.net 00:00:00.93]     UFMDb.Tests.Catalog.PostgresCatalogTests.FollowedReview_AppearsInActivityButSpotlightOmitsSpoilerText [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="YAVUZ" outcome="Warning" timestamp="2026-11-23T15:44:33.1778380+03:00">
+        <Text>[xUnit.net 00:00:00.93]     UFMDb.Tests.Catalog.PostgresCatalogTests.RatingSort_WeightsVoteCount_AndReturnsLocalizedTitlesInRankOrder [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="YAVUZ" outcome="Warning" timestamp="2026-11-23T15:44:33.1778788+03:00">
+        <Text>[xUnit.net 00:00:00.93]     UFMDb.Tests.Catalog.PostgresCatalogTests.Search_TreatsPercentAndUnderscoreInTitlesAsLiteral [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="YAVUZ" outcome="Warning" timestamp="2026-11-23T15:44:33.2016363+03:00">
+        <Text>[xUnit.net 00:00:00.94]     UFMDb.Tests.Catalog.PostgresCatalogTests.ScreeningPages_KeepWholeDaysAndCountEarlierRewatches [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="YAVUZ" outcome="Warning" timestamp="2026-11-23T15:44:33.2017327+03:00">
+        <Text>[xUnit.net 00:00:00.94]     UFMDb.Tests.Catalog.PostgresCatalogTests.Activity_PagesWholeCardsAcrossEqualTimestamps_AndRespectsPrivateDiary [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="YAVUZ" outcome="Warning" timestamp="2026-11-23T15:44:33.2017771+03:00">
+        <Text>[xUnit.net 00:00:00.94]     UFMDb.Tests.Catalog.PostgresCatalogTests.Activity_GroupsAcrossUtcMidnightInViewersTimeZone [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="YAVUZ" outcome="Warning" timestamp="2026-11-23T15:44:33.2018479+03:00">
+        <Text>[xUnit.net 00:00:00.94]     UFMDb.Tests.Catalog.PostgresCatalogTests.Search_NormalizesAccents_RanksExactFirst_AndPaginatesAfterFiltering [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="YAVUZ" outcome="Warning" timestamp="2026-11-23T15:44:33.2018864+03:00">
+        <Text>[xUnit.net 00:00:00.94]     UFMDb.Tests.Catalog.PostgresCatalogTests.ClearWatchlist_DeletesOnlyTheRequestedUsersRows_AndIsRepeatable [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="YAVUZ" outcome="Warning" timestamp="2026-11-23T15:44:33.2019242+03:00">
+        <Text>[xUnit.net 00:00:00.94]     UFMDb.Tests.Catalog.PostgresCatalogTests.FilmDetail_ReadsMyRatingAndSpoilerReview_AndLocalizesTheTitle [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="YAVUZ" outcome="Warning" timestamp="2026-11-23T15:44:33.2019618+03:00">
+        <Text>[xUnit.net 00:00:00.94]     UFMDb.Tests.Catalog.PostgresCatalogTests.DiaryOwnerLookup_ResolvesLiteralUnderscoreInUserName [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="YAVUZ" outcome="Warning" timestamp="2026-11-23T15:44:33.7123157+03:00">
+        <Text>[xUnit.net 00:00:01.47]     UFMDb.Tests.Api.HttpSessionTests.Registration_IssuesSession_ProfileAcceptsBearer_AndRefreshCookieRotates [SKIP]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

@@ -46,11 +46,14 @@ public class ScreeningLogTests
     }
 
     [Theory]
-    [InlineData(-6, true)]
-    [InlineData(6, false)]
-    public void ScreeningTimeValidation_AgreesForAddAndEdit(int hours, bool valid)
+    [InlineData(-1, 0, true)]
+    [InlineData(0, 0, true)]
+    [InlineData(0, 23, true)]
+    [InlineData(1, 0, false)]
+    public void ScreeningDateValidation_AgreesForAddAndEdit(int daysFromLatest, int hour, bool valid)
     {
-        var at = DateTime.UtcNow.AddHours(hours);
+        var latestCalendarDay = DateTime.UtcNow.AddHours(14).Date;
+        var at = latestCalendarDay.AddDays(daysFromLatest).AddHours(hour);
         var user = Guid.NewGuid();
         var id = Guid.NewGuid();
         Assert.Equal(valid, new LogScreeningCommandValidator().Validate(new LogScreeningCommand(user, id, at, null)).IsValid);

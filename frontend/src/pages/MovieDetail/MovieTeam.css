@@ -1,8 +1,15 @@
 .movie-detail__directors.movie-detail__team {
   display: flex;
   align-items: flex-start;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 4px 2px 10px;
   gap: 1rem;
+}
+.movie-detail__team > .movie-detail__director-card {
+  flex: 0 0 7rem;
 }
 .movie-detail__team small {
   display: block;
