@@ -7,6 +7,7 @@ namespace UFMDb.Tools.TmdbImporter;
 
 public class TmdbClient
 {
+    private readonly ArchiveRequestPacer _archivePacer = new();
     private readonly HttpClient _http;
     private readonly string _apiKey;
     private readonly JsonSerializerOptions _jsonOptions = new()
@@ -101,11 +102,21 @@ public class TmdbClient
 
         for (var attempt = 0; attempt < 4; attempt++)
         {
+            var paced = append == "credits";
+            if (paced) await _archivePacer.WaitAsync(ct);
             using var response = await _http.GetAsync(url, ct);
 
             if ((int)response.StatusCode == 429 || (int)response.StatusCode >= 500)
             {
-                var wait = response.Headers.RetryAfter?.Delta ?? TimeSpan.FromSeconds(1 << attempt);
+                var retry = response.Headers.RetryAfter;
+                var wait = retry?.Delta ?? (retry?.Date - DateTimeOffset.UtcNow) ?? TimeSpan.FromSeconds(1 << attempt);
+                if (wait < TimeSpan.Zero) wait = TimeSpan.Zero;
+                if (paced && (int)response.StatusCode == 429)
+                {
+                    _archivePacer.BackOff(wait);
+                    if (attempt == 3) response.EnsureSuccessStatusCode();
+                    continue;
+                }
                 await Task.Delay(wait, ct);
                 continue;
             }

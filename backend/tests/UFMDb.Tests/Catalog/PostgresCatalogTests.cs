@@ -214,12 +214,16 @@ public class PostgresCatalogTests : IAsyncLifetime
         var at = new DateTime(2026, 11, 18, 22, 30, 0, DateTimeKind.Utc);
         db.WatchHistory.Add(new WatchHistory { UserId = viewer.Id, MovieId = film.Id, WatchedAtUtc = at });
         db.Reviews.Add(new Review { UserId = viewer.Id, MovieId = film.Id, Content = "Review", UpdatedAtUtc = at.AddHours(2) });
+        db.MovieRatings.Add(new MovieRating { MovieId = film.Id, UserId = viewer.Id, Value = 4.5m, UpdatedAtUtc = at });
+        db.Likes.Add(new Like { MovieId = film.Id, UserId = viewer.Id, Reaction = UFMDb.Domain.Enums.ReactionType.Like, UpdatedAtUtc = at });
         await db.SaveChangesAsync();
         var handler = new GetActivityFeedQueryHandler(db);
         var query = new GetActivityFeedQuery(viewer.Id, null, "all", 1, TimeZone: "Europe/Istanbul");
         var local = await handler.Handle(query, default);
         var card = Assert.Single(local.Items);
         Assert.True(card.Watched && card.HasReview);
+        Assert.Equal(4.5m, card.Rating);
+        Assert.Equal("Like", card.Reaction);
         Assert.False(local.HasMore);
         var utc = await handler.Handle(query with { TimeZone = "UTC" }, default);
         Assert.True(utc.HasMore);

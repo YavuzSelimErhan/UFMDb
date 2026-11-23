@@ -95,6 +95,16 @@ public class GetMovieDetailQueryHandler : IRequestHandler<GetMovieDetailQuery, M
             .Select(i => new MovieImageDto(i.Type, i.FilePath, i.Language, i.Width, i.Height))
             .ToList();
 
+        var crew = await (from credit in _context.MovieCredits.AsNoTracking()
+                          join person in _context.People on credit.PersonId equals person.Id
+                          where credit.MovieId == movie.Id && credit.Kind == UFMDb.Domain.Entities.CreditKind.Crew
+                                && credit.Job != "Director" && !person.IsDeleted
+                          select new { PersonId = person.Id, person.FullName, credit.Job })
+            .Distinct()
+            .OrderBy(c => c.Job).ThenBy(c => c.FullName).ThenBy(c => c.PersonId)
+            .Select(c => new MovieCrewDto(c.PersonId, c.FullName, c.Job))
+            .ToListAsync(ct);
+
         return new MovieDetailDto(
             movie.Id,
             Localization.Pick(isTr, movie.Title, movie.TitleTr),
@@ -129,7 +139,8 @@ public class GetMovieDetailQueryHandler : IRequestHandler<GetMovieDetailQuery, M
                 .OrderBy(c => c.Name).ToList(),
             Videos: videos,
             Images: images,
-            Collection: collectionDto
+            Collection: collectionDto,
+            Crew: crew
         );
     }
 }

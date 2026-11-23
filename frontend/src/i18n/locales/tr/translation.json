@@ -71,6 +71,19 @@
     "searchDirectors": "Yönetmenler"
   },
   "movie": {
+    "crew": "Film ekibi",
+    "jobs": {
+      "Writer": "Yazar",
+      "Screenplay": "Senaryo",
+      "Story": "Hikâye",
+      "Novel": "Roman",
+      "Director of Photography": "Görüntü yönetmeni",
+      "Editor": "Kurgu",
+      "Original Music Composer": "Özgün müzik",
+      "Production Design": "Yapım tasarımı",
+      "Costume Design": "Kostüm tasarımı",
+      "Producer": "Yapımcı"
+    },
     "overview": "Konu",
     "cast": "Oyuncular",
     "director": "Yönetmen",

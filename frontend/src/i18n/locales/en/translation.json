@@ -71,6 +71,19 @@
     "searchDirectors": "Directors"
   },
   "movie": {
+    "crew": "Crew",
+    "jobs": {
+      "Writer": "Writer",
+      "Screenplay": "Screenplay",
+      "Story": "Story",
+      "Novel": "Novel",
+      "Director of Photography": "Director of Photography",
+      "Editor": "Editor",
+      "Original Music Composer": "Original Music Composer",
+      "Production Design": "Production Design",
+      "Costume Design": "Costume Design",
+      "Producer": "Producer"
+    },
     "overview": "Overview",
     "cast": "Cast",
     "director": "Director",

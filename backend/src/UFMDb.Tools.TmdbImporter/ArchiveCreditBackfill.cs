@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using UFMDb.Persistence;
 using UFMDb.Tools.TmdbImporter.Models;
 
@@ -27,15 +29,15 @@ public static class ArchiveCreditBackfill
         var status = args.Contains("--status");
         var once = args.Contains("--once");
         var size = 25;
-        var parallelism = 1;
+        var parallelism = 24;
         for (int i = 0; i < args.Length; i++)
         {
             if (args[i] is "--status" or "--once" or "--retry-failed") continue;
             if (args[i] == "--batch-size" && i + 1 < args.Length &&
                 int.TryParse(args[++i], out size) && size is >= 1 and <= 500) continue;
             if (args[i] == "--parallel" && i + 1 < args.Length &&
-                int.TryParse(args[++i], out parallelism) && parallelism is >= 1 and <= 8) continue;
-            throw new ArgumentException("Seçenekler: --status | [--once] [--retry-failed] [--batch-size 1..500] [--parallel 1..8]");
+                int.TryParse(args[++i], out parallelism) && parallelism is >= 1 and <= 64) continue;
+            throw new ArgumentException("Seçenekler: --status | [--once] [--retry-failed] [--batch-size 1..500] [--parallel 1..64]");
         }
 
         await using var catalog = new ApplicationDbContext(options);
@@ -59,53 +61,99 @@ public static class ArchiveCreditBackfill
                 """).ToListAsync(ct);
             if (movies.Count == 0) break;
 
+            var wall = Stopwatch.StartNew();
+            var writes = new Stopwatch();
+            var buffer = new List<Download>(25);
+            async Task FlushAsync()
+            {
+                if (buffer.Count == 0) return;
+                writes.Start();
+                failed += await SaveGroupAsync(options, buffer, ct);
+                writes.Stop();
+                buffer.Clear();
+            }
+
             await foreach (var result in PrefetchAsync(movies, fetch, parallelism, ct))
             {
-                ct.ThrowIfCancellationRequested();
-                var id = result.Movie.TmdbId;
-                cursor = id;
-                var movieId = result.Movie.MovieId;
-
-                try
+                cursor = result.Movie.TmdbId;
+                if (result.Error is not null || result.Detail?.Id != cursor)
                 {
-                    if (result.Error is not null) throw result.Error;
-                    var detail = result.Detail;
-                    if (detail?.Id != id) throw new InvalidDataException("TMDB ayrıntısı eksik veya film kimliği uyuşmuyor.");
-                    await using var db = new ApplicationDbContext(options);
-                    await using var tx = await db.Database.BeginTransactionAsync(ct);
-                    await MovieCreditImport.LockAsync(db, ct);
-                    if (!await db.Movies.AnyAsync(m => m.Id == movieId && m.TmdbId == id, ct)) continue;
-                    var done = await db.Database.SqlQuery<int>($"""
-                        SELECT 1 AS "Value" FROM "ArchiveCreditProgress"
-                        WHERE "MovieId" = {movieId} AND "TmdbId" = {id} AND "Completed"
-                        """).AnyAsync(ct);
-                    if (done) continue;
-                    var added = await MovieCreditImport.MergeAsync(db, movieId, detail.Credits, ct);
-                    await RecordAsync(db, movieId, id, true, null, ct);
-                    await tx.CommitAsync(ct);
-                    Console.WriteLine($"TMDB {id}: {added} yeni kredi.");
-                    consecutiveFailures = 0;
-                }
-                catch (Exception ex) when (!ct.IsCancellationRequested)
-                {
-                    // Do not persist request URLs, credentials or arbitrary response bodies.
-                    var reason = ex is HttpRequestException http && http.StatusCode.HasValue
-                        ? $"HTTP {(int)http.StatusCode.Value}" : ex.GetType().Name;
-                    await RecordAsync(catalog, movieId, id, false, reason, ct);
-                    Console.Error.WriteLine($"TMDB {id}: {reason}; yeniden denemeye kaydedildi.");
+                    await FlushAsync();
+                    var reason = result.Error is HttpRequestException http && http.StatusCode.HasValue
+                        ? $"HTTP {(int)http.StatusCode.Value}" : result.Error?.GetType().Name ?? "Missing movie";
+                    await RecordAsync(catalog, result.Movie.MovieId, cursor, false, reason, ct);
+                    Console.Error.WriteLine($"TMDB {cursor}: {reason}");
                     failed++;
                     if (++consecutiveFailures >= 3)
                     {
-                        Console.Error.WriteLine("Art arda üç hata: aktarım durduruldu.");
                         await PrintStatusAsync(catalog, ct);
                         return 1;
                     }
+                    continue;
                 }
+                consecutiveFailures = 0;
+                buffer.Add(result);
+                if (buffer.Count == 25) await FlushAsync();
             }
+            await FlushAsync();
+            Console.WriteLine($"{movies.Count} film: toplam {wall.Elapsed.TotalSeconds:F1} sn, " +
+                $"veritabanı grupları {writes.Elapsed.TotalSeconds:F1} sn, " +
+                $"indirme bekleme ve diğer {(wall.Elapsed - writes.Elapsed).TotalSeconds:F1} sn.");
         } while (!once);
         await PrintStatusAsync(catalog, ct);
         return failed == 0 ? 0 : 1;
     }
+
+    private static async Task<int> SaveGroupAsync(DbContextOptions<ApplicationDbContext> options,
+        List<Download> group, CancellationToken ct)
+    {
+        try
+        {
+            await using var db = new ApplicationDbContext(options);
+            await using var tx = await db.Database.BeginTransactionAsync(ct);
+            await MovieCreditImport.LockAsync(db, ct);
+            var ids = group.Select(x => x.Movie.MovieId).ToArray();
+            var eligible = await db.Database.SqlQuery<Candidate>($"""
+                SELECT m."Id" AS "MovieId", m."TmdbId" FROM "Movies" m
+                WHERE m."Id" = ANY({ids}) AND NOT m."IsDeleted" AND m."TmdbId" IS NOT NULL
+                  AND NOT EXISTS (SELECT 1 FROM "ArchiveCreditProgress" p WHERE p."MovieId" = m."Id"
+                    AND p."TmdbId" = m."TmdbId" AND p."Completed")
+                """).ToListAsync(ct);
+            var keys = eligible.Select(x => (x.MovieId, x.TmdbId)).ToHashSet();
+            var films = group.Where(x => keys.Contains((x.Movie.MovieId, x.Movie.TmdbId)))
+                .ToDictionary(x => x.Movie.MovieId, x => x.Detail!.Credits);
+            if (films.Count == 0) return 0;
+            var counts = await MovieCreditImport.MergeBatchAsync(db, films, ct);
+            var saved = counts.Keys.ToArray();
+            await db.Database.ExecuteSqlInterpolatedAsync($"""
+                INSERT INTO "ArchiveCreditProgress" ("MovieId","TmdbId","Completed","Attempts","LastError")
+                SELECT m."Id", m."TmdbId", TRUE, 1, NULL FROM "Movies" m WHERE m."Id" = ANY({saved})
+                ON CONFLICT ("MovieId","TmdbId") DO UPDATE SET "Completed" = TRUE,
+                  "Attempts" = "ArchiveCreditProgress"."Attempts" + 1, "LastError" = NULL, "UpdatedAt" = now()
+                """, ct);
+            await tx.CommitAsync(ct);
+            Console.WriteLine($"{counts.Count} film kaydedildi, {counts.Values.Sum()} yeni kredi.");
+            return 0;
+        }
+        catch (Exception ex) when (!ct.IsCancellationRequested && IsDataError(ex))
+        {
+            // The failed transaction has been disposed before either half is retried.
+            if (group.Count > 1)
+            {
+                int mid = group.Count / 2;
+                var left = await SaveGroupAsync(options, group.GetRange(0, mid), ct);
+                return left + await SaveGroupAsync(options, group.GetRange(mid, group.Count - mid), ct);
+            }
+            var film = group[0].Movie;
+            await using var db = new ApplicationDbContext(options);
+            await RecordAsync(db, film.MovieId, film.TmdbId, false, ex.GetType().Name, ct);
+            Console.Error.WriteLine($"TMDB {film.TmdbId}: {ex.GetType().Name}");
+            return 1;
+        }
+    }
+
+    private static bool IsDataError(Exception ex) => ex is InvalidDataException ||
+        ex.GetBaseException() is PostgresException pg && (pg.SqlState.StartsWith("22") || pg.SqlState.StartsWith("23"));
 
     private sealed class Candidate
     {

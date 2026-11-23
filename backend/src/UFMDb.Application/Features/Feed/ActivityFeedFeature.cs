@@ -118,14 +118,18 @@ public class GetActivityFeedQueryHandler : IRequestHandler<GetActivityFeedQuery,
                 Content = (string?)x.Content, Spoiler = x.ContainsSpoiler, x.Id, x.CreatedAtUtc
             });
 
-        var events = type switch
+        var sources = type switch
         {
-            "ratings" => ratingsEvents,
-            "diary" => diaryEvents,
-            "reactions" => reactionsEvents,
-            "reviews" => reviewsEvents,
-            _ => ratingsEvents.Concat(diaryEvents).Concat(reactionsEvents).Concat(reviewsEvents)
+            "ratings" => new[] { ratingsEvents },
+            "diary" => new[] { diaryEvents },
+            "reactions" => new[] { reactionsEvents },
+            "reviews" => new[] { reviewsEvents },
+            _ => new[] { ratingsEvents, diaryEvents, reactionsEvents, reviewsEvents }
         };
+
+        // Only columns shared by all four tables participate in UNION ALL.
+        var timeline = sources.Select(source => source.Select(e => new { e.UserId, e.MovieId, e.At }))
+            .Aggregate((left, right) => left.Concat(right));
 
         var zone = request.TimeZone;
         if (!TimeZoneInfo.TryFindSystemTimeZoneById(zone, out var info) || (zone != "UTC" && !info.HasIanaId))
@@ -133,7 +137,7 @@ public class GetActivityFeedQueryHandler : IRequestHandler<GetActivityFeedQuery,
             {
                 ["timeZone"] = new[] { "Geçersiz saat dilimi." }
             });
-        var cards = events.GroupBy(e => new { e.UserId, e.MovieId, Day = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(e.At, zone).Date })
+        var cards = timeline.GroupBy(e => new { e.UserId, e.MovieId, Day = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(e.At, zone).Date })
             .Select(g => new { g.Key.UserId, g.Key.MovieId, g.Key.Day, Last = g.Max(e => e.At) });
         if (before is DateTime boundary)
         {
@@ -146,14 +150,18 @@ public class GetActivityFeedQueryHandler : IRequestHandler<GetActivityFeedQuery,
 
         var keys = cards.OrderByDescending(c => c.Last).ThenBy(c => c.UserId).ThenBy(c => c.MovieId)
             .Take(pageSize + 1);
-        var page = await (from e in events
-                          join k in keys on new { e.UserId, e.MovieId, Day = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(e.At, zone).Date }
-                              equals new { k.UserId, k.MovieId, k.Day }
-                          orderby e.At descending, e.CreatedAtUtc descending, e.Id descending
-                          select new { Event = e, k.Day }).ToListAsync(ct);
+        var queries = sources.Select(source =>
+            from e in source
+            join k in keys on new { e.UserId, e.MovieId, Day = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(e.At, zone).Date }
+                equals new { k.UserId, k.MovieId, k.Day }
+            select new { Event = e, k.Day }).ToArray();
+        var page = await queries[0].ToListAsync(ct);
+        foreach (var query in queries.Skip(1))
+            page.AddRange(await query.ToListAsync(ct));
 
         var merged = new Dictionary<(Guid UserId, Guid MovieId, DateTime Day), Row>();
-        foreach (var item in page)
+        foreach (var item in page.OrderByDescending(x => x.Event.At)
+                     .ThenByDescending(x => x.Event.CreatedAtUtc).ThenByDescending(x => x.Event.Id))
         {
             var e = item.Event;
             var key = (e.UserId, e.MovieId, item.Day);

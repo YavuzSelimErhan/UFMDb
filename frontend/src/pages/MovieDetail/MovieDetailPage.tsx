@@ -525,6 +525,19 @@ export default function MovieDetailPage() {
             </>
           )}
 
+          {!!movie.crew?.length && (
+            <section>
+              <h3 className="movie-detail__section-title">{t("movie.crew")}</h3>
+              <ul>
+                {movie.crew.map((c) => (
+                  <li key={c.personId + ":" + c.job}>
+                    {c.fullName} · {t(`movie.jobs.${c.job}`, { defaultValue: c.job })}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           <h3 className="movie-detail__section-title">{t("movie.cast")}</h3>
           <div className="movie-detail__cast-wrap">
             <div className="movie-detail__cast">

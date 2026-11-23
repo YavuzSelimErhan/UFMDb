@@ -24,6 +24,8 @@ public record MovieCountryDto(string IsoCode, string Name);
 public record CollectionMovieDto(Guid Id, string Title, int ReleaseYear, string PosterUrl);
 public record MovieCollectionDto(Guid Id, string Name, string PosterUrl, string BackdropUrl, List<CollectionMovieDto> Movies);
 
+public record MovieCrewDto(Guid PersonId, string FullName, string Job);
+
 public record MovieDetailDto(
     Guid Id, string Title, string OriginalTitle, string Overview, int ReleaseYear, DateTime ReleaseDate,
     int RuntimeMinutes, string PosterUrl, string BackdropUrl, List<MovieDirectorDto> Directors, string Country,
@@ -39,7 +41,8 @@ public record MovieDetailDto(
     List<ProductionCompanyDto>? Companies = null,
     List<MovieVideoDto>? Videos = null,
     List<MovieImageDto>? Images = null,
-    MovieCollectionDto? Collection = null
+    MovieCollectionDto? Collection = null,
+    List<MovieCrewDto>? Crew = null
 );
 
 public record MovieCastDto(Guid ActorId, string FullName, string PhotoUrl, string CharacterName, int Order);

@@ -129,6 +129,7 @@ export interface MovieCollection {
 }
 
 export interface MovieDetail {
+  crew?: { personId: string; fullName: string; job: string }[] | null;
   id: string;
   title: string;
   originalTitle: string;
