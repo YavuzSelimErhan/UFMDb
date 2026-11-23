@@ -1,4 +1,4 @@
-import { localScreeningTime } from "@/utils/screeningTime";
+import { localScreeningDate } from "@/utils/screeningTime";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -29,7 +29,7 @@ export default function LogScreeningModal({ movie, onClose }: Props) {
   const { t } = useTranslation();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
-  const [logDate, setLogDate] = useState(localScreeningTime());
+  const [logDate, setLogDate] = useState(localScreeningDate());
   const [logRating, setLogRating] = useState(0);
 
   // Önceki tepki: sunucudaki güncel değer (film detayı cache'i); o gelene kadar
@@ -108,10 +108,10 @@ export default function LogScreeningModal({ movie, onClose }: Props) {
           <div className="log-screening-modal__field">
             <label>{t("log.addEntryDate")}</label>
             <input
-              type="datetime-local"
+              type="date"
               value={logDate}
               onChange={(e) => setLogDate(e.target.value)}
-              max={localScreeningTime()}
+              max={localScreeningDate()}
             />
           </div>
           <div className="log-screening-modal__field">

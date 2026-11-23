@@ -80,7 +80,7 @@ public class WatchHistory : BaseEntity
     public User User { get; set; } = default!;
     public Guid MovieId { get; set; }
     public Movie Movie { get; set; } = default!;
-    public DateTime WatchedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime WatchedAtUtc { get; set; } = DateTime.UtcNow.Date;
     public decimal? Rating { get; set; } // eklendi — bu SPESİFİK seansta verilen puan
 }
 

@@ -1,4 +1,4 @@
-import { localScreeningTime } from "@/utils/screeningTime";
+import { localScreeningDate } from "@/utils/screeningTime";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -26,6 +26,7 @@ import StarRating from "@/components/movie/StarRating";
 import PersonAvatar from "@/components/common/PersonAvatar";
 import { PageSpinner, PageError } from "@/components/common/PageState";
 import "./MovieDetailPage.css";
+import "./MovieTeam.css";
 
 
 export default function MovieDetailPage() {
@@ -36,7 +37,7 @@ export default function MovieDetailPage() {
   const [reviewText, setReviewText] = useState("");
   const [myRating, setMyRating] = useState(0);
   const [isLogging, setIsLogging] = useState(false);
-  const [logDate, setLogDate] = useState(localScreeningTime());
+  const [logDate, setLogDate] = useState(localScreeningDate());
   const [logRating, setLogRating] = useState(0);
   const { showToast } = useToast();
   // undefined = kullanıcı dokunmadı (güncel tepki geçerli), null = bilerek temizledi
@@ -188,7 +189,7 @@ export default function MovieDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["home-feed"] });
       queryClient.invalidateQueries({ queryKey: ["list"] });
       if (reactionFailed) showToast(t("log.reactionSaveError"), "error");
-      setLogDate(localScreeningTime());
+      setLogDate(localScreeningDate());
       setLogRating(0);
       setIsLogging(false);
     },
@@ -216,6 +217,17 @@ export default function MovieDetailPage() {
     setMyRating(rating);
     quickRateMutation.mutate(rating);
   };
+
+  const team = new Map<string, { id: string; name: string; photo?: string; directorId?: string; roles: string[] }>();
+  for (const d of movie.directors) {
+    team.set(d.id, { id: d.id, name: d.fullName, photo: d.photoUrl, directorId: d.id, roles: [t("movie.director")] });
+  }
+  for (const c of movie.crew ?? []) {
+    const key = c.directorId && team.has(c.directorId) ? c.directorId : c.personId;
+    const card = team.get(key) ?? { id: c.personId, name: c.fullName, photo: c.photoUrl, roles: [] as string[] };
+    card.roles.push(t(`movie.jobs.${c.job}`, { defaultValue: c.job }));
+    team.set(key, card);
+  }
 
   return (
     <div className="movie-detail" style={themeStyle}>
@@ -438,10 +450,10 @@ export default function MovieDetailPage() {
                 <div className="movie-detail__log-form-field">
                   <label>{t("log.addEntryDate")}</label>
                   <input
-                    type="datetime-local"
+                    type="date"
                     value={logDate}
                     onChange={(e) => setLogDate(e.target.value)}
-                    max={localScreeningTime()}
+                    max={localScreeningDate()}
                   />
                 </div>
                 <div className="movie-detail__log-form-field">
@@ -500,41 +512,23 @@ export default function MovieDetailPage() {
           <h3 className="movie-detail__section-title">{t("movie.overview")}</h3>
           <p className="movie-detail__overview">{movie.overview}</p>
 
-          {movie.directors.length > 0 && (
-            <>
-              <h3 className="movie-detail__section-title">
-                {t("movie.director")}
-              </h3>
-              <div className="movie-detail__directors">
-                {movie.directors.map((d) => (
-                  <Link
-                    key={d.id}
-                    to={`/directors/${d.id}`}
-                    className="movie-detail__director-card"
-                  >
-                    <PersonAvatar
-                      id={d.id}
-                      photoUrl={d.photoUrl}
-                      fullName={d.fullName}
-                      size="sm"
-                    />
-                    <span>{d.fullName}</span>
-                  </Link>
-                ))}
-              </div>
-            </>
-          )}
-
-          {!!movie.crew?.length && (
+          {team.size > 0 && (
             <section>
               <h3 className="movie-detail__section-title">{t("movie.crew")}</h3>
-              <ul>
-                {movie.crew.map((c) => (
-                  <li key={c.personId + ":" + c.job}>
-                    {c.fullName} · {t(`movie.jobs.${c.job}`, { defaultValue: c.job })}
-                  </li>
-                ))}
-              </ul>
+              <div className="movie-detail__directors movie-detail__team">
+                {Array.from(team.values(), (person) => {
+                  const body = <>
+                    <PersonAvatar id={person.id} photoUrl={person.photo} fullName={person.name} size="sm" />
+                    <span>{person.name}</span>
+                    <small>{person.roles.join(" · ")}</small>
+                  </>;
+                  return person.directorId ? (
+                    <Link className="movie-detail__director-card" key={person.id} to={`/directors/${person.directorId}`}>{body}</Link>
+                  ) : (
+                    <div className="movie-detail__director-card" key={person.id}>{body}</div>
+                  );
+                })}
+              </div>
             </section>
           )}
 

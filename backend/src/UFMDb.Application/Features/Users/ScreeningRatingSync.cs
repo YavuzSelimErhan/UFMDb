@@ -12,7 +12,7 @@ internal static class ScreeningRatingSync
     public static Task<RatedScreening?> LatestAsync(IApplicationDbContext ctx, Guid movieId, Guid userId, CancellationToken ct) =>
         ctx.WatchHistory.AsNoTracking()
             .Where(w => w.MovieId == movieId && w.UserId == userId && w.Rating.HasValue)
-            .OrderByDescending(w => w.WatchedAtUtc)
+            .OrderByDescending(w => w.WatchedAtUtc.Date)
             .ThenByDescending(w => w.CreatedAtUtc)
             .ThenByDescending(w => w.Id)
             .Select(w => new RatedScreening(w.Id, w.Rating!.Value))

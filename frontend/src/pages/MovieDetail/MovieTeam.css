@@ -1,0 +1,13 @@
+.movie-detail__directors.movie-detail__team {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.movie-detail__team small {
+  display: block;
+  font-size: .78rem;
+  line-height: 1.35;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}

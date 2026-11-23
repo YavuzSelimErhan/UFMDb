@@ -72,7 +72,7 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
         var recent = await _context.WatchHistory.AsNoTracking()
             .Include(w => w.Movie).ThenInclude(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
             .Where(w => w.UserId == request.UserId)
-            .OrderByDescending(w => w.WatchedAtUtc).ThenByDescending(w => w.CreatedAtUtc).ThenByDescending(w => w.Id).Take(4)
+            .OrderByDescending(w => w.WatchedAtUtc.Date).ThenByDescending(w => w.CreatedAtUtc).ThenByDescending(w => w.Id).Take(4)
             .ToListAsync(ct);
 
         // Profildeki "Beğenilen filmler" listesi yalnızca "Beğendi" tepkilerini içerir.
@@ -682,8 +682,9 @@ public class LogScreeningCommandValidator : AbstractValidator<LogScreeningComman
         RuleFor(x => x.Rating)
             .InclusiveBetween(0.5m, 5.0m)
             .When(x => x.Rating.HasValue);
-        RuleFor(x => x.WatchedAtUtc)
-            .LessThanOrEqualTo(_ => DateTime.UtcNow)
+        // The request carries a calendar day. The earliest zone to enter a new day is UTC+14.
+        RuleFor(x => x.WatchedAtUtc.Date)
+            .LessThanOrEqualTo(_ => DateTime.UtcNow.AddHours(14).Date)
             .WithMessage("İzlenme tarihi gelecekte olamaz.");
     }
 }
@@ -703,7 +704,7 @@ public class LogScreeningCommandHandler : IRequestHandler<LogScreeningCommand, G
 
         var previous = request.Rating.HasValue
             ? await ScreeningRatingSync.LatestAsync(_context, movie.Id, request.UserId, ct) : null;
-        var entry = new WatchHistory { UserId = request.UserId, MovieId = request.MovieId, WatchedAtUtc = request.WatchedAtUtc, Rating = request.Rating };
+        var entry = new WatchHistory { UserId = request.UserId, MovieId = request.MovieId, WatchedAtUtc = request.WatchedAtUtc.Date, Rating = request.Rating };
         _context.WatchHistory.Add(entry);
 
         var watchlistEntry = await _context.WatchlistItems
@@ -729,8 +730,9 @@ public class UpdateScreeningLogEntryCommandValidator : AbstractValidator<UpdateS
         RuleFor(x => x.Rating)
             .InclusiveBetween(0.5m, 5.0m)
             .When(x => x.Rating.HasValue);
-        RuleFor(x => x.WatchedAtUtc)
-            .LessThanOrEqualTo(_ => DateTime.UtcNow)
+        // The request carries a calendar day. The earliest zone to enter a new day is UTC+14.
+        RuleFor(x => x.WatchedAtUtc.Date)
+            .LessThanOrEqualTo(_ => DateTime.UtcNow.AddHours(14).Date)
             .WithMessage("İzlenme tarihi gelecekte olamaz.");
     }
 }
@@ -752,7 +754,7 @@ public class UpdateScreeningLogEntryCommandHandler : IRequestHandler<UpdateScree
         var ratingChanged = entry.Rating != request.Rating;
         var previous = ratingChanged
             ? await ScreeningRatingSync.LatestAsync(_context, entry.MovieId, request.UserId, ct) : null;
-        entry.WatchedAtUtc = request.WatchedAtUtc;
+        entry.WatchedAtUtc = request.WatchedAtUtc.Date;
         entry.Rating = request.Rating;
         entry.UpdatedAtUtc = DateTime.UtcNow;
         await _context.SaveChangesAsync(ct);

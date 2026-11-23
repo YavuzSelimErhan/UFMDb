@@ -1,0 +1,484 @@
+diff --git a/backend/src/UFMDb.Application/DTOs/MovieDtos.cs b/backend/src/UFMDb.Application/DTOs/MovieDtos.cs
+index 3b1ea70..84c9ae0 100644
+--- a/backend/src/UFMDb.Application/DTOs/MovieDtos.cs
++++ b/backend/src/UFMDb.Application/DTOs/MovieDtos.cs
+@@ -24,7 +24,7 @@ public record MovieCountryDto(string IsoCode, string Name);
+ public record CollectionMovieDto(Guid Id, string Title, int ReleaseYear, string PosterUrl);
+ public record MovieCollectionDto(Guid Id, string Name, string PosterUrl, string BackdropUrl, List<CollectionMovieDto> Movies);
+ 
+-public record MovieCrewDto(Guid PersonId, string FullName, string Job);
++public record MovieCrewDto(Guid PersonId, string FullName, string Job, string PhotoUrl, Guid? DirectorId);
+ 
+ public record MovieDetailDto(
+     Guid Id, string Title, string OriginalTitle, string Overview, int ReleaseYear, DateTime ReleaseDate,
+diff --git a/backend/src/UFMDb.Application/Features/Movies/GetMovieDetail/GetMovieDetailQuery.cs b/backend/src/UFMDb.Application/Features/Movies/GetMovieDetail/GetMovieDetailQuery.cs
+index e2ed593..8a6d421 100644
+--- a/backend/src/UFMDb.Application/Features/Movies/GetMovieDetail/GetMovieDetailQuery.cs
++++ b/backend/src/UFMDb.Application/Features/Movies/GetMovieDetail/GetMovieDetailQuery.cs
+@@ -99,10 +99,10 @@ public class GetMovieDetailQueryHandler : IRequestHandler<GetMovieDetailQuery, M
+                           join person in _context.People on credit.PersonId equals person.Id
+                           where credit.MovieId == movie.Id && credit.Kind == UFMDb.Domain.Entities.CreditKind.Crew
+                                 && credit.Job != "Director" && !person.IsDeleted
+-                          select new { PersonId = person.Id, person.FullName, credit.Job })
++                          select new { PersonId = person.Id, person.FullName, credit.Job, person.PhotoUrl, DirectorId = person.LegacyDirectorId })
+             .Distinct()
+             .OrderBy(c => c.Job).ThenBy(c => c.FullName).ThenBy(c => c.PersonId)
+-            .Select(c => new MovieCrewDto(c.PersonId, c.FullName, c.Job))
++            .Select(c => new MovieCrewDto(c.PersonId, c.FullName, c.Job, c.PhotoUrl, c.DirectorId))
+             .ToListAsync(ct);
+ 
+         return new MovieDetailDto(
+diff --git a/backend/src/UFMDb.Application/Features/Reviews/ReviewCommands.cs b/backend/src/UFMDb.Application/Features/Reviews/ReviewCommands.cs
+index 133f1ab..fe557e6 100644
+--- a/backend/src/UFMDb.Application/Features/Reviews/ReviewCommands.cs
++++ b/backend/src/UFMDb.Application/Features/Reviews/ReviewCommands.cs
+@@ -145,7 +145,7 @@ public class UpsertReviewCommandHandler : IRequestHandler<UpsertReviewCommand, G
+         var alreadyWatched = await _context.WatchHistory
+             .AnyAsync(w => w.MovieId == request.MovieId && w.UserId == request.UserId, ct);
+         if (!alreadyWatched)
+-            _context.WatchHistory.Add(new WatchHistory { MovieId = request.MovieId, UserId = request.UserId, WatchedAtUtc = DateTime.UtcNow });
++            _context.WatchHistory.Add(new WatchHistory { MovieId = request.MovieId, UserId = request.UserId, WatchedAtUtc = DateTime.UtcNow.Date });
+ 
+         var watchlistEntry = await _context.WatchlistItems
+             .FirstOrDefaultAsync(w => w.MovieId == request.MovieId && w.UserId == request.UserId, ct);
+@@ -317,7 +317,7 @@ public class ToggleWatchedCommandHandler : IRequestHandler<ToggleWatchedCommand,
+             if (hasQuickRating)
+                 throw new ConflictException("Bu filme puan verdiğin için izlenmedi olarak işaretleyemezsin. Önce puanını kaldır.");
+ 
+-            _context.WatchHistory.Add(new WatchHistory { MovieId = request.MovieId, UserId = request.UserId, WatchedAtUtc = DateTime.UtcNow });
++            _context.WatchHistory.Add(new WatchHistory { MovieId = request.MovieId, UserId = request.UserId, WatchedAtUtc = DateTime.UtcNow.Date });
+             nowWatched = true;
+ 
+             // LogScreeningCommand ve UpsertReviewCommand'daki aynı davranış: izlendi işaretlenince
+diff --git a/backend/src/UFMDb.Application/Features/ScreeningLog/ScreeningLogQueries.cs b/backend/src/UFMDb.Application/Features/ScreeningLog/ScreeningLogQueries.cs
+index dc6e024..317ef4f 100644
+--- a/backend/src/UFMDb.Application/Features/ScreeningLog/ScreeningLogQueries.cs
++++ b/backend/src/UFMDb.Application/Features/ScreeningLog/ScreeningLogQueries.cs
+@@ -90,7 +90,7 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
+         // 2) Yalnızca bu günlerin seansları, düz projeksiyonla (Include yok).
+         var entries = await query
+             .Where(w => w.WatchedAtUtc >= lower && w.WatchedAtUtc < upper)
+-            .OrderByDescending(w => w.WatchedAtUtc).ThenByDescending(w => w.CreatedAtUtc).ThenByDescending(w => w.Id)
++            .OrderByDescending(w => w.WatchedAtUtc.Date).ThenByDescending(w => w.CreatedAtUtc).ThenByDescending(w => w.Id)
+             .Select(w => new
+             {
+                 w.Id,
+@@ -124,7 +124,7 @@ public class GetScreeningLogQueryHandler : IRequestHandler<GetScreeningLogQuery,
+         foreach (var group in history.GroupBy(h => h.MovieId))
+         {
+             var n = 0;
+-            foreach (var h in group.OrderBy(h => h.WatchedAtUtc).ThenBy(h => h.CreatedAtUtc).ThenBy(h => h.Id))
++            foreach (var h in group.OrderBy(h => h.WatchedAtUtc.Date).ThenBy(h => h.CreatedAtUtc).ThenBy(h => h.Id))
+                 screeningNumbers[h.Id] = ++n;
+         }
+ 
+diff --git a/backend/src/UFMDb.Application/Features/Users/ProfileFeature.cs b/backend/src/UFMDb.Application/Features/Users/ProfileFeature.cs
+index 7855327..471d9e6 100644
+--- a/backend/src/UFMDb.Application/Features/Users/ProfileFeature.cs
++++ b/backend/src/UFMDb.Application/Features/Users/ProfileFeature.cs
+@@ -72,7 +72,7 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
+         var recent = await _context.WatchHistory.AsNoTracking()
+             .Include(w => w.Movie).ThenInclude(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
+             .Where(w => w.UserId == request.UserId)
+-            .OrderByDescending(w => w.WatchedAtUtc).ThenByDescending(w => w.CreatedAtUtc).ThenByDescending(w => w.Id).Take(4)
++            .OrderByDescending(w => w.WatchedAtUtc.Date).ThenByDescending(w => w.CreatedAtUtc).ThenByDescending(w => w.Id).Take(4)
+             .ToListAsync(ct);
+ 
+         // Profildeki "Beğenilen filmler" listesi yalnızca "Beğendi" tepkilerini içerir.
+@@ -682,8 +682,9 @@ public class LogScreeningCommandValidator : AbstractValidator<LogScreeningComman
+         RuleFor(x => x.Rating)
+             .InclusiveBetween(0.5m, 5.0m)
+             .When(x => x.Rating.HasValue);
+-        RuleFor(x => x.WatchedAtUtc)
+-            .LessThanOrEqualTo(_ => DateTime.UtcNow)
++        // The request carries a calendar day. The earliest zone to enter a new day is UTC+14.
++        RuleFor(x => x.WatchedAtUtc.Date)
++            .LessThanOrEqualTo(_ => DateTime.UtcNow.AddHours(14).Date)
+             .WithMessage("İzlenme tarihi gelecekte olamaz.");
+     }
+ }
+@@ -703,7 +704,7 @@ public class LogScreeningCommandHandler : IRequestHandler<LogScreeningCommand, G
+ 
+         var previous = request.Rating.HasValue
+             ? await ScreeningRatingSync.LatestAsync(_context, movie.Id, request.UserId, ct) : null;
+-        var entry = new WatchHistory { UserId = request.UserId, MovieId = request.MovieId, WatchedAtUtc = request.WatchedAtUtc, Rating = request.Rating };
++        var entry = new WatchHistory { UserId = request.UserId, MovieId = request.MovieId, WatchedAtUtc = request.WatchedAtUtc.Date, Rating = request.Rating };
+         _context.WatchHistory.Add(entry);
+ 
+         var watchlistEntry = await _context.WatchlistItems
+@@ -729,8 +730,9 @@ public class UpdateScreeningLogEntryCommandValidator : AbstractValidator<UpdateS
+         RuleFor(x => x.Rating)
+             .InclusiveBetween(0.5m, 5.0m)
+             .When(x => x.Rating.HasValue);
+-        RuleFor(x => x.WatchedAtUtc)
+-            .LessThanOrEqualTo(_ => DateTime.UtcNow)
++        // The request carries a calendar day. The earliest zone to enter a new day is UTC+14.
++        RuleFor(x => x.WatchedAtUtc.Date)
++            .LessThanOrEqualTo(_ => DateTime.UtcNow.AddHours(14).Date)
+             .WithMessage("İzlenme tarihi gelecekte olamaz.");
+     }
+ }
+@@ -752,7 +754,7 @@ public class UpdateScreeningLogEntryCommandHandler : IRequestHandler<UpdateScree
+         var ratingChanged = entry.Rating != request.Rating;
+         var previous = ratingChanged
+             ? await ScreeningRatingSync.LatestAsync(_context, entry.MovieId, request.UserId, ct) : null;
+-        entry.WatchedAtUtc = request.WatchedAtUtc;
++        entry.WatchedAtUtc = request.WatchedAtUtc.Date;
+         entry.Rating = request.Rating;
+         entry.UpdatedAtUtc = DateTime.UtcNow;
+         await _context.SaveChangesAsync(ct);
+diff --git a/backend/src/UFMDb.Application/Features/Users/ScreeningRatingSync.cs b/backend/src/UFMDb.Application/Features/Users/ScreeningRatingSync.cs
+index d237f04..3cd38bd 100644
+--- a/backend/src/UFMDb.Application/Features/Users/ScreeningRatingSync.cs
++++ b/backend/src/UFMDb.Application/Features/Users/ScreeningRatingSync.cs
+@@ -12,7 +12,7 @@ internal static class ScreeningRatingSync
+     public static Task<RatedScreening?> LatestAsync(IApplicationDbContext ctx, Guid movieId, Guid userId, CancellationToken ct) =>
+         ctx.WatchHistory.AsNoTracking()
+             .Where(w => w.MovieId == movieId && w.UserId == userId && w.Rating.HasValue)
+-            .OrderByDescending(w => w.WatchedAtUtc)
++            .OrderByDescending(w => w.WatchedAtUtc.Date)
+             .ThenByDescending(w => w.CreatedAtUtc)
+             .ThenByDescending(w => w.Id)
+             .Select(w => new RatedScreening(w.Id, w.Rating!.Value))
+diff --git a/backend/src/UFMDb.Domain/Entities/User.cs b/backend/src/UFMDb.Domain/Entities/User.cs
+index b821d1b..b33bcae 100644
+--- a/backend/src/UFMDb.Domain/Entities/User.cs
++++ b/backend/src/UFMDb.Domain/Entities/User.cs
+@@ -80,7 +80,7 @@ public class WatchHistory : BaseEntity
+     public User User { get; set; } = default!;
+     public Guid MovieId { get; set; }
+     public Movie Movie { get; set; } = default!;
+-    public DateTime WatchedAtUtc { get; set; } = DateTime.UtcNow;
++    public DateTime WatchedAtUtc { get; set; } = DateTime.UtcNow.Date;
+     public decimal? Rating { get; set; } // eklendi — bu SPESİFİK seansta verilen puan
+ }
+ 
+diff --git a/frontend/src/components/movie/LogScreeningModal.tsx b/frontend/src/components/movie/LogScreeningModal.tsx
+index e6ad549..4014ac6 100644
+--- a/frontend/src/components/movie/LogScreeningModal.tsx
++++ b/frontend/src/components/movie/LogScreeningModal.tsx
+@@ -1,4 +1,4 @@
+-import { localScreeningTime } from "@/utils/screeningTime";
++import { localScreeningDate } from "@/utils/screeningTime";
+ import { useState } from "react";
+ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+ import { useTranslation } from "react-i18next";
+@@ -29,7 +29,7 @@ export default function LogScreeningModal({ movie, onClose }: Props) {
+   const { t } = useTranslation();
+   const { showToast } = useToast();
+   const queryClient = useQueryClient();
+-  const [logDate, setLogDate] = useState(localScreeningTime());
++  const [logDate, setLogDate] = useState(localScreeningDate());
+   const [logRating, setLogRating] = useState(0);
+ 
+   // Önceki tepki: sunucudaki güncel değer (film detayı cache'i); o gelene kadar
+@@ -108,10 +108,10 @@ export default function LogScreeningModal({ movie, onClose }: Props) {
+           <div className="log-screening-modal__field">
+             <label>{t("log.addEntryDate")}</label>
+             <input
+-              type="datetime-local"
++              type="date"
+               value={logDate}
+               onChange={(e) => setLogDate(e.target.value)}
+-              max={localScreeningTime()}
++              max={localScreeningDate()}
+             />
+           </div>
+           <div className="log-screening-modal__field">
+diff --git a/frontend/src/pages/MovieDetail/MovieDetailPage.tsx b/frontend/src/pages/MovieDetail/MovieDetailPage.tsx
+index 43155b0..bb91c0e 100644
+--- a/frontend/src/pages/MovieDetail/MovieDetailPage.tsx
++++ b/frontend/src/pages/MovieDetail/MovieDetailPage.tsx
+@@ -1,4 +1,4 @@
+-import { localScreeningTime } from "@/utils/screeningTime";
++import { localScreeningDate } from "@/utils/screeningTime";
+ import { useEffect, useState } from "react";
+ import { useParams, Link } from "react-router-dom";
+ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+@@ -26,6 +26,7 @@ import StarRating from "@/components/movie/StarRating";
+ import PersonAvatar from "@/components/common/PersonAvatar";
+ import { PageSpinner, PageError } from "@/components/common/PageState";
+ import "./MovieDetailPage.css";
++import "./MovieTeam.css";
+ 
+ 
+ export default function MovieDetailPage() {
+@@ -36,7 +37,7 @@ export default function MovieDetailPage() {
+   const [reviewText, setReviewText] = useState("");
+   const [myRating, setMyRating] = useState(0);
+   const [isLogging, setIsLogging] = useState(false);
+-  const [logDate, setLogDate] = useState(localScreeningTime());
++  const [logDate, setLogDate] = useState(localScreeningDate());
+   const [logRating, setLogRating] = useState(0);
+   const { showToast } = useToast();
+   // undefined = kullanıcı dokunmadı (güncel tepki geçerli), null = bilerek temizledi
+@@ -188,7 +189,7 @@ export default function MovieDetailPage() {
+       queryClient.invalidateQueries({ queryKey: ["home-feed"] });
+       queryClient.invalidateQueries({ queryKey: ["list"] });
+       if (reactionFailed) showToast(t("log.reactionSaveError"), "error");
+-      setLogDate(localScreeningTime());
++      setLogDate(localScreeningDate());
+       setLogRating(0);
+       setIsLogging(false);
+     },
+@@ -217,6 +218,17 @@ export default function MovieDetailPage() {
+     quickRateMutation.mutate(rating);
+   };
+ 
++  const team = new Map<string, { id: string; name: string; photo?: string; directorId?: string; roles: string[] }>();
++  for (const d of movie.directors) {
++    team.set(d.id, { id: d.id, name: d.fullName, photo: d.photoUrl, directorId: d.id, roles: [t("movie.director")] });
++  }
++  for (const c of movie.crew ?? []) {
++    const key = c.directorId && team.has(c.directorId) ? c.directorId : c.personId;
++    const card = team.get(key) ?? { id: c.personId, name: c.fullName, photo: c.photoUrl, roles: [] as string[] };
++    card.roles.push(t(`movie.jobs.${c.job}`, { defaultValue: c.job }));
++    team.set(key, card);
++  }
++
+   return (
+     <div className="movie-detail" style={themeStyle}>
+       <div
+@@ -438,10 +450,10 @@ export default function MovieDetailPage() {
+                 <div className="movie-detail__log-form-field">
+                   <label>{t("log.addEntryDate")}</label>
+                   <input
+-                    type="datetime-local"
++                    type="date"
+                     value={logDate}
+                     onChange={(e) => setLogDate(e.target.value)}
+-                    max={localScreeningTime()}
++                    max={localScreeningDate()}
+                   />
+                 </div>
+                 <div className="movie-detail__log-form-field">
+@@ -500,41 +512,23 @@ export default function MovieDetailPage() {
+           <h3 className="movie-detail__section-title">{t("movie.overview")}</h3>
+           <p className="movie-detail__overview">{movie.overview}</p>
+ 
+-          {movie.directors.length > 0 && (
+-            <>
+-              <h3 className="movie-detail__section-title">
+-                {t("movie.director")}
+-              </h3>
+-              <div className="movie-detail__directors">
+-                {movie.directors.map((d) => (
+-                  <Link
+-                    key={d.id}
+-                    to={`/directors/${d.id}`}
+-                    className="movie-detail__director-card"
+-                  >
+-                    <PersonAvatar
+-                      id={d.id}
+-                      photoUrl={d.photoUrl}
+-                      fullName={d.fullName}
+-                      size="sm"
+-                    />
+-                    <span>{d.fullName}</span>
+-                  </Link>
+-                ))}
+-              </div>
+-            </>
+-          )}
+-
+-          {!!movie.crew?.length && (
++          {team.size > 0 && (
+             <section>
+               <h3 className="movie-detail__section-title">{t("movie.crew")}</h3>
+-              <ul>
+-                {movie.crew.map((c) => (
+-                  <li key={c.personId + ":" + c.job}>
+-                    {c.fullName} · {t(`movie.jobs.${c.job}`, { defaultValue: c.job })}
+-                  </li>
+-                ))}
+-              </ul>
++              <div className="movie-detail__directors movie-detail__team">
++                {Array.from(team.values(), (person) => {
++                  const body = <>
++                    <PersonAvatar id={person.id} photoUrl={person.photo} fullName={person.name} size="sm" />
++                    <span>{person.name}</span>
++                    <small>{person.roles.join(" · ")}</small>
++                  </>;
++                  return person.directorId ? (
++                    <Link className="movie-detail__director-card" key={person.id} to={`/directors/${person.directorId}`}>{body}</Link>
++                  ) : (
++                    <div className="movie-detail__director-card" key={person.id}>{body}</div>
++                  );
++                })}
++              </div>
+             </section>
+           )}
+ 
+diff --git a/frontend/src/pages/MovieDetail/MovieTeam.css b/frontend/src/pages/MovieDetail/MovieTeam.css
+new file mode 100644
+index 0000000..30da151
+--- /dev/null
++++ b/frontend/src/pages/MovieDetail/MovieTeam.css
+@@ -0,0 +1,13 @@
++.movie-detail__directors.movie-detail__team {
++  display: flex;
++  align-items: flex-start;
++  flex-wrap: wrap;
++  gap: 1rem;
++}
++.movie-detail__team small {
++  display: block;
++  font-size: .78rem;
++  line-height: 1.35;
++  font-weight: 400;
++  overflow-wrap: anywhere;
++}
+diff --git a/frontend/src/pages/ScreeningLog/ScreeningLogPage.tsx b/frontend/src/pages/ScreeningLog/ScreeningLogPage.tsx
+index 739febe..4c5146c 100644
+--- a/frontend/src/pages/ScreeningLog/ScreeningLogPage.tsx
++++ b/frontend/src/pages/ScreeningLog/ScreeningLogPage.tsx
+@@ -1,4 +1,4 @@
+-import { localScreeningTime } from "@/utils/screeningTime";
++import { localScreeningDate } from "@/utils/screeningTime";
+ import { useMemo, useState } from "react";
+ import { useTranslation } from "react-i18next";
+ import {
+@@ -45,7 +45,7 @@ export default function ScreeningLogPage() {
+     title: string;
+     posterUrl: string;
+   } | null>(null);
+-  const [watchedDate, setWatchedDate] = useState(localScreeningTime());
++  const [watchedDate, setWatchedDate] = useState(localScreeningDate());
+   const [addRating, setAddRating] = useState(0);
+   // undefined = kullanıcı dokunmadı (önceki tepki geçerli), null = bilerek temizledi
+   const [addReaction, setAddReaction] = useState<
+@@ -136,7 +136,7 @@ export default function ScreeningLogPage() {
+       invalidateAll();
+       if (reactionFailed) showToast(t("log.reactionSaveError"), "error");
+       setSelectedMovie(null);
+-      setWatchedDate(localScreeningTime());
++      setWatchedDate(localScreeningDate());
+       setAddRating(0);
+       setAddReaction(undefined);
+       setIsAdding(false);
+@@ -263,10 +263,10 @@ export default function ScreeningLogPage() {
+             <div className="screening-log__add-date-slot">
+               <label>{t("log.addEntryDate")}</label>
+               <input
+-                type="datetime-local"
++                type="date"
+                 value={watchedDate}
+                 onChange={(e) => setWatchedDate(e.target.value)}
+-                max={localScreeningTime()}
++                max={localScreeningDate()}
+               />
+             </div>
+ 
+diff --git a/frontend/src/pages/ScreeningLog/ScreeningLogTimeline.tsx b/frontend/src/pages/ScreeningLog/ScreeningLogTimeline.tsx
+index 915aaf3..1759f1e 100644
+--- a/frontend/src/pages/ScreeningLog/ScreeningLogTimeline.tsx
++++ b/frontend/src/pages/ScreeningLog/ScreeningLogTimeline.tsx
+@@ -1,4 +1,4 @@
+-import { localScreeningTime } from "@/utils/screeningTime";
++import { localScreeningDate } from "@/utils/screeningTime";
+ import { useEffect, useState, type CSSProperties } from "react";
+ import { Link } from "react-router-dom";
+ import { useTranslation } from "react-i18next";
+@@ -57,17 +57,7 @@ function monthLabel(dateStr: string, locale: string): string {
+ 
+ function groupDaysByMonth(days: ScreeningLogDay[], locale: string) {
+   const groups: { label: string; days: ScreeningLogDay[] }[] = [];
+-  const localDays = new Map<string, ScreeningLogDay>();
+-  for (const { entries } of days) {
+-    for (const entry of entries) {
+-      const date = localScreeningTime(new Date(entry.watchedAtUtc)).slice(0, 10);
+-      const day: ScreeningLogDay = localDays.get(date) ?? { date, entries: [] };
+-      day.entries.push(entry);
+-      localDays.set(date, day);
+-    }
+-  }
+-  for (const day of [...localDays.values()].sort((a, b) => b.date.localeCompare(a.date))) {
+-    day.entries.sort((a, b) => Date.parse(b.watchedAtUtc) - Date.parse(a.watchedAtUtc));
++  for (const day of days) {
+     const label = monthLabel(day.date, locale);
+     const last = groups[groups.length - 1];
+     if (last && last.label === label) last.days.push(day);
+@@ -235,11 +225,11 @@ export function EntryCard({
+   const [isSaving, setIsSaving] = useState(false);
+   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+   const [isDeleting, setIsDeleting] = useState(false);
+-  const [draftDate, setDraftDate] = useState(localScreeningTime(new Date(entry.watchedAtUtc)));
++  const [draftDate, setDraftDate] = useState(entry.watchedAtUtc.slice(0, 10));
+   const [draftRating, setDraftRating] = useState(entry.rating ?? 0);
+ 
+   const startEdit = () => {
+-    setDraftDate(localScreeningTime(new Date(entry.watchedAtUtc)));
++    setDraftDate(entry.watchedAtUtc.slice(0, 10));
+     setDraftRating(entry.rating ?? 0);
+     setIsEditing(true);
+   };
+@@ -250,7 +240,7 @@ export function EntryCard({
+     try {
+       await onSave(
+         entry.id,
+-        draftDate === localScreeningTime(new Date(entry.watchedAtUtc))
++        draftDate === entry.watchedAtUtc.slice(0, 10)
+           ? entry.watchedAtUtc
+           : new Date(draftDate).toISOString(),
+         draftRating > 0 ? draftRating : null,
+@@ -285,11 +275,11 @@ export function EntryCard({
+             {entry.movieTitle}
+           </h4>
+           <input
+-            type="datetime-local"
++            type="date"
+             aria-label={t("log.addEntryDate")}
+             value={draftDate}
+             onChange={(e) => setDraftDate(e.target.value)}
+-            max={localScreeningTime()}
++            max={localScreeningDate()}
+           />
+           <StarRating value={draftRating} onChange={setDraftRating} />
+           <div className="screening-log__entry-edit-actions">
+diff --git a/frontend/src/types/index.ts b/frontend/src/types/index.ts
+index 0faba0d..3f1c4a4 100644
+--- a/frontend/src/types/index.ts
++++ b/frontend/src/types/index.ts
+@@ -129,7 +129,7 @@ export interface MovieCollection {
+ }
+ 
+ export interface MovieDetail {
+-  crew?: { personId: string; fullName: string; job: string }[] | null;
++  crew?: { personId: string; fullName: string; photoUrl?: string; directorId?: string | null; job: string }[] | null;
+   id: string;
+   title: string;
+   originalTitle: string;
+diff --git a/frontend/src/utils/screeningTime.ts b/frontend/src/utils/screeningTime.ts
+index f39d177..2c7886b 100644
+--- a/frontend/src/utils/screeningTime.ts
++++ b/frontend/src/utils/screeningTime.ts
+@@ -1,5 +1,5 @@
+-/** Value for a datetime-local input in the viewer's time zone. */
+-export function localScreeningTime(date = new Date()): string {
++/** Value for a date input in the viewer's time zone. */
++export function localScreeningDate(date = new Date()): string {
+   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+-  return local.toISOString().slice(0, 16);
++  return local.toISOString().slice(0, 10);
+ }
+diff --git a/frontend/tests/LogScreeningModal.test.tsx b/frontend/tests/LogScreeningModal.test.tsx
+index 0c41412..3eee333 100644
+--- a/frontend/tests/LogScreeningModal.test.tsx
++++ b/frontend/tests/LogScreeningModal.test.tsx
+@@ -31,13 +31,13 @@ it.each([false, true])("saves one screening even when saving the reaction fails=
+   if (fails) mocks.setReaction.mockRejectedValue(new Error("offline"));
+   else mocks.setReaction.mockResolvedValue(undefined);
+   const close = openModal();
+-  const time = document.querySelector<HTMLInputElement>('input[type="datetime-local"]')!;
+-  fireEvent.change(time, { target: { value: "2020-04-02T21:35" } });
++  const time = document.querySelector<HTMLInputElement>('input[type="date"]')!;
++  fireEvent.change(time, { target: { value: "2020-04-02" } });
+   fireEvent.click(screen.getByRole("button", { name: "movie.notForMe" }));
+   fireEvent.click(screen.getByRole("button", { name: "log.addEntrySubmit" }));
+   await waitFor(() => expect(close).toHaveBeenCalledTimes(1));
+   expect(mocks.log).toHaveBeenCalledTimes(1);
+-  expect(mocks.log).toHaveBeenCalledWith("film", new Date("2020-04-02T21:35").toISOString(), null);
++  expect(mocks.log).toHaveBeenCalledWith("film", new Date("2020-04-02").toISOString(), null);
+   expect(mocks.setReaction).toHaveBeenCalledWith("film", "Dislike", "Like");
+   if (fails) expect(mocks.showToast).toHaveBeenCalledWith("log.reactionSaveError", "error");
+   else expect(mocks.showToast).not.toHaveBeenCalled();

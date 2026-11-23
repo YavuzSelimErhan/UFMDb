@@ -31,13 +31,13 @@ it.each([false, true])("saves one screening even when saving the reaction fails=
   if (fails) mocks.setReaction.mockRejectedValue(new Error("offline"));
   else mocks.setReaction.mockResolvedValue(undefined);
   const close = openModal();
-  const time = document.querySelector<HTMLInputElement>('input[type="datetime-local"]')!;
-  fireEvent.change(time, { target: { value: "2020-04-02T21:35" } });
+  const time = document.querySelector<HTMLInputElement>('input[type="date"]')!;
+  fireEvent.change(time, { target: { value: "2020-04-02" } });
   fireEvent.click(screen.getByRole("button", { name: "movie.notForMe" }));
   fireEvent.click(screen.getByRole("button", { name: "log.addEntrySubmit" }));
   await waitFor(() => expect(close).toHaveBeenCalledTimes(1));
   expect(mocks.log).toHaveBeenCalledTimes(1);
-  expect(mocks.log).toHaveBeenCalledWith("film", new Date("2020-04-02T21:35").toISOString(), null);
+  expect(mocks.log).toHaveBeenCalledWith("film", new Date("2020-04-02").toISOString(), null);
   expect(mocks.setReaction).toHaveBeenCalledWith("film", "Dislike", "Like");
   if (fails) expect(mocks.showToast).toHaveBeenCalledWith("log.reactionSaveError", "error");
   else expect(mocks.showToast).not.toHaveBeenCalled();

@@ -145,7 +145,7 @@ public class UpsertReviewCommandHandler : IRequestHandler<UpsertReviewCommand, G
         var alreadyWatched = await _context.WatchHistory
             .AnyAsync(w => w.MovieId == request.MovieId && w.UserId == request.UserId, ct);
         if (!alreadyWatched)
-            _context.WatchHistory.Add(new WatchHistory { MovieId = request.MovieId, UserId = request.UserId, WatchedAtUtc = DateTime.UtcNow });
+            _context.WatchHistory.Add(new WatchHistory { MovieId = request.MovieId, UserId = request.UserId, WatchedAtUtc = DateTime.UtcNow.Date });
 
         var watchlistEntry = await _context.WatchlistItems
             .FirstOrDefaultAsync(w => w.MovieId == request.MovieId && w.UserId == request.UserId, ct);
@@ -317,7 +317,7 @@ public class ToggleWatchedCommandHandler : IRequestHandler<ToggleWatchedCommand,
             if (hasQuickRating)
                 throw new ConflictException("Bu filme puan verdiğin için izlenmedi olarak işaretleyemezsin. Önce puanını kaldır.");
 
-            _context.WatchHistory.Add(new WatchHistory { MovieId = request.MovieId, UserId = request.UserId, WatchedAtUtc = DateTime.UtcNow });
+            _context.WatchHistory.Add(new WatchHistory { MovieId = request.MovieId, UserId = request.UserId, WatchedAtUtc = DateTime.UtcNow.Date });
             nowWatched = true;
 
             // LogScreeningCommand ve UpsertReviewCommand'daki aynı davranış: izlendi işaretlenince

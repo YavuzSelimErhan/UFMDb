@@ -1,4 +1,4 @@
-import { localScreeningTime } from "@/utils/screeningTime";
+import { localScreeningDate } from "@/utils/screeningTime";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -45,7 +45,7 @@ export default function ScreeningLogPage() {
     title: string;
     posterUrl: string;
   } | null>(null);
-  const [watchedDate, setWatchedDate] = useState(localScreeningTime());
+  const [watchedDate, setWatchedDate] = useState(localScreeningDate());
   const [addRating, setAddRating] = useState(0);
   // undefined = kullanıcı dokunmadı (önceki tepki geçerli), null = bilerek temizledi
   const [addReaction, setAddReaction] = useState<
@@ -136,7 +136,7 @@ export default function ScreeningLogPage() {
       invalidateAll();
       if (reactionFailed) showToast(t("log.reactionSaveError"), "error");
       setSelectedMovie(null);
-      setWatchedDate(localScreeningTime());
+      setWatchedDate(localScreeningDate());
       setAddRating(0);
       setAddReaction(undefined);
       setIsAdding(false);
@@ -263,10 +263,10 @@ export default function ScreeningLogPage() {
             <div className="screening-log__add-date-slot">
               <label>{t("log.addEntryDate")}</label>
               <input
-                type="datetime-local"
+                type="date"
                 value={watchedDate}
                 onChange={(e) => setWatchedDate(e.target.value)}
-                max={localScreeningTime()}
+                max={localScreeningDate()}
               />
             </div>
 

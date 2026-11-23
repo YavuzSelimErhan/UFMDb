@@ -99,10 +99,10 @@ public class GetMovieDetailQueryHandler : IRequestHandler<GetMovieDetailQuery, M
                           join person in _context.People on credit.PersonId equals person.Id
                           where credit.MovieId == movie.Id && credit.Kind == UFMDb.Domain.Entities.CreditKind.Crew
                                 && credit.Job != "Director" && !person.IsDeleted
-                          select new { PersonId = person.Id, person.FullName, credit.Job })
+                          select new { PersonId = person.Id, person.FullName, credit.Job, person.PhotoUrl, DirectorId = person.LegacyDirectorId })
             .Distinct()
             .OrderBy(c => c.Job).ThenBy(c => c.FullName).ThenBy(c => c.PersonId)
-            .Select(c => new MovieCrewDto(c.PersonId, c.FullName, c.Job))
+            .Select(c => new MovieCrewDto(c.PersonId, c.FullName, c.Job, c.PhotoUrl, c.DirectorId))
             .ToListAsync(ct);
 
         return new MovieDetailDto(

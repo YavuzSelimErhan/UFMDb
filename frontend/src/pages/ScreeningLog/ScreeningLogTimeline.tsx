@@ -1,4 +1,4 @@
-import { localScreeningTime } from "@/utils/screeningTime";
+import { localScreeningDate } from "@/utils/screeningTime";
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -57,17 +57,7 @@ function monthLabel(dateStr: string, locale: string): string {
 
 function groupDaysByMonth(days: ScreeningLogDay[], locale: string) {
   const groups: { label: string; days: ScreeningLogDay[] }[] = [];
-  const localDays = new Map<string, ScreeningLogDay>();
-  for (const { entries } of days) {
-    for (const entry of entries) {
-      const date = localScreeningTime(new Date(entry.watchedAtUtc)).slice(0, 10);
-      const day: ScreeningLogDay = localDays.get(date) ?? { date, entries: [] };
-      day.entries.push(entry);
-      localDays.set(date, day);
-    }
-  }
-  for (const day of [...localDays.values()].sort((a, b) => b.date.localeCompare(a.date))) {
-    day.entries.sort((a, b) => Date.parse(b.watchedAtUtc) - Date.parse(a.watchedAtUtc));
+  for (const day of days) {
     const label = monthLabel(day.date, locale);
     const last = groups[groups.length - 1];
     if (last && last.label === label) last.days.push(day);
@@ -235,11 +225,11 @@ export function EntryCard({
   const [isSaving, setIsSaving] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [draftDate, setDraftDate] = useState(localScreeningTime(new Date(entry.watchedAtUtc)));
+  const [draftDate, setDraftDate] = useState(entry.watchedAtUtc.slice(0, 10));
   const [draftRating, setDraftRating] = useState(entry.rating ?? 0);
 
   const startEdit = () => {
-    setDraftDate(localScreeningTime(new Date(entry.watchedAtUtc)));
+    setDraftDate(entry.watchedAtUtc.slice(0, 10));
     setDraftRating(entry.rating ?? 0);
     setIsEditing(true);
   };
@@ -250,7 +240,7 @@ export function EntryCard({
     try {
       await onSave(
         entry.id,
-        draftDate === localScreeningTime(new Date(entry.watchedAtUtc))
+        draftDate === entry.watchedAtUtc.slice(0, 10)
           ? entry.watchedAtUtc
           : new Date(draftDate).toISOString(),
         draftRating > 0 ? draftRating : null,
@@ -285,11 +275,11 @@ export function EntryCard({
             {entry.movieTitle}
           </h4>
           <input
-            type="datetime-local"
+            type="date"
             aria-label={t("log.addEntryDate")}
             value={draftDate}
             onChange={(e) => setDraftDate(e.target.value)}
-            max={localScreeningTime()}
+            max={localScreeningDate()}
           />
           <StarRating value={draftRating} onChange={setDraftRating} />
           <div className="screening-log__entry-edit-actions">
