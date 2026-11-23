@@ -1,10 +1,109 @@
-.person-profile { max-width: 72rem; margin: auto; padding: 2rem 1rem; }
-.person-profile header, .person-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; }
-.person-profile header a { margin-inline-end: 1rem; }
-.person-profile p { max-width: 76ch; white-space: pre-line; }
-.person-profile h2 { margin-block: 2rem 1rem; }
-.person-controls select { font: inherit; padding: .35rem; }
-.person-profile ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(9rem, 100%), 1fr)); gap: 1.5rem 1rem; list-style: none; padding: 0; }
-.person-profile li { display: grid; align-content: start; gap: .35rem; }
-.person-film-poster { display: block; aspect-ratio: 2/3; overflow: hidden; border-radius: .5rem; }
+.person-profile {
+  padding-block: clamp(1.5rem, 4vw, 4rem);
+  --profile-line: color-mix(in srgb, currentColor 17%, transparent);
+  --profile-muted: var(--color-text-secondary, #acb0bb);
+}
+
+.person-hero {
+  display: grid;
+  grid-template-columns: clamp(9rem, 18vw, 14rem) minmax(0, 1fr);
+  gap: clamp(1.25rem, 4vw, 4rem);
+  align-items: center;
+  padding-bottom: clamp(2rem, 4vw, 3.5rem);
+  border-bottom: 1px solid var(--profile-line);
+}
+
+.person-hero .person-portrait {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-md, .75rem);
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+.person-intro h1 {
+  margin: 0;
+  max-width: 20ch;
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  letter-spacing: -.045em;
+  line-height: 1.04;
+  overflow-wrap: anywhere;
+}
+
+.person-intro p {
+  margin: 1rem 0 0;
+  max-width: 67ch;
+  line-height: 1.65;
+  white-space: pre-line;
+  color: var(--profile-muted);
+  overflow-wrap: anywhere;
+}
+
+.person-links, .person-controls, .person-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .65rem;
+}
+
+.person-links:not(:empty) { margin-top: 1.2rem; }
+.person-links a, .person-more {
+  padding: .45rem .85rem;
+  border: 1px solid var(--profile-line);
+  border-radius: var(--radius-pill, 2rem);
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 600;
+  color: inherit;
+  background: transparent;
+  text-decoration: none;
+}
+.person-links span { color: var(--color-accent); }
+.person-toolbar { justify-content: space-between; margin: 2rem 0 1.3rem; gap: 1rem; }
+.person-toolbar h2 { margin: 0; font-size: clamp(1.45rem, 3vw, 2rem); letter-spacing: -.035em; }
+.person-toolbar h2 small { font-size: .85rem; vertical-align: middle; color: var(--profile-muted); }
+.person-controls label { display: grid; gap: .25rem; color: var(--profile-muted); font-size: .78rem; }
+.person-controls select {
+  max-width: 100%;
+  font: inherit;
+  font-size: .9rem;
+  padding: .52rem .65rem;
+  border: 1px solid var(--profile-line);
+  border-radius: .45rem;
+  color: var(--color-text-primary, #eee);
+  background: var(--color-surface, #191c22);
+}
+
+.person-films {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
+  gap: 1.65rem 1.1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.person-films li { min-width: 0; }
+.person-film-poster {
+  display: block;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  background: var(--color-surface, #191c22);
+  border-radius: var(--radius-md, .65rem);
+}
 .person-film-poster img { width: 100%; height: 100%; object-fit: cover; }
+.person-film-title { display: block; margin: .6rem 0 .2rem; font-weight: 700; color: inherit; text-decoration: none; }
+.person-films li:hover .person-film-title, .person-film-title:focus-visible { color: var(--color-accent); }
+.person-films small { display: block; color: var(--profile-muted); font-size: .8rem; line-height: 1.45; }
+.person-more { display: block; margin: 2rem auto; cursor: pointer; }
+
+@media (max-width: 600px) {
+  .person-hero { grid-template-columns: 6rem minmax(0, 1fr); align-items: start; gap: 1rem; }
+  .person-intro { display: contents; }
+  .person-intro h1 { align-self: center; }
+  .person-intro p, .person-links { grid-column: 1 / -1; margin: 0; }
+  .person-links:not(:empty) { margin: 0; }
+  .person-controls { width: 100%; }
+  .person-controls label { flex: 1; min-width: 0; }
+  .person-films { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem .8rem; }
+}

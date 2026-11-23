@@ -40,15 +40,20 @@ function Profile({ id }: { id: string }) {
     .sort((a, b) => label(a).localeCompare(label(b), i18n.language));
   const films = data.films.filter(f => !role || f.roles.includes(role));
   if (order === "date") films.sort((a, b) => b.releaseDate.localeCompare(a.releaseDate));
-  return <article className="person-profile">
-    <header><PersonAvatar id={id} fullName={data.fullName} photoUrl={data.photoUrl} size="lg" />
-      <div><h1>{data.fullName}</h1>
-        {data.actorId && <Link to={`/actors/${data.actorId}`}>{t("personFilmography.actor")}</Link>}
-        {data.directorId && <Link to={`/directors/${data.directorId}`}>{t("personFilmography.director")}</Link>}
+  return <article className="container person-profile">
+    <header className="person-hero">
+      <PersonAvatar className="person-portrait" id={id} fullName={data.fullName} photoUrl={data.photoUrl} size="lg" />
+      <div className="person-intro">
+        <h1>{data.fullName}</h1>
+        {data.biography && <p>{data.biography}</p>}
+        <div className="person-links">
+          {data.actorId && <Link to={`/actors/${data.actorId}`}>{t("personFilmography.actor")} <span aria-hidden="true">↗</span></Link>}
+          {data.directorId && <Link to={`/directors/${data.directorId}`}>{t("personFilmography.director")} <span aria-hidden="true">↗</span></Link>}
+        </div>
       </div>
     </header>
-    {data.biography && <p>{data.biography}</p>}
-    <h2>{t("personFilmography.heading")}</h2>
+    <div className="person-toolbar">
+      <h2>{t("personFilmography.heading")} <small>{films.length}</small></h2>
     <div className="person-controls">
       <label>{t("personFilmography.role")} <select value={role} onChange={e => { setRole(e.target.value); setLimit(36); }}>
         <option value="">{t("personFilmography.all")}</option>
@@ -59,12 +64,13 @@ function Profile({ id }: { id: string }) {
         <option value="date">{t("personFilmography.date")}</option>
       </select></label>
     </div>
+    </div>
     {!films.length && <p>{t("personFilmography.empty")}</p>}
-    <ul>{films.slice(0, limit).map(f => <li key={f.id}>
+    <ul className="person-films">{films.slice(0, limit).map(f => <li key={f.id}>
       <MoviePoster movie={f} className="person-film-poster" />
-      <Link to={`/movies/${f.id}`}>{f.title}</Link>
+      <Link className="person-film-title" to={`/movies/${f.id}`}>{f.title}</Link>
       <small>{[f.year || "", ...f.roles.map(label)].filter(Boolean).join(" · ")}</small>
     </li>)}</ul>
-    {films.length > limit && <button onClick={() => setLimit(limit + 36)}>{t("personFilmography.more")}</button>}
+    {films.length > limit && <button className="person-more" onClick={() => setLimit(limit + 36)}>{t("personFilmography.more")}</button>}
   </article>;
 }
