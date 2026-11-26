@@ -840,3 +840,20 @@ export interface MovieCrew {
   job: string;
   photoUrl: string;
 }
+
+export type PersonRole =
+  | "actor"
+  | "director"
+  | "writer"
+  | "composer"
+  | "cinematographer"
+  | "editor"
+  | "producer";
+export type PersonSort = "popular" | "likes" | "name";
+
+export interface PersonSearchItem extends PersonListItem {
+  likeCount: number;
+  isLikedByCurrentUser: boolean;
+  filmCount: number;
+  primaryRole: PersonRole | null;
+}

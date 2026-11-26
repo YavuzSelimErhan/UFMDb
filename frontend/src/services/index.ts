@@ -49,7 +49,9 @@ import type {
   CompatibilityFilms,
   PersonFormPayload,
   PersonDetail,
-  PersonListItem,
+  PersonSearchItem,
+  PersonRole,
+  PersonSort,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -182,11 +184,12 @@ export const personService = {
   search: async (
     params: {
       search?: string;
-      role?: "actor" | "director";
+      role?: PersonRole;
+      sort?: PersonSort;
       page?: number;
       pageSize?: number;
     } = {},
-  ): Promise<PagedResult<PersonListItem>> => {
+  ): Promise<PagedResult<PersonSearchItem>> => {
     const { data } = await api.get("/people", { params });
     return data;
   },

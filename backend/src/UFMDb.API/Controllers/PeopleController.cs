@@ -16,9 +16,9 @@ public class PeopleController(ISender mediator, ICurrentUserService currentUser)
 
     [HttpGet]
     public async Task<IActionResult> GetAll(
-        [FromQuery] string? search, [FromQuery] string? role,
+        [FromQuery] string? search, [FromQuery] string? role, [FromQuery] string? sort,
         [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default) =>
-        Ok(await mediator.Send(new GetPeople(search, role, page, pageSize), ct));
+        Ok(await mediator.Send(new GetPeople(search, role, page, pageSize, sort, currentUser.UserId), ct));
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> Get(Guid id, CancellationToken ct) =>

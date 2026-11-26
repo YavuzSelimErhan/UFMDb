@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UFMDb.Application.Common;
@@ -12,6 +13,12 @@ namespace UFMDb.Application.Features.People;
 // ---------- DTO'lar ----------
 public record PersonListItemDto(Guid Id, string FullName, string PhotoUrl, string Nationality);
 
+/// <summary>Kiþi arama/liste kartý: beðeni durumu ve seçili roldeki film sayýsýyla birlikte.</summary>
+public record PersonSearchItemDto(
+    Guid Id, string FullName, string PhotoUrl, string Nationality,
+    int LikeCount, bool IsLikedByCurrentUser,
+    int FilmCount, string? PrimaryRole);
+
 public record PersonFilm(MovieListItemDto Movie, double Popularity, string[] Roles);
 
 public record PersonDetail(
@@ -19,22 +26,75 @@ public record PersonDetail(
     int LikeCount, bool IsLikedByCurrentUser,
     Guid? ActorId, Guid? DirectorId, List<PersonFilm> Films);
 
-// ---------- Liste / arama ----------
-/// <summary>Role: "actor" veya "director" (boþsa tüm kiþiler).</summary>
-public record GetPeople(string? Search, string? Role, int Page = 1, int PageSize = 20) : IRequest<PagedResult<PersonListItemDto>>;
-
-public class GetPeopleHandler(IApplicationDbContext db) : IRequestHandler<GetPeople, PagedResult<PersonListItemDto>>
+// ---------- Roller ----------
+/// <summary>Arama filtresindeki roller ile MovieCredit (Kind + Job) eþlemesi.</summary>
+public static class PersonRoles
 {
-    public async Task<PagedResult<PersonListItemDto>> Handle(GetPeople request, CancellationToken ct)
-    {
-        var query = db.People.AsNoTracking().Where(p => !p.IsDeleted);
+    public const string Actor = "actor";
+    public const string Director = "director";
 
-        query = request.Role?.ToLowerInvariant() switch
-        {
-            "actor" => query.Where(p => p.Credits.Any(c => c.Kind == CreditKind.Cast)),
-            "director" => query.Where(p => p.Credits.Any(c => c.Kind == CreditKind.Crew && c.Job == "Director")),
-            _ => query
-        };
+    // TMDB "Job" deðerleri; yeni bir görev eþlemek için sadece buraya ekle.
+    private static readonly Dictionary<string, string[]> CrewJobs = new()
+    {
+        ["writer"] = ["Writer", "Screenplay", "Story", "Novel"],
+        ["composer"] = ["Original Music Composer", "Composer", "Music"],
+        ["cinematographer"] = ["Director of Photography"],
+        ["editor"] = ["Editor"],
+        ["producer"] = ["Producer"],
+    };
+
+    public static readonly string[] All =
+        [Actor, Director, "writer", "composer", "cinematographer", "editor", "producer"];
+
+    public static string? Normalize(string? role)
+    {
+        var r = role?.Trim().ToLowerInvariant();
+        return r is not null && All.Contains(r) ? r : null;
+    }
+
+    public static Expression<Func<MovieCredit, bool>> Predicate(string role)
+    {
+        if (role == Actor) return c => c.Kind == CreditKind.Cast;
+        if (role == Director) return c => c.Kind == CreditKind.Crew && c.Job == "Director";
+        var jobs = CrewJobs[role];
+        return c => c.Kind == CreditKind.Crew && jobs.Contains(c.Job);
+    }
+
+    /// <summary>Rol seçilmediðinde sýralama için sayýlan krediler: oyunculuk + yönetmenlik.</summary>
+    public static readonly Expression<Func<MovieCredit, bool>> ActingOrDirecting =
+        c => c.Kind == CreditKind.Cast || (c.Kind == CreditKind.Crew && c.Job == "Director");
+
+    public static string? RoleOf(CreditKind kind, string job)
+    {
+        if (kind == CreditKind.Cast) return Actor;
+        if (job == "Director") return Director;
+        foreach (var (role, jobs) in CrewJobs)
+            if (jobs.Contains(job)) return role;
+        return null;
+    }
+}
+
+// ---------- Liste / arama ----------
+/// <summary>
+/// Role: actor | director | writer | composer | cinematographer | editor | producer (boþsa tüm kiþiler).
+/// Sort: popular (seçili roldeki film sayýsý, varsayýlan) | likes | name.
+/// </summary>
+public record GetPeople(
+    string? Search, string? Role, int Page = 1, int PageSize = 20,
+    string? Sort = null, Guid? CurrentUserId = null) : IRequest<PagedResult<PersonSearchItemDto>>;
+
+public class GetPeopleHandler(IApplicationDbContext db) : IRequestHandler<GetPeople, PagedResult<PersonSearchItemDto>>
+{
+    public async Task<PagedResult<PersonSearchItemDto>> Handle(GetPeople request, CancellationToken ct)
+    {
+        var role = PersonRoles.Normalize(request.Role);
+        // Hem filtre hem sýralama SADECE seçilen role ait kredilere göre yapýlýr.
+        var credits = db.MovieCredits.AsNoTracking()
+            .Where(role is null ? PersonRoles.ActingOrDirecting : PersonRoles.Predicate(role));
+
+        var query = db.People.AsNoTracking().Where(p => !p.IsDeleted);
+        if (role is not null)
+            query = query.Where(p => credits.Any(c => c.PersonId == p.Id));
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
@@ -47,16 +107,71 @@ public class GetPeopleHandler(IApplicationDbContext db) : IRequestHandler<GetPeo
         var page = request.Page < 1 ? 1 : request.Page;
         var pageSize = request.PageSize is < 1 or > 100 ? 20 : request.PageSize;
 
-        var items = await query
-            .OrderByDescending(p => p.Credits.Count)
-            .ThenByDescending(p => p.LikeCount)
-            .ThenBy(p => p.FullName)
-            .ThenBy(p => p.Id)
+        var ranked = query.Select(p => new
+        {
+            p.Id,
+            p.FullName,
+            p.PhotoUrl,
+            p.Nationality,
+            p.LikeCount,
+            Films = credits.Where(c => c.PersonId == p.Id).Select(c => c.MovieId).Distinct().Count()
+        });
+
+        var sorted = request.Sort?.ToLowerInvariant() switch
+        {
+            "likes" => ranked.OrderByDescending(x => x.LikeCount).ThenByDescending(x => x.Films),
+            "name" => ranked.OrderBy(x => x.FullName),
+            _ => ranked.OrderByDescending(x => x.Films).ThenByDescending(x => x.LikeCount)
+        };
+
+        var rows = await sorted
+            .ThenBy(x => x.FullName)
+            .ThenBy(x => x.Id)
             .Skip((page - 1) * pageSize).Take(pageSize)
-            .Select(p => new PersonListItemDto(p.Id, p.FullName, p.PhotoUrl, p.Nationality))
             .ToListAsync(ct);
 
-        return new PagedResult<PersonListItemDto>(items, total, page, pageSize);
+        var ids = rows.Select(r => r.Id).ToList();
+
+        // Sayfadaki kiþiler için: bu kullanýcýnýn beðenileri
+        var likedIds = new HashSet<Guid>();
+        if (request.CurrentUserId is Guid uid && ids.Count > 0)
+        {
+            likedIds = (await db.PersonLikes.AsNoTracking()
+                    .Where(l => l.UserId == uid && ids.Contains(l.PersonId))
+                    .Select(l => l.PersonId)
+                    .ToListAsync(ct))
+                .ToHashSet();
+        }
+
+        // Sayfadaki kiþiler için: rol baþýna (tekil) film sayýsý -> ana rol ve rozet
+        var creditRows = ids.Count == 0
+            ? []
+            : await db.MovieCredits.AsNoTracking()
+                .Where(c => ids.Contains(c.PersonId))
+                .Select(c => new { c.PersonId, c.MovieId, c.Kind, c.Job })
+                .Distinct()
+                .ToListAsync(ct);
+
+        var filmsByRole = creditRows
+            .GroupBy(r => r.PersonId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(r => (Role: PersonRoles.RoleOf(r.Kind, r.Job), r.MovieId))
+                      .Where(x => x.Role is not null)
+                      .GroupBy(x => x.Role!)
+                      .ToDictionary(rg => rg.Key, rg => rg.Select(x => x.MovieId).Distinct().Count()));
+
+        var items = rows.Select(r =>
+        {
+            var counts = filmsByRole.GetValueOrDefault(r.Id) ?? new Dictionary<string, int>();
+            var primary = role ?? counts.OrderByDescending(kv => kv.Value).Select(kv => kv.Key).FirstOrDefault();
+            var films = primary is not null && counts.TryGetValue(primary, out var n) ? n : r.Films;
+            return new PersonSearchItemDto(
+                r.Id, r.FullName, r.PhotoUrl, r.Nationality,
+                r.LikeCount, likedIds.Contains(r.Id), films, primary);
+        }).ToList();
+
+        return new PagedResult<PersonSearchItemDto>(items, total, page, pageSize);
     }
 }
 

@@ -1,11 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
   Search as SearchIcon,
   Film,
   Users,
-  Clapperboard,
+  Filter,
+  ArrowUpDown,
   X,
 } from "lucide-react";
 import {
@@ -14,8 +15,10 @@ import {
   personService,
   countryService,
 } from "@/services";
+import { useAppSelector } from "@/store";
 import RandomPicker from "@/components/random/RandomPicker";
 import MovieCard from "@/components/movie/MovieCard";
+import PersonCard from "@/components/person/PersonCard";
 import { useScreeningLogModal } from "@/hooks/useScreeningLogModal";
 import YearPicker from "@/components/search/YearPicker";
 import Pagination from "@/components/common/Pagination";
@@ -26,7 +29,13 @@ import {
   EmptyState,
   PageError,
 } from "@/components/common/PageState";
-import type { MovieSearchFilter, PagedResult, PersonListItem } from "@/types";
+import type {
+  MovieSearchFilter,
+  PagedResult,
+  PersonRole,
+  PersonSearchItem,
+  PersonSort,
+} from "@/types";
 import "./SearchPage.css";
 
 const SORT_OPTIONS = [
@@ -52,7 +61,24 @@ const SORT_OPTIONS = [
   { labelKey: "search.sortNameDesc", sortBy: "title", sortDirection: "desc" },
 ] as const;
 
-type Tab = "movies" | "actors" | "directors";
+const PEOPLE_ROLES: PersonRole[] = [
+  "actor",
+  "director",
+  "writer",
+  "composer",
+  "cinematographer",
+  "editor",
+  "producer",
+];
+const PEOPLE_SORTS: PersonSort[] = ["popular", "likes", "name"];
+const PEOPLE_PAGE_SIZE = 24;
+
+const isPersonRole = (v: string | null): v is PersonRole =>
+  v !== null && (PEOPLE_ROLES as string[]).includes(v);
+const isPersonSort = (v: string | null): v is PersonSort =>
+  v !== null && (PEOPLE_SORTS as string[]).includes(v);
+
+type Tab = "movies" | "people";
 
 interface TabTheme {
   accent: string;
@@ -68,24 +94,17 @@ const THEME: Record<Tab, TabTheme> = {
     glow: "rgba(212,175,55,0.35)",
     icon: Film,
   },
-  actors: {
+  people: {
     accent: "#4a90e2",
     dim: "rgba(74,144,226,0.14)",
     glow: "rgba(74,144,226,0.30)",
     icon: Users,
   },
-  directors: {
-    accent: "#00ff88",
-    dim: "rgba(0,255,136,0.12)",
-    glow: "rgba(0,255,136,0.35)",
-    icon: Clapperboard,
-  },
 };
 
 const TABS: { key: Tab; labelKey: string }[] = [
   { key: "movies", labelKey: "search.moviesTab" },
-  { key: "actors", labelKey: "search.actorsTab" },
-  { key: "directors", labelKey: "search.directorsTab" },
+  { key: "people", labelKey: "search.peopleTab" },
 ];
 
 function filterFromParams(params: URLSearchParams): MovieSearchFilter {
@@ -138,8 +157,14 @@ export default function SearchPage() {
   const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { openLog, logModal } = useScreeningLogModal();
+  const { isAuthenticated } = useAppSelector((s) => s.auth);
 
-  const tab = (searchParams.get("tab") as Tab) || "movies";
+  // Eski linkler (?tab=actors / ?tab=directors) "Kişiler" sekmesine, ilgili rol seçili olarak açılır.
+  const rawTab = searchParams.get("tab");
+  const tab: Tab =
+    rawTab === "people" || rawTab === "actors" || rawTab === "directors"
+      ? "people"
+      : "movies";
   const theme = THEME[tab];
 
   // ---- Film state (URL'den) ----
@@ -157,16 +182,20 @@ export default function SearchPage() {
     return res.items;
   };
 
-  // ---- Oyuncu state (URL'den) ----
-  const actorQuery = tab === "actors" ? (searchParams.get("q") ?? "") : "";
-  const actorPage =
-    tab === "actors" ? Number(searchParams.get("page")) || 1 : 1;
-
-  // ---- Yönetmen state (URL'den) ----
-  const directorQuery =
-    tab === "directors" ? (searchParams.get("q") ?? "") : "";
-  const directorPage =
-    tab === "directors" ? Number(searchParams.get("page")) || 1 : 1;
+  // ---- Kişi state (URL'den) ----
+  const legacyRole: PersonRole | "" =
+    rawTab === "actors" ? "actor" : rawTab === "directors" ? "director" : "";
+  const roleParam = searchParams.get("role");
+  const peopleRole: PersonRole | "" = isPersonRole(roleParam)
+    ? roleParam
+    : legacyRole;
+  const sortParam = searchParams.get("sort");
+  const peopleSort: PersonSort = isPersonSort(sortParam)
+    ? sortParam
+    : "popular";
+  const peopleQuery = tab === "people" ? (searchParams.get("q") ?? "") : "";
+  const peoplePage =
+    tab === "people" ? Number(searchParams.get("page")) || 1 : 1;
 
   const { data: genres } = useQuery({
     queryKey: ["genres"],
@@ -185,29 +214,32 @@ export default function SearchPage() {
     retry: 1,
   });
 
-  // Oyuncu ve yönetmen aramaları tek kaynaktan (People) gelir; role sunucuda filtrelenir.
-  const { data: actorResults, isLoading: isActorLoading } = useQuery({
-    queryKey: ["people-search", "actor", actorQuery, actorPage],
+  // Tüm roller tek kaynaktan (People) gelir; rol ve sıralama sunucuda uygulanır.
+  const {
+    data: peopleResults,
+    isLoading: isPeopleLoading,
+    isError: isPeopleError,
+    refetch: refetchPeople,
+  } = useQuery({
+    queryKey: [
+      "people-search",
+      peopleRole,
+      peopleSort,
+      peopleQuery,
+      peoplePage,
+      isAuthenticated,
+    ],
     queryFn: () =>
       personService.search({
-        search: actorQuery,
-        role: "actor",
-        page: actorPage,
-        pageSize: 24,
+        search: peopleQuery.trim() || undefined,
+        role: peopleRole || undefined,
+        sort: peopleSort,
+        page: peoplePage,
+        pageSize: PEOPLE_PAGE_SIZE,
       }),
-    enabled: tab === "actors",
-  });
-
-  const { data: directorResults, isLoading: isDirectorLoading } = useQuery({
-    queryKey: ["people-search", "director", directorQuery, directorPage],
-    queryFn: () =>
-      personService.search({
-        search: directorQuery,
-        role: "director",
-        page: directorPage,
-        pageSize: 24,
-      }),
-    enabled: tab === "directors",
+    enabled: tab === "people",
+    placeholderData: keepPreviousData,
+    retry: 1,
   });
 
   const setTab = (next: Tab) => {
@@ -236,6 +268,31 @@ export default function SearchPage() {
       (o) => `${o.sortBy}-${o.sortDirection}` === value,
     );
     if (opt) update({ sortBy: opt.sortBy, sortDirection: opt.sortDirection });
+  };
+
+  // Rol / sıralama değişince URL'yi yeni biçime (tab=people&role=...) çevirir ve ilk sayfaya döner.
+  const updatePeople = (patch: {
+    role?: PersonRole | "";
+    sort?: PersonSort;
+  }) => {
+    const role = patch.role ?? peopleRole;
+    const sort = patch.sort ?? peopleSort;
+    const n = new URLSearchParams(searchParams);
+    n.set("tab", "people");
+    if (role) n.set("role", role);
+    else n.delete("role");
+    if (sort !== "popular") n.set("sort", sort);
+    else n.delete("sort");
+    n.delete("page");
+    setSearchParams(n);
+  };
+
+  const setPeoplePage = (page: number) => {
+    const n = new URLSearchParams(searchParams);
+    if (page > 1) n.set("page", String(page));
+    else n.delete("page");
+    setSearchParams(n);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const genreLabel = (name?: string) => {
@@ -286,19 +343,11 @@ export default function SearchPage() {
   ].filter(Boolean) as { key: string; label: string; onRemove: () => void }[];
 
   // Aktif tab'a göre tek arama kutusunun bağlı olduğu state
-  const currentQuery =
-    tab === "movies"
-      ? (filter.title ?? "")
-      : tab === "actors"
-        ? actorQuery
-        : directorQuery;
-
+  const currentQuery = tab === "movies" ? (filter.title ?? "") : peopleQuery;
   const currentPlaceholder =
     tab === "movies"
       ? t("search.titlePlaceholder")
-      : tab === "actors"
-        ? t("search.actorSearchPlaceholder")
-        : t("search.directorSearchPlaceholder");
+      : t("search.peopleSearchPlaceholder");
 
   const handleQueryChange = (value: string) => {
     if (tab === "movies") {
@@ -306,16 +355,11 @@ export default function SearchPage() {
       return;
     }
     const n = new URLSearchParams(searchParams);
+    n.set("tab", "people");
+    if (peopleRole) n.set("role", peopleRole);
     if (value) n.set("q", value);
     else n.delete("q");
     n.delete("page");
-    setSearchParams(n);
-  };
-
-  const setPersonPage = (page: number) => {
-    const n = new URLSearchParams(searchParams);
-    if (page > 1) n.set("page", String(page));
-    else n.delete("page");
     setSearchParams(n);
   };
 
@@ -434,6 +478,33 @@ export default function SearchPage() {
             </div>
           )}
 
+          {tab === "people" && (
+            <div className="spotlight-card__filters">
+              <Dropdown
+                icon={<Filter size={14} />}
+                value={peopleRole}
+                onChange={(v) => updatePeople({ role: v as PersonRole | "" })}
+                options={[
+                  { label: t("personFilmography.all"), value: "" },
+                  ...PEOPLE_ROLES.map((r) => ({
+                    label: t(`people.roles.${r}`),
+                    value: r,
+                  })),
+                ]}
+              />
+              <Dropdown
+                accent
+                icon={<ArrowUpDown size={14} />}
+                value={peopleSort}
+                onChange={(v) => updatePeople({ sort: v as PersonSort })}
+                options={PEOPLE_SORTS.map((s) => ({
+                  label: t(`search.peopleSort.${s}`),
+                  value: s,
+                }))}
+              />
+            </div>
+          )}
+
           {tab === "movies" && activeChips.length > 0 && (
             <div className="spotlight-card__chips">
               {activeChips.map((chip) => (
@@ -496,21 +567,13 @@ export default function SearchPage() {
         </>
       )}
 
-      {tab === "actors" && (
-        <PersonResults
-          isLoading={isActorLoading}
-          query={actorQuery}
-          results={actorResults}
-          onPageChange={setPersonPage}
-        />
-      )}
-
-      {tab === "directors" && (
-        <PersonResults
-          isLoading={isDirectorLoading}
-          query={directorQuery}
-          results={directorResults}
-          onPageChange={setPersonPage}
+      {tab === "people" && (
+        <PeopleResults
+          isLoading={isPeopleLoading}
+          isError={isPeopleError}
+          results={peopleResults}
+          onRetry={() => refetchPeople()}
+          onPageChange={setPeoplePage}
         />
       )}
 
@@ -519,58 +582,50 @@ export default function SearchPage() {
   );
 }
 
-// Oyuncu ve yönetmen sonuçları için ortak grid; ikisi de /people/:id sayfasına gider.
-function PersonResults({
+function PeopleResults({
   isLoading,
-  query,
+  isError,
   results,
+  onRetry,
   onPageChange,
 }: {
   isLoading: boolean;
-  query: string;
-  results?: PagedResult<PersonListItem>;
+  isError: boolean;
+  results?: PagedResult<PersonSearchItem>;
+  onRetry: () => void;
   onPageChange: (page: number) => void;
 }) {
   const { t } = useTranslation();
 
-  if (isLoading && query.trim().length > 0)
-    return <MovieGridSkeleton count={8} />;
+  if (isLoading) return <MovieGridSkeleton count={12} />;
 
-  if (results && results.items.length > 0) {
+  if (isError && !results)
+    return <PageError message={t("errors.searchFailed")} onRetry={onRetry} />;
+
+  if (!results || results.items.length === 0)
     return (
-      <>
-        <div className="person-grid">
-          {results.items.map((p) => (
-            <Link
-              key={p.id}
-              to={`/people/${p.id}`}
-              className="person-grid__item card"
-            >
-              <img src={p.photoUrl} alt={p.fullName} />
-              <span>{p.fullName}</span>
-              {p.nationality && (
-                <span className="person-grid__nationality">
-                  {p.nationality}
-                </span>
-              )}
-            </Link>
-          ))}
-        </div>
-        <Pagination
-          page={results.page}
-          totalPages={results.totalPages}
-          onChange={(p) => {
-            onPageChange(p);
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-        />
-      </>
+      <EmptyState
+        icon={<Users size={26} />}
+        title={t("search.noResults")}
+        hint={t("search.changeFilters")}
+      />
     );
-  }
 
-  return query.trim().length > 0 && !isLoading ? (
-    <EmptyState icon={<Users size={26} />} title={t("search.noResults")} />
-  ) : (
-    <EmptyState icon={<Users size={26} />} title={t("search.startTyping")} />
+  return (
+    <>
+      <p className="search-page__results-count">
+        {t("search.resultsCount", { count: results.totalCount })}
+      </p>
+      <div className="people-grid">
+        {results.items.map((p) => (
+          <PersonCard key={p.id} person={p} />
+        ))}
+      </div>
+      <Pagination
+        page={results.page}
+        totalPages={results.totalPages}
+        onChange={onPageChange}
+      />
+    </>
   );
 }

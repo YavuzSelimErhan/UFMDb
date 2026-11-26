@@ -181,6 +181,18 @@
     }
   },
   "search": {
+    "people": {
+      "roles": {
+        "actor": "Oyuncu",
+        "director": "Yönetmen",
+        "writer": "Senarist",
+        "composer": "Besteci",
+        "cinematographer": "Görüntü yönetmeni",
+        "editor": "Kurgucu",
+        "producer": "Yapımcı"
+      },
+      "filmCount_other": "{{count}} film"
+    },
     "noResults": "Sonuç bulunamadı",
     "title": "Keşfet",
     "subtitle": "Film, oyuncu ve yönetmen dünyasında kaybol",
@@ -206,7 +218,14 @@
     "resultsCount": "{{count}} sonuç bulundu",
     "changeFilters": "Filtreleri değiştirip tekrar dene",
     "startTyping": "Aramaya başlamak için yazmaya başla",
-    "titlesCount": "başlık"
+    "titlesCount": "başlık",
+    "peopleTab": "Kişiler",
+    "peopleSearchPlaceholder": "Oyuncu, yönetmen, besteci ara...",
+    "peopleSort": {
+      "popular": "Film sayısı",
+      "likes": "En çok beğenilen",
+      "name": "İsim (A-Z)"
+    }
   },
   "auth": {
     "email": "E-posta",
