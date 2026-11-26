@@ -506,7 +506,16 @@
     },
     "people": {
       "actorsTab": "Actors",
-      "directorsTab": "Directors"
+      "directorsTab": "Directors",
+      "createTitle": "Add person",
+      "editTitle": "Edit person",
+      "listTitle": "People",
+      "searchPlaceholder": "Search people...",
+      "colName": "Name",
+      "colNationality": "Nationality",
+      "namePlaceholder": "Full name",
+      "nationalityPlaceholder": "e.g. Turkey",
+      "roleFilter": "Role"
     },
     "movies": {
       "listTitle": "Existing Movies",

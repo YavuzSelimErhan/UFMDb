@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Search, X, Star } from "lucide-react";
-import { movieService, actorService, directorService } from "@/services";
-import type { MovieListItem, ActorListItem, DirectorListItem } from "@/types";
+import { movieService, personService } from "@/services";
+import type { MovieListItem, PersonListItem } from "@/types";
 import "./HomeSearchBar.css";
 
 const DEBOUNCE_MS = 320;
@@ -18,8 +18,8 @@ export default function HomeSearchBar() {
 
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState<MovieListItem[]>([]);
-  const [actors, setActors] = useState<ActorListItem[]>([]);
-  const [directors, setDirectors] = useState<DirectorListItem[]>([]);
+  const [actors, setActors] = useState<PersonListItem[]>([]);
+  const [directors, setDirectors] = useState<PersonListItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -37,8 +37,18 @@ export default function HomeSearchBar() {
       try {
         const [movieRes, actorRes, directorRes] = await Promise.all([
           movieService.search({ title: query, page: 1, pageSize: MAX_MOVIES }),
-          actorService.search(query, 1, MAX_ACTORS),
-          directorService.search(query, 1, MAX_DIRECTORS),
+          personService.search({
+            search: query,
+            role: "actor",
+            page: 1,
+            pageSize: MAX_ACTORS,
+          }),
+          personService.search({
+            search: query,
+            role: "director",
+            page: 1,
+            pageSize: MAX_DIRECTORS,
+          }),
         ]);
         setMovies(movieRes.items);
         setActors(actorRes.items);
@@ -81,13 +91,13 @@ export default function HomeSearchBar() {
   };
 
   const goToActor = (id: string) => {
-    navigate(`/actors/${id}`);
+    navigate(`/people/${id}`);
     setQuery("");
     setIsOpen(false);
   };
 
   const goToDirector = (id: string) => {
-    navigate(`/directors/${id}`);
+    navigate(`/people/${id}`);
     setQuery("");
     setIsOpen(false);
   };

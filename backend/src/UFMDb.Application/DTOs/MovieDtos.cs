@@ -11,7 +11,7 @@ public record MovieListItemDto(
     ReactionType? CurrentUserReaction = null
 );
 
-public record MovieDirectorDto(Guid Id, string FullName, string PhotoUrl, Guid? PersonId = null);
+public record MovieDirectorDto(Guid PersonId, string FullName, string PhotoUrl);
 
 public record MyReviewDto(string Content, bool ContainsSpoiler);
 
@@ -24,7 +24,7 @@ public record MovieCountryDto(string IsoCode, string Name);
 public record CollectionMovieDto(Guid Id, string Title, int ReleaseYear, string PosterUrl);
 public record MovieCollectionDto(Guid Id, string Name, string PosterUrl, string BackdropUrl, List<CollectionMovieDto> Movies);
 
-public record MovieCrewDto(Guid PersonId, string FullName, string Job, string PhotoUrl, Guid? DirectorId);
+public record MovieCrewDto(Guid PersonId, string FullName, string Job, string PhotoUrl);
 
 public record MovieDetailDto(
     Guid Id, string Title, string OriginalTitle, string Overview, int ReleaseYear, DateTime ReleaseDate,
@@ -45,7 +45,7 @@ public record MovieDetailDto(
     List<MovieCrewDto>? Crew = null
 );
 
-public record MovieCastDto(Guid ActorId, string FullName, string PhotoUrl, string CharacterName, int Order, Guid? PersonId = null);
+public record MovieCastDto(Guid PersonId, string FullName, string PhotoUrl, string CharacterName, int Order);
 public record DirectorListItemDto(Guid Id, string FullName, string PhotoUrl, string Nationality);
 
 

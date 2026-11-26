@@ -11,8 +11,7 @@ import {
 import {
   movieService,
   genreService,
-  actorService,
-  directorService,
+  personService,
   countryService,
 } from "@/services";
 import RandomPicker from "@/components/random/RandomPicker";
@@ -27,12 +26,7 @@ import {
   EmptyState,
   PageError,
 } from "@/components/common/PageState";
-import type {
-  MovieSearchFilter,
-  PagedResult,
-  ActorListItem,
-  DirectorListItem,
-} from "@/types";
+import type { MovieSearchFilter, PagedResult, PersonListItem } from "@/types";
 import "./SearchPage.css";
 
 const SORT_OPTIONS = [
@@ -112,8 +106,6 @@ function filterFromParams(params: URLSearchParams): MovieSearchFilter {
     minRating: params.get("minRating")
       ? Number(params.get("minRating"))
       : undefined,
-
-    // BURAYI EKLE
     releaseDateFrom: params.get("releaseDateFrom") ?? undefined,
     releaseDateTo: params.get("releaseDateTo") ?? undefined,
   };
@@ -193,15 +185,28 @@ export default function SearchPage() {
     retry: 1,
   });
 
+  // Oyuncu ve yönetmen aramaları tek kaynaktan (People) gelir; role sunucuda filtrelenir.
   const { data: actorResults, isLoading: isActorLoading } = useQuery({
-    queryKey: ["actor-search", actorQuery, actorPage],
-    queryFn: () => actorService.search(actorQuery, actorPage, 24),
+    queryKey: ["people-search", "actor", actorQuery, actorPage],
+    queryFn: () =>
+      personService.search({
+        search: actorQuery,
+        role: "actor",
+        page: actorPage,
+        pageSize: 24,
+      }),
     enabled: tab === "actors",
   });
 
   const { data: directorResults, isLoading: isDirectorLoading } = useQuery({
-    queryKey: ["director-search", directorQuery, directorPage],
-    queryFn: () => directorService.search(directorQuery, directorPage, 24),
+    queryKey: ["people-search", "director", directorQuery, directorPage],
+    queryFn: () =>
+      personService.search({
+        search: directorQuery,
+        role: "director",
+        page: directorPage,
+        pageSize: 24,
+      }),
     enabled: tab === "directors",
   });
 
@@ -496,7 +501,6 @@ export default function SearchPage() {
           isLoading={isActorLoading}
           query={actorQuery}
           results={actorResults}
-          entityRoute="/actors"
           onPageChange={setPersonPage}
         />
       )}
@@ -506,7 +510,6 @@ export default function SearchPage() {
           isLoading={isDirectorLoading}
           query={directorQuery}
           results={directorResults}
-          entityRoute="/directors"
           onPageChange={setPersonPage}
         />
       )}
@@ -516,18 +519,16 @@ export default function SearchPage() {
   );
 }
 
-// Oyuncu ve yönetmen sonuçları için ortak grid — ikisi de aynı şekle sahip (id, fullName, photoUrl, nationality)
+// Oyuncu ve yönetmen sonuçları için ortak grid; ikisi de /people/:id sayfasına gider.
 function PersonResults({
   isLoading,
   query,
   results,
-  entityRoute,
   onPageChange,
 }: {
   isLoading: boolean;
   query: string;
-  results?: PagedResult<ActorListItem | DirectorListItem>;
-  entityRoute: string;
+  results?: PagedResult<PersonListItem>;
   onPageChange: (page: number) => void;
 }) {
   const { t } = useTranslation();
@@ -542,7 +543,7 @@ function PersonResults({
           {results.items.map((p) => (
             <Link
               key={p.id}
-              to={`${entityRoute}/${p.id}`}
+              to={`/people/${p.id}`}
               className="person-grid__item card"
             >
               <img src={p.photoUrl} alt={p.fullName} />

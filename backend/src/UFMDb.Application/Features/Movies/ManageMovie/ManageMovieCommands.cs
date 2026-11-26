@@ -8,7 +8,8 @@ using UFMDb.Domain.Entities;
 
 namespace UFMDb.Application.Features.Movies.ManageMovie;
 
-public record CastMemberInput(Guid ActorId, string CharacterName, int Order);
+/// <summary>PersonId: People tablosundaki kişi kimliği.</summary>
+public record CastMemberInput(Guid PersonId, string CharacterName, int Order);
 
 // ---------- Ortak doğrulama kuralları ----------
 internal static class MovieRules
@@ -18,7 +19,7 @@ internal static class MovieRules
         System.Linq.Expressions.Expression<Func<T, string>> overview,
         System.Linq.Expressions.Expression<Func<T, int>> year,
         System.Linq.Expressions.Expression<Func<T, int>> runtime,
-        System.Linq.Expressions.Expression<Func<T, double>> seed,
+        System.Linq.Expressions.Expression<Func<T, double?>> seed,
         System.Linq.Expressions.Expression<Func<T, string?>> titleTr,
         System.Linq.Expressions.Expression<Func<T, string?>> overviewTr,
         System.Linq.Expressions.Expression<Func<T, string?>> tagline,
@@ -46,7 +47,33 @@ internal static class MovieRules
     };
 }
 
+/// <summary>Admin panelinden girilen oyuncu/yönetmenler için kredi satırı üretir (importer ile aynı Department/Job değerleri).</summary>
+internal static class CreditFactory
+{
+    public const string DirectorJob = "Director";
+
+    public static MovieCredit Cast(CastMemberInput c) => new()
+    {
+        PersonId = c.PersonId,
+        Kind = CreditKind.Cast,
+        Department = "Acting",
+        Job = "Actor",
+        CharacterName = c.CharacterName,
+        Order = c.Order
+    };
+
+    public static MovieCredit Director(Guid personId, int order) => new()
+    {
+        PersonId = personId,
+        Kind = CreditKind.Crew,
+        Department = "Directing",
+        Job = DirectorJob,
+        Order = order
+    };
+}
+
 // ---------- CREATE ----------
+/// <summary>DirectorIds: yönetmen olacak kişilerin PersonId'leri.</summary>
 public record CreateMovieCommand(
     string Title, string OriginalTitle, string Overview, int ReleaseYear, DateTime ReleaseDate,
     int RuntimeMinutes, string PosterUrl, string BackdropUrl, List<Guid> DirectorIds, string Country,
@@ -69,6 +96,11 @@ public class CreateMovieCommandHandler : IRequestHandler<CreateMovieCommand, Gui
 
     public async Task<Guid> Handle(CreateMovieCommand request, CancellationToken ct)
     {
+        var credits = request.DirectorIds.Distinct()
+            .Select((personId, i) => CreditFactory.Director(personId, i))
+            .Concat(request.Cast.DistinctBy(c => c.PersonId).Select(CreditFactory.Cast))
+            .ToList();
+
         var movie = new Movie
         {
             Title = request.Title,
@@ -88,14 +120,7 @@ public class CreateMovieCommandHandler : IRequestHandler<CreateMovieCommand, Gui
             SeedRating = request.SeedRating,
             AverageRating = request.SeedRating,
             MovieGenres = request.GenreIds.Distinct().Select(gId => new MovieGenre { GenreId = gId }).ToList(),
-            MovieDirectors = request.DirectorIds.Distinct()
-                .Select((dId, i) => new MovieDirector { DirectorId = dId, Order = i }).ToList(),
-            MovieActors = request.Cast.DistinctBy(c => c.ActorId).Select(c => new MovieActor
-            {
-                ActorId = c.ActorId,
-                CharacterName = c.CharacterName,
-                Order = c.Order
-            }).ToList()
+            Credits = credits
         };
 
         _context.Movies.Add(movie);
@@ -108,7 +133,7 @@ public class CreateMovieCommandHandler : IRequestHandler<CreateMovieCommand, Gui
 public record UpdateMovieCommand(
     Guid Id, string Title, string OriginalTitle, string Overview, int ReleaseYear, DateTime ReleaseDate,
     int RuntimeMinutes, string PosterUrl, string BackdropUrl, List<Guid> DirectorIds, string Country,
-    List<Guid> GenreIds, List<CastMemberInput> Cast, double SeedRating,
+    List<Guid> GenreIds, List<CastMemberInput> Cast, double? SeedRating,
     // null = dokunma, "" = temizle
     string? TitleTr = null, string? OverviewTr = null, string? Tagline = null,
     string? TaglineTr = null, string? TrailerKey = null
@@ -133,9 +158,6 @@ public class UpdateMovieCommandHandler : IRequestHandler<UpdateMovieCommand>
     {
         var movie = await _context.Movies
             .Include(m => m.MovieGenres)
-            .Include(m => m.MovieActors)
-            .Include(m => m.MovieDirectors)
-            .AsSplitQuery()
             .FirstOrDefaultAsync(m => m.Id == request.Id && !m.IsDeleted, ct)
             ?? throw new NotFoundException(nameof(Movie), request.Id);
 
@@ -148,7 +170,7 @@ public class UpdateMovieCommandHandler : IRequestHandler<UpdateMovieCommand>
         movie.PosterUrl = request.PosterUrl;
         movie.BackdropUrl = request.BackdropUrl;
         movie.Country = request.Country;
-        movie.SeedRating = request.SeedRating;
+        if (request.SeedRating.HasValue) movie.SeedRating = request.SeedRating.Value;
         movie.UpdatedAtUtc = DateTime.UtcNow;
 
         if (request.TitleTr is not null) movie.TitleTr = request.TitleTr;
@@ -165,38 +187,48 @@ public class UpdateMovieCommandHandler : IRequestHandler<UpdateMovieCommand>
         foreach (var genreId in wantedGenres.Where(id => !haveGenres.Contains(id)))
             movie.MovieGenres.Add(new MovieGenre { MovieId = movie.Id, GenreId = genreId });
 
-        // ---- Yönetmenler (diff + sıra) ----
+        var credits = await _context.MovieCredits.Where(c => c.MovieId == movie.Id).ToListAsync(ct);
+
+        // ---- Yönetmenler (diff + sıra). Diğer crew kredilerine (writer, producer...) dokunulmaz. ----
         var wantedDirectors = request.DirectorIds.Distinct().Select((id, i) => (id, i)).ToDictionary(x => x.id, x => x.i);
-        foreach (var md in movie.MovieDirectors.Where(x => !wantedDirectors.ContainsKey(x.DirectorId)).ToList())
-            movie.MovieDirectors.Remove(md);
-        var haveDirectors = movie.MovieDirectors.ToDictionary(x => x.DirectorId);
-        foreach (var (directorId, order) in wantedDirectors)
+        var haveDirectors = new Dictionary<Guid, MovieCredit>();
+        foreach (var row in credits.Where(c => c.Kind == CreditKind.Crew && c.Job == CreditFactory.DirectorJob))
         {
-            if (haveDirectors.TryGetValue(directorId, out var existing)) existing.Order = order;
-            else movie.MovieDirectors.Add(new MovieDirector { MovieId = movie.Id, DirectorId = directorId, Order = order });
+            // İstenmeyen veya aynı kişiye ait ikinci satırlar silinir
+            if (wantedDirectors.ContainsKey(row.PersonId) && haveDirectors.TryAdd(row.PersonId, row)) continue;
+            _context.MovieCredits.Remove(row);
+        }
+        foreach (var (personId, order) in wantedDirectors)
+        {
+            if (haveDirectors.TryGetValue(personId, out var existing)) existing.Order = order;
+            else
+            {
+                var credit = CreditFactory.Director(personId, order);
+                credit.MovieId = movie.Id;
+                _context.MovieCredits.Add(credit);
+            }
         }
 
         // ---- Oyuncular (diff + karakter/sıra) ----
-        var wantedCast = request.Cast.DistinctBy(c => c.ActorId).ToDictionary(c => c.ActorId);
-        foreach (var ma in movie.MovieActors.Where(x => !wantedCast.ContainsKey(x.ActorId)).ToList())
-            movie.MovieActors.Remove(ma);
-        var haveActors = movie.MovieActors.ToDictionary(x => x.ActorId);
+        var wantedCast = request.Cast.DistinctBy(c => c.PersonId).ToDictionary(c => c.PersonId);
+        var haveCast = new Dictionary<Guid, MovieCredit>();
+        foreach (var row in credits.Where(c => c.Kind == CreditKind.Cast))
+        {
+            if (wantedCast.ContainsKey(row.PersonId) && haveCast.TryAdd(row.PersonId, row)) continue;
+            _context.MovieCredits.Remove(row);
+        }
         foreach (var cast in wantedCast.Values)
         {
-            if (haveActors.TryGetValue(cast.ActorId, out var existing))
+            if (haveCast.TryGetValue(cast.PersonId, out var existing))
             {
                 existing.CharacterName = cast.CharacterName;
                 existing.Order = cast.Order;
             }
             else
             {
-                movie.MovieActors.Add(new MovieActor
-                {
-                    MovieId = movie.Id,
-                    ActorId = cast.ActorId,
-                    CharacterName = cast.CharacterName,
-                    Order = cast.Order
-                });
+                var credit = CreditFactory.Cast(cast);
+                credit.MovieId = movie.Id;
+                _context.MovieCredits.Add(credit);
             }
         }
 

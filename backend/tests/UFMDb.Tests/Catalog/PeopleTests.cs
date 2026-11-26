@@ -1,56 +1,73 @@
 using UFMDb.Application.Common.Exceptions;
-using UFMDb.Application.Features.Actors;
-using UFMDb.Application.Features.Directors;
+using UFMDb.Application.Features.People;
 using UFMDb.Domain.Entities;
 using UFMDb.Tests.TestHelpers;
 using Xunit;
 
 namespace UFMDb.Tests.Catalog;
 
-public class PeopleTests
+public class PersonTests
 {
     [Fact]
-    public async Task ActorDetails_SortCreditsAndShowOnlyViewersPersonalFlags()
+    public async Task PersonDetails_MergeRolesPerFilm_SortByPopularity_AndShowOnlyViewersPersonalFlags()
     {
         await using var db = TestDbContextFactory.Create();
-        var actor = await new CreateActorCommandHandler(db).Handle(new("Performer", null, "", "", ""), default);
-        var older = new Movie { Title = "Early", OriginalTitle = "Early", ReleaseYear = 1960 };
-        var newer = new Movie { Title = "Late", OriginalTitle = "Late", ReleaseYear = 1980 };
+        var person = new Person { FullName = "Auteur" };
+        var older = new Movie { Title = "Early", OriginalTitle = "Early", ReleaseYear = 1960, TmdbPopularity = 5 };
+        var newer = new Movie { Title = "Late", OriginalTitle = "Late", ReleaseYear = 1980, TmdbPopularity = 50 };
         var viewer = Guid.NewGuid();
+        db.People.Add(person);
         db.Movies.AddRange(older, newer);
-        db.MovieActors.AddRange(new MovieActor { ActorId = actor, MovieId = older.Id },
-            new MovieActor { ActorId = actor, MovieId = newer.Id });
+        db.MovieCredits.AddRange(
+            new MovieCredit { MovieId = older.Id, PersonId = person.Id, Kind = CreditKind.Cast, Department = "Acting", Job = "Actor" },
+            new MovieCredit { MovieId = newer.Id, PersonId = person.Id, Kind = CreditKind.Cast, Department = "Acting", Job = "Actor" },
+            new MovieCredit { MovieId = newer.Id, PersonId = person.Id, Kind = CreditKind.Crew, Department = "Directing", Job = "Director" });
         db.WatchlistItems.Add(new WatchlistItem { UserId = viewer, MovieId = older.Id });
         await db.SaveChangesAsync();
-        await new ToggleActorLikeCommandHandler(db).Handle(new(actor, viewer), default);
-        var details = new GetActorDetailQueryHandler(db);
-        var mine = await details.Handle(new(actor, viewer), default);
+
+        var like = new TogglePersonLikeHandler(db);
+        Assert.True(await like.Handle(new(person.Id, viewer), default));
+
+        var details = new GetPersonHandler(db);
+        var mine = await details.Handle(new(person.Id, "en", viewer), default);
         Assert.True(mine.IsLikedByCurrentUser);
-        Assert.Equal(new[] { newer.Id, older.Id }, mine.Filmography.Select(f => f.Id));
-        Assert.True(mine.Filmography[1].IsInWatchlistByCurrentUser);
-        var guest = await details.Handle(new(actor, null), default);
+        Assert.Equal(1, mine.LikeCount);
+        Assert.Equal(new[] { newer.Id, older.Id }, mine.Films.Select(f => f.Movie.Id));
+        Assert.Equal(new[] { "Cast", "Director" }, mine.Films[0].Roles);
+        Assert.Equal(new[] { "Cast" }, mine.Films[1].Roles);
+        Assert.True(mine.Films[1].Movie.IsInWatchlistByCurrentUser);
+
+        var guest = await details.Handle(new(person.Id, "en", null), default);
         Assert.False(guest.IsLikedByCurrentUser);
-        Assert.False(guest.Filmography[1].IsInWatchlistByCurrentUser);
-        await new DeleteActorCommandHandler(db).Handle(new(actor), default);
-        await Assert.ThrowsAsync<NotFoundException>(() => details.Handle(new(actor, viewer), default));
+        Assert.False(guest.Films[1].Movie.IsInWatchlistByCurrentUser);
+
+        Assert.False(await like.Handle(new(person.Id, viewer), default));
+        Assert.Equal(0, (await details.Handle(new(person.Id, "en", viewer), default)).LikeCount);
+
+        person.IsDeleted = true;
+        await db.SaveChangesAsync();
+        await Assert.ThrowsAsync<NotFoundException>(() => details.Handle(new(person.Id, "en", viewer), default));
     }
 
     [Fact]
-    public async Task DirectorDetails_ReflectEditsAndLikes_AndHideDeletedDirector()
+    public async Task PersonAdmin_EditsAreReflectedInDetails_AndDeletedPersonIsHidden()
     {
         await using var db = TestDbContextFactory.Create();
-        var id = await new CreateDirectorCommandHandler(db).Handle(new("Director", null, "", "", ""), default);
+        var id = await new CreatePersonHandler(db).Handle(new("Director", null, "", "", ""), default);
         var viewer = Guid.NewGuid();
-        var like = new ToggleDirectorLikeCommandHandler(db);
+        var like = new TogglePersonLikeHandler(db);
         await like.Handle(new(id, viewer), default);
-        await new UpdateDirectorCommandHandler(db).Handle(new(id, "Updated", null, "Bio", "", "TR"), default);
-        var details = new GetDirectorDetailQueryHandler(db);
-        var saved = await details.Handle(new(id, viewer), default);
+        await new UpdatePersonHandler(db).Handle(new(id, "Updated", null, "Bio", "", "TR"), default);
+
+        var details = new GetPersonHandler(db);
+        var saved = await details.Handle(new(id, "en", viewer), default);
         Assert.Equal(("Updated", "Bio", "TR", 1, true),
             (saved.FullName, saved.Biography, saved.Nationality, saved.LikeCount, saved.IsLikedByCurrentUser));
+
         Assert.False(await like.Handle(new(id, viewer), default));
-        Assert.Equal(0, (await details.Handle(new(id, viewer), default)).LikeCount);
-        await new DeleteDirectorCommandHandler(db).Handle(new(id), default);
-        await Assert.ThrowsAsync<NotFoundException>(() => details.Handle(new(id, null), default));
+        Assert.Equal(0, (await details.Handle(new(id, "en", viewer), default)).LikeCount);
+
+        await new DeletePersonHandler(db).Handle(new(id), default);
+        await Assert.ThrowsAsync<NotFoundException>(() => details.Handle(new(id, "en", null), default));
     }
 }

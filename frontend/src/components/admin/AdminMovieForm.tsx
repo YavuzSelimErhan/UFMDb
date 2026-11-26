@@ -11,22 +11,22 @@ import {
   Clapperboard,
 } from "lucide-react";
 import { movieService, genreService, countryService } from "@/services";
-import ActorSearchSelect from "./ActorSearchSelect";
-import DirectorSearchSelect from "./DirectorSearchSelect";
+import PersonSearchSelect from "./PersonSearchSelect";
 import type { MovieFormPayload } from "@/types";
 import "./AdminMovieForm.css";
 
+// personId: People tablosundaki kişi kimliği (hem oyuncu hem yönetmen satırları için)
 interface CastRow {
   tempId: string;
-  actorId: string;
-  actorName: string;
+  personId: string;
+  personName: string;
   characterName: string;
 }
 
 interface DirectorRow {
   tempId: string;
-  directorId: string;
-  directorName: string;
+  personId: string;
+  personName: string;
 }
 
 interface Props {
@@ -69,8 +69,8 @@ export default function AdminMovieForm({ movieId, onDone, onCancel }: Props) {
   });
 
   const { data: existingMovie } = useQuery({
-    queryKey: ["movie", movieId],
-    queryFn: () => movieService.getById(movieId!),
+    queryKey: ["movie-edit", movieId],
+    queryFn: () => movieService.getByIdForEdit(movieId!),
     enabled: isEditMode,
   });
 
@@ -91,16 +91,16 @@ export default function AdminMovieForm({ movieId, onDone, onCancel }: Props) {
     setCast(
       existingMovie.cast.map((c) => ({
         tempId: crypto.randomUUID(),
-        actorId: c.actorId,
-        actorName: c.fullName,
+        personId: c.personId,
+        personName: c.fullName,
         characterName: c.characterName,
       })),
     );
     setDirectors(
       existingMovie.directors.map((d) => ({
         tempId: crypto.randomUUID(),
-        directorId: d.id,
-        directorName: d.fullName,
+        personId: d.personId,
+        personName: d.fullName,
       })),
     );
   }, [existingMovie]);
@@ -110,13 +110,11 @@ export default function AdminMovieForm({ movieId, onDone, onCancel }: Props) {
       const payload: MovieFormPayload = {
         ...form,
         genreIds,
-        directorIds: directors
-          .filter((d) => d.directorId)
-          .map((d) => d.directorId),
+        directorIds: directors.filter((d) => d.personId).map((d) => d.personId),
         cast: cast
-          .filter((c) => c.actorId)
+          .filter((c) => c.personId)
           .map((c, i) => ({
-            actorId: c.actorId,
+            personId: c.personId,
             characterName: c.characterName,
             order: i,
           })),
@@ -127,8 +125,10 @@ export default function AdminMovieForm({ movieId, onDone, onCancel }: Props) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["movie-search-admin"] });
-      if (isEditMode)
+      if (isEditMode) {
+        queryClient.invalidateQueries({ queryKey: ["movie-edit", movieId] });
         queryClient.invalidateQueries({ queryKey: ["movie", movieId] });
+      }
       onDone();
     },
   });
@@ -149,8 +149,8 @@ export default function AdminMovieForm({ movieId, onDone, onCancel }: Props) {
       ...prev,
       {
         tempId: crypto.randomUUID(),
-        actorId: "",
-        actorName: "",
+        personId: "",
+        personName: "",
         characterName: "",
       },
     ]);
@@ -164,7 +164,7 @@ export default function AdminMovieForm({ movieId, onDone, onCancel }: Props) {
   const addDirectorRow = () =>
     setDirectors((prev) => [
       ...prev,
-      { tempId: crypto.randomUUID(), directorId: "", directorName: "" },
+      { tempId: crypto.randomUUID(), personId: "", personName: "" },
     ]);
   const removeDirectorRow = (tempId: string) =>
     setDirectors((prev) => prev.filter((d) => d.tempId !== tempId));
@@ -331,11 +331,12 @@ export default function AdminMovieForm({ movieId, onDone, onCancel }: Props) {
           {directors.map((row, index) => (
             <div key={row.tempId} className="admin-movie-form__cast-row">
               <span className="admin-movie-form__cast-order">{index + 1}</span>
-              <DirectorSearchSelect
-                value={row.directorId}
-                displayName={row.directorName}
-                onSelect={(directorId, directorName) =>
-                  updateDirectorRow(row.tempId, { directorId, directorName })
+              <PersonSearchSelect
+                role="director"
+                value={row.personId}
+                displayName={row.personName}
+                onSelect={(personId, personName) =>
+                  updateDirectorRow(row.tempId, { personId, personName })
                 }
               />
               <button
@@ -372,11 +373,12 @@ export default function AdminMovieForm({ movieId, onDone, onCancel }: Props) {
           {cast.map((row, index) => (
             <div key={row.tempId} className="admin-movie-form__cast-row">
               <span className="admin-movie-form__cast-order">{index + 1}</span>
-              <ActorSearchSelect
-                value={row.actorId}
-                displayName={row.actorName}
-                onSelect={(actorId, actorName) =>
-                  updateCastRow(row.tempId, { actorId, actorName })
+              <PersonSearchSelect
+                role="actor"
+                value={row.personId}
+                displayName={row.personName}
+                onSelect={(personId, personName) =>
+                  updateCastRow(row.tempId, { personId, personName })
                 }
               />
               <input

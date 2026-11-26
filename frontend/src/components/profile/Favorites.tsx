@@ -4,12 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Clapperboard, Film, Users, X, Plus, Search } from "lucide-react";
-import {
-  actorService,
-  directorService,
-  movieService,
-  profileService,
-} from "@/services";
+import { personService, movieService, profileService } from "@/services";
 import type {
   FavoriteSlot,
   FavoriteActorSlot,
@@ -276,7 +271,7 @@ export default function Favorites({
               id: actor.id,
               title: actor.fullName,
               imageUrl: actor.photoUrl,
-              href: `/actors/${actor.id}`,
+              href: `/people/${actor.id}`,
             }
           : undefined,
       })),
@@ -292,7 +287,7 @@ export default function Favorites({
               id: director.id,
               title: director.fullName,
               imageUrl: director.photoUrl,
-              href: `/directors/${director.id}`,
+              href: `/people/${director.id}`,
             }
           : undefined,
       })),
@@ -328,7 +323,12 @@ export default function Favorites({
       emptyActionLabel: "profile.chooseActor",
       emptyOtherLabel: "profile.noFavoriteYet",
       search: async (query) => {
-        const res = await actorService.search(query, 1, 8);
+        const res = await personService.search({
+          search: query,
+          role: "actor",
+          page: 1,
+          pageSize: 8,
+        });
         return res.items.map((a) => ({
           id: a.id,
           title: a.fullName,
@@ -345,7 +345,12 @@ export default function Favorites({
       emptyActionLabel: "profile.chooseDirector",
       emptyOtherLabel: "profile.noFavoriteYet",
       search: async (query) => {
-        const res = await directorService.search(query, 1, 8);
+        const res = await personService.search({
+          search: query,
+          role: "director",
+          page: 1,
+          pageSize: 8,
+        });
         return res.items.map((d) => ({
           id: d.id,
           title: d.fullName,

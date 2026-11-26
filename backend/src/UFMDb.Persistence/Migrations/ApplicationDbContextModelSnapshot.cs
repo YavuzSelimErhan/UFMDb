@@ -23,82 +23,6 @@ namespace UFMDb.Persistence.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "unaccent");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("UFMDb.Domain.Entities.Person", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Biography")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("BirthDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid?>("LegacyActorId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("LegacyDirectorId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Nationality")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PhotoUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("TmdbId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("UpdatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FullName");
-
-                    b.HasIndex("LegacyActorId").IsUnique();
-
-                    b.HasIndex("LegacyDirectorId").IsUnique();
-
-                    b.HasIndex("TmdbId")
-                        .IsUnique()
-                        .HasFilter("\"TmdbId\" IS NOT NULL");
-
-                    b.ToTable("People", (string)null);
-                });
-
-            modelBuilder.Entity("UFMDb.Domain.Entities.MovieCredit", b =>
-                {
-                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
-                    b.Property<Guid>("MovieId").HasColumnType("uuid");
-                    b.Property<Guid>("PersonId").HasColumnType("uuid");
-                    b.Property<string>("Kind").IsRequired().HasColumnType("text");
-                    b.Property<string>("Department").IsRequired().HasColumnType("text");
-                    b.Property<string>("Job").IsRequired().HasColumnType("text");
-                    b.Property<string>("CharacterName").HasColumnType("text");
-                    b.Property<int>("Order").HasColumnType("integer");
-                    b.Property<string>("TmdbCreditId").HasColumnType("text");
-                    b.HasKey("Id");
-                    b.HasIndex("PersonId");
-                    b.HasIndex("MovieId", "TmdbCreditId").IsUnique();
-                    b.ToTable("MovieCredits", (string)null);
-                });
-
             modelBuilder.Entity("UFMDb.Domain.Entities.Actor", b =>
                 {
                     b.Property<Guid>("Id")
@@ -506,6 +430,31 @@ namespace UFMDb.Persistence.Migrations
                     b.HasIndex("MovieId");
 
                     b.ToTable("FavoriteMovies", (string)null);
+                });
+
+            modelBuilder.Entity("UFMDb.Domain.Entities.FavoritePerson", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Role")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<int>("Slot")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("UserId", "Role", "Slot");
+
+                    b.HasIndex("PersonId");
+
+                    b.HasIndex("UserId", "Role", "PersonId")
+                        .IsUnique();
+
+                    b.ToTable("FavoritePeople", (string)null);
                 });
 
             modelBuilder.Entity("UFMDb.Domain.Entities.Follow", b =>
@@ -931,6 +880,61 @@ namespace UFMDb.Persistence.Migrations
                     b.ToTable("MovieCountries", (string)null);
                 });
 
+            modelBuilder.Entity("UFMDb.Domain.Entities.MovieCredit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CharacterName")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Department")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Job")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<Guid>("MovieId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TmdbCreditId")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonId")
+                        .HasDatabaseName("IX_MovieCredits_Cast_PersonId")
+                        .HasFilter("\"Kind\" = 'Cast'");
+
+                    b.HasIndex("TmdbCreditId")
+                        .IsUnique()
+                        .HasFilter("\"TmdbCreditId\" IS NOT NULL");
+
+                    b.HasIndex("PersonId", "MovieId");
+
+                    b.HasIndex("MovieId", "Kind", "Order");
+
+                    b.ToTable("MovieCredits", (string)null);
+                });
+
             modelBuilder.Entity("UFMDb.Domain.Entities.MovieDirector", b =>
                 {
                     b.Property<Guid>("MovieId")
@@ -1241,6 +1245,107 @@ namespace UFMDb.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("PasswordResetTokens", (string)null);
+                });
+
+            modelBuilder.Entity("UFMDb.Domain.Entities.Person", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Biography")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("BirthDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid?>("LegacyActorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("LegacyDirectorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("LikeCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Nationality")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PhotoUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int?>("TmdbId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FullName");
+
+                    b.HasIndex("LegacyActorId")
+                        .IsUnique()
+                        .HasFilter("\"LegacyActorId\" IS NOT NULL");
+
+                    b.HasIndex("LegacyDirectorId")
+                        .IsUnique()
+                        .HasFilter("\"LegacyDirectorId\" IS NOT NULL");
+
+                    b.HasIndex("TmdbId")
+                        .IsUnique()
+                        .HasFilter("\"TmdbId\" IS NOT NULL");
+
+                    b.HasIndex("LikeCount", "FullName");
+
+                    b.ToTable("People", (string)null);
+                });
+
+            modelBuilder.Entity("UFMDb.Domain.Entities.PersonLike", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("PersonId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("PersonLikes", (string)null);
                 });
 
             modelBuilder.Entity("UFMDb.Domain.Entities.ProductionCompany", b =>
@@ -1703,6 +1808,25 @@ namespace UFMDb.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("UFMDb.Domain.Entities.FavoritePerson", b =>
+                {
+                    b.HasOne("UFMDb.Domain.Entities.Person", "Person")
+                        .WithMany("FavoritePeople")
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("UFMDb.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Person");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("UFMDb.Domain.Entities.Follow", b =>
                 {
                     b.HasOne("UFMDb.Domain.Entities.User", "Follower")
@@ -1787,6 +1911,25 @@ namespace UFMDb.Persistence.Migrations
                     b.Navigation("Country");
 
                     b.Navigation("Movie");
+                });
+
+            modelBuilder.Entity("UFMDb.Domain.Entities.MovieCredit", b =>
+                {
+                    b.HasOne("UFMDb.Domain.Entities.Movie", "Movie")
+                        .WithMany("Credits")
+                        .HasForeignKey("MovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UFMDb.Domain.Entities.Person", "Person")
+                        .WithMany("Credits")
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Movie");
+
+                    b.Navigation("Person");
                 });
 
             modelBuilder.Entity("UFMDb.Domain.Entities.MovieDirector", b =>
@@ -1935,6 +2078,25 @@ namespace UFMDb.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("UFMDb.Domain.Entities.PersonLike", b =>
+                {
+                    b.HasOne("UFMDb.Domain.Entities.Person", "Person")
+                        .WithMany("PersonLikes")
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UFMDb.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Person");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("UFMDb.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("UFMDb.Domain.Entities.User", "User")
@@ -2069,6 +2231,8 @@ namespace UFMDb.Persistence.Migrations
 
             modelBuilder.Entity("UFMDb.Domain.Entities.Movie", b =>
                 {
+                    b.Navigation("Credits");
+
                     b.Navigation("Images");
 
                     b.Navigation("Likes");
@@ -2097,6 +2261,15 @@ namespace UFMDb.Persistence.Migrations
             modelBuilder.Entity("UFMDb.Domain.Entities.MovieCollection", b =>
                 {
                     b.Navigation("Movies");
+                });
+
+            modelBuilder.Entity("UFMDb.Domain.Entities.Person", b =>
+                {
+                    b.Navigation("Credits");
+
+                    b.Navigation("FavoritePeople");
+
+                    b.Navigation("PersonLikes");
                 });
 
             modelBuilder.Entity("UFMDb.Domain.Entities.ProductionCompany", b =>
@@ -2143,22 +2316,6 @@ namespace UFMDb.Persistence.Migrations
 
                     b.Navigation("WatchlistItems");
                 });
-            modelBuilder.Entity("UFMDb.Domain.Entities.Person", b =>
-                {
-                    b.HasOne("UFMDb.Domain.Entities.Actor", null).WithMany()
-                        .HasForeignKey("LegacyActorId").OnDelete(DeleteBehavior.SetNull);
-                    b.HasOne("UFMDb.Domain.Entities.Director", null).WithMany()
-                        .HasForeignKey("LegacyDirectorId").OnDelete(DeleteBehavior.SetNull);
-                });
-
-            modelBuilder.Entity("UFMDb.Domain.Entities.MovieCredit", b =>
-                {
-                    b.HasOne("UFMDb.Domain.Entities.Movie", null).WithMany()
-                        .HasForeignKey("MovieId").OnDelete(DeleteBehavior.Cascade).IsRequired();
-                    b.HasOne("UFMDb.Domain.Entities.Person", null).WithMany()
-                        .HasForeignKey("PersonId").OnDelete(DeleteBehavior.Cascade).IsRequired();
-                });
-
 #pragma warning restore 612, 618
         }
     }

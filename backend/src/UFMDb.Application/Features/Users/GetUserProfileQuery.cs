@@ -1,12 +1,11 @@
-﻿// KONUM: public profil dosyası (PublicProfileDto / GetUserProfileQuery / PublicFullProfileDto) -> TAMAMINI bununla değiştir
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UFMDb.Application.Common;
 using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.Common.Services;
 using UFMDb.Application.DTOs;
-using UFMDb.Application.Features.Actors;
+using UFMDb.Application.Features.People;
 using UFMDb.Domain.Entities;
 using UFMDb.Domain.Enums;
 namespace UFMDb.Application.Features.Users;
@@ -64,9 +63,9 @@ public record PublicFullProfileDto(
     List<MovieListItemDto> Watchlist,
     List<ReviewSummaryDto> Reviews,
     List<FavoriteActorSlotDto> FavoriteActors,
-    List<ActorListItemDto> LikedActors,
+    List<PersonListItemDto> LikedActors,
     List<FavoriteDirectorSlotDto> FavoriteDirectors,
-    List<DirectorListItemDto> LikedDirectors,
+    List<PersonListItemDto> LikedDirectors,
     int TotalWatchedCount, WatchedFilmsCountsDto WatchedCounts, decimal? AverageGivenRating, int RatingsCount, DateTime MemberSinceUtc,
     int FollowerCount, int FollowingCount, int ListsCount,
     bool IsFollowedByCurrentUser, bool IsCurrentUser,

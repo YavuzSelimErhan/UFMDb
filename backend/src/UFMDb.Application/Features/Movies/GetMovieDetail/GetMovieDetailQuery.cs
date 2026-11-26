@@ -5,6 +5,7 @@ using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.DTOs;
 using UFMDb.Domain.Enums;
+using CreditKind = UFMDb.Domain.Entities.CreditKind;
 namespace UFMDb.Application.Features.Movies.GetMovieDetail;
 
 public record GetMovieDetailQuery(Guid MovieId, Guid? CurrentUserId, string Lang = "en") : IRequest<MovieDetailDto>;
@@ -21,8 +22,6 @@ public class GetMovieDetailQueryHandler : IRequestHandler<GetMovieDetailQuery, M
         var movie = await _context.Movies
             .AsNoTracking()
             .Include(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
-            .Include(m => m.MovieActors.OrderBy(ma => ma.Order)).ThenInclude(ma => ma.Actor)
-            .Include(m => m.MovieDirectors).ThenInclude(md => md.Director)
             .Include(m => m.MovieCountries.OrderBy(mc => mc.Order)).ThenInclude(mc => mc.Country)
             .Include(m => m.MovieKeywords).ThenInclude(mk => mk.Keyword)
             .Include(m => m.MovieProductionCompanies).ThenInclude(pc => pc.ProductionCompany)
@@ -95,24 +94,52 @@ public class GetMovieDetailQueryHandler : IRequestHandler<GetMovieDetailQuery, M
             .Select(i => new MovieImageDto(i.Type, i.FilePath, i.Language, i.Width, i.Height))
             .ToList();
 
-        var actorIds = movie.MovieActors.Select(c => c.ActorId).ToArray();
-        var directorIds = movie.MovieDirectors.Select(c => c.DirectorId).ToArray();
-        var identities = await _context.People.AsNoTracking()
-            .Where(p => !p.IsDeleted && ((p.LegacyActorId.HasValue && actorIds.Contains(p.LegacyActorId.Value))
-                || (p.LegacyDirectorId.HasValue && directorIds.Contains(p.LegacyDirectorId.Value))))
-            .Select(p => new { p.Id, p.LegacyActorId, p.LegacyDirectorId }).ToListAsync(ct);
-        var actors = identities.Where(p => p.LegacyActorId.HasValue).ToDictionary(p => p.LegacyActorId!.Value, p => (Guid?)p.Id);
-        var directors = identities.Where(p => p.LegacyDirectorId.HasValue).ToDictionary(p => p.LegacyDirectorId!.Value, p => (Guid?)p.Id);
+        // ---- Oyuncular, yönetmenler, ekip: tek kredi sorgusu ----
+        var creditRows = await (from credit in _context.MovieCredits.AsNoTracking()
+                                join person in _context.People on credit.PersonId equals person.Id
+                                where credit.MovieId == movie.Id && !person.IsDeleted
+                                select new
+                                {
+                                    credit.Kind,
+                                    credit.Job,
+                                    credit.CharacterName,
+                                    credit.Order,
+                                    PersonId = person.Id,
+                                    person.FullName,
+                                    person.PhotoUrl
+                                })
+            .ToListAsync(ct);
 
-        var crew = await (from credit in _context.MovieCredits.AsNoTracking()
-                          join person in _context.People on credit.PersonId equals person.Id
-                          where credit.MovieId == movie.Id && credit.Kind == UFMDb.Domain.Entities.CreditKind.Crew
-                                && credit.Job != "Director" && !person.IsDeleted
-                          select new { PersonId = person.Id, person.FullName, credit.Job, person.PhotoUrl, DirectorId = person.LegacyDirectorId })
+        var cast = creditRows
+            .Where(c => c.Kind == CreditKind.Cast)
+            .GroupBy(c => c.PersonId)
+            .Select(g =>
+            {
+                var ordered = g.OrderBy(c => c.Order).ToList();
+                var first = ordered[0];
+                var characters = string.Join(" / ", ordered
+                    .Select(c => c.CharacterName)
+                    .Where(n => !string.IsNullOrWhiteSpace(n))
+                    .Distinct());
+                return new MovieCastDto(g.Key, first.FullName, first.PhotoUrl, characters, first.Order);
+            })
+            .OrderBy(c => c.Order).ThenBy(c => c.FullName).ThenBy(c => c.PersonId)
+            .ToList();
+
+        var directors = creditRows
+            .Where(c => c.Kind == CreditKind.Crew && c.Job == "Director")
+            .GroupBy(c => c.PersonId)
+            .Select(g => g.OrderBy(c => c.Order).First())
+            .OrderBy(c => c.Order).ThenBy(c => c.FullName).ThenBy(c => c.PersonId)
+            .Select(c => new MovieDirectorDto(c.PersonId, c.FullName, c.PhotoUrl))
+            .ToList();
+
+        var crew = creditRows
+            .Where(c => c.Kind == CreditKind.Crew && c.Job != "Director")
+            .Select(c => new MovieCrewDto(c.PersonId, c.FullName, c.Job, c.PhotoUrl))
             .Distinct()
             .OrderBy(c => c.Job).ThenBy(c => c.FullName).ThenBy(c => c.PersonId)
-            .Select(c => new MovieCrewDto(c.PersonId, c.FullName, c.Job, c.PhotoUrl, c.DirectorId))
-            .ToListAsync(ct);
+            .ToList();
 
         return new MovieDetailDto(
             movie.Id,
@@ -121,12 +148,11 @@ public class GetMovieDetailQueryHandler : IRequestHandler<GetMovieDetailQuery, M
             Localization.Pick(isTr, movie.Overview, movie.OverviewTr),
             movie.ReleaseYear, movie.ReleaseDate,
             movie.RuntimeMinutes, movie.PosterUrl, movie.BackdropUrl,
-            movie.MovieDirectors.OrderBy(md => md.Order)
-                .Select(md => new MovieDirectorDto(md.DirectorId, md.Director.FullName, md.Director.PhotoUrl, directors.GetValueOrDefault(md.DirectorId))).ToList(),
+            directors,
             primaryCountry, movie.AverageRating, movie.RatingCount, movie.LikeCount,
             movie.MovieGenres.Select(mg => Localization.Pick(isTr, mg.Genre.Name, mg.Genre.NameTr)).ToList(),
             movie.MovieGenres.Select(mg => mg.GenreId).ToList(),
-            movie.MovieActors.Select(ma => new MovieCastDto(ma.ActorId, ma.Actor.FullName, ma.Actor.PhotoUrl, ma.CharacterName, ma.Order, actors.GetValueOrDefault(ma.ActorId))).ToList(),
+            cast,
             myReaction == ReactionType.Like, isInWatchlist, isWatched, myRating, myReview,
             movie.DislikeCount, myReaction,
             Tagline: Localization.Pick(isTr, movie.Tagline, movie.TaglineTr),

@@ -21,9 +21,21 @@ public class MovieManagementTests
             100, "", "", [director, director], "Turkey", [genre, genre],
             [new(actor, "A", 0), new(actor, "Duplicate", 1)], 4, TitleTr: "Umut", Tagline: "Original");
         var id = await new CreateMovieCommandHandler(db).Handle(added, default);
-        Assert.Equal(1, await db.MovieDirectors.CountAsync());
-        Assert.Equal("A", (await db.MovieActors.AsNoTracking().SingleAsync()).CharacterName);
+
+        Assert.Equal(1, await db.MovieCredits.CountAsync(c => c.Kind == CreditKind.Crew && c.Job == "Director"));
+        Assert.Equal("A", (await db.MovieCredits.AsNoTracking().SingleAsync(c => c.Kind == CreditKind.Cast)).CharacterName);
+
         db.MovieRatings.Add(new MovieRating { MovieId = id, UserId = Guid.NewGuid(), Value = 3 });
+        // Importer'ýn eklediði baþka bir crew kredisi: admin düzenlemesi buna dokunmamalý.
+        db.MovieCredits.Add(new MovieCredit
+        {
+            MovieId = id,
+            PersonId = Guid.NewGuid(),
+            Kind = CreditKind.Crew,
+            Department = "Writing",
+            Job = "Writer",
+            TmdbCreditId = "writer-credit"
+        });
         await db.SaveChangesAsync();
 
         var edit = new UpdateMovieCommand(id, "Hope", "Umut", "", 1970, added.ReleaseDate,
@@ -34,9 +46,11 @@ public class MovieManagementTests
         Assert.Equal(DateTimeKind.Utc, saved.ReleaseDate.Kind);
         Assert.Equal((3.0, 1), (saved.AverageRating, saved.RatingCount));
         Assert.Empty(await db.Set<MovieGenre>().ToListAsync());
-        Assert.Equal(new[] { newDirector, director }, await db.MovieDirectors.AsNoTracking()
-            .OrderBy(d => d.Order).Select(d => d.DirectorId).ToListAsync());
-        Assert.Equal("Lead", (await db.MovieActors.AsNoTracking().SingleAsync()).CharacterName);
+        Assert.Equal(new[] { newDirector, director }, await db.MovieCredits.AsNoTracking()
+            .Where(c => c.Kind == CreditKind.Crew && c.Job == "Director")
+            .OrderBy(c => c.Order).Select(c => c.PersonId).ToListAsync());
+        Assert.Equal("Lead", (await db.MovieCredits.AsNoTracking().SingleAsync(c => c.Kind == CreditKind.Cast)).CharacterName);
+        Assert.Equal(1, await db.MovieCredits.CountAsync(c => c.Job == "Writer"));
 
         await new DeleteMovieCommandHandler(db).Handle(new(id), default);
         await Assert.ThrowsAsync<NotFoundException>(() => new UpdateMovieCommandHandler(db).Handle(edit, default));

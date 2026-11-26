@@ -28,7 +28,6 @@ import { PageSpinner, PageError } from "@/components/common/PageState";
 import "./MovieDetailPage.css";
 import "./MovieTeam.css";
 
-
 export default function MovieDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { t, i18n } = useTranslation();
@@ -218,15 +217,30 @@ export default function MovieDetailPage() {
     quickRateMutation.mutate(rating);
   };
 
-  const team = new Map<string, { id: string; name: string; photo?: string; href: string; roles: string[] }>();
+  // Anahtar her zaman personId: aynı kişi hem yönetmen hem başka görevdeyse tek kartta birleşir.
+  const team = new Map<
+    string,
+    { id: string; name: string; photo?: string; href: string; roles: string[] }
+  >();
   for (const d of movie.directors) {
-    team.set(d.id, { id: d.id, name: d.fullName, photo: d.photoUrl, href: d.personId ? `/people/${d.personId}` : `/directors/${d.id}`, roles: [t("movie.director")] });
+    team.set(d.personId, {
+      id: d.personId,
+      name: d.fullName,
+      photo: d.photoUrl,
+      href: `/people/${d.personId}`,
+      roles: [t("movie.director")],
+    });
   }
   for (const c of movie.crew ?? []) {
-    const key = c.directorId && team.has(c.directorId) ? c.directorId : c.personId;
-    const card = team.get(key) ?? { id: c.personId, name: c.fullName, photo: c.photoUrl, href: `/people/${c.personId}`, roles: [] as string[] };
+    const card = team.get(c.personId) ?? {
+      id: c.personId,
+      name: c.fullName,
+      photo: c.photoUrl,
+      href: `/people/${c.personId}`,
+      roles: [] as string[],
+    };
     card.roles.push(t(`movie.jobs.${c.job}`, { defaultValue: c.job }));
-    team.set(key, card);
+    team.set(c.personId, card);
   }
 
   return (
@@ -517,13 +531,26 @@ export default function MovieDetailPage() {
               <h3 className="movie-detail__section-title">{t("movie.crew")}</h3>
               <div className="movie-detail__directors movie-detail__team">
                 {Array.from(team.values(), (person) => {
-                  const body = <>
-                    <PersonAvatar id={person.id} photoUrl={person.photo} fullName={person.name} size="sm" />
-                    <span>{person.name}</span>
-                    <small>{person.roles.join(" · ")}</small>
-                  </>;
+                  const body = (
+                    <>
+                      <PersonAvatar
+                        id={person.id}
+                        photoUrl={person.photo}
+                        fullName={person.name}
+                        size="sm"
+                      />
+                      <span>{person.name}</span>
+                      <small>{person.roles.join(" · ")}</small>
+                    </>
+                  );
                   return (
-                    <Link className="movie-detail__director-card" key={person.id} to={person.href}>{body}</Link>
+                    <Link
+                      className="movie-detail__director-card"
+                      key={person.id}
+                      to={person.href}
+                    >
+                      {body}
+                    </Link>
                   );
                 })}
               </div>
@@ -535,12 +562,12 @@ export default function MovieDetailPage() {
             <div className="movie-detail__cast">
               {movie.cast.map((c) => (
                 <Link
-                  key={c.actorId}
-                  to={c.personId ? `/people/${c.personId}` : `/actors/${c.actorId}`}
+                  key={c.personId}
+                  to={`/people/${c.personId}`}
                   className="movie-detail__cast-item"
                 >
                   <PersonAvatar
-                    id={c.actorId}
+                    id={c.personId}
                     photoUrl={c.photoUrl}
                     fullName={c.fullName}
                     size="sm"

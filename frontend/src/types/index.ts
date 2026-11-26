@@ -31,19 +31,11 @@ export interface MovieListItem {
 }
 
 export interface MovieCast {
-  personId?: string | null;
-  actorId: string;
+  personId: string;
   fullName: string;
   photoUrl: string;
   characterName: string;
   order: number;
-}
-
-export interface MovieDirectorItem {
-  personId?: string | null;
-  id: string;
-  fullName: string;
-  photoUrl: string;
 }
 
 export interface MyReview {
@@ -131,7 +123,7 @@ export interface MovieCollection {
 }
 
 export interface MovieDetail {
-  crew?: { personId: string; fullName: string; photoUrl?: string; directorId?: string | null; job: string }[] | null;
+  crew?: MovieCrew[] | null;
   id: string;
   title: string;
   originalTitle: string;
@@ -141,7 +133,7 @@ export interface MovieDetail {
   runtimeMinutes: number;
   posterUrl: string;
   backdropUrl: string;
-  directors: MovieDirectorItem[];
+  directors: MovieDirector[];
   country: string;
   averageRating: number;
   ratingCount: number;
@@ -180,12 +172,6 @@ export interface MovieDetail {
   videos: MovieVideo[];
   images: MovieImage[];
   collection: MovieCollection | null;
-}
-
-export interface CastMemberInput {
-  actorId: string;
-  characterName: string;
-  order: number;
 }
 
 export interface MovieFormPayload {
@@ -349,12 +335,11 @@ export interface FavoriteSlot {
 
 export interface FavoriteActorSlot {
   slot: number;
-  actor: ActorListItem | null;
+  actor: PersonListItem | null;
 }
-
 export interface FavoriteDirectorSlot {
   slot: number;
-  director: DirectorListItem | null;
+  director: PersonListItem | null;
 }
 
 export interface ReviewSummary {
@@ -402,9 +387,9 @@ export interface ProfileData {
   watchlist: MovieListItem[];
   reviews: ReviewSummary[];
   favoriteActors: FavoriteActorSlot[];
-  likedActors: ActorListItem[];
+  likedActors: PersonListItem[];
   favoriteDirectors: FavoriteDirectorSlot[];
-  likedDirectors: DirectorListItem[];
+  likedDirectors: PersonListItem[];
   totalWatchedCount: number;
   watchedCounts: WatchedFilmsCounts;
   averageGivenRating: number | null;
@@ -625,9 +610,9 @@ export interface PublicFullProfileDto {
   watchlist: MovieListItem[];
   reviews: ReviewSummary[];
   favoriteActors: FavoriteActorSlot[];
-  likedActors: ActorListItem[];
+  likedActors: PersonListItem[];
   favoriteDirectors: FavoriteDirectorSlot[];
-  likedDirectors: DirectorListItem[];
+  likedDirectors: PersonListItem[];
   totalWatchedCount: number;
   watchedCounts: WatchedFilmsCounts;
   averageGivenRating: number | null;
@@ -800,4 +785,58 @@ export interface WatchlistImportResult {
   duplicateRows: number;
   notFound: WatchlistImportMiss[];
   invalidRows: number;
+}
+
+export interface PersonListItem {
+  id: string;
+  fullName: string;
+  photoUrl: string;
+  nationality: string;
+}
+
+export interface PersonFilm {
+  movie: MovieListItem;
+  popularity: number;
+  roles: string[];
+}
+
+export interface PersonDetail {
+  id: string;
+  fullName: string;
+  birthDate: string | null;
+  biography: string;
+  photoUrl: string;
+  nationality: string;
+  likeCount: number;
+  isLikedByCurrentUser: boolean;
+  actorId: string | null;
+  directorId: string | null;
+  films: PersonFilm[];
+}
+
+export interface PersonFormPayload {
+  fullName: string;
+  birthDate: string | null;
+  biography: string;
+  photoUrl: string;
+  nationality: string;
+}
+
+export interface CastMemberInput {
+  personId: string;
+  characterName: string;
+  order: number;
+}
+
+export interface MovieDirector {
+  personId: string;
+  fullName: string;
+  photoUrl: string;
+}
+
+export interface MovieCrew {
+  personId: string;
+  fullName: string;
+  job: string;
+  photoUrl: string;
 }

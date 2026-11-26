@@ -13,6 +13,8 @@ public interface IApplicationDbContext
 {
     DbSet<Person> People { get; }
     DbSet<MovieCredit> MovieCredits { get; }
+    DbSet<PersonLike> PersonLikes { get; }
+    DbSet<FavoritePerson> FavoritePeople { get; }
     DbSet<Movie> Movies { get; }
     DbSet<Genre> Genres { get; }
     DbSet<MovieRating> MovieRatings { get; }

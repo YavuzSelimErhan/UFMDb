@@ -87,6 +87,10 @@ public class Movie : BaseEntity
 
     // Navigation
     public ICollection<MovieGenre> MovieGenres { get; set; } = new List<MovieGenre>();
+
+    /// <summary>Yeni kredi sistemi (cast + crew tek tabloda). Geçiş bitince MovieActors/MovieDirectors kaldırılacak.</summary>
+    public ICollection<MovieCredit> Credits { get; set; } = new List<MovieCredit>();
+
     public ICollection<MovieActor> MovieActors { get; set; } = new List<MovieActor>();
     public ICollection<MovieDirector> MovieDirectors { get; set; } = new List<MovieDirector>();
     public ICollection<Review> Reviews { get; set; } = new List<Review>();

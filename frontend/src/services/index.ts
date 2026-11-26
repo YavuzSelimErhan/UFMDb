@@ -47,6 +47,9 @@ import type {
   DiaryVisibility,
   CompatibilityResult,
   CompatibilityFilms,
+  PersonFormPayload,
+  PersonDetail,
+  PersonListItem,
 } from "@/types";
 
 // ---------------- Movies ----------------
@@ -137,6 +140,13 @@ export const movieService = {
   update: async (id: string, payload: MovieFormPayload) =>
     (await api.put(`/movies/${id}`, { id, ...payload })).data,
   remove: async (id: string) => (await api.delete(`/movies/${id}`)).data,
+  /** Admin formu için: arayüz dilinden bağımsız, kaynak (İngilizce) alanlarla yükler. */
+  getByIdForEdit: async (id: string): Promise<MovieDetail> => {
+    const { data } = await api.get(`/movies/${id}`, {
+      headers: { "Accept-Language": "en" },
+    });
+    return data;
+  },
 };
 
 // ---------------- Actors ----------------
@@ -164,6 +174,44 @@ export const actorService = {
   update: async (id: string, payload: ActorFormPayload) =>
     (await api.put(`/actors/${id}`, { id, ...payload })).data,
   remove: async (id: string) => (await api.delete(`/actors/${id}`)).data,
+};
+
+// ---------------- People (oyuncu + yönetmen tek kaynak) ----------------
+export const personService = {
+  /** role: "actor" | "director"; boşsa tüm kişiler. */
+  search: async (
+    params: {
+      search?: string;
+      role?: "actor" | "director";
+      page?: number;
+      pageSize?: number;
+    } = {},
+  ): Promise<PagedResult<PersonListItem>> => {
+    const { data } = await api.get("/people", { params });
+    return data;
+  },
+  getById: async (id: string): Promise<PersonDetail> => {
+    const { data } = await api.get(`/people/${id}`);
+    return data;
+  },
+  toggleLike: async (id: string): Promise<boolean> => {
+    const { data } = await api.post(`/people/${id}/like`);
+    return data;
+  },
+  /** Backend yeni kişinin Id'sini (Guid) döndürür. */
+  create: async (payload: PersonFormPayload): Promise<string> =>
+    (await api.post("/people", payload)).data,
+  update: async (id: string, payload: PersonFormPayload) =>
+    (await api.put(`/people/${id}`, { id, ...payload })).data,
+  remove: async (id: string) => (await api.delete(`/people/${id}`)).data,
+  /** Eski /actors/:id ve /directors/:id linklerini PersonId'ye çevirir. */
+  resolveLegacy: async (
+    kind: "actor" | "director",
+    legacyId: string,
+  ): Promise<string> => {
+    const { data } = await api.get(`/people/legacy/${kind}/${legacyId}`);
+    return data;
+  },
 };
 
 // ---------------- Directors ----------------
@@ -249,21 +297,21 @@ export const profileService = {
     ).data,
   removeFavoriteSlot: async (slot: number) =>
     (await api.delete(`/profile/favorites/${slot}`)).data,
-  setFavoriteActorSlot: async (slot: number, actorId: string) =>
+  setFavoriteActorSlot: async (slot: number, personId: string) =>
     (
       await api.put(
         `/profile/favorite-actors/${slot}`,
-        JSON.stringify(actorId),
+        JSON.stringify(personId),
         {
           headers: { "Content-Type": "application/json" },
         },
       )
     ).data,
-  setFavoriteDirectorSlot: async (slot: number, directorId: string) =>
+  setFavoriteDirectorSlot: async (slot: number, personId: string) =>
     (
       await api.put(
         `/profile/favorite-directors/${slot}`,
-        JSON.stringify(directorId),
+        JSON.stringify(personId),
         {
           headers: { "Content-Type": "application/json" },
         },

@@ -37,6 +37,9 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
         var containsPattern = $"%{term}%";
         var startsPattern = $"{term}%";
 
+        // Büyük/küçük harften baðýmsýz eþleþsin diye küçük harfe çevrilir
+        var sortBy = (f.SortBy ?? "title").ToLowerInvariant();
+
         if (hasTitleSearch)
         {
             // Dilden ve aksandan baðýmsýz: Ýngilizce, orijinal ve Türkçe baþlýklarýn hepsinde aranýr.
@@ -77,16 +80,21 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
         if (releaseDateToUtc.HasValue)
             query = query.Where(m => m.ReleaseDate <= releaseDateToUtc.Value);
 
+        // Oyuncu ve yönetmen filtresi tek kredi tablosundan (MovieCredits) çalýþýyor.
         if (!string.IsNullOrWhiteSpace(f.ActorName))
         {
             var actorPattern = $"%{SqlLike.Escape(f.ActorName.Trim())}%";
-            query = query.Where(m => m.MovieActors.Any(ma => EF.Functions.ILike(ma.Actor.FullName, actorPattern, SqlLike.EscapeCharacter)));
+            query = query.Where(m => m.Credits.Any(c =>
+                c.Kind == CreditKind.Cast && !c.Person.IsDeleted &&
+                EF.Functions.ILike(c.Person.FullName, actorPattern, SqlLike.EscapeCharacter)));
         }
 
         if (!string.IsNullOrWhiteSpace(f.DirectorName))
         {
             var directorPattern = $"%{SqlLike.Escape(f.DirectorName.Trim())}%";
-            query = query.Where(m => m.MovieDirectors.Any(md => EF.Functions.ILike(md.Director.FullName, directorPattern, SqlLike.EscapeCharacter)));
+            query = query.Where(m => m.Credits.Any(c =>
+                c.Kind == CreditKind.Crew && c.Job == "Director" && !c.Person.IsDeleted &&
+                EF.Functions.ILike(c.Person.FullName, directorPattern, SqlLike.EscapeCharacter)));
         }
 
         if (f.MinRating.HasValue)
@@ -97,7 +105,7 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
         List<MovieListItemDto> items;
         int totalCount;
 
-        if (f.SortBy == "random")
+        if (sortBy == "random")
         {
             // Sayfalama yok: filtreye uyan TÜM filmlerden eþit olasýlýklý rastgele örneklem.
             // Rating dalýndaki gibi önce sadece id'ler seçilir, sonra projeksiyon yüklenir.
@@ -113,7 +121,7 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
             totalCount = items.Count; // rastgele modda toplam sayý kullanýlmýyor, ekstra COUNT sorgusu atmýyoruz
             page = 1;
         }
-        else if (f.SortBy == "rating")
+        else if (sortBy == "rating")
         {
             // Bayesian aðýrlýklý puan: WR = (v*R + m*C) / (v + m)
             //   v = RatingCount, R = AverageRating, m = RatingRankPolicy.MinVotesForRatingRank,
@@ -185,7 +193,7 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
 
                 var ordered = query.OrderBy(relevance);
 
-                query = (f.SortBy, isDescending) switch
+                query = (sortBy, isDescending) switch
                 {
                     ("year", true) => ordered.ThenByDescending(m => m.ReleaseYear),
                     ("year", false) => ordered.ThenBy(m => m.ReleaseYear),
@@ -195,15 +203,15 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
                     ("votes", false) => ordered.ThenBy(m => m.RatingCount).ThenBy(m => m.TmdbPopularity),
                     ("newest", true) => ordered.ThenByDescending(m => m.CreatedAtUtc),
                     ("newest", false) => ordered.ThenBy(m => m.CreatedAtUtc),
-                    ("releaseDate", true) => ordered.ThenByDescending(m => m.ReleaseDate),
-                    ("releaseDate", false) => ordered.ThenBy(m => m.ReleaseDate),
+                    ("releasedate", true) => ordered.ThenByDescending(m => m.ReleaseDate),
+                    ("releasedate", false) => ordered.ThenBy(m => m.ReleaseDate),
                     (_, true) => ordered.ThenByDescending(m => isTr && m.TitleTr != "" ? m.TitleTr : m.Title),
                     _ => ordered.ThenBy(m => isTr && m.TitleTr != "" ? m.TitleTr : m.Title)
                 };
             }
             else
             {
-                query = (f.SortBy, isDescending) switch
+                query = (sortBy, isDescending) switch
                 {
                     ("year", true) => query.OrderByDescending(m => m.ReleaseYear),
                     ("year", false) => query.OrderBy(m => m.ReleaseYear),
@@ -213,12 +221,15 @@ public class GetMoviesQueryHandler : IRequestHandler<GetMoviesQuery, PagedResult
                     ("votes", false) => query.OrderBy(m => m.RatingCount).ThenBy(m => m.TmdbPopularity),
                     ("newest", true) => query.OrderByDescending(m => m.CreatedAtUtc),
                     ("newest", false) => query.OrderBy(m => m.CreatedAtUtc),
-                    ("releaseDate", true) => query.OrderByDescending(m => m.ReleaseDate),
-                    ("releaseDate", false) => query.OrderBy(m => m.ReleaseDate),
+                    ("releasedate", true) => query.OrderByDescending(m => m.ReleaseDate),
+                    ("releasedate", false) => query.OrderBy(m => m.ReleaseDate),
                     (_, true) => query.OrderByDescending(m => isTr && m.TitleTr != "" ? m.TitleTr : m.Title),
                     _ => query.OrderBy(m => isTr && m.TitleTr != "" ? m.TitleTr : m.Title)
                 };
             }
+
+            // Eþit deðerlerde sayfalar arasý tekrar/kayýp olmasýn diye son kriter Id
+            query = ((IOrderedQueryable<Movie>)query).ThenBy(m => m.Id);
 
             totalCount = await query.CountAsync(ct);
             items = await ProjectToListItem(

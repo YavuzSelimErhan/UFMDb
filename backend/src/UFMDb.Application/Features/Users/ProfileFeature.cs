@@ -7,7 +7,7 @@ using UFMDb.Application.Common.Exceptions;
 using UFMDb.Application.Common.Interfaces;
 using UFMDb.Application.Common.Services;
 using UFMDb.Application.DTOs;
-using UFMDb.Application.Features.Actors;
+using UFMDb.Application.Features.People;
 using UFMDb.Domain.Entities;
 using ReactionType = UFMDb.Domain.Enums.ReactionType;
 using System.Text.RegularExpressions;
@@ -16,9 +16,9 @@ using System.Text.RegularExpressions;
 namespace UFMDb.Application.Features.Users;
 
 public record FavoriteSlotDto(int Slot, MovieListItemDto? Movie);
-public record FavoriteActorSlotDto(int Slot, ActorListItemDto? Actor);
+public record FavoriteActorSlotDto(int Slot, PersonListItemDto? Actor);
 public record ReviewSummaryDto(Guid Id, Guid MovieId, string MovieTitle, string PosterUrl, string Content, bool ContainsSpoiler, DateTime CreatedAtUtc);
-public record FavoriteDirectorSlotDto(int Slot, DirectorListItemDto? Director);
+public record FavoriteDirectorSlotDto(int Slot, PersonListItemDto? Director);
 
 
 public record RecentlyWatchedItemDto(MovieListItemDto Movie, decimal? UserRating);
@@ -32,9 +32,9 @@ public record ProfileDto(
     List<MovieListItemDto> Watchlist,
     List<ReviewSummaryDto> Reviews,
     List<FavoriteActorSlotDto> FavoriteActors,
-    List<ActorListItemDto> LikedActors,
+    List<PersonListItemDto> LikedActors,
     List<FavoriteDirectorSlotDto> FavoriteDirectors,
-    List<DirectorListItemDto> LikedDirectors,
+    List<PersonListItemDto> LikedDirectors,
     int TotalWatchedCount,
     WatchedFilmsCountsDto WatchedCounts,
     decimal? AverageGivenRating,
@@ -150,43 +150,46 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
         var reviews = reviewEntities.Select(r => new ReviewSummaryDto(
             r.Id, r.MovieId, MovieText.Title(r.Movie, isTr), r.Movie.PosterUrl, r.Content, r.ContainsSpoiler, r.CreatedAtUtc)).ToList();
 
-        var favoriteActorEntities = await _context.FavoriteActors.AsNoTracking()
-            .Include(f => f.Actor)
+        // ---- Favori kişiler: tek tablo, Role ile oyuncu/yönetmen listeleri ayrılır ----
+        var favoritePeople = await _context.FavoritePeople.AsNoTracking()
+            .Include(f => f.Person)
             .Where(f => f.UserId == request.UserId)
             .ToListAsync(ct);
+
         var favoriteActors = Enumerable.Range(1, 4)
             .Select(slot =>
             {
-                var match = favoriteActorEntities.FirstOrDefault(f => f.Slot == slot);
-                return new FavoriteActorSlotDto(slot, match is null ? null : new ActorListItemDto(match.Actor.Id, match.Actor.FullName, match.Actor.PhotoUrl, match.Actor.Nationality));
+                var match = favoritePeople.FirstOrDefault(f => f.Role == FavoritePersonRole.Actor && f.Slot == slot);
+                return new FavoriteActorSlotDto(slot, match is null ? null : ToPersonItem(match.Person));
             })
             .ToList();
 
-        var likedActors = await _context.ActorLikes.AsNoTracking()
-            .Include(l => l.Actor)
-            .Where(l => l.UserId == request.UserId)
-            .OrderByDescending(l => l.CreatedAtUtc)
-            .Select(l => new ActorListItemDto(l.Actor.Id, l.Actor.FullName, l.Actor.PhotoUrl, l.Actor.Nationality))
-            .ToListAsync(ct);
-
-        var favoriteDirectorEntities = await _context.FavoriteDirectors.AsNoTracking()
-            .Include(f => f.Director)
-            .Where(f => f.UserId == request.UserId)
-            .ToListAsync(ct);
         var favoriteDirectors = Enumerable.Range(1, 4)
             .Select(slot =>
             {
-                var match = favoriteDirectorEntities.FirstOrDefault(f => f.Slot == slot);
-                return new FavoriteDirectorSlotDto(slot, match is null ? null : new DirectorListItemDto(match.Director.Id, match.Director.FullName, match.Director.PhotoUrl, match.Director.Nationality));
+                var match = favoritePeople.FirstOrDefault(f => f.Role == FavoritePersonRole.Director && f.Slot == slot);
+                return new FavoriteDirectorSlotDto(slot, match is null ? null : ToPersonItem(match.Person));
             })
             .ToList();
 
-        var likedDirectors = await _context.DirectorLikes.AsNoTracking()
-            .Include(l => l.Director)
-            .Where(l => l.UserId == request.UserId)
-            .OrderByDescending(l => l.CreatedAtUtc)
-            .Select(l => new DirectorListItemDto(l.Director.Id, l.Director.FullName, l.Director.PhotoUrl, l.Director.Nationality))
+        // ---- Beğenilen kişiler: beğeni tek tabloda; listeler krediye göre ayrılır ----
+        // Yönetmenlik kredisi olan -> "beğenilen yönetmenler". Oyunculuk kredisi olan veya hiç yönetmenlik
+        // kredisi olmayan -> "beğenilen oyuncular" (kredisi olmayan kişi hiçbir listede kaybolmasın).
+        var likedPeople = _context.PersonLikes.AsNoTracking()
+            .Where(l => l.UserId == request.UserId && !l.Person.IsDeleted)
+            .OrderByDescending(l => l.CreatedAtUtc);
+
+        var likedActors = await likedPeople
+            .Where(l => l.Person.Credits.Any(c => c.Kind == CreditKind.Cast)
+                     || !l.Person.Credits.Any(c => c.Kind == CreditKind.Crew && c.Job == "Director"))
+            .Select(l => new PersonListItemDto(l.Person.Id, l.Person.FullName, l.Person.PhotoUrl, l.Person.Nationality))
             .ToListAsync(ct);
+
+        var likedDirectors = await likedPeople
+            .Where(l => l.Person.Credits.Any(c => c.Kind == CreditKind.Crew && c.Job == "Director"))
+            .Select(l => new PersonListItemDto(l.Person.Id, l.Person.FullName, l.Person.PhotoUrl, l.Person.Nationality))
+            .ToListAsync(ct);
+
         var followerCount = await _context.Follows.AsNoTracking()
             .CountAsync(f => f.FollowingId == request.UserId, ct);
         var followingCount = await _context.Follows.AsNoTracking()
@@ -216,6 +219,9 @@ public class GetProfileQueryHandler : IRequestHandler<GetProfileQuery, ProfileDt
             user.DiaryVisibility.ToString()
         );
     }
+
+    private static PersonListItemDto ToPersonItem(Person p) =>
+        new(p.Id, p.FullName, p.PhotoUrl, p.Nationality);
 
     private static MovieListItemDto ToListItem(Movie m, IReadOnlyDictionary<Guid, ReactionType> reactions, HashSet<Guid> watchlistIds, HashSet<Guid> watchedIds, bool isTr)
     {
@@ -404,30 +410,55 @@ public class RemoveFavoriteMovieCommandHandler : IRequestHandler<RemoveFavoriteM
     }
 }
 
-// ---------- Favori aktör slotunu güncelle (1-4) ----------
-public record SetFavoriteActorCommand(Guid UserId, Guid ActorId, int Slot) : IRequest;
+// ---------- Favori kişi slotları (oyuncu ve yönetmen listeleri tek tabloda, Role ile ayrı) ----------
+internal static class FavoritePersonSlots
+{
+    public static async Task SetAsync(IApplicationDbContext context, Guid userId, Guid personId,
+        FavoritePersonRole role, int slot, CancellationToken ct)
+    {
+        if (slot is < 1 or > 4)
+            throw new Common.Exceptions.ValidationException(new Dictionary<string, string[]>
+            {
+                ["Slot"] = new[] { "Slot değeri 1 ile 4 arasında olmalıdır." }
+            });
+
+        // Soft-delete filtresi silinmiş kişileri de dışarıda bırakır.
+        if (!await context.People.AnyAsync(p => p.Id == personId, ct))
+            throw new NotFoundException(nameof(Person), personId);
+
+        // Aynı kişi aynı listede başka slottaysa oradan al (taşıma); hedef slottaki eski kişiyi de boşalt.
+        await context.FavoritePeople
+            .Where(f => f.UserId == userId && f.Role == role && (f.Slot == slot || f.PersonId == personId))
+            .ExecuteDeleteAsync(ct);
+
+        context.FavoritePeople.Add(new FavoritePerson { UserId = userId, Role = role, PersonId = personId, Slot = slot });
+        await context.SaveChangesAsync(ct);
+    }
+
+    public static async Task RemoveAsync(IApplicationDbContext context, Guid userId,
+        FavoritePersonRole role, int slot, CancellationToken ct)
+    {
+        var existing = await context.FavoritePeople
+            .FirstOrDefaultAsync(f => f.UserId == userId && f.Role == role && f.Slot == slot, ct);
+
+        if (existing is not null)
+        {
+            context.FavoritePeople.Remove(existing);
+            await context.SaveChangesAsync(ct);
+        }
+    }
+}
+
+// ---------- Favori aktör slotunu güncelle (1-4). PersonId: People tablosundaki kişi ----------
+public record SetFavoriteActorCommand(Guid UserId, Guid PersonId, int Slot) : IRequest;
 
 public class SetFavoriteActorCommandHandler : IRequestHandler<SetFavoriteActorCommand>
 {
     private readonly IApplicationDbContext _context;
     public SetFavoriteActorCommandHandler(IApplicationDbContext context) => _context = context;
 
-    public async Task Handle(SetFavoriteActorCommand request, CancellationToken ct)
-    {
-        if (request.Slot is < 1 or > 4)
-            throw new Common.Exceptions.ValidationException(new Dictionary<string, string[]>
-            {
-                ["Slot"] = new[] { "Slot değeri 1 ile 4 arasında olmalıdır." }
-            });
-
-        var existing = await _context.FavoriteActors
-            .FirstOrDefaultAsync(f => f.UserId == request.UserId && f.Slot == request.Slot, ct);
-
-        if (existing is not null) _context.FavoriteActors.Remove(existing);
-
-        _context.FavoriteActors.Add(new FavoriteActor { UserId = request.UserId, ActorId = request.ActorId, Slot = request.Slot });
-        await _context.SaveChangesAsync(ct);
-    }
+    public Task Handle(SetFavoriteActorCommand request, CancellationToken ct) =>
+        FavoritePersonSlots.SetAsync(_context, request.UserId, request.PersonId, FavoritePersonRole.Actor, request.Slot, ct);
 }
 
 // ---------- Favori aktör slotunu boşalt ----------
@@ -438,43 +469,20 @@ public class RemoveFavoriteActorCommandHandler : IRequestHandler<RemoveFavoriteA
     private readonly IApplicationDbContext _context;
     public RemoveFavoriteActorCommandHandler(IApplicationDbContext context) => _context = context;
 
-    public async Task Handle(RemoveFavoriteActorCommand request, CancellationToken ct)
-    {
-        var existing = await _context.FavoriteActors
-            .FirstOrDefaultAsync(f => f.UserId == request.UserId && f.Slot == request.Slot, ct);
-
-        if (existing is not null)
-        {
-            _context.FavoriteActors.Remove(existing);
-            await _context.SaveChangesAsync(ct);
-        }
-    }
+    public Task Handle(RemoveFavoriteActorCommand request, CancellationToken ct) =>
+        FavoritePersonSlots.RemoveAsync(_context, request.UserId, FavoritePersonRole.Actor, request.Slot, ct);
 }
 
-// ---------- Favori yönetmen slotunu güncelle (1-4) ----------
-public record SetFavoriteDirectorCommand(Guid UserId, Guid DirectorId, int Slot) : IRequest;
+// ---------- Favori yönetmen slotunu güncelle (1-4). PersonId: People tablosundaki kişi ----------
+public record SetFavoriteDirectorCommand(Guid UserId, Guid PersonId, int Slot) : IRequest;
 
 public class SetFavoriteDirectorCommandHandler : IRequestHandler<SetFavoriteDirectorCommand>
 {
     private readonly IApplicationDbContext _context;
     public SetFavoriteDirectorCommandHandler(IApplicationDbContext context) => _context = context;
 
-    public async Task Handle(SetFavoriteDirectorCommand request, CancellationToken ct)
-    {
-        if (request.Slot is < 1 or > 4)
-            throw new Common.Exceptions.ValidationException(new Dictionary<string, string[]>
-            {
-                ["Slot"] = new[] { "Slot değeri 1 ile 4 arasında olmalıdır." }
-            });
-
-        var existing = await _context.FavoriteDirectors
-            .FirstOrDefaultAsync(f => f.UserId == request.UserId && f.Slot == request.Slot, ct);
-
-        if (existing is not null) _context.FavoriteDirectors.Remove(existing);
-
-        _context.FavoriteDirectors.Add(new FavoriteDirector { UserId = request.UserId, DirectorId = request.DirectorId, Slot = request.Slot });
-        await _context.SaveChangesAsync(ct);
-    }
+    public Task Handle(SetFavoriteDirectorCommand request, CancellationToken ct) =>
+        FavoritePersonSlots.SetAsync(_context, request.UserId, request.PersonId, FavoritePersonRole.Director, request.Slot, ct);
 }
 
 // ---------- Favori yönetmen slotunu boşalt ----------
@@ -485,17 +493,8 @@ public class RemoveFavoriteDirectorCommandHandler : IRequestHandler<RemoveFavori
     private readonly IApplicationDbContext _context;
     public RemoveFavoriteDirectorCommandHandler(IApplicationDbContext context) => _context = context;
 
-    public async Task Handle(RemoveFavoriteDirectorCommand request, CancellationToken ct)
-    {
-        var existing = await _context.FavoriteDirectors
-            .FirstOrDefaultAsync(f => f.UserId == request.UserId && f.Slot == request.Slot, ct);
-
-        if (existing is not null)
-        {
-            _context.FavoriteDirectors.Remove(existing);
-            await _context.SaveChangesAsync(ct);
-        }
-    }
+    public Task Handle(RemoveFavoriteDirectorCommand request, CancellationToken ct) =>
+        FavoritePersonSlots.RemoveAsync(_context, request.UserId, FavoritePersonRole.Director, request.Slot, ct);
 }
 
 // ---------- Kullanıcı ayarlarını güncelle (tema/dil) ----------
@@ -568,7 +567,9 @@ public class GetUserWatchedMoviesQueryHandler : IRequestHandler<GetUserWatchedMo
             .Take(pageSize)
             .Select(w => new
             {
-                w.Movie.Id, w.WatchedAtUtc, w.UserRating,
+                w.Movie.Id,
+                w.WatchedAtUtc,
+                w.UserRating,
                 Reaction = _context.Likes.Where(l => l.UserId == request.UserId && l.MovieId == w.Movie.Id)
                     .Select(l => (ReactionType?)l.Reaction).FirstOrDefault(),
                 InWatchlist = _context.WatchlistItems.Any(l => l.UserId == request.UserId && l.MovieId == w.Movie.Id)

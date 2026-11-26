@@ -504,7 +504,16 @@
     },
     "people": {
       "actorsTab": "Oyuncular",
-      "directorsTab": "Yönetmenler"
+      "directorsTab": "Yönetmenler",
+      "createTitle": "Yeni kişi ekle",
+      "editTitle": "Kişiyi düzenle",
+      "listTitle": "Kişiler",
+      "searchPlaceholder": "Kişi ara...",
+      "colName": "Ad Soyad",
+      "colNationality": "Uyruk",
+      "namePlaceholder": "Ad Soyad",
+      "nationalityPlaceholder": "Örn. Türkiye",
+      "roleFilter": "Rol"
     },
     "movies": {
       "listTitle": "Mevcut Filmler",

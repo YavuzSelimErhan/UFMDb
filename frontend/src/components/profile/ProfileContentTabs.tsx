@@ -19,8 +19,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import {
-  actorService,
-  directorService,
+  personService,
   movieService,
   listService,
   profileService,
@@ -37,12 +36,7 @@ import {
   PageSpinner,
   PageError,
 } from "@/components/common/PageState";
-import type {
-  MovieListItem,
-  ActorListItem,
-  DirectorListItem,
-  ReviewSummary,
-} from "@/types";
+import type { MovieListItem, PersonListItem, ReviewSummary } from "@/types";
 import "./ProfileContentTabs.css";
 
 export type ContentTab = "watchlist" | "liked" | "reviews";
@@ -56,8 +50,8 @@ interface Props {
   isOwnProfile: boolean;
   watchlist: MovieListItem[];
   likedMovies: MovieListItem[];
-  likedActors: ActorListItem[];
-  likedDirectors: DirectorListItem[];
+  likedActors: PersonListItem[];
+  likedDirectors: PersonListItem[];
   reviews: ReviewSummary[];
 }
 
@@ -81,13 +75,8 @@ export default function ProfileContentTabs({
   );
   const [likedSubTab, setLikedSubTab] = useState<LikedSubTab>("films");
 
-  const unlikeActorMutation = useMutation({
-    mutationFn: (id: string) => actorService.toggleLike(id),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["my-profile"] }),
-  });
-  const unlikeDirectorMutation = useMutation({
-    mutationFn: (id: string) => directorService.toggleLike(id),
+  const unlikePersonMutation = useMutation({
+    mutationFn: (id: string) => personService.toggleLike(id),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["my-profile"] }),
   });
@@ -239,7 +228,7 @@ export default function ProfileContentTabs({
                   {likedActors.map((a) => (
                     <div key={a.id} className="person-card">
                       <Link
-                        to={`/actors/${a.id}`}
+                        to={`/people/${a.id}`}
                         className="person-card__media"
                       >
                         <img
@@ -255,9 +244,9 @@ export default function ProfileContentTabs({
                         <button
                           type="button"
                           className="person-card__unlike"
-                          disabled={unlikeActorMutation.isPending}
+                          disabled={unlikePersonMutation.isPending}
                           aria-label={t("movie.unlike")}
-                          onClick={() => unlikeActorMutation.mutate(a.id)}
+                          onClick={() => unlikePersonMutation.mutate(a.id)}
                         >
                           <Heart size={13} fill="currentColor" />
                         </button>
@@ -282,10 +271,7 @@ export default function ProfileContentTabs({
                 <div className="person-card-grid">
                   {likedDirectors.map((d) => (
                     <div key={d.id} className="person-card">
-                      <Link
-                        to={`/directors/${d.id}`}
-                        className="person-card__media"
-                      >
+                      <Link to={`/peopleid}`} className="person-card__media">
                         <img
                           src={d.photoUrl}
                           alt={d.fullName}
@@ -299,9 +285,9 @@ export default function ProfileContentTabs({
                         <button
                           type="button"
                           className="person-card__unlike"
-                          disabled={unlikeDirectorMutation.isPending}
+                          disabled={unlikePersonMutation.isPending}
                           aria-label={t("movie.unlike")}
-                          onClick={() => unlikeDirectorMutation.mutate(d.id)}
+                          onClick={() => unlikePersonMutation.mutate(d.id)}
                         >
                           <Heart size={13} fill="currentColor" />
                         </button>
