@@ -271,7 +271,10 @@ export default function ProfileContentTabs({
                 <div className="person-card-grid">
                   {likedDirectors.map((d) => (
                     <div key={d.id} className="person-card">
-                      <Link to={`/peopleid}`} className="person-card__media">
+                      <Link
+                        to={`/people/${d.id}`}
+                        className="person-card__media"
+                      >
                         <img
                           src={d.photoUrl}
                           alt={d.fullName}
