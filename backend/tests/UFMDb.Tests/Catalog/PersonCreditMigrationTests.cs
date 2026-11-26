@@ -27,12 +27,20 @@ public class PersonCreditMigrationTests
             await db.SaveChangesAsync();
 
             await migrator.MigrateAsync("20261119120000_AddPeopleAndMovieCredits");
-            var person = await db.People.SingleAsync(p => p.TmdbId == 17);
+
+            // O migration noktasýnda sonradan eklenen sütunlar (örn. People.LikeCount) yok:
+            // entity'nin tamamý yerine sadece gereken alanlar seçilir.
+            var person = await db.People.Where(p => p.TmdbId == 17)
+                .Select(p => new { p.Id, p.LegacyActorId, p.LegacyDirectorId, p.Biography })
+                .SingleAsync();
             Assert.Equal(actor.Id, person.LegacyActorId);
             Assert.Equal(director.Id, person.LegacyDirectorId);
             Assert.Equal("Biography", person.Biography);
             Assert.Equal(2, await db.People.CountAsync(p => p.FullName == "Same"));
-            var credits = await db.MovieCredits.Where(c => c.PersonId == person.Id && c.MovieId == film.Id).ToListAsync();
+            var credits = await db.MovieCredits
+                .Where(c => c.PersonId == person.Id && c.MovieId == film.Id)
+                .Select(c => new { c.Kind, c.Job, c.CharacterName, c.Order })
+                .ToListAsync();
             Assert.Equal(2, credits.Count);
             Assert.Contains(credits, c => c.Kind == CreditKind.Cast && c.CharacterName == "Lead" && c.Order == 2);
             Assert.Contains(credits, c => c.Kind == CreditKind.Crew && c.Job == "Director" && c.Order == 1);

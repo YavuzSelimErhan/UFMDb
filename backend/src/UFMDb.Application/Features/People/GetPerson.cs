@@ -125,37 +125,44 @@ public class TogglePersonLikeHandler(IApplicationDbContext db) : IRequestHandler
 {
     public async Task<bool> Handle(TogglePersonLike request, CancellationToken ct)
     {
-        var exists = await db.People.AnyAsync(p => p.Id == request.PersonId && !p.IsDeleted, ct);
-        if (!exists) throw new NotFoundException(nameof(Person), request.PersonId);
+        // Soft-delete query filter silinmiþ kiþiyi zaten dýþarýda býrakýr
+        var person = await db.People.FirstOrDefaultAsync(p => p.Id == request.PersonId, ct)
+            ?? throw new NotFoundException(nameof(Person), request.PersonId);
 
-        // 1) Önce silmeyi dene: silinen satýr varsa "beðeniyi geri alma"dýr
-        var removed = await db.PersonLikes
-            .Where(l => l.PersonId == request.PersonId && l.UserId == request.UserId)
-            .ExecuteDeleteAsync(ct);
+        var existing = await db.PersonLikes
+            .FirstOrDefaultAsync(l => l.PersonId == request.PersonId && l.UserId == request.UserId, ct);
 
-        if (removed > 0)
-        {
-            await db.People.Where(p => p.Id == request.PersonId)
-                .ExecuteUpdateAsync(s => s.SetProperty(p => p.LikeCount,
-                    p => p.LikeCount > 0 ? p.LikeCount - 1 : 0), ct);
-            return false;
-        }
-
-        // 2) Yoksa ekle
+        bool nowLiked;
         try
         {
-            db.PersonLikes.Add(new PersonLike { PersonId = request.PersonId, UserId = request.UserId });
+            if (existing is null)
+            {
+                db.PersonLikes.Add(new PersonLike { PersonId = request.PersonId, UserId = request.UserId });
+                nowLiked = true;
+            }
+            else
+            {
+                db.PersonLikes.Remove(existing);
+                nowLiked = false;
+            }
             await db.SaveChangesAsync(ct);
         }
         catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException { SqlState: "23505" })
         {
-            // Eþzamanlý baþka bir istek zaten ekledi: sayaç onda artýrýldý, burada artýrma
+            // Eþzamanlý baþka bir istek ayný beðeniyi zaten ekledi
             return true;
         }
+        catch (DbUpdateConcurrencyException)
+        {
+            // Eþzamanlý baþka bir istek beðeniyi zaten kaldýrdý
+            return false;
+        }
 
-        await db.People.Where(p => p.Id == request.PersonId)
-            .ExecuteUpdateAsync(s => s.SetProperty(p => p.LikeCount, p => p.LikeCount + 1), ct);
-        return true;
+        // Sayaç, artýr/azalt yerine gerçek satýr sayýsýndan hesaplanýr: eþzamanlý isteklerde
+        // sayý kayýyorsa bir sonraki iþlemde kendini düzeltir.
+        person.LikeCount = await db.PersonLikes.CountAsync(l => l.PersonId == request.PersonId, ct);
+        await db.SaveChangesAsync(ct);
+        return nowLiked;
     }
 }
 

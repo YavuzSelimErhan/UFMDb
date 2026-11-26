@@ -426,10 +426,16 @@ internal static class FavoritePersonSlots
         if (!await context.People.AnyAsync(p => p.Id == personId, ct))
             throw new NotFoundException(nameof(Person), personId);
 
-        // Aynı kişi aynı listede başka slottaysa oradan al (taşıma); hedef slottaki eski kişiyi de boşalt.
-        await context.FavoritePeople
+        // Hedef slottaki eski kişi ve aynı kişinin aynı listedeki eski slotu temizlenir.
+        // Silme ayrı kaydedilir: unique index (UserId, Role, PersonId) ekleme sırasında çakışmasın.
+        var conflicts = await context.FavoritePeople
             .Where(f => f.UserId == userId && f.Role == role && (f.Slot == slot || f.PersonId == personId))
-            .ExecuteDeleteAsync(ct);
+            .ToListAsync(ct);
+        if (conflicts.Count > 0)
+        {
+            context.FavoritePeople.RemoveRange(conflicts);
+            await context.SaveChangesAsync(ct);
+        }
 
         context.FavoritePeople.Add(new FavoritePerson { UserId = userId, Role = role, PersonId = personId, Slot = slot });
         await context.SaveChangesAsync(ct);
