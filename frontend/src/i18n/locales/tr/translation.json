@@ -496,6 +496,12 @@
     "allRightsReserved": "Tüm hakları saklıdır."
   },
   "admin": {
+    "panel": "Yönetim",
+    "common": {
+      "actions": "İşlemler",
+      "close": "Kapat",
+      "loadError": "Veriler yüklenemedi. Sayfayı yenileyip tekrar dene."
+    },
     "tabs": {
       "movies": "Filmler",
       "people": "Kişiler",
@@ -505,15 +511,19 @@
     "people": {
       "actorsTab": "Oyuncular",
       "directorsTab": "Yönetmenler",
-      "createTitle": "Yeni kişi ekle",
-      "editTitle": "Kişiyi düzenle",
       "listTitle": "Kişiler",
-      "searchPlaceholder": "Kişi ara...",
-      "colName": "Ad Soyad",
-      "colNationality": "Uyruk",
       "namePlaceholder": "Ad Soyad",
       "nationalityPlaceholder": "Örn. Türkiye",
-      "roleFilter": "Rol"
+      "roleFilter": "Rol",
+      "subtitle": "Oyuncu ve yönetmenleri yönet",
+      "newPerson": "Yeni kişi",
+      "createTitle": "Yeni kişi ekle",
+      "editTitle": "Kişiyi düzenle",
+      "colName": "Ad Soyad",
+      "colNationality": "Uyruk",
+      "searchPlaceholder": "Kişi ara...",
+      "confirmDelete": "\"{{name}}\" silinsin mi? Bu işlem geri alınamaz.",
+      "deleteError": "Kişi silinemedi."
     },
     "movies": {
       "listTitle": "Mevcut Filmler",
@@ -550,27 +560,12 @@
       "noCast": "Henüz oyuncu eklenmedi.",
       "characterNamePlaceholder": "Karakter adı",
       "directorSearchPlaceholder": "Yönetmen ara...",
-      "actorSearchPlaceholder": "Oyuncu ara..."
-    },
-    "actors": {
-      "listTitle": "Mevcut Oyuncular",
-      "searchPlaceholder": "Oyuncu adına göre ara...",
-      "editTitle": "Oyuncuyu Düzenle",
-      "createTitle": "Yeni Oyuncu Ekle",
-      "colName": "Ad Soyad",
-      "colNationality": "Uyruk",
-      "namePlaceholder": "Örn. Leonardo DiCaprio",
-      "nationalityPlaceholder": "Örn. USA"
-    },
-    "directors": {
-      "listTitle": "Mevcut Yönetmenler",
-      "searchPlaceholder": "Yönetmen adına göre ara...",
-      "editTitle": "Yönetmeni Düzenle",
-      "createTitle": "Yeni Yönetmen Ekle",
-      "colName": "Ad Soyad",
-      "colNationality": "Uyruk",
-      "namePlaceholder": "Örn. Christopher Nolan",
-      "nationalityPlaceholder": "Örn. UK"
+      "actorSearchPlaceholder": "Oyuncu ara...",
+      "subtitle": "Film kataloğunu ekle, düzenle ve sil",
+      "newMovie": "Yeni film",
+      "editMovie": "Filmi düzenle",
+      "confirmDelete": "\"{{title}}\" filmi silinsin mi? Bu işlem geri alınamaz.",
+      "deleteError": "Film silinemedi."
     },
     "personForm": {
       "fullName": "Ad Soyad",
@@ -594,11 +589,12 @@
       "makeAdmin": "Admin yap",
       "deactivate": "Pasifleştir",
       "activate": "Aktifleştir",
-      "cannotChangeSelf": "Kendi hesabını değiştiremezsin"
+      "cannotChangeSelf": "Kendi hesabını değiştiremezsin",
+      "subtitle": "Rolleri ve hesap durumlarını yönet",
+      "confirmDeactivate": "\"{{name}}\" kullanıcısı devre dışı bırakılsın mı?"
     },
     "lists": {
       "listTitle": "Mevcut Listeler",
-      "colTitle": "Başlık",
       "colMovieCount": "Film Sayısı",
       "movieSearchPlaceholder": "Eklemek için film ara...",
       "dragOrClick": "Sürükle veya seçmek için tıkla",
@@ -614,15 +610,20 @@
       "scopeAll": "Tümü",
       "official": "Resmi",
       "colCreator": "Oluşturan",
-      "colStatus": "Durum",
       "colVisibility": "Görünürlük",
-      "colLikes": "Beğeni",
       "confirmDelete": "\"{{title}}\" listesi silinsin mi? Bu işlem geri alınamaz.",
       "deleteError": "Liste silinemedi.",
       "loadError": "Listeler yüklenemedi.",
       "prevPage": "Önceki",
       "nextPage": "Sonraki",
-      "pageOf": "{{page}} / {{total}}"
+      "pageOf": "{{page}} / {{total}}",
+      "subtitle": "Resmi ve topluluk listelerini yönet",
+      "colTitle": "Liste",
+      "colStatus": "Durum",
+      "colOwner": "Oluşturan",
+      "colStats": "İstatistik",
+      "colMovies": "Film sayısı",
+      "colLikes": "Beğeni sayısı"
     }
   },
   "log": {

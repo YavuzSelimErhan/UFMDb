@@ -1,125 +1,169 @@
-import { useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Trash2, Pencil, Search } from "lucide-react";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { Trash2, Pencil, Plus } from "lucide-react";
 import { personService } from "@/services";
-import AdminPersonForm from "./AdminPersonForm";
+import { useAdminListState } from "@/hooks/useAdminListState";
 import Pagination from "@/components/common/Pagination";
-import "./AdminTabs.css";
+import AdminPersonForm from "./AdminPersonForm";
+import AdminDrawer from "./ui/AdminDrawer";
+import AdminSearchBox from "./ui/AdminSearchBox";
+import AdminSectionHeader from "./ui/AdminSectionHeader";
+import AdminSegmented from "./ui/AdminSegmented";
+import AdminTableStatus from "./ui/AdminTableStatus";
+import AdminThumb from "./ui/AdminThumb";
 
+const PAGE_SIZE = 20;
 type RoleFilter = "" | "actor" | "director";
+type DrawerState = { id?: string } | null;
 
 export default function AdminPeopleTab() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
+  const { input, setInput, search, page, setPage } = useAdminListState();
   const [role, setRole] = useState<RoleFilter>("");
+  const [drawer, setDrawer] = useState<DrawerState>(null);
+  const closeDrawer = useCallback(() => setDrawer(null), []);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => setSearch(searchInput.trim()), 350);
-    return () => clearTimeout(timeout);
-  }, [searchInput]);
-
-  // Arama ya da rol değişince ilk sayfaya dön
-  useEffect(() => {
-    setPage(1);
-  }, [search, role]);
-
-  const { data } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["people-search-admin", page, search, role],
     queryFn: () =>
       personService.search({
         search: search || undefined,
         role: role || undefined,
         page,
-        pageSize: 20,
+        pageSize: PAGE_SIZE,
       }),
+    placeholderData: keepPreviousData,
   });
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ["people-search-admin"] });
+    queryClient.invalidateQueries({ queryKey: ["people-search"] });
+  };
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => personService.remove(id),
-    onSuccess: (_data, id) => {
-      queryClient.invalidateQueries({ queryKey: ["people-search-admin"] });
-      queryClient.invalidateQueries({ queryKey: ["people-search"] });
-      if (editingId === id) setEditingId(null);
+    onSuccess: (_d, id) => {
+      if (page > 1 && data?.items.length === 1) setPage((p) => p - 1);
+      if (drawer?.id === id) closeDrawer();
+      invalidate();
     },
   });
 
+  const handleDelete = (id: string, name: string) => {
+    if (!window.confirm(t("admin.people.confirmDelete", { name }))) return;
+    deleteMutation.mutate(id);
+  };
+
+  const changeRole = (r: RoleFilter) => {
+    setRole(r);
+    setPage(1);
+  };
+
+  const items = data?.items ?? [];
+
   return (
-    <div className="admin-tab">
-      <AdminPersonForm
-        key={editingId ?? "create"}
-        personId={editingId ?? undefined}
-        onDone={() => setEditingId(null)}
-        onCancel={editingId ? () => setEditingId(null) : undefined}
+    <section className="admin-section">
+      <AdminSectionHeader
+        title={t("admin.tabs.people")}
+        subtitle={t("admin.people.subtitle")}
+        count={data?.totalCount}
+        actions={
+          <button
+            type="button"
+            className="btn-primary admin-btn-icon"
+            onClick={() => setDrawer({})}
+          >
+            <Plus size={15} /> {t("admin.people.newPerson")}
+          </button>
+        }
       />
 
-      <div className="admin-tab__list card">
-        <div className="admin-tab__list-header">
-          <h3>
-            {t("admin.people.listTitle", "Kişiler")} ({data?.totalCount ?? 0})
-          </h3>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value as RoleFilter)}
-            aria-label={t("admin.people.roleFilter", "Rol")}
-          >
-            <option value="">{t("personFilmography.all")}</option>
-            <option value="actor">{t("admin.people.actorsTab")}</option>
-            <option value="director">{t("admin.people.directorsTab")}</option>
-          </select>
-          <div className="admin-tab__search">
-            <Search size={15} />
-            <input
-              placeholder={t("admin.people.searchPlaceholder", "Kişi ara...")}
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-            />
-          </div>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>{t("admin.people.colName", "Ad Soyad")}</th>
-              <th>{t("admin.people.colNationality", "Uyruk")}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.items.map((p) => (
-              <tr key={p.id} className={editingId === p.id ? "is-editing" : ""}>
-                <td>{p.fullName}</td>
-                <td className="text-muted">{p.nationality || "—"}</td>
-                <td className="admin-tab__row-actions">
-                  <button
-                    className="admin-tab__edit-btn"
-                    onClick={() => setEditingId(p.id)}
-                  >
-                    <Pencil size={15} />
-                  </button>
-                  <button
-                    className="admin-tab__delete-btn"
-                    disabled={deleteMutation.isPending}
-                    onClick={() => deleteMutation.mutate(p.id)}
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {data?.items.length === 0 && (
+      <div className="admin-toolbar">
+        <AdminSegmented<RoleFilter>
+          value={role}
+          onChange={changeRole}
+          options={[
+            { value: "", label: t("personFilmography.all") },
+            { value: "actor", label: t("admin.people.actorsTab") },
+            { value: "director", label: t("admin.people.directorsTab") },
+          ]}
+        />
+        <AdminSearchBox
+          value={input}
+          onChange={setInput}
+          placeholder={t("admin.people.searchPlaceholder")}
+        />
+      </div>
+
+      {deleteMutation.isError && (
+        <p className="admin-error">{t("admin.people.deleteError")}</p>
+      )}
+
+      <div className="admin-table-card card">
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <td colSpan={3} className="text-muted admin-tab__empty">
-                  {t("search.noResults")}
-                </td>
+                <th>{t("admin.people.colName")}</th>
+                <th>{t("admin.people.colNationality")}</th>
+                <th className="admin-table__actions-col">
+                  {t("admin.common.actions")}
+                </th>
               </tr>
-            )}
-          </tbody>
-        </table>
-        {data && (
+            </thead>
+            <tbody>
+              {items.map((p) => (
+                <tr
+                  key={p.id}
+                  className={drawer?.id === p.id ? "is-editing" : ""}
+                >
+                  <td>
+                    <div className="admin-cell">
+                      <AdminThumb src={p.photoUrl} name={p.fullName} />
+                      <span className="admin-cell__title">{p.fullName}</span>
+                    </div>
+                  </td>
+                  <td className="text-muted">{p.nationality || "—"}</td>
+                  <td className="admin-table__actions-col">
+                    <div className="admin-row-actions">
+                      <button
+                        className="admin-icon-btn"
+                        aria-label={t("common.edit")}
+                        title={t("common.edit")}
+                        onClick={() => setDrawer({ id: p.id })}
+                      >
+                        <Pencil size={15} />
+                      </button>
+                      <button
+                        className="admin-icon-btn admin-icon-btn--danger"
+                        aria-label={t("common.delete")}
+                        title={t("common.delete")}
+                        disabled={deleteMutation.isPending}
+                        onClick={() => handleDelete(p.id, p.fullName)}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              <AdminTableStatus
+                colSpan={3}
+                isLoading={isLoading}
+                isError={isError}
+                isEmpty={!isLoading && !isError && items.length === 0}
+              />
+            </tbody>
+          </table>
+        </div>
+        {data && data.totalPages > 1 && (
           <Pagination
             page={data.page}
             totalPages={data.totalPages}
@@ -127,6 +171,25 @@ export default function AdminPeopleTab() {
           />
         )}
       </div>
-    </div>
+
+      <AdminDrawer
+        open={!!drawer}
+        title={
+          drawer?.id
+            ? t("admin.people.editTitle")
+            : t("admin.people.createTitle")
+        }
+        onClose={closeDrawer}
+      >
+        {drawer && (
+          <AdminPersonForm
+            key={drawer.id ?? "create"}
+            personId={drawer.id}
+            onDone={closeDrawer}
+            onCancel={closeDrawer}
+          />
+        )}
+      </AdminDrawer>
+    </section>
   );
 }

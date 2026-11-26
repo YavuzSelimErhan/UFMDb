@@ -498,6 +498,11 @@
     "allRightsReserved": "All rights reserved."
   },
   "admin": {
+    "common": {
+      "actions": "Actions",
+      "close": "Close",
+      "loadError": "Couldn't load data. Refresh the page and try again."
+    },
     "tabs": {
       "movies": "Movies",
       "people": "People",
@@ -505,17 +510,22 @@
       "users": "Users"
     },
     "people": {
+      "panel": "Admin",
       "actorsTab": "Actors",
       "directorsTab": "Directors",
-      "createTitle": "Add person",
-      "editTitle": "Edit person",
       "listTitle": "People",
-      "searchPlaceholder": "Search people...",
-      "colName": "Name",
-      "colNationality": "Nationality",
       "namePlaceholder": "Full name",
       "nationalityPlaceholder": "e.g. Turkey",
-      "roleFilter": "Role"
+      "roleFilter": "Role",
+      "subtitle": "Manage actors and directors",
+      "newPerson": "New person",
+      "createTitle": "Add person",
+      "editTitle": "Edit person",
+      "colName": "Name",
+      "colNationality": "Nationality",
+      "searchPlaceholder": "Search people...",
+      "confirmDelete": "Delete \"{{name}}\"? This can't be undone.",
+      "deleteError": "Couldn't delete the person."
     },
     "movies": {
       "listTitle": "Existing Movies",
@@ -552,27 +562,12 @@
       "noCast": "No cast members added yet.",
       "characterNamePlaceholder": "Character name",
       "directorSearchPlaceholder": "Search director...",
-      "actorSearchPlaceholder": "Search actor..."
-    },
-    "actors": {
-      "listTitle": "Existing Actors",
-      "searchPlaceholder": "Search by actor name...",
-      "editTitle": "Edit Actor",
-      "createTitle": "Add New Actor",
-      "colName": "Full Name",
-      "colNationality": "Nationality",
-      "namePlaceholder": "e.g. Leonardo DiCaprio",
-      "nationalityPlaceholder": "e.g. USA"
-    },
-    "directors": {
-      "listTitle": "Existing Directors",
-      "searchPlaceholder": "Search by director name...",
-      "editTitle": "Edit Director",
-      "createTitle": "Add New Director",
-      "colName": "Full Name",
-      "colNationality": "Nationality",
-      "namePlaceholder": "e.g. Christopher Nolan",
-      "nationalityPlaceholder": "e.g. UK"
+      "actorSearchPlaceholder": "Search actor...",
+      "subtitle": "Add, edit and remove movies in the catalog",
+      "newMovie": "New movie",
+      "editMovie": "Edit movie",
+      "confirmDelete": "Delete \"{{title}}\"? This can't be undone.",
+      "deleteError": "Couldn't delete the movie."
     },
     "personForm": {
       "fullName": "Full Name",
@@ -596,11 +591,12 @@
       "makeAdmin": "Make Admin",
       "deactivate": "Deactivate",
       "activate": "Activate",
-      "cannotChangeSelf": "You can't change your own account"
+      "cannotChangeSelf": "You can't change your own account",
+      "subtitle": "Manage roles and account status",
+      "confirmDeactivate": "Deactivate user \"{{name}}\"?"
     },
     "lists": {
       "listTitle": "Existing Lists",
-      "colTitle": "Title",
       "colMovieCount": "Movies",
       "movieSearchPlaceholder": "Search movie to add...",
       "dragOrClick": "Drag and drop or click to select",
@@ -616,15 +612,20 @@
       "scopeAll": "All",
       "official": "Official",
       "colCreator": "Created by",
-      "colStatus": "Status",
       "colVisibility": "Visibility",
-      "colLikes": "Likes",
       "confirmDelete": "Delete the list \"{{title}}\"? This cannot be undone.",
       "deleteError": "Could not delete the list.",
       "loadError": "Could not load lists.",
       "prevPage": "Previous",
       "nextPage": "Next",
-      "pageOf": "{{page}} / {{total}}"
+      "pageOf": "{{page}} / {{total}}",
+      "subtitle": "Manage official and community lists",
+      "colTitle": "List",
+      "colStatus": "Status",
+      "colOwner": "Created by",
+      "colStats": "Stats",
+      "colMovies": "Movies",
+      "colLikes": "Likes"
     }
   },
   "log": {

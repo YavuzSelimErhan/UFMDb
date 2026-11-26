@@ -7,27 +7,26 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import {
-  Trash2,
-  Pencil,
-  Plus,
-  Heart,
-  Film,
-  User,
-  Image as ImageIcon,
-} from "lucide-react";
+import { Trash2, Pencil, Plus, Heart, Film } from "lucide-react";
 import { listService } from "@/services";
 import { pickListText } from "@/utils/listText";
 import type { ListScope, ListStatus, ListVisibility } from "@/types";
-import "./AdminTabs.css";
-import "./AdminListsTab.css";
+import Pagination from "@/components/common/Pagination";
+import AdminSectionHeader from "./ui/AdminSectionHeader";
+import AdminSegmented from "./ui/AdminSegmented";
+import AdminTableStatus from "./ui/AdminTableStatus";
+import AdminThumb from "./ui/AdminThumb";
 
 // Rotalar router tanımıyla uyuşmuyorsa sadece burayı değiştir.
 const CREATE_ROUTE = "/lists/new";
 const editRoute = (id: string) => `/lists/${id}/edit`;
 
 const PAGE_SIZE = 20;
-const SCOPES: ListScope[] = ["Official", "Community", "All"];
+const STATUS_TONE: Record<ListStatus, string> = {
+  Published: "success",
+  Draft: "warning",
+  Archived: "muted",
+};
 
 export default function AdminListsTab() {
   const { t, i18n } = useTranslation();
@@ -46,7 +45,6 @@ export default function AdminListsTab() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => listService.remove(id),
     onSuccess: () => {
-      // Sayfadaki son kayıt silindiyse bir önceki sayfaya dön.
       if (page > 1 && data?.items.length === 1) setPage((p) => p - 1);
       queryClient.invalidateQueries({ queryKey: ["lists"] });
     },
@@ -56,11 +54,6 @@ export default function AdminListsTab() {
   const totalCount = data?.totalCount ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
-  const scopeLabels: Record<string, string> = {
-    Official: t("admin.lists.scopeOfficial"),
-    Community: t("admin.lists.scopeCommunity"),
-    All: t("admin.lists.scopeAll"),
-  };
   const statusLabels: Record<ListStatus, string> = {
     Published: t("lists.form.statusPublished"),
     Draft: t("lists.form.statusDraft"),
@@ -72,153 +65,138 @@ export default function AdminListsTab() {
     Private: t("lists.form.visPrivate"),
   };
 
-  const changeScope = (s: ListScope) => {
-    setScope(s);
-    setPage(1);
-  };
-
   const handleDelete = (id: string, title: string) => {
     if (!window.confirm(t("admin.lists.confirmDelete", { title }))) return;
     deleteMutation.mutate(id);
   };
 
   return (
-    <div className="admin-tab">
-      <div className="admin-tab__list card admin-lists">
-        <header className="admin-lists__head">
-          <h3>
-            {t("admin.lists.listTitle")}
-            <span className="admin-lists__total">{totalCount}</span>
-          </h3>
+    <section className="admin-section">
+      <AdminSectionHeader
+        title={t("admin.tabs.lists")}
+        subtitle={t("admin.lists.subtitle")}
+        count={totalCount}
+        actions={
           <button
             type="button"
-            className="btn-primary admin-lists__new"
+            className="btn-primary admin-btn-icon"
             onClick={() => navigate(CREATE_ROUTE)}
           >
-            <Plus size={14} /> {t("admin.lists.newList")}
+            <Plus size={15} /> {t("admin.lists.newList")}
           </button>
-        </header>
+        }
+      />
 
-        <div className="admin-lists__scopes" role="group">
-          {SCOPES.map((s) => (
-            <button
-              key={s}
-              type="button"
-              aria-pressed={scope === s}
-              className={scope === s ? "is-active" : ""}
-              onClick={() => changeScope(s)}
-            >
-              {scopeLabels[s]}
-            </button>
-          ))}
-        </div>
+      <div className="admin-toolbar">
+        <AdminSegmented<ListScope>
+          value={scope}
+          onChange={(s) => {
+            setScope(s);
+            setPage(1);
+          }}
+          options={[
+            { value: "Official", label: t("admin.lists.scopeOfficial") },
+            { value: "Community", label: t("admin.lists.scopeCommunity") },
+            { value: "All", label: t("admin.lists.scopeAll") },
+          ]}
+        />
+      </div>
 
-        {isError && (
-          <p className="admin-movie-form__error">
-            {t("admin.lists.loadError")}
-          </p>
-        )}
-        {deleteMutation.isError && (
-          <p className="admin-movie-form__error">
-            {t("admin.lists.deleteError")}
-          </p>
-        )}
+      {deleteMutation.isError && (
+        <p className="admin-error">{t("admin.lists.deleteError")}</p>
+      )}
 
-        <ul className="admin-lists__rows" aria-busy={isLoading}>
-          {items.map((l) => {
-            const title = pickListText(l.titleTr, l.title, i18n.language);
-            const cover = l.coverImageUrl || l.coverPosters[0];
-            return (
-              <li key={l.id} className="admin-lists__row">
-                <div className="admin-lists__thumb">
-                  {cover ? (
-                    <img src={cover} alt="" loading="lazy" />
-                  ) : (
-                    <ImageIcon size={16} />
-                  )}
-                </div>
-
-                <div className="admin-lists__info">
-                  <div className="admin-lists__title-line">
-                    <strong className="admin-lists__title">{title}</strong>
-                    {l.isOfficial && (
-                      <span className="admin-lists__badge">
-                        {t("admin.lists.official")}
+      <div className="admin-table-card card">
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>{t("admin.lists.colTitle")}</th>
+                <th>{t("admin.lists.colStatus")}</th>
+                <th>{t("admin.lists.colOwner")}</th>
+                <th>{t("admin.lists.colStats")}</th>
+                <th className="admin-table__actions-col">
+                  {t("admin.common.actions")}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((l) => {
+                const title = pickListText(l.titleTr, l.title, i18n.language);
+                const cover = l.coverImageUrl || l.coverPosters[0];
+                return (
+                  <tr key={l.id}>
+                    <td>
+                      <div className="admin-cell">
+                        <AdminThumb src={cover} name={title} shape="poster" />
+                        <span className="admin-cell__title">{title}</span>
+                        {l.isOfficial && (
+                          <span className="admin-badge admin-badge--accent">
+                            {t("admin.lists.official")}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="admin-badges">
+                        <span
+                          className={`admin-badge admin-badge--${STATUS_TONE[l.status]}`}
+                        >
+                          {statusLabels[l.status]}
+                        </span>
+                        <span className="admin-badge admin-badge--muted">
+                          {visibilityLabels[l.visibility]}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="text-muted">{l.createdByUserName}</td>
+                    <td>
+                      <span className="admin-stats">
+                        <span title={t("admin.lists.colMovies")}>
+                          <Film size={13} /> {l.movieCount}
+                        </span>
+                        <span title={t("admin.lists.colLikes")}>
+                          <Heart size={13} /> {l.likeCount}
+                        </span>
                       </span>
-                    )}
-                  </div>
-                  <div className="admin-lists__meta">
-                    <span
-                      className={`admin-lists__chip admin-lists__chip--${l.status.toLowerCase()}`}
-                    >
-                      {statusLabels[l.status]}
-                    </span>
-                    <span className="admin-lists__chip">
-                      {visibilityLabels[l.visibility]}
-                    </span>
-                    <span className="admin-lists__stat">
-                      <User size={12} /> {l.createdByUserName}
-                    </span>
-                    <span className="admin-lists__stat">
-                      <Film size={12} /> {l.movieCount}
-                    </span>
-                    <span className="admin-lists__stat">
-                      <Heart size={12} /> {l.likeCount}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="admin-tab__row-actions admin-lists__actions">
-                  <button
-                    className="admin-tab__edit-btn"
-                    aria-label={t("common.edit")}
-                    title={t("common.edit")}
-                    onClick={() => navigate(editRoute(l.id))}
-                  >
-                    <Pencil size={15} />
-                  </button>
-                  <button
-                    className="admin-tab__delete-btn"
-                    aria-label={t("common.delete")}
-                    title={t("common.delete")}
-                    disabled={deleteMutation.isPending}
-                    onClick={() => handleDelete(l.id, title)}
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </div>
-              </li>
-            );
-          })}
-          {!isLoading && items.length === 0 && (
-            <li className="text-muted admin-lists__empty">
-              {t("search.noResults")}
-            </li>
-          )}
-        </ul>
-
+                    </td>
+                    <td className="admin-table__actions-col">
+                      <div className="admin-row-actions">
+                        <button
+                          className="admin-icon-btn"
+                          aria-label={t("common.edit")}
+                          title={t("common.edit")}
+                          onClick={() => navigate(editRoute(l.id))}
+                        >
+                          <Pencil size={15} />
+                        </button>
+                        <button
+                          className="admin-icon-btn admin-icon-btn--danger"
+                          aria-label={t("common.delete")}
+                          title={t("common.delete")}
+                          disabled={deleteMutation.isPending}
+                          onClick={() => handleDelete(l.id, title)}
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+              <AdminTableStatus
+                colSpan={5}
+                isLoading={isLoading}
+                isError={isError}
+                isEmpty={!isLoading && !isError && items.length === 0}
+              />
+            </tbody>
+          </table>
+        </div>
         {totalPages > 1 && (
-          <div className="admin-lists__pager">
-            <button
-              type="button"
-              className="btn-secondary"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              {t("admin.lists.prevPage")}
-            </button>
-            <span>{t("admin.lists.pageOf", { page, total: totalPages })}</span>
-            <button
-              type="button"
-              className="btn-secondary"
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              {t("admin.lists.nextPage")}
-            </button>
-          </div>
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         )}
       </div>
-    </div>
+    </section>
   );
 }
