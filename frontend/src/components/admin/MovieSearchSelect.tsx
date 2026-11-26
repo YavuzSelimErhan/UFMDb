@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { movieService } from "@/services";
-import "./ActorSearchSelect.css";
+import "./SearchSelect.css";
 
 interface Props {
   onSelect: (movieId: string, title: string, posterUrl: string) => void;

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { personService } from "@/services";
 import type { PersonFormPayload } from "@/types";
-import "./AdminActorForm.css";
+import "./AdminPersonForm.css";
 
 interface Props {
   personId?: string;

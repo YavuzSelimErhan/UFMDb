@@ -19,7 +19,7 @@ import AdminThumb from "./ui/AdminThumb";
 
 // Rotalar router tanımıyla uyuşmuyorsa sadece burayı değiştir.
 const CREATE_ROUTE = "/lists/new";
-const editRoute = (id: string) => `/lists/${id}/edit`;
+const editRoute = (id: string) => `/lists/edit/${id}`;
 
 const PAGE_SIZE = 20;
 const STATUS_TONE: Record<ListStatus, string> = {

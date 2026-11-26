@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { personService } from "@/services";
 // Stil dosyası eski seçiciyle ortak; ActorSearchSelect.tsx'i silerken bu CSS'i
 // silme (ya da PersonSearchSelect.css olarak yeniden adlandırıp buradaki import'u güncelle).
-import "./ActorSearchSelect.css";
+import "./SearchSelect.css";
 
 interface Props {
   /** Sadece yer tutucu metni belirler; arama HER ZAMAN tüm kişilerde yapılır. */
