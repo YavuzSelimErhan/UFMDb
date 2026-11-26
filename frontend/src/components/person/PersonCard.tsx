@@ -81,11 +81,11 @@ export default function PersonCard({ person }: Props) {
       : null;
 
   return (
-    <Link to={`/people/${person.id}`} className="person-card card">
-      <div className="person-card__photo-wrap">
+    <Link to={`/people/${person.id}`} className="people-card card">
+      <div className="people-card__photo-wrap">
         {showFallback ? (
           <div
-            className="person-card__photo-fallback"
+            className="people-card__photo-fallback"
             style={
               {
                 "--fallback-accent": theme.accent,
@@ -101,7 +101,7 @@ export default function PersonCard({ person }: Props) {
             alt={person.fullName}
             loading="lazy"
             decoding="async"
-            className="person-card__photo"
+            className="people-card__photo"
             onError={() => setPhotoFailed(true)}
           />
         )}
@@ -109,7 +109,7 @@ export default function PersonCard({ person }: Props) {
         {isAuthenticated ? (
           <button
             type="button"
-            className={`person-card__like ${liked ? "is-active" : ""}`}
+            className={`people-card__like ${liked ? "is-active" : ""}`}
             disabled={likeMutation.isPending}
             title={likeLabel}
             aria-label={likeLabel}
@@ -125,7 +125,7 @@ export default function PersonCard({ person }: Props) {
           </button>
         ) : (
           countText && (
-            <span className="person-card__like person-card__like--static">
+            <span className="people-card__like people-card__like--static">
               <Heart size={13} />
               <span>{countText}</span>
             </span>
@@ -133,12 +133,12 @@ export default function PersonCard({ person }: Props) {
         )}
       </div>
 
-      <div className="person-card__info">
-        <h3 className="person-card__name">{person.fullName}</h3>
+      <div className="people-card__info">
+        <h3 className="people-card__name">{person.fullName}</h3>
         {(roleLabel || person.filmCount > 0) && (
-          <div className="person-card__meta">
+          <div className="people-card__meta">
             {roleLabel && (
-              <span className="person-card__role">{roleLabel}</span>
+              <span className="people-card__role">{roleLabel}</span>
             )}
             {person.filmCount > 0 && (
               <span>{t("people.filmCount", { count: person.filmCount })}</span>
@@ -146,7 +146,7 @@ export default function PersonCard({ person }: Props) {
           </div>
         )}
         {person.nationality && (
-          <p className="person-card__nationality">{person.nationality}</p>
+          <p className="people-card__nationality">{person.nationality}</p>
         )}
       </div>
     </Link>
