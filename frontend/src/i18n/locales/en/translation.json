@@ -181,19 +181,6 @@
     }
   },
   "search": {
-    "people": {
-      "roles": {
-        "actor": "Actor",
-        "director": "Director",
-        "writer": "Writer",
-        "composer": "Composer",
-        "cinematographer": "Cinematographer",
-        "editor": "Editor",
-        "producer": "Producer"
-      },
-      "filmCount_one": "{{count}} film",
-      "filmCount_other": "{{count}} films"
-    },
     "noResults": "No results found",
     "title": "Discover",
     "subtitle": "Get lost in the world of movies, actors and directors",
@@ -978,5 +965,18 @@
       "unmute": "Unmute sound",
       "loading": "Loading posters…"
     }
+  },
+  "people": {
+    "roles": {
+      "actor": "Actor",
+      "director": "Director",
+      "writer": "Writer",
+      "composer": "Composer",
+      "cinematographer": "Cinematographer",
+      "editor": "Editor",
+      "producer": "Producer"
+    },
+    "filmCount_one": "{{count}} film",
+    "filmCount_other": "{{count}} films"
   }
 }

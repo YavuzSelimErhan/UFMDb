@@ -181,18 +181,6 @@
     }
   },
   "search": {
-    "people": {
-      "roles": {
-        "actor": "Oyuncu",
-        "director": "Yönetmen",
-        "writer": "Senarist",
-        "composer": "Besteci",
-        "cinematographer": "Görüntü yönetmeni",
-        "editor": "Kurgucu",
-        "producer": "Yapımcı"
-      },
-      "filmCount_other": "{{count}} film"
-    },
     "noResults": "Sonuç bulunamadı",
     "title": "Keşfet",
     "subtitle": "Film, oyuncu ve yönetmen dünyasında kaybol",
@@ -973,5 +961,17 @@
       "unmute": "Sesi aç",
       "loading": "Afişler yükleniyor…"
     }
+  },
+  "people": {
+    "roles": {
+      "actor": "Oyuncu",
+      "director": "Yönetmen",
+      "writer": "Senarist",
+      "composer": "Besteci",
+      "cinematographer": "Görüntü yönetmeni",
+      "editor": "Kurgucu",
+      "producer": "Yapımcı"
+    },
+    "filmCount_other": "{{count}} film"
   }
 }
