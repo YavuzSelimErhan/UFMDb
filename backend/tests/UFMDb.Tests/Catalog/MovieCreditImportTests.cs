@@ -36,7 +36,9 @@ public class MovieCreditImportTests
                 new() { Id = 92, Name = "Assistant", CreditId = "assistant", Department = "Camera", Job = "Assistant Camera" }
             }
         };
-        Assert.Equal(2, await MovieCreditImport.MergeAsync(db, film.Id, payload, default));
+        var merged = await MovieCreditImport.MergeAsync(db, film.Id, payload, default);
+        var ids = await db.MovieCredits.Select(c => c.TmdbCreditId ?? "(null)").ToListAsync();
+        Assert.True(merged == 2, $"merged={merged}; credits=[{string.Join(", ", ids)}]");
         db.ChangeTracker.Clear();
         Assert.Equal(0, await MovieCreditImport.MergeAsync(db, film.Id, payload, default));
         payload.Crew.RemoveAt(2);
